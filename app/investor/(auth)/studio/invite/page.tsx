@@ -4,6 +4,17 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { Upload, Download, Eye, Trash2 } from "lucide-react"
 import { usePathname } from "next/navigation"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface UploadedFile {
   id: string
@@ -12,10 +23,45 @@ interface UploadedFile {
   uploadedAt: string
 }
 
+interface InvitedPerson {
+  id: string
+  name: string
+  email: string
+  company: string
+  status: 'pending' | 'accepted' | 'declined'
+  invitedAt: string
+}
+
 function InviteContent() {
   const router = useRouter()
   const pathname = usePathname()
   const [files, setFiles] = useState<UploadedFile[]>([])
+  const [invitedPeople, setInvitedPeople] = useState<InvitedPerson[]>([
+    {
+      id: '1',
+      name: 'John Doe',
+      email: 'john@startup.com',
+      company: 'Tech Innovators',
+      status: 'accepted',
+      invitedAt: '2024-03-20 14:30'
+    },
+    {
+      id: '2',
+      name: 'Sarah Smith',
+      email: 'sarah@newco.io',
+      company: 'NewCo Solutions',
+      status: 'pending',
+      invitedAt: '2024-03-20 15:45'
+    },
+    {
+      id: '3',
+      name: 'Mike Johnson',
+      email: 'mike@futuretech.com',
+      company: 'Future Tech',
+      status: 'declined',
+      invitedAt: '2024-03-20 16:15'
+    }
+  ])
   const mode = pathname.split('/')[3]
   const programId = pathname.split('/')[4]
 
@@ -62,6 +108,10 @@ function InviteContent() {
   const handleSave = () => {
     console.log("Saving invites")
     router.push("/investor/studio/schedule")
+  }
+
+  const handleWithdraw = (id: string) => {
+    setInvitedPeople(people => people.filter(person => person.id !== id))
   }
 
   return (
@@ -149,6 +199,65 @@ function InviteContent() {
             ))}
           </div>
         )}
+
+        {/* Invited People Log */}
+        <div className="max-w-6xl space-y-4 mt-8">
+          <h3 className="text-sm font-medium">Invited People</h3>
+          <div className="space-y-2">
+            {invitedPeople.map((person) => (
+              <div
+                key={person.id}
+                className="flex items-center justify-between p-4 rounded-[0.3rem] bg-muted/50"
+              >
+                <div className="flex items-center gap-3">
+                  <div>
+                    <p className="font-medium text-sm">{person.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {person.email} • {person.company}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className={`text-xs px-2 py-1 rounded-full ${person.status === 'accepted' ? 'bg-green-500/10 text-green-500' :
+                      person.status === 'declined' ? 'bg-red-500/10 text-red-500' :
+                        'bg-yellow-500/10 text-yellow-500'
+                    }`}>
+                    {person.status.charAt(0).toUpperCase() + person.status.slice(1)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{person.invitedAt}</span>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs text-red-500 hover:text-red-600"
+                      >
+                        Withdraw
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Withdraw Invitation</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to withdraw the invitation sent to {person.name}? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleWithdraw(person.id)}
+                          className="bg-red-500 hover:bg-red-600"
+                        >
+                          Withdraw
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="flex justify-center pt-4">
           <Button

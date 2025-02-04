@@ -8,6 +8,37 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const LANGUAGES = {
+  indian: [
+    { value: "hindi", label: "Hindi" },
+    { value: "tamil", label: "Tamil" },
+    { value: "telugu", label: "Telugu" },
+    { value: "kannada", label: "Kannada" },
+    { value: "malayalam", label: "Malayalam" },
+    { value: "marathi", label: "Marathi" },
+    { value: "bengali", label: "Bengali" },
+    { value: "gujarati", label: "Gujarati" },
+    { value: "punjabi", label: "Punjabi" },
+    { value: "odia", label: "Odia" },
+    { value: "assamese", label: "Assamese" },
+    { value: "urdu", label: "Urdu" }
+  ],
+  international: [
+    { value: "english", label: "English" },
+    { value: "mandarin", label: "Mandarin" },
+    { value: "spanish", label: "Spanish" },
+    { value: "arabic", label: "Arabic" },
+    { value: "french", label: "French" }
+  ]
+}
 
 export default function InvestorPitchPage() {
   const router = useRouter()
@@ -76,7 +107,7 @@ export default function InvestorPitchPage() {
       })
     }
   }
-
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("")
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop()
@@ -164,8 +195,8 @@ export default function InvestorPitchPage() {
                         >
                           {isRecording ? "Stop" : "Record"}
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={handleUpload}
                           className="min-w-[100px]"
@@ -195,17 +226,41 @@ export default function InvestorPitchPage() {
                 </div>
                 <div className="space-y-3">
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Your investment is more than just money, and your story with the founders 
-                    is more than a pitch. Share your vision to connect with founders who align 
+                    Your investment is more than just money, and your story with the founders
+                    is more than a pitch. Share your vision to connect with founders who align
                     with your values.
                   </p>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    A simple message about your 'why' can help you connect with founders who 
+                    A simple message about your 'why' can help you connect with founders who
                     share your values and are building a similar future.
                   </p>
                 </div>
               </div>
 
+              <div className="mb-6">
+                <label className="text-sm font-medium mb-2 block">Select Pitch Language</label>
+                <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                  <SelectTrigger className="w-[280px]">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <div className="p-2">
+                      <h4 className="text-sm font-medium mb-2 text-muted-foreground">Indian Languages</h4>
+                      {LANGUAGES.indian.map((language) => (
+                        <SelectItem key={language.value} value={language.value}>
+                          {language.label}
+                        </SelectItem>
+                      ))}
+                      <h4 className="text-sm font-medium mb-2 mt-4 text-muted-foreground">International Languages</h4>
+                      {LANGUAGES.international.map((language) => (
+                        <SelectItem key={language.value} value={language.value}>
+                          {language.label}
+                        </SelectItem>
+                      ))}
+                    </div>
+                  </SelectContent>
+                </Select>
+              </div>
               <Button
                 onClick={() => router.push("/investor/studio/faqs")}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"

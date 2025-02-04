@@ -23,7 +23,7 @@ export default function RootLayout({
           {children}
         </ToastProvider>
         <Toaster />
-        <div className="w-full bg-[#0e0e0e] py-2 z-50 ">
+        {/* <div className="w-full bg-[#0e0e0e] py-2 z-50 ">
           <h1 className="text-md text-center font-bold">Beta Version 0.0.1</h1>
           <p className="text-center space-x-2 text-xs text-muted-foreground">
             This is a beta version of the platform. Please report any issues to the development team.
@@ -32,7 +32,7 @@ export default function RootLayout({
               Contact Us
             </Link>
           </p>
-        </div>
+        </div> */}
       </body>
     </html>
   );

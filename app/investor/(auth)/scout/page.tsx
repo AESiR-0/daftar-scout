@@ -67,7 +67,7 @@ export default function scoutPage() {
   return (
     <div className="space-y-6 max-w-7xl container mx-auto">
       <div className="flex items-center justify-end gap-2">
-        <Link href="/studio/details">
+        <Link href="/investor/studio">
           <Button
             size="sm"
             className="bg-blue-600 hover:bg-blue-700 text-white h-9"
@@ -76,14 +76,7 @@ export default function scoutPage() {
           </Button>
         </Link>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setInsightsOpen(true)}
-          className="h-9 border-border hover:bg-muted"
-        >
-          <BarChart2 className="h-4 w-4" />
-        </Button>
+
       </div>
 
       <div className="grid grid-cols-4 gap-6">

@@ -31,7 +31,7 @@ export const founderNavItems = [
   //   icon: LayoutDashboard,
   // },
   {
-    title: "IncuHub",
+    title: "Scout",
     url: "/founder/incuhub",
     icon: Building,
   },
@@ -68,7 +68,7 @@ export const topNavConfig = {
 
 export const investorStudioNavItems = [
   {
-    title: "Program Details",
+    title: "Scout Details",
     url: "/investor/studio/details",
     icon: FileSpreadsheet,
   },
@@ -78,7 +78,7 @@ export const investorStudioNavItems = [
     icon: Users2,
   },
   {
-    title: "Program Document",
+    title: "Scout Document",
     url: "/investor/studio/documents",
     icon: FileText,
   },

@@ -55,3 +55,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  height: 100%;
+  outline: none;
+}
+
+.ProseMirror p {
+  margin: 0.5em 0;
+}
+
+.ProseMirror ul {
+  padding-left: 1.5em;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}

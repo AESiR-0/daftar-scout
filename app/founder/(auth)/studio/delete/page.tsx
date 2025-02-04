@@ -3,16 +3,29 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, XCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useState } from "react"
+import { Checkbox } from "@/components/ui/checkbox"
 
-// Sample data for both roles
-const approvalRequests = [
+interface ApprovalRequest {
+  id: string
+  name: string
+  approvedBy: string
+  designation: string
+  date: string
+  status: "approved" | "pending"
+  isApproved?: boolean
+}
+
+// Sample data modified to include isApproved state
+const approvalRequests: ApprovalRequest[] = [
   {
     id: "1",
     name: "AI Healthcare Assistant",
     approvedBy: "Sarah Johnson",
     designation: "Program Director",
     date: "2024-03-19T10:15:00",
-    status: "approved"
+    status: "pending",
+    isApproved: false
   },
   {
     id: "2",
@@ -20,10 +33,10 @@ const approvalRequests = [
     approvedBy: "Sarah Johnson",
     designation: "Program Director",
     date: "2024-03-19T10:15:00",
-    status: "approved"
+    status: "pending",
+    isApproved: false
   }
 ]
-
 
 // Add the formatDate function
 const formatDate = (date: string) => {
@@ -37,8 +50,21 @@ const formatDate = (date: string) => {
 export default function DeletePage() {
   const router = useRouter()
   const deletionDate = formatDate(new Date().toISOString())
+  const [approvals, setApprovals] = useState<ApprovalRequest[]>(approvalRequests)
+  const [userConsent, setUserConsent] = useState(false)
+  
+  const allApproved = approvals.every(request => request.isApproved) && userConsent
+  
+  const handleApprovalChange = (id: string, checked: boolean) => {
+    setApprovals(prev => prev.map(request => 
+      request.id === id ? { ...request, isApproved: checked } : request
+    ))
+  }
+
   const handleDelete = () => {
-    router.push("/founder/daftar")
+    if (allApproved) {
+      router.push("/founder/daftar")
+    }
   }
 
   return (
@@ -53,20 +79,8 @@ export default function DeletePage() {
           Are you sure you want to delete this pitch? This action cannot be undone.
         </p>
 
-        <div className="flex gap-2">
-          <Button variant="destructive" onClick={handleDelete}>
-            Delete Pitch
-          </Button>
-        </div>
-
-        <div className="flex items-start gap-2 p-4 border rounded-[0.3rem] bg-muted/50">
-          <p className="text-sm text-muted-foreground">
-            I agree that I have read all the data, and we're good to delete the pitch.
-          </p>
-        </div>
-
         <div className="space-y-3">
-          {approvalRequests.map((request) => (
+          {approvals.map((request) => (
             <div
               key={request.id}
               className="flex items-center justify-between p-4 border rounded-[0.3rem]"
@@ -75,7 +89,7 @@ export default function DeletePage() {
                 <h3 className="font-medium">{request.name}</h3>
                 <div className="space-y-0.5">
                   <p className="text-sm">
-                    Approved by <span className="text-blue-600">{request.approvedBy}</span>
+                    Approval needed from <span className="text-blue-600">{request.approvedBy}</span>
                   </p>
                   <p className="text-sm text-muted-foreground">{request.designation}</p>
                   <p className="text-xs text-muted-foreground">
@@ -83,13 +97,37 @@ export default function DeletePage() {
                   </p>
                 </div>
               </div>
-              {request.status === "approved" ? (
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
-              ) : (
-                <XCircle className="h-5 w-5 text-yellow-500" />
-              )}
+              <Checkbox 
+                id={`approval-${request.id}`}
+                checked={request.isApproved}
+                onCheckedChange={(checked) => handleApprovalChange(request.id, checked as boolean)}
+              />
             </div>
           ))}
+        </div>
+
+        <div className="flex items-start gap-2 p-4 border rounded-[0.3rem] bg-muted/50">
+          <Checkbox 
+            id="user-consent" 
+            checked={userConsent}
+            onCheckedChange={(checked) => setUserConsent(checked as boolean)}
+          />
+          <label 
+            htmlFor="user-consent" 
+            className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            I agree that I have read all the data, and we're good to delete the pitch.
+          </label>
+        </div>
+
+        <div className="flex gap-2">
+          <Button 
+            variant="destructive" 
+            onClick={handleDelete}
+            disabled={!allApproved}
+          >
+            Delete Pitch
+          </Button>
         </div>
 
         <div className="space-y-2 pt-4">

@@ -159,7 +159,7 @@ export default function ProgramDetailsPage() {
           >
             End Scouting
           </Button>
-          <Link href={`/studio/details?mode=edit&programId=${params.slug}`}>
+          <Link href={`/investor/studio/details?mode=edit&programId=${params.slug}`}>
             <Button variant="outline" size="sm">
               <span className="text-xs">Studio</span>
             </Button>
@@ -171,15 +171,20 @@ export default function ProgramDetailsPage() {
           >
             Updates
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setInsightsOpen(true)}
-          >
-            <BarChart2 className="h-4 w-4" />
-          </Button>
 
-          <Button variant={"outline"} className=" text-white" size="sm">
+
+          <Button
+            variant={"outline"}
+            className="text-white"
+            size="sm"
+            onClick={() => {
+              const url = window.location.href;
+              navigator.clipboard.writeText(url).then(() => {
+                // You may want to add a toast notification here
+                alert("Link copied to clipboard!");
+              });
+            }}
+          >
             <Share2 className="h-4 w-4" />
           </Button>
         </div>

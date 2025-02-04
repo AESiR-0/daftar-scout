@@ -12,7 +12,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { format } from "date-fns"
-import { Suspense } from "react"
 
 const programSteps = [
   { id: 'details', title: 'Program Details', status: 'completed' },
@@ -25,18 +24,43 @@ const programSteps = [
   { id: 'schedule', title: 'Program Schedule', status: 'pending' },
 ] as const
 
+// Simulated approval status
+const teamApprovalStatus = {
+  allApproved: false,
+  collaboratorPending: true
+}
+
 function ScheduleContent() {
   const router = useRouter()
   const pathname = usePathname()
-  const mode = pathname.includes('edit') ? 'edit' : 'add'
-  const programId = pathname.split('/').pop()
   const [lastPitchDate, setLastPitchDate] = useState<Date>()
   const [launchDate, setLaunchDate] = useState<Date>()
+  const [dateError, setDateError] = useState<string>("")
 
   const handleSave = () => {
     console.log("Saving schedule:", { lastPitchDate, launchDate })
     router.push("/scout")
   }
+
+  const handleLaunchDateSelect = (date: Date | undefined) => {
+    setLaunchDate(date)
+    if (date && lastPitchDate && date > lastPitchDate) {
+      setDateError("Launch date cannot be after the last pitch date")
+    } else {
+      setDateError("")
+    }
+  }
+
+  const handleLastPitchDateSelect = (date: Date | undefined) => {
+    setLastPitchDate(date)
+    if (date && launchDate && launchDate > date) {
+      setDateError("Launch date cannot be after the last pitch date")
+    } else {
+      setDateError("")
+    }
+  }
+
+  const isDateValid = !dateError && lastPitchDate && launchDate
 
   return (
     <div className="gap-8 container mx-auto px-4">
@@ -91,7 +115,7 @@ function ScheduleContent() {
                   <Calendar
                     mode="single"
                     selected={lastPitchDate}
-                    onSelect={setLastPitchDate}
+                    onSelect={handleLastPitchDateSelect}
                     initialFocus
                   />
                 </PopoverContent>
@@ -116,23 +140,36 @@ function ScheduleContent() {
                   <Calendar
                     mode="single"
                     selected={launchDate}
-                    onSelect={setLaunchDate}
+                    onSelect={handleLaunchDateSelect}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
             </div>
           </div>
+          {dateError && (
+            <p className="text-sm text-red-500 text-center">{dateError}</p>
+          )}
         </div>
 
-        <div className="flex justify-center pt-4">
+        <div className="flex flex-col items-center gap-2 pt-4">
           <Button
             onClick={handleSave}
             className="bg-blue-600 hover:bg-blue-700 text-white"
-            disabled={!lastPitchDate || !launchDate}
+            disabled={
+              !isDateValid || 
+              !teamApprovalStatus.allApproved || 
+              teamApprovalStatus.collaboratorPending
+            }
           >
             Save
           </Button>
+          {teamApprovalStatus.collaboratorPending && (
+            <p className="text-xs text-yellow-500">Waiting for team approvals</p>
+          )}
+          {!isDateValid && !dateError && (
+            <p className="text-xs text-muted-foreground">Please select both dates</p>
+          )}
         </div>
       </div>
     </div>

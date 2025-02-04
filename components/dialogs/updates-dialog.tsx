@@ -1,9 +1,12 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Trash2 } from "lucide-react"
+import { Trash2, Bold, Italic, List, Link as LinkIcon } from "lucide-react"
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import Link from '@tiptap/extension-link'
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface Update {
     id: string
@@ -19,20 +22,116 @@ interface UpdatesDialogProps {
     onDeleteUpdate: (id: string) => void
 }
 
+const MenuBar = ({ editor }: { editor: any }) => {
+  if (!editor) {
+    return null
+  }
+
+  return (
+    <div className="border-b p-2 flex gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive('bold') ? 'bg-accent' : ''}
+      >
+        <Bold className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive('italic') ? 'bg-accent' : ''}
+      >
+        <Italic className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={editor.isActive('bulletList') ? 'bg-accent' : ''}
+      >
+        <List className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => {
+          const url = window.prompt('Enter URL')
+          if (url) {
+            editor.chain().focus().setLink({ href: url }).run()
+          }
+        }}
+        className={editor.isActive('link') ? 'bg-accent' : ''}
+      >
+        <LinkIcon className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+}
+
 export function UpdatesDialog({
     open,
     onOpenChange,
-    updates,
+    updates: initialUpdates,
     onAddUpdate,
     onDeleteUpdate
 }: UpdatesDialogProps) {
-    const [newUpdate, setNewUpdate] = useState("")
+    // Add local state for updates
+    const [updates, setUpdates] = useState<Update[]>(initialUpdates)
+
+    // Sync with parent updates
+    useEffect(() => {
+        setUpdates(initialUpdates)
+    }, [initialUpdates])
+
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Link.configure({
+                openOnClick: false,
+                HTMLAttributes: {
+                    class: 'text-blue-500 hover:underline',
+                },
+            }),
+        ],
+        content: '',
+        editorProps: {
+            attributes: {
+                class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[100px] px-3 py-2',
+            },
+        },
+    })
 
     const handleSubmit = () => {
-        if (newUpdate.trim()) {
-            onAddUpdate(newUpdate)
-            setNewUpdate("")
+        if (editor?.isEmpty) return
+        
+        const content = editor?.getHTML() || ""
+        if (content.trim()) {
+            // Create new update
+            const newUpdate: Update = {
+                id: Date.now().toString(),
+                content: content,
+                date: new Date().toISOString()
+            }
+            
+            // Update local state immediately
+            setUpdates(prev => [newUpdate, ...prev])
+            
+            // Notify parent
+            onAddUpdate(content)
+            
+            // Clear editor
+            editor?.commands.setContent('')
         }
+    }
+
+    const handleDelete = (id: string) => {
+        // Update local state immediately
+        setUpdates(prev => prev.filter(update => update.id !== id))
+        
+        // Notify parent
+        onDeleteUpdate(id)
     }
 
     return (
@@ -43,52 +142,55 @@ export function UpdatesDialog({
                 </DialogHeader>
 
                 <div className="space-y-4">
-
-
-                    {/* Updates List */}
-                    <div className="space-y-3">
-                        {updates.map((update) => (
-                            <div
-                                key={update.id}
-                                className="p-4 rounded-[0.3rem] border group"
+                    {/* New Update Form - Moved to top */}
+                    <div className="space-y-2 flex flex-col items-center gap-2 border rounded-md">
+                        <MenuBar editor={editor} />
+                        <EditorContent editor={editor} className="w-full" />
+                        <div className="p-2 w-full flex justify-end border-t">
+                            <Button
+                                onClick={handleSubmit}
+                                size="sm"
+                                className="w-fit bg-blue-600 hover:bg-blue-700 text-white"
+                                disabled={editor?.isEmpty}
                             >
-                                <div className="flex items-start justify-between">
-                                    <p className="text-sm text-muted-foreground">
-                                        {new Date(update.date).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                            year: 'numeric'
-                                        })}
-                                    </p>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => onDeleteUpdate(update.id)}
-                                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
+                                Post Update
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Updates List with ScrollArea */}
+                    <ScrollArea className="h-[400px] rounded-md border">
+                        <div className="space-y-3 p-4">
+                            {updates.map((update) => (
+                                <div
+                                    key={update.id}
+                                    className="p-4 rounded-[0.3rem] border group bg-background"
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <p className="text-sm text-muted-foreground">
+                                            {new Date(update.date).toLocaleDateString('en-US', {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                year: 'numeric'
+                                            })}
+                                        </p>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleDelete(update.id)}
+                                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                                    <div 
+                                        className="text-sm prose prose-sm dark:prose-invert max-w-none"
+                                        dangerouslySetInnerHTML={{ __html: update.content }}
+                                    />
                                 </div>
-                                <p className="text-sm">{update.content}</p>
-                            </div>
-                        ))}
-                    </div>
-                    {/* New Update Form */}
-                    <div className="space-y-2 flex flex-col items-center gap-2">
-                        <Textarea
-                            placeholder="Write a new update..."
-                            value={newUpdate}
-                            onChange={(e) => setNewUpdate(e.target.value)}
-                            className="min-h-[100px]"
-                        />
-                        <Button
-                            onClick={handleSubmit}
-                            size="sm"
-                            className="w-fit bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                            Post Update
-                        </Button>
-                    </div>
+                            ))}
+                        </div>
+                    </ScrollArea>
                 </div>
             </DialogContent>
         </Dialog>

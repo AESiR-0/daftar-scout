@@ -5,43 +5,45 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Editor } from "novel-lightweight"
+import { useTheme } from "next-themes"
 
-interface ProgramDetails {
+interface ScoutDetails {
   name: string;
   description: string;
 }
 
 export default function DetailsPage() {
   const pathname = usePathname()
+  const { theme } = useTheme()
   const mode = pathname.split('/')[3]
-  const programId = pathname.split('/')[4]
-  const [details, setDetails] = useState<ProgramDetails>({
+  const ScoutId = pathname.split('/')[4]
+  const [details, setDetails] = useState<ScoutDetails>({
     name: "",
     description: "",
   })
 
   useEffect(() => {
-    if (mode === 'edit' && programId) {
-      fetchProgramDetails(programId)
+    if (mode === 'edit' && ScoutId) {
+      fetchScoutDetails(ScoutId)
     }
-  }, [mode, programId])
+  }, [mode, ScoutId])
 
-  const fetchProgramDetails = async (id: string) => {
+  const fetchScoutDetails = async (id: string) => {
     // Simulate API call
     const data = {
-      name: "Example Program",
-      description: "Program description..."
+      name: "Example Scout",
+      description: "Scout description..."
     }
     setDetails(data)
   }
 
   const handleSave = async () => {
     if (mode === 'edit') {
-      console.log("Updating program:", programId, details)
+      console.log("Updating Scout:", ScoutId, details)
     } else {
-      console.log("Creating new program:", details)
+      console.log("Creating new Scout:", details)
     }
   }
 
@@ -49,28 +51,42 @@ export default function DetailsPage() {
     <Card className="border-none bg-[#0e0e0e]">
       <CardHeader>
         <CardTitle>
-          {mode === 'edit' ? 'Edit Program Details' : 'Create New Program'}
+          {mode === 'edit' ? 'Edit Scout Details' : 'Create New Scout'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Program Name</Label>
+            <Label>Scout Name</Label>
             <Input
               value={details.name}
               onChange={(e) => setDetails({ ...details, name: e.target.value })}
-              placeholder="Enter program name"
+              placeholder="Enter Scout name"
             />
           </div>
 
           <div className="space-y-2">
             <Label>Description</Label>
-            <Textarea
-              value={details.description}
-              onChange={(e) => setDetails({ ...details, description: e.target.value })}
-              placeholder="Enter program description"
-              className="min-h-[200px] resize-none"
-            />
+            <div className="min-h-[400px] border rounded-lg">
+              <Editor
+                defaultValue={details.description}
+                onUpdate={(editor: any) => {
+                  if (editor) {
+                    setDetails(prev => ({
+                      ...prev,
+                      description: editor.getHTML()
+                    }))
+                  }
+                }}
+                disableLocalStorage
+                className="min-h-[400px]"
+                editorProps={{
+                  attributes: {
+                    class: " border-none  max-w-none p-4  min-h-[400px]"
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -79,7 +95,7 @@ export default function DetailsPage() {
             onClick={handleSave}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {mode === 'edit' ? 'Update Program' : 'Create Program'}
+            {mode === 'edit' ? 'Update Scout' : 'Create Scout'}
           </Button>
         </div>
       </CardContent>
