@@ -1,11 +1,11 @@
 "use client"
 import { useEffect, useState } from "react"
 import dynamic from 'next/dynamic'
-import { investmentTrends } from "@/lib/dummy-data/analytics"
+import { scoutingTrends, scoutAnalytics } from "@/lib/dummy-data/analytics"
 import ReactApexChart from "react-apexcharts"
 import { BaseChartOptions, ChartData } from "@/lib/types/chart"
 import { Card } from "@/components/ui/card"
-import { ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, Users, Target, Briefcase, Award, Download, Plus } from "lucide-react"
+import { ArrowUpRight, ArrowDownRight, Users, Target, Briefcase, Clock, Download, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
@@ -16,50 +16,50 @@ const Chart = dynamic(() => import('react-apexcharts') as any, { ssr: false }) a
 // Quick stats data
 const quickStats = [
     {
-        title: "Total Investment",
-        value: "$2.4M",
+        title: "Total Scouted",
+        value: scoutAnalytics.totalScoutedProjects.toString(),
         change: "+12.5%",
         trend: "up",
-        icon: DollarSign
+        icon: Target
     },
     {
-        title: "Active Deals",
+        title: "Active Scouts",
         value: "24",
         change: "+3.2%",
         trend: "up",
         icon: Briefcase
     },
     {
-        title: "Portfolio Companies",
+        title: "Matched Teams",
         value: "18",
         change: "-2.1%",
         trend: "down",
         icon: Users
     },
     {
-        title: "Success Rate",
-        value: "76%",
+        title: "Avg Response Time",
+        value: `${scoutAnalytics.averageResponseTime}d`,
         change: "+5.3%",
         trend: "up",
-        icon: Target
+        icon: Clock
     }
 ]
 
-// Portfolio performance data
-const portfolioPerformance = [
-    { company: "Tech Innovators", growth: 45, investment: 500000, sector: "AI" },
-    { company: "Green Energy Co", growth: 32, investment: 300000, sector: "CleanTech" },
-    { company: "HealthTech Plus", growth: 28, investment: 450000, sector: "Healthcare" },
-    { company: "FinServ Pro", growth: 38, investment: 600000, sector: "FinTech" },
-    { company: "EduTech Solutions", growth: 25, investment: 250000, sector: "Education" }
+// Scout performance data
+const scoutPerformance = [
+    { name: "Tech Scouts", matches: 45, projects: 50, sector: "Technology" },
+    { name: "FinTech Scouts", matches: 32, projects: 40, sector: "Finance" },
+    { name: "Health Scouts", matches: 28, projects: 35, sector: "Healthcare" },
+    { name: "Edu Scouts", matches: 38, projects: 45, sector: "Education" },
+    { name: "Green Scouts", matches: 25, projects: 30, sector: "Sustainability" }
 ]
 
 // Sector distribution data
 const sectorDistribution = [
-    { sector: "AI/ML", percentage: 35 },
-    { sector: "FinTech", percentage: 25 },
+    { sector: "Technology", percentage: 35 },
+    { sector: "Finance", percentage: 25 },
     { sector: "Healthcare", percentage: 20 },
-    { sector: "CleanTech", percentage: 15 },
+    { sector: "Education", percentage: 15 },
     { sector: "Others", percentage: 5 }
 ]
 
@@ -90,8 +90,8 @@ export default function Page() {
         return <LoadingSkeleton />
     }
 
-    // Investment Trends Chart Options
-    const investmentOptions: BaseChartOptions = {
+    // Scouting Trends Chart Options
+    const scoutingOptions: BaseChartOptions = {
         chart: {
             type: "bar" as const,
             background: 'transparent',
@@ -107,7 +107,7 @@ export default function Page() {
             }
         },
         xaxis: {
-            categories: investmentTrends.map(t => t.month),
+            categories: scoutingTrends.map(t => t.month),
             labels: {
                 style: {
                     colors: '#fff'
@@ -119,7 +119,7 @@ export default function Page() {
                 style: {
                     colors: '#fff'
                 },
-                formatter: (value: number) => `$${(value / 1000)}K`
+                formatter: (value: number) => value.toString()
             }
         },
         grid: {
@@ -130,16 +130,13 @@ export default function Page() {
             mode: 'dark'
         },
         tooltip: {
-            theme: 'dark',
-            y: {
-                formatter: (value: number) => `$${value.toLocaleString()}`
-            }
+            theme: 'dark'
         }
     }
 
-    const investmentSeries: ChartData[] = [{
-        name: 'Investment Amount',
-        data: investmentTrends.map(t => t.investmentAmount)
+    const scoutingSeries: ChartData[] = [{
+        name: 'Scouted Projects',
+        data: scoutingTrends.map(t => t.scoutedProjects)
     }]
 
     // Sector Distribution Chart (Donut)
@@ -169,8 +166,8 @@ export default function Page() {
 
     const sectorSeries = sectorDistribution.map(item => item.percentage)
 
-    // Portfolio Growth Chart (Mixed)
-    const portfolioOptions: any = {
+    // Scout Performance Chart (Mixed)
+    const performanceOptions: any = {
         chart: {
             type: 'line',
             background: 'transparent',
@@ -192,37 +189,37 @@ export default function Page() {
         },
         colors: ['#6366f1', '#16a34a'],
         xaxis: {
-            categories: portfolioPerformance.map(item => item.company),
+            categories: scoutPerformance.map(item => item.name),
             labels: { style: { colors: '#fff' } }
         },
         yaxis: [
             {
                 labels: {
                     style: { colors: '#fff' },
-                    formatter: (value: number) => `$${value / 1000}K`
+                    formatter: (value: number) => `${value} Projects`
                 }
             },
             {
                 opposite: true,
                 labels: {
                     style: { colors: '#fff' },
-                    formatter: (value: number) => `${value}%`
+                    formatter: (value: number) => `${value} Matches`
                 }
             }
         ],
         theme: { mode: 'dark' }
     }
 
-    const portfolioSeries = [
+    const performanceSeries = [
         {
-            name: 'Investment',
+            name: 'Projects',
             type: 'column',
-            data: portfolioPerformance.map(item => item.investment)
+            data: scoutPerformance.map(item => item.projects)
         },
         {
-            name: 'Growth',
+            name: 'Matches',
             type: 'line',
-            data: portfolioPerformance.map(item => item.growth)
+            data: scoutPerformance.map(item => item.matches)
         }
     ]
 
@@ -234,10 +231,10 @@ export default function Page() {
                 Value: stat.value,
                 Change: stat.change
             })),
-            portfolioPerformance: portfolioPerformance.map(item => ({
-                Company: item.company,
-                Growth: `${item.growth}%`,
-                Investment: `$${item.investment.toLocaleString()}`,
+            scoutPerformance: scoutPerformance.map(item => ({
+                Name: item.name,
+                Matches: item.matches,
+                Projects: item.projects,
                 Sector: item.sector
             })),
             sectorDistribution: sectorDistribution.map(item => ({
@@ -246,29 +243,26 @@ export default function Page() {
             }))
         }
 
-        // Create workbook
+        // Create workbook and save file
         const wb = XLSX.utils.book_new()
-
-        // Add Quick Stats sheet
+        
+        // Add sheets
         const wsStats = XLSX.utils.json_to_sheet(exportData.quickStats)
         XLSX.utils.book_append_sheet(wb, wsStats, "Quick Stats")
-
-        // Add Portfolio Performance sheet
-        const wsPortfolio = XLSX.utils.json_to_sheet(exportData.portfolioPerformance)
-        XLSX.utils.book_append_sheet(wb, wsPortfolio, "Portfolio Performance")
-
-        // Add Sector Distribution sheet
+        
+        const wsPerformance = XLSX.utils.json_to_sheet(exportData.scoutPerformance)
+        XLSX.utils.book_append_sheet(wb, wsPerformance, "Scout Performance")
+        
         const wsSector = XLSX.utils.json_to_sheet(exportData.sectorDistribution)
         XLSX.utils.book_append_sheet(wb, wsSector, "Sector Distribution")
 
-        // Save file
-        XLSX.writeFile(wb, `investment_dashboard_${new Date().toISOString().split('T')[0]}.xlsx`)
+        XLSX.writeFile(wb, `scouting_dashboard_${new Date().toISOString().split('T')[0]}.xlsx`)
     }
 
     return (
         <div className="min-h-screen bg-[#0e0e0e] p-6 space-y-6">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-2xl font-bold text-white">Investment Dashboard</h1>
+                <h1 className="text-2xl font-bold text-white">Scouting Dashboard</h1>
                 <div className="flex gap-2">
                     <Button
                         variant="outline"
@@ -281,10 +275,10 @@ export default function Page() {
 
                     <Button
                         className="bg-blue-600 hover:bg-blue-700"
-                        onClick={() => router.push("/investor/studio")}
+                        onClick={() => router.push("/scout/studio")}
                     >
                         <Plus className="h-4 w-4 mr-2" />
-                        New Investment
+                        New Scout
                     </Button>
                 </div>
             </div>
@@ -327,13 +321,13 @@ export default function Page() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Investment Trends */}
+                {/* Scouting Trends */}
                 <div className="lg:col-span-2 bg-[#1a1a1a] p-6 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4 text-white">Investment Trends</h3>
+                    <h3 className="text-lg font-semibold mb-4 text-white">Scouting Trends</h3>
                     <div className="h-[400px]">
                         <Chart
-                            options={investmentOptions}
-                            series={investmentSeries}
+                            options={scoutingOptions}
+                            series={scoutingSeries}
                             type="bar"
                             height="100%"
                         />
@@ -353,13 +347,13 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* Portfolio Performance */}
+                {/* Scout Performance */}
                 <div className="lg:col-span-3 bg-[#1a1a1a] p-6 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4 text-white">Portfolio Performance</h3>
+                    <h3 className="text-lg font-semibold mb-4 text-white">Scout Performance</h3>
                     <div className="h-[400px]">
                         <Chart
-                            options={portfolioOptions}
-                            series={portfolioSeries}
+                            options={performanceOptions}
+                            series={performanceSeries}
                             type="line"
                             height="100%"
                         />

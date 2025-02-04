@@ -1,7 +1,7 @@
 export interface Pitch {
     id: string
     name: string
-    status: 'Accepted' | 'Pending' | 'Rejected' | 'Pitched' | 'Offer Received' | 'Deal Cancelled' | 'Planning'
+    status: 'Accepted' | 'Pending' | 'Rejected' | 'Pitched' | 'Scout Interested' | 'Not Matched' | 'Planning'
     date: string
     scoutName: string
     postedBy: string
@@ -34,6 +34,14 @@ export interface Daftar {
     }>
 }
 
+const scoutingFeatures = [
+    "Unlimited pitches",
+    "Scout network access",
+    "Community support",
+    "Advanced matching",
+    "Priority support"
+]
+
 export const daftarsData: Daftar[] = [
     {
         id: "tech-innovation",
@@ -47,10 +55,10 @@ export const daftarsData: Daftar[] = [
             ]
         },
         subscription: {
-            plan: "Enterprise",
+            plan: "Pro Scout",
             status: "Active",
             nextBilling: "2024-05-01",
-            features: ["Unlimited pitches", "Custom analytics", "24/7 support", "API access"]
+            features: scoutingFeatures
         },
         pitches: [
             {
@@ -88,10 +96,10 @@ export const daftarsData: Daftar[] = [
             ]
         },
         subscription: {
-            plan: "Enterprise",
+            plan: "Pro Scout",
             status: "Active",
             nextBilling: "2024-05-01",
-            features: ["Unlimited pitches", "Custom analytics", "24/7 support", "API access"]
+            features: scoutingFeatures
         },
         pitches: [
             { id: "scout-3", name: "Islamic Banking Platform", status: "Accepted", date: "2024-03-10", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
@@ -110,10 +118,10 @@ export const daftarsData: Daftar[] = [
             ]
         },
         subscription: {
-            plan: "Pro",
+            plan: "Pro Scout",
             status: "Active",
             nextBilling: "2024-04-30",
-            features: ["Unlimited pitches", "Advanced analytics", "Priority support"]
+            features: scoutingFeatures
         },
         pitches: [
             { id: "scout-5", name: "EdTech Platform", status: "Accepted", date: "2024-03-18", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
@@ -132,10 +140,10 @@ export const daftarsData: Daftar[] = [
             ]
         },
         subscription: {
-            plan: "Basic",
+            plan: "Pro Scout",
             status: "Active",
             nextBilling: "2024-06-15",
-            features: ["Limited pitches", "Basic analytics", "Email support"]
+            features: scoutingFeatures
         },
         pitches: [
             { id: "scout-7", name: "Sustainable Agriculture Tech", status: "Pending", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
@@ -154,10 +162,10 @@ export const daftarsData: Daftar[] = [
             ]
         },
         subscription: {
-            plan: "Enterprise",
+            plan: "Pro Scout",
             status: "Active",
             nextBilling: "2024-05-15",
-            features: ["Unlimited pitches", "Custom analytics", "24/7 support", "API access"]
+            features: scoutingFeatures
         },
         pitches: [
             { id: "scout-9", name: "E-commerce Platform", status: "Accepted", date: "2024-03-20", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
@@ -176,10 +184,10 @@ export const daftarsData: Daftar[] = [
             ]
         },
         subscription: {
-            plan: "Pro",
+            plan: "Pro Scout",
             status: "Inactive",
             nextBilling: "2024-07-01",
-            features: ["Unlimited pitches", "Advanced analytics", "Priority support"]
+            features: scoutingFeatures
         },
         pitches: [
             { id: "scout-11", name: "Halal Food Delivery", status: "Rejected", date: "2024-03-12", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },

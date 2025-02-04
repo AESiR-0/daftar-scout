@@ -1,41 +1,35 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { CheckCircle2, XCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { daftarsData } from "@/lib/dummy-data/daftars"
+import { Badge } from "@/components/ui/badge"
 
-interface ApprovalRequest {
-  id: string
+interface TeamMember {
   name: string
-  approvedBy: string
-  designation: string
-  date: string
-  status: "approved" | "pending"
-  isApproved?: boolean
+  email: string
+  role: string
+  isApproved: boolean
+  isOwner?: boolean
 }
 
-// Sample data modified to include isApproved state
-const approvalRequests: ApprovalRequest[] = [
+// Get the first daftar's team data and combine owner and members
+const selectedDaftar = daftarsData[0]
+const teamMembers: TeamMember[] = [
   {
-    id: "1",
-    name: "AI Healthcare Assistant",
-    approvedBy: "Sarah Johnson",
-    designation: "Program Director",
-    date: "2024-03-19T10:15:00",
-    status: "pending",
-    isApproved: false
+    name: selectedDaftar.team.owner,
+    email: "owner@example.com", // You might want to add this to your data structure
+    role: "Owner",
+    isApproved: true,
+    isOwner: true
   },
-  {
-    id: "2",
-    name: "AI Healthcare Assistant",
-    approvedBy: "Sarah Johnson",
-    designation: "Program Director",
-    date: "2024-03-19T10:15:00",
-    status: "pending",
-    isApproved: false
-  }
+  ...selectedDaftar.team.members.map(member => ({
+    ...member,
+    isApproved: false,
+    isOwner: false
+  }))
 ]
 
 // Add the formatDate function
@@ -50,57 +44,68 @@ const formatDate = (date: string) => {
 export default function DeletePage() {
   const router = useRouter()
   const deletionDate = formatDate(new Date().toISOString())
-  const [approvals, setApprovals] = useState<ApprovalRequest[]>(approvalRequests)
+  const [approvals] = useState<TeamMember[]>(teamMembers)
   const [userConsent, setUserConsent] = useState(false)
   
-  const allApproved = approvals.every(request => request.isApproved) && userConsent
+  const pendingApprovals = approvals.filter(member => !member.isApproved && !member.isOwner).length
   
-  const handleApprovalChange = (id: string, checked: boolean) => {
-    setApprovals(prev => prev.map(request => 
-      request.id === id ? { ...request, isApproved: checked } : request
-    ))
-  }
-
   const handleDelete = () => {
-    if (allApproved) {
+    if (userConsent) {
       router.push("/founder/daftar")
     }
   }
 
   return (
-    <div className="space-y-6  mx-auto max-w-6xl mt-5">
-
+    <div className="space-y-6 mx-auto max-w-6xl mt-5">
       <h1 className="text-2xl font-semibold text-destructive">
         Delete Pitch
       </h1>
 
       <div className="space-y-6">
-        <p className="text-muted-foreground">
-          Are you sure you want to delete this pitch? This action cannot be undone.
-        </p>
+        <div className="space-y-2">
+          <p className="text-muted-foreground">
+            Are you sure you want to delete this pitch? This action cannot be undone.
+          </p>
+          {pendingApprovals > 0 && (
+            <p className="text-sm text-yellow-600 font-medium">
+              Waiting for approval from {pendingApprovals} team member{pendingApprovals !== 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
 
         <div className="space-y-3">
-          {approvals.map((request) => (
+          {approvals.map((member) => (
             <div
-              key={request.id}
+              key={member.email}
               className="flex items-center justify-between p-4 border rounded-[0.3rem]"
             >
               <div className="space-y-1">
-                <h3 className="font-medium">{request.name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">{member.name}</h3>
+                  {member.isOwner && (
+                    <Badge variant="secondary" className="text-xs">
+                      Owner
+                    </Badge>
+                  )}
+                </div>
                 <div className="space-y-0.5">
-                  <p className="text-sm">
-                    Approval needed from <span className="text-blue-600">{request.approvedBy}</span>
-                  </p>
-                  <p className="text-sm text-muted-foreground">{request.designation}</p>
+                  <p className="text-sm text-muted-foreground">{member.role}</p>
+                  <p className="text-sm text-blue-600">{member.email}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatDate(request.date)}
+                    {member.isOwner 
+                      ? 'Automatically approved (Owner)' 
+                      : member.isApproved 
+                        ? 'Approved' 
+                        : 'Pending approval'
+                    }
                   </p>
                 </div>
               </div>
               <Checkbox 
-                id={`approval-${request.id}`}
-                checked={request.isApproved}
-                onCheckedChange={(checked) => handleApprovalChange(request.id, checked as boolean)}
+                id={`approval-${member.email}`}
+                checked={member.isApproved || member.isOwner}
+                disabled
+                className="h-5 w-5 border-2 border-gray-400 data-[state=checked]:border-green-600 data-[state=checked]:bg-green-600"
               />
             </div>
           ))}
@@ -111,12 +116,13 @@ export default function DeletePage() {
             id="user-consent" 
             checked={userConsent}
             onCheckedChange={(checked) => setUserConsent(checked as boolean)}
+            className="h-5 w-5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
           />
           <label 
             htmlFor="user-consent" 
             className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            I agree that I have read all the data, and we're good to delete the pitch.
+            I understand that this pitch will be deleted once all team members approve
           </label>
         </div>
 
@@ -124,7 +130,7 @@ export default function DeletePage() {
           <Button 
             variant="destructive" 
             onClick={handleDelete}
-            disabled={!allApproved}
+            disabled={!userConsent || pendingApprovals > 0}
           >
             Delete Pitch
           </Button>
@@ -132,15 +138,13 @@ export default function DeletePage() {
 
         <div className="space-y-2 pt-4">
           <p className="text-sm text-muted-foreground">
-            All data related to the pitch has been deleted
-            The pitch is no longer available.
+            The pitch will be permanently deleted after receiving all required approvals.
           </p>
           <p className="text-xs text-muted-foreground">
-            Deletion Date: {deletionDate}
+            Request initiated on: {deletionDate}
           </p>
         </div>
       </div>
-
     </div>
   )
 } 

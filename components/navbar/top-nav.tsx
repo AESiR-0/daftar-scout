@@ -81,25 +81,7 @@ export function TopNav({ role }: { role: string }) {
               ))}
             </Breadcrumb>
           </div>
-          {showDaftarSelector && (
-            <Select value={selectedDaftar} onValueChange={setSelectedDaftar}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select Daftar" />
-              </SelectTrigger>
-              <SelectContent>
-                {daftarsData.map((daftar) => (
-                  <SelectItem key={daftar.id} value={daftar.id}>
-                    <div className="flex items-center">
-                      <span>{daftar.name}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        ({daftar.pitchCount} pitches)
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+
         </div>
 
         <div className="ml-auto flex items-center space-x-4">

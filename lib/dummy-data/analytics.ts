@@ -3,10 +3,10 @@ export interface PitchAnalytics {
   pitchesGiven: number
   pitchesApproved: number
   pitchesRejected: number
-  offersReceived: number
-  offersRejected: number
-  offersAccepted: number
-  offersWithdrawn: number
+  scoutingRequests: number
+  requestsRejected: number
+  requestsAccepted: number
+  requestsWithdrawn: number
 }
 
 export interface DaftarPerformance {
@@ -23,10 +23,10 @@ export const founderAnalytics: PitchAnalytics = {
   pitchesGiven: 45,
   pitchesApproved: 28,
   pitchesRejected: 17,
-  offersReceived: 20,
-  offersRejected: 5,
-  offersAccepted: 12,
-  offersWithdrawn: 3,
+  scoutingRequests: 20,
+  requestsRejected: 5,
+  requestsAccepted: 12,
+  requestsWithdrawn: 3,
 }
 
 // Monthly performance data for all daftars
@@ -66,41 +66,41 @@ export const daftarPerformanceData: DaftarPerformance[] = [
   },
 ]
 
-// Investor analytics dummy data
-export interface InvestorAnalytics {
+// Scout analytics dummy data
+export interface ScoutAnalytics {
   pitchesReviewed: number
-  offersExtended: number
-  offersPending: number
-  offersAccepted: number
-  offersRejected: number
-  offersWithdrawn: number
-  totalInvestmentAmount: number
-  averageInvestmentSize: number
+  requestsExtended: number
+  requestsPending: number
+  requestsAccepted: number
+  requestsRejected: number
+  requestsWithdrawn: number
+  totalScoutedProjects: number
+  averageResponseTime: number // in days
 }
 
-export const investorAnalytics: InvestorAnalytics = {
+export const scoutAnalytics: ScoutAnalytics = {
   pitchesReviewed: 75,
-  offersExtended: 30,
-  offersPending: 8,
-  offersAccepted: 12,
-  offersRejected: 7,
-  offersWithdrawn: 3,
-  totalInvestmentAmount: 5000000, // in dollars
-  averageInvestmentSize: 416666, // total investment / offers accepted
+  requestsExtended: 30,
+  requestsPending: 8,
+  requestsAccepted: 12,
+  requestsRejected: 7,
+  requestsWithdrawn: 3,
+  totalScoutedProjects: 25,
+  averageResponseTime: 3, // 3 days average response time
 }
 
-// Monthly investment trends
-export interface InvestmentTrend {
+// Monthly scouting trends
+export interface ScoutingTrend {
   month: string
-  investmentAmount: number
-  numberOfDeals: number
+  scoutedProjects: number
+  successfulMatches: number
 }
 
-export const investmentTrends: InvestmentTrend[] = [
-  { month: "Jan", investmentAmount: 500000, numberOfDeals: 2 },
-  { month: "Feb", investmentAmount: 750000, numberOfDeals: 3 },
-  { month: "Mar", investmentAmount: 1000000, numberOfDeals: 4 },
-  { month: "Apr", investmentAmount: 800000, numberOfDeals: 3 },
-  { month: "May", investmentAmount: 1200000, numberOfDeals: 5 },
-  { month: "Jun", investmentAmount: 750000, numberOfDeals: 3 },
+export const scoutingTrends: ScoutingTrend[] = [
+  { month: "Jan", scoutedProjects: 5, successfulMatches: 2 },
+  { month: "Feb", scoutedProjects: 7, successfulMatches: 3 },
+  { month: "Mar", scoutedProjects: 10, successfulMatches: 4 },
+  { month: "Apr", scoutedProjects: 8, successfulMatches: 3 },
+  { month: "May", scoutedProjects: 12, successfulMatches: 5 },
+  { month: "Jun", scoutedProjects: 9, successfulMatches: 4 },
 ] 

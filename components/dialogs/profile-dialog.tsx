@@ -31,7 +31,12 @@ interface ProfileData {
   email: string
   phone: string
   gender: string
-  language: string
+  primaryLanguage: string
+  secondaryLanguage: string
+  languageProficiency: {
+    primary: 'beginner' | 'intermediate' | 'advanced'
+    secondary: 'beginner' | 'intermediate' | 'advanced'
+  }
   country: string
   city: string
   company: string
@@ -263,6 +268,67 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       <div className="space-y-2">
                         <Label>City</Label>
                         <Input disabled={!isEditing} defaultValue="New York" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Preferred Language</Label>
+                        <Select disabled={!isEditing}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="english">English</SelectItem>
+                            <SelectItem value="arabic">Arabic</SelectItem>
+                            <SelectItem value="mandarin">Mandarin</SelectItem>
+                            <SelectItem value="spanish">Spanish</SelectItem>
+                            <SelectItem value="french">French</SelectItem>
+                            <SelectItem value="german">German</SelectItem>
+                            <SelectItem value="japanese">Japanese</SelectItem>
+                            <SelectItem value="korean">Korean</SelectItem>
+                            <SelectItem value="russian">Russian</SelectItem>
+                            <SelectItem value="portuguese">Portuguese</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Secondary Language</Label>
+                        <Select disabled={!isEditing}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select secondary language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="english">English</SelectItem>
+                            <SelectItem value="arabic">Arabic</SelectItem>
+                            <SelectItem value="mandarin">Mandarin</SelectItem>
+                            <SelectItem value="spanish">Spanish</SelectItem>
+                            <SelectItem value="french">French</SelectItem>
+                            <SelectItem value="german">German</SelectItem>
+                            <SelectItem value="japanese">Japanese</SelectItem>
+                            <SelectItem value="korean">Korean</SelectItem>
+                            <SelectItem value="russian">Russian</SelectItem>
+                            <SelectItem value="portuguese">Portuguese</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Add a language proficiency section */}
+                    <div className="space-y-4 pt-4 border-t">
+                      <h4 className="text-sm font-medium">Language Proficiency</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Primary Language</span>
+                            <Badge variant="secondary">Advanced</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">English</p>
+                        </div>
+                        <div className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Secondary Language</span>
+                            <Badge variant="secondary">Intermediate</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">Spanish</p>
+                        </div>
                       </div>
                     </div>
                   </div>

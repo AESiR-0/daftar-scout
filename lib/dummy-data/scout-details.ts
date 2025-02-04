@@ -12,8 +12,13 @@ export interface ScoutDetails {
         Location: string
         Gender: string
         Age: string
-        Stage: string
+        ExpertiseLevel: string
         Sector: string
+    }
+    requirements: {
+        experience: string
+        availability: string
+        communication: string
     }
     faqs: Array<{
         question: string
@@ -30,25 +35,30 @@ export interface ScoutDetails {
 
 export const scoutDetailsData: ScoutDetails[] = [
     {
-        title: "Tech Startup Fund",
-        slug: "tech-startup-fund",
+        title: "Tech Talent Scout Program",
+        slug: "tech-talent-scout-program",
         collaboration: "Daftar OS",
         description: "Early stage technology companies investment program focused on innovative solutions",
         videoUrl: "https://example.com/video.mp4",
         about: `Our program focuses on early-stage technology startups with innovative solutions. 
                We provide not just funding, but also mentorship and networking opportunities.`,
         details: {
-            Community: "Christian",
+            Community: "Open",
             Location: "UAE",
             Gender: "All",
             Age: "18-35",
-            Stage: "Seed to Series A",
-            Sector: "Big Data",
+            ExpertiseLevel: "Mid to Senior",
+            Sector: "Technology",
+        },
+        requirements: {
+            experience: "Minimum 3 years in tech industry",
+            availability: "10 hours/week",
+            communication: "Fluent in English"
         },
         faqs: [
             {
-                question: "What stage companies do you invest in?",
-                answer: "We typically invest in seed to series A stage companies."
+                question: "What kind of projects do you scout for?",
+                answer: "We scout for innovative technology projects and talented teams."
             },
             {
                 question: "What is your typical investment size?",
@@ -86,8 +96,13 @@ export const scoutDetailsData: ScoutDetails[] = [
             Location: "Malaysia",
             Gender: "All",
             Age: "21-45",
-            Stage: "Pre-seed to Seed",
+            ExpertiseLevel: "Pre-seed to Seed",
             Sector: "FinTech",
+        },
+        requirements: {
+            experience: "Minimum 3 years in Islamic finance",
+            availability: "10 hours/week",
+            communication: "Fluent in Arabic"
         },
         faqs: [
             {
@@ -126,8 +141,13 @@ export const scoutDetailsData: ScoutDetails[] = [
             Location: "Singapore",
             Gender: "Female",
             Age: "20-50",
-            Stage: "Seed",
+            ExpertiseLevel: "Seed",
             Sector: "Technology",
+        },
+        requirements: {
+            experience: "Minimum 2 years in tech industry",
+            availability: "8 hours/week",
+            communication: "Fluent in English"
         },
         faqs: [
             {

@@ -47,7 +47,7 @@ export function AppSidebar({ role }: { role: string }) {
           <div>
             {/* Header */}
             <div className="space-y-4 px-4 py-5">
-              <Link href={'/'} className={cn("flex hover:cursor-pointer items-center gap-2 overflow-hidden", isCollapsed && "justify-center")}>
+              <Link href={`${role === 'investor' ? '/investor' : '/founder'}`} className={cn("flex hover:cursor-pointer items-center gap-2 overflow-hidden", isCollapsed && "justify-center")}>
                 <Building2 className="h-6 w-6" />
                 {!isCollapsed && <h2 className="text-md font-semibold">{Header}</h2>}
               </Link>
@@ -81,8 +81,8 @@ export function AppSidebar({ role }: { role: string }) {
               <div className="px-4 mb-4">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full justify-between"
                     >
                       <span className="truncate">{selectedDaftarName}</span>
@@ -105,7 +105,7 @@ export function AppSidebar({ role }: { role: string }) {
                       </DropdownMenuItem>
                     ))}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={() => handleDaftarSelect("new")}
                       className="text-blue-500 cursor-pointer"
                     >

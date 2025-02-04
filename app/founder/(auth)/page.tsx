@@ -5,14 +5,14 @@ import { founderAnalytics, daftarPerformanceData } from "@/lib/dummy-data/analyt
 import ReactApexChart from "react-apexcharts"
 import { BaseChartOptions, ChartData } from "@/lib/types/chart"
 import { Card } from "@/components/ui/card"
-import { ArrowUpRight, ArrowDownRight, Download, Plus, Target, Users, TrendingUp, Award, Briefcase, DollarSign } from "lucide-react"
+import { ArrowUpRight, ArrowDownRight, Download, Target, Users, Clock, Award } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import * as XLSX from 'xlsx'
 
 const Chart = dynamic(() => import('react-apexcharts') as any, { ssr: false }) as typeof ReactApexChart
 
-// Enhanced quick stats
+// Quick stats updated for scouting focus
 const quickStats = [
     {
         title: "Total Pitches",
@@ -22,35 +22,35 @@ const quickStats = [
         icon: Target
     },
     {
-        title: "Success Rate",
-        value: `${((founderAnalytics.pitchesApproved / founderAnalytics.pitchesGiven) * 100).toFixed(1)}%`,
+        title: "Scout Requests",
+        value: founderAnalytics.scoutingRequests,
         change: "+8.2%",
         trend: "up",
-        icon: TrendingUp
+        icon: Users
     },
     {
-        title: "Active Offers",
-        value: founderAnalytics.offersReceived - founderAnalytics.offersAccepted - founderAnalytics.offersRejected,
-        change: "-2.5%",
-        trend: "down",
-        icon: Briefcase
-    },
-    {
-        title: "Investor Meetings",
-        value: "32",
+        title: "Accepted Matches",
+        value: founderAnalytics.requestsAccepted,
         change: "+12.1%",
         trend: "up",
-        icon: Users
+        icon: Award
+    },
+    {
+        title: "Avg Response Time",
+        value: "48h",
+        change: "-2.5%",
+        trend: "down",
+        icon: Clock
     }
 ]
 
-// Add more detailed performance metrics
+// Add more detailed scouting metrics
 const pitchPerformance = [
-    { month: "Jan", approved: 12, rejected: 3, pending: 5 },
-    { month: "Feb", approved: 15, rejected: 4, pending: 6 },
-    { month: "Mar", approved: 18, rejected: 2, pending: 8 },
-    { month: "Apr", approved: 22, rejected: 5, pending: 4 },
-    { month: "May", approved: 20, rejected: 3, pending: 7 }
+    { month: "Jan", matched: 12, pending: 5, rejected: 3 },
+    { month: "Feb", matched: 15, pending: 6, rejected: 4 },
+    { month: "Mar", matched: 18, pending: 8, rejected: 2 },
+    { month: "Apr", matched: 22, pending: 4, rejected: 5 },
+    { month: "May", matched: 20, pending: 7, rejected: 3 }
 ]
 
 function LoadingSkeleton() {
@@ -88,10 +88,10 @@ export default function Page() {
             })),
             pitchPerformance: pitchPerformance.map(perf => ({
                 Month: perf.month,
-                Approved: perf.approved,
-                Rejected: perf.rejected,
+                Matched: perf.matched,
                 Pending: perf.pending,
-                "Success Rate": `${((perf.approved / (perf.approved + perf.rejected)) * 100).toFixed(1)}%`
+                Rejected: perf.rejected,
+                "Match Rate": `${((perf.matched / (perf.matched + perf.rejected)) * 100).toFixed(1)}%`
             }))
         }
 
@@ -115,7 +115,7 @@ export default function Page() {
             background: 'transparent',
             toolbar: { show: false }
         },
-        colors: ['#16a34a', '#dc2626', '#f59e0b'],
+        colors: ['#16a34a', '#f59e0b', '#dc2626'],
         plotOptions: {
             bar: {
                 horizontal: false,
@@ -139,16 +139,16 @@ export default function Page() {
 
     const pitchPerformanceSeries = [
         {
-            name: 'Approved',
-            data: pitchPerformance.map(p => p.approved)
-        },
-        {
-            name: 'Rejected',
-            data: pitchPerformance.map(p => p.rejected)
+            name: 'Matched',
+            data: pitchPerformance.map(p => p.matched)
         },
         {
             name: 'Pending',
             data: pitchPerformance.map(p => p.pending)
+        },
+        {
+            name: 'Rejected',
+            data: pitchPerformance.map(p => p.rejected)
         }
     ]
 
@@ -172,16 +172,43 @@ export default function Page() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {quickStats.map((stat, index) => (
                     <Card key={index} className="p-6 bg-[#1a1a1a] border-none">
-                        <h3 className="text-sm text-gray-400">{stat.title}</h3>
-                        <p className="text-2xl font-bold text-white">{stat.value}</p>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-sm text-gray-400">{stat.title}</p>
+                                <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
+                            </div>
+                            <div className={cn(
+                                "p-2 rounded-full",
+                                stat.trend === "up" ? "bg-green-500/10" : "bg-red-500/10"
+                            )}>
+                                <stat.icon className={cn(
+                                    "h-5 w-5",
+                                    stat.trend === "up" ? "text-green-500" : "text-red-500"
+                                )} />
+                            </div>
+                        </div>
+                        <div className="flex items-center mt-4">
+                            {stat.trend === "up" ? (
+                                <ArrowUpRight className="h-4 w-4 text-green-500" />
+                            ) : (
+                                <ArrowDownRight className="h-4 w-4 text-red-500" />
+                            )}
+                            <span className={cn(
+                                "text-sm ml-1",
+                                stat.trend === "up" ? "text-green-500" : "text-red-500"
+                            )}>
+                                {stat.change}
+                            </span>
+                            <span className="text-xs text-gray-400 ml-2">vs last month</span>
+                        </div>
                     </Card>
                 ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Pitch Performance */}
-                <div className="lg:col-span-2 bg-[#1a1a1a] p-6 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4 text-white">Pitch Performance</h3>
+                <div className="lg:col-span-3 bg-[#1a1a1a] p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4 text-white">Scout Matching Performance</h3>
                     <div className="h-[400px]">
                         <Chart
                             options={pitchPerformanceOptions}
@@ -191,8 +218,6 @@ export default function Page() {
                         />
                     </div>
                 </div>
-
-                {/* Additional charts and metrics... */}
             </div>
         </div>
     )

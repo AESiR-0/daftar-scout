@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ScrollText, Bold, Italic, List } from "lucide-react"
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -47,6 +47,9 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl p-0 gap-0">
+        <DialogHeader>
+          <DialogTitle></DialogTitle>
+        </DialogHeader>
         <div className="flex flex-col h-[28rem]">
           <div className="flex items-center gap-2 p-4 border-b">
             <ScrollText className="h-4 w-4" />

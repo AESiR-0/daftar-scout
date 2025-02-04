@@ -4,8 +4,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mail, Phone, Languages, Loader2, UserMinus, Trash2 } from "lucide-react"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Mail, UserMinus, Trash2, Loader2, Languages, Phone, User } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 // import { api } from "@/lib/api-client"
 import { useToast } from "@/hooks/use-toast"
 import { Daftar } from "@/lib/dummy-data/daftars"
@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "../ui/scroll-area"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface TeamDialogProps {
   open: boolean
@@ -28,22 +29,32 @@ interface TeamDialogProps {
   daftarId?: string
 }
 
+interface TeamMemberDetails {
+  preferredLanguage: string
+  age: string
+  gender: 'Male' | 'Female' | 'Other' | ''
+  phoneNumber: string
+}
+
 export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDialogProps) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     designation: "",
-    email: ""
+    email: "",
+    age: "",
+    gender: "" as TeamMemberDetails['gender'],
+    phoneNumber: ""
   })
   // const { inviteTeamMember } = api.founderTeam
   const [isInviting, setIsInviting] = useState(false)
   const { toast } = useToast()
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
+  const [showLeaveConfirmDialog, setShowLeaveConfirmDialog] = useState(false)
 
-  // Update teamMembers when daftarData changes
+  // Get all team members without owner distinction
   const teamMembers = daftarData ? [
-    { name: daftarData.team.owner, role: "Owner", email: `${daftarData.team.owner.toLowerCase().replace(' ', '.')}@example.com` },
     ...daftarData.team.members
   ] : []
 
@@ -69,7 +80,10 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
         firstName: "",
         lastName: "",
         designation: "",
-        email: ""
+        email: "",
+        age: "",
+        gender: "" as TeamMemberDetails['gender'],
+        phoneNumber: ""
       })
       onOpenChange(false)
       window.location.reload()
@@ -85,7 +99,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
       setIsInviting(false)
     }
   }
-  const [isOwner, setIsOwner] = useState(true)
+
   const isFormValid = formData.firstName &&
     formData.lastName &&
     formData.designation &&
@@ -122,6 +136,16 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
     })
   }
 
+  const handleLeaveTeam = () => {
+    toast({
+      title: "Left team successfully",
+      description: "You have been removed from the team",
+      variant: "success",
+    })
+    onOpenChange(false)
+    // Here you would typically redirect to a different page or update the UI
+  }
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -132,16 +156,19 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
             <div className="flex items-center justify-between mb-4">
               <TabsList>
                 <TabsTrigger value="team" className="flex items-center gap-1">
-                  Team
+                  Team Members
                   <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
                     {teamMembers.length}
                   </span>
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="flex items-center gap-1">
-                  Pending
+                  Pending Invites
                   <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
                     {pendingInvites.length}
                   </span>
+                </TabsTrigger>
+                <TabsTrigger value="leave" className="text-red-600">
+                  Leave Team
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -169,21 +196,33 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                               </p>
                             </div>
                           </div>
-                          {isOwner && member.role !== "Owner" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => handleRemoveMember(member.email)}
-                            >
-                              <UserMinus className="h-4 w-4" />
-                            </Button>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleRemoveMember(member.email)}
+                          >
+                            <UserMinus className="h-4 w-4" />
+                          </Button>
                         </div>
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="h-4 w-4 text-muted-foreground" />
-                            <span>{member.email}</span>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4 text-muted-foreground" />
+                              <span>{member.email}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-4 w-4 text-muted-foreground" />
+                              <span>{member.phoneNumber || 'Not provided'}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Languages className="h-4 w-4 text-muted-foreground" />
+                              <span>{member.preferredLanguage || 'Not specified'}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <span>{member.gender || 'Not specified'}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -216,6 +255,37 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                         placeholder="Email"
                         value={formData.email}
                         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <label className="text-sm text-muted-foreground">Gender</label>
+                          <Select
+                            value={formData.gender}
+                            onValueChange={(value: TeamMemberDetails['gender']) => 
+                              setFormData(prev => ({ ...prev, gender: value }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select gender" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Male">Male</SelectItem>
+                              <SelectItem value="Female">Female</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Input
+                          type="tel"
+                          placeholder="Phone Number"
+                          value={formData.phoneNumber}
+                          onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                        />
+                      </div>
+                      <Input
+                        type="number"
+                        placeholder="Age"
+                        value={formData.age}
+                        onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
                       />
                       <Button
                         onClick={handleSendInvite}
@@ -264,6 +334,32 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                   ))}
                 </div>
               </TabsContent>
+
+              <TabsContent value="leave" className="mt-0">
+                <div className="p-6 space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-red-600">Leave Team</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Are you sure you want to leave this team? This action cannot be undone.
+                    </p>
+                  </div>
+                  <div className="space-y-2 rounded-md bg-red-500/10 p-4">
+                    <p className="text-sm font-medium text-red-600">What happens when you leave:</p>
+                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                      <li>You will lose access to all team resources</li>
+                      <li>Your contributions will remain with the team</li>
+                      <li>You can be invited back by other team members</li>
+                    </ul>
+                  </div>
+                  <Button 
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => setShowLeaveConfirmDialog(true)}
+                  >
+                    Leave Team
+                  </Button>
+                </div>
+              </TabsContent>
             </ScrollArea>
           </Tabs>
         </DialogContent>
@@ -279,6 +375,25 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmRemoveMember}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={showLeaveConfirmDialog} onOpenChange={setShowLeaveConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove you from the team. You will lose access to all team resources and ongoing projects.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleLeaveTeam}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Yes, leave team
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

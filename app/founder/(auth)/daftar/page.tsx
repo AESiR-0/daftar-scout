@@ -177,39 +177,7 @@ export default function DaftarPage() {
                             </div>
 
                             {/* Subscription Section */}
-                            <div className="border rounded-[0.3rem]">
-                                <div className="p-4 border-b">
-                                    <h3 className="font-medium">Subscription</h3>
-                                </div>
-                                <div className="p-4 space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium">{selectedDaftar.subscription.plan} Plan</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Next billing: {formatDate(selectedDaftar.subscription.nextBilling)}
-                                            </p>
-                                        </div>
-                                        <span className={cn(
-                                            "text-xs",
-                                            selectedDaftar.subscription.status === "Active" && "text-green-600",
-                                            selectedDaftar.subscription.status === "Inactive" && "text-red-600"
-                                        )}>
-                                            {selectedDaftar.subscription.status}
-                                        </span>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-sm text-muted-foreground">Features</p>
-                                        <ul className="space-y-2">
-                                            {selectedDaftar.subscription.features.map((feature, index) => (
-                                                <li key={index} className="text-sm flex items-center gap-2">
-                                                    <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                                                    {feature}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
+
                         </>
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full text-sm text-muted-foreground">
