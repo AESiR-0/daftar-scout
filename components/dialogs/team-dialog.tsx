@@ -27,6 +27,12 @@ interface TeamDialogProps {
   onOpenChange: (open: boolean) => void
   daftarData: Daftar | null
   daftarId?: string
+  onLeaveTeam?: () => void;
+  onWithdrawInvite?: (email: string) => void;
+  preferredLanguage?: string;
+  age?: string;
+  phoneNumber?: string;
+  gender?: 'Male' | 'Female' | 'Other' | '';
 }
 
 interface TeamMemberDetails {
@@ -261,7 +267,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                           <label className="text-sm text-muted-foreground">Gender</label>
                           <Select
                             value={formData.gender}
-                            onValueChange={(value: TeamMemberDetails['gender']) => 
+                            onValueChange={(value: TeamMemberDetails['gender']) =>
                               setFormData(prev => ({ ...prev, gender: value }))}
                           >
                             <SelectTrigger>
@@ -351,7 +357,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                       <li>You can be invited back by other team members</li>
                     </ul>
                   </div>
-                  <Button 
+                  <Button
                     variant="destructive"
                     className="w-full"
                     onClick={() => setShowLeaveConfirmDialog(true)}
@@ -388,7 +394,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleLeaveTeam}
               className="bg-red-600 hover:bg-red-700"
             >

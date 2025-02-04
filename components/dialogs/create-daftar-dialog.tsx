@@ -19,6 +19,7 @@ import {
 interface CreateDaftarDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
+    onSuccess: (daftarId: string) => void
 }
 
 const daftarStructures = [
@@ -54,7 +55,7 @@ const countries = [
     "Greece"
 ]
 
-export function CreateDaftarDialog({ open, onOpenChange }: CreateDaftarDialogProps) {
+export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaftarDialogProps) {
     const [formData, setFormData] = useState({
         name: "",
         structure: "",

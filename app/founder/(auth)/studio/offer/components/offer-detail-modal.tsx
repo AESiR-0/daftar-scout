@@ -15,6 +15,8 @@ interface OfferDetailModalProps {
   onClose: () => void;
   onAccept?: (id: string) => void;
   onDecline?: (id: string) => void;
+  onWithdraw?: (id: string) => void;
+  showWithdrawOption?: boolean | undefined;
 }
 
 export function OfferDetailModal({
@@ -23,6 +25,8 @@ export function OfferDetailModal({
   onClose,
   onAccept,
   onDecline,
+  onWithdraw,
+  showWithdrawOption = false,
 }: OfferDetailModalProps) {
   if (!offer) return null;
 
@@ -53,7 +57,7 @@ export function OfferDetailModal({
                 <span className="font-medium">{offer.user}</span>
                 <span className="text-muted-foreground ml-2">· {offer.designation}</span>
               </div>
-              
+
               <div className="flex items-center text-sm">
                 <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">{offer.program}</span>

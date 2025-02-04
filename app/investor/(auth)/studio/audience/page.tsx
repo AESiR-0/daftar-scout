@@ -1,132 +1,69 @@
 "use client"
 
-import { usePathname } from "next/navigation"
-import { useEffect, useReducer, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Combobox } from "./components/combobox"
+import { Card } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
 import { AgeRange } from "./components/age-range"
-import { communities, sectors, stages, genderOptions } from "./constants"
-import { audienceReducer, initialState } from "./reducer"
-import type { AudienceDetails, Location } from "./types"
+import { Combobox } from "./components/combobox"
+import { useRouter } from "next/navigation"
 
-interface AudienceContentProps {
-  initialData?: AudienceDetails
-  location: Location[]
-  onSave: (data: AudienceDetails) => Promise<void>
-}
+export default function AudiencePage() {
+  const router = useRouter()
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([])
+  const [ageRange, setAgeRange] = useState<[number, number]>([18, 65])
 
-export default function AudienceContent({ initialData, location, onSave }: AudienceContentProps) {
-  const pathname = usePathname()
-  const mode = pathname.includes("edit") ? "edit" : "add"
-  const programId = pathname.split("/").pop()
-
-  const [state, dispatch] = useReducer(audienceReducer, initialState)
-  const [locations, setLocations] = useState<Location[]>([])
-
-  useEffect(() => {
-    if (mode === "edit" && programId) fetchAudienceDetails(programId)
-    fetchLocations()
-  }, [mode, programId])
-
-  const fetchAudienceDetails = async (id: string) => {
-    try {
-      // Simulated API call
-      const data: AudienceDetails = {
-        location: "UAE",
-        community: "auto-rickshaw",
-        gender: "male",
-        ageMin: "20",
-        ageMax: "30",
-        stage: "idea",
-        sector: "ai",
-      }
-      Object.keys(data).forEach((key) =>
-        dispatch({ type: key, payload: data[key as keyof AudienceDetails] })
-      )
-    } catch (error) {
-      console.error("Error fetching audience details:", error)
-    }
-  }
-
-  const fetchLocations = async () => {
-    try {
-      const response = await fetch("https://restcountries.com/v3.1/all")
-      const data = await response.json()
-      const formattedLocations = data
-        .map((country: any) => ({
-          name: country.name.common,
-          code: country.cca2,
-        }))
-        .sort((a: Location, b: Location) => a.name.localeCompare(b.name))
-      setLocations(formattedLocations)
-    } catch (error) {
-      console.error("Error fetching locations:", error)
-    }
-  }
-
-  const handleSave = async () => {
-    console.log(mode === "edit" ? "Updating audience" : "Creating audience", state)
+  const handleNext = () => {
+    // Handle the next action
+    router.push("/investor/studio/pitch")
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 space-y-6">
-      <h1 className="text-xl font-semibold">
-        {mode === "edit" ? "Edit Audience" : "Add Audience"}
-      </h1>
+    <div className="container max-w-4xl mx-auto py-6">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Target Audience</h1>
+          <p className="text-sm text-muted-foreground">
+            Define your target audience to help us match you with the right startups
+          </p>
+        </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        <Combobox
-          label="Location"
-          value={state.location}
-          options={locations.map((loc) => ({ value: loc.code, label: loc.name }))}
-          onChange={(value) => dispatch({ type: "location", payload: value })}
-          placeholder="Select location..."
-        />
+        <Card className="p-6">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label>Location</Label>
+              <Combobox
+                label="Location"
+                value="Location"
+                options={[]}
+                selected={selectedLocations}
+                onChange={(value: string) => setSelectedLocations(prev => [...prev, value])}
+              />
+            </div>
 
-        <Combobox
-          label="Community"
-          value={state.community}
-          options={communities}
-          onChange={(value) => dispatch({ type: "community", payload: value })}
-          placeholder="Select community..."
-        />
+            <Separator />
 
-        <Combobox
-          label="Gender"
-          value={state.gender}
-          options={genderOptions}
-          onChange={(value) => dispatch({ type: "gender", payload: value })}
-          placeholder="Select gender..."
-        />
+            <div className="space-y-2">
+              <Label>Age Range</Label>
+              <AgeRange
+                minAge={ageRange[0].toString()}
+                maxAge={ageRange[1].toString()}
+                onMinChange={(value) => setAgeRange([Number(value), ageRange[1]])}
+                onMaxChange={(value) => setAgeRange([ageRange[0], Number(value)])}
+              />
+            </div>
+          </div>
+        </Card>
 
-        <AgeRange
-          minAge={state.ageMin}
-          maxAge={state.ageMax}
-          onMinChange={(value) => dispatch({ type: "ageMin", payload: value })}
-          onMaxChange={(value) => dispatch({ type: "ageMax", payload: value })}
-        />
-
-        <Combobox
-          label="Stage"
-          value={state.stage}
-          options={stages}
-          onChange={(value) => dispatch({ type: "stage", payload: value })}
-          placeholder="Select stage..."
-        />
-
-        <Combobox
-          label="Sector"
-          value={state.sector}
-          options={sectors}
-          onChange={(value) => dispatch({ type: "sector", payload: value })}
-          placeholder="Select sector..."
-        />
-      </div>
-
-      <div className="flex justify-center pt-4">
-        <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
-          {mode === "edit" ? "Update" : "Save"}
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            onClick={handleNext}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   )

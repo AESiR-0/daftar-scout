@@ -45,6 +45,7 @@ interface FoundersPitch {
   status: string;
   location: string;
   sectors: string[];
+  stage: string;
   questions: {
     id: number;
     question: string;
@@ -138,11 +139,7 @@ export default function PitchDetailsPage() {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
-  const params = useParams();
-  const router = useRouter();
-
-  // Sample data - replace with API call
-  const pitchDetails: PitchDetails = {
+  const [pitchDetails, setPitchDetails] = useState<PitchDetails>({
     daftarName: "Tech Startup",
     pitchName: "AI Chatbot",
     status: "In Review",
@@ -155,6 +152,7 @@ export default function PitchDetailsPage() {
       foundersPitch: {
         status: "Under Review",
         location: "Dubai, UAE",
+        stage: "Seed",
         sectors: ["AI/ML", "SaaS"],
         questions: [
           {
@@ -189,6 +187,10 @@ export default function PitchDetailsPage() {
           }
         ]
       },
+      analysis: {
+        performanceData: [45, 52, 38, 65, 78],
+        investmentDistribution: [30, 25, 20, 15, 10]
+      },
       teamAnalysis: [
         {
           id: '1',
@@ -214,7 +216,9 @@ export default function PitchDetailsPage() {
         }
       ]
     }
-  };
+  });
+  const params = useParams();
+  const router = useRouter();
 
   // Add current profile (this could come from your auth context)
   const currentProfile = {
@@ -226,7 +230,7 @@ export default function PitchDetailsPage() {
 
   const handleSubmitAnalysis = async (data: {
     belief: 'yes' | 'no'
-    note: string
+    note: string | undefined
     analyst: Profile
   }) => {
     try {
@@ -243,10 +247,10 @@ export default function PitchDetailsPage() {
       if (!response.ok) throw new Error('Failed to submit analysis')
 
       // Update local state
-      const newAnalysis = {
+      const newAnalysis: TeamAnalysis = {
         id: Date.now().toString(),
         belief: data.belief,
-        note: data.note,
+        note: data.note || '',
         analyst: data.analyst,
         date: new Date().toISOString()
       }

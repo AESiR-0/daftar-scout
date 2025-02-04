@@ -189,6 +189,9 @@ export default function DaftarPage() {
             <CreateDaftarDialog
                 open={createDaftarOpen}
                 onOpenChange={setCreateDaftarOpen}
+                onSuccess={() => {
+                    setCreateDaftarOpen(false)
+                }}
             />
         </div >
     )

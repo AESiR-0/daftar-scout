@@ -129,6 +129,9 @@ export default function PitchBoardPage() {
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
             <CreateDaftarDialog
+                onSuccess={() => {
+                    setCreateDaftarOpen(false)
+                }}
                 open={createDaftarOpen}
                 onOpenChange={setCreateDaftarOpen}
             />

@@ -1,31 +1,35 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, ChevronRight } from "lucide-react";
-import { type Offer, getStatusColor } from "../context/offers-context";
+import { type Offer, OfferStatus, getStatusColor } from "../context/offers-context";
 import { cn } from "@/lib/utils";
 
 interface OfferCardProps {
   offer: Offer;
   onView: (offer: Offer) => void;
-  onAccept: (id: string) => void;
-  onDecline: (id: string) => void;
-  onWithdraw: (id: string) => void;
+  onAccept?: (id: string) => void;
+  onDecline?: (id: string) => void;
+  onWithdraw?: (id: string) => void;
   showWithdrawOption: boolean;
 }
 
 export function OfferCard({ offer, onView, onAccept, onDecline, onWithdraw, showWithdrawOption }: OfferCardProps) {
-  const statusConfig = {
+  const statusConfig: Record<OfferStatus, { label: string; className: string }> = {
     pending: {
       label: "Pending",
-      className: "bg-yellow-50 text-yellow-800 ring-yellow-600/20"
+      className: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
     },
     completed: {
-      label: "Accepted",
-      className: "bg-green-50 text-green-800 ring-green-600/20"
+      label: "Completed",
+      className: "bg-green-500/10 text-green-500 border-green-500/20"
     },
     rejected: {
-      label: "Declined",
-      className: "bg-red-50 text-red-800 ring-red-600/20"
+      label: "Rejected",
+      className: "bg-red-500/10 text-red-500 border-red-500/20"
+    },
+    withdrawn: {
+      label: "Withdrawn",
+      className: "bg-gray-500/10 text-gray-500 border-gray-500/20"
     }
   };
 
@@ -39,7 +43,7 @@ export function OfferCard({ offer, onView, onAccept, onDecline, onWithdraw, show
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <Badge 
+            <Badge
               variant="secondary"
               className={`${getStatusColor(offer.type)} border-0`}
             >
@@ -53,7 +57,7 @@ export function OfferCard({ offer, onView, onAccept, onDecline, onWithdraw, show
           <h3 className="font-medium leading-none mt-2">{offer.daftar}</h3>
           <p className="text-sm text-muted-foreground mt-2">{offer.message}</p>
         </div>
-        
+
         <ChevronRight className="h-5 w-5 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5" />
       </div>
 
@@ -76,14 +80,14 @@ export function OfferCard({ offer, onView, onAccept, onDecline, onWithdraw, show
             variant="ghost"
             size="sm"
             className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
-            onClick={() => onDecline(offer.id)}
+            onClick={() => onDecline?.(offer.id)}
           >
             Decline
           </Button>
           <Button
             size="sm"
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
-            onClick={() => onAccept(offer.id)}
+            onClick={() => onAccept?.(offer.id)}
           >
             Accept Offer
           </Button>

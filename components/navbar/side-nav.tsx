@@ -136,6 +136,9 @@ export function AppSidebar({ role }: { role: string }) {
       </div>
 
       <CreateDaftarDialog
+        onSuccess={() => {
+          setCreateDaftarOpen(false)
+        }}
         open={createDaftarOpen}
         onOpenChange={setCreateDaftarOpen}
       />

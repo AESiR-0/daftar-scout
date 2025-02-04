@@ -24,9 +24,8 @@ function OfferContent() {
 
     toast({
       title: `Offer ${status === "completed" ? "Accepted" : "Rejected"}`,
-      description: `The offer from ${offers.find((o) => o.id === id)?.daftar} has been ${
-        status === "completed" ? "accepted" : "rejected"
-      }.`,
+      description: `The offer from ${offers.find((o) => o.id === id)?.daftar} has been ${status === "completed" ? "accepted" : "rejected"
+        }.`,
       variant: type === "accepted" ? "success" : "destructive",
     });
   };
@@ -34,7 +33,7 @@ function OfferContent() {
   const handleWithdrawAcceptedOffer = (id: string) => {
     updateOfferStatus(id, "withdrawn", "rejected");
     setSelectedOffer(null);
-    
+
     toast({
       title: "Offer Withdrawn",
       description: `The offer has been withdrawn successfully.`,
@@ -53,14 +52,14 @@ function OfferContent() {
   return (
     <StudioContainer>
       <OffersHeader pendingCount={pendingCount} />
-      
+
       {/* Pending Offers Section */}
       <div className={cn(
         "mb-8",
         pendingCount === 0 ? "p-2" : ""
       )}>
         <h2 className="text-lg font-semibold mb-4">
-          Pending Offers 
+          Pending Offers
           <span className="ml-2 inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
             {pendingCount}
           </span>
@@ -74,6 +73,7 @@ function OfferContent() {
               <OfferCard
                 key={offer.id}
                 offer={offer}
+                showWithdrawOption={false}
                 onView={setSelectedOffer}
                 onAccept={(id) => handleStatusUpdate(id, "accepted", "completed")}
                 onDecline={(id) => handleStatusUpdate(id, "withdrawn", "rejected")}

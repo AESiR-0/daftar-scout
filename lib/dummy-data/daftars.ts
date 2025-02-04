@@ -18,6 +18,10 @@ export interface Daftar {
             name: string
             role: string
             email: string
+            phoneNumber?: string
+            preferredLanguage?: string
+            age?: string
+            gender?: 'Male' | 'Female' | 'Other' | ''
         }>
     }
     subscription: {

@@ -7,6 +7,7 @@ interface ComboboxProps {
     options: { value: string; label: string }[]
     onChange: (value: string) => void
     placeholder?: string
+    selected?: string | string[] | undefined
 }
 
 export function Combobox({
@@ -14,6 +15,7 @@ export function Combobox({
     value,
     options,
     onChange,
+    selected,
     placeholder = "Select..."
 }: ComboboxProps) {
     const [isOpen, setIsOpen] = useState(false)
