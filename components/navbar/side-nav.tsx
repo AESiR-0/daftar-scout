@@ -20,7 +20,7 @@ import { useDaftar } from "@/lib/context/daftar-context"
 
 export function AppSidebar({ role }: { role: string }) {
   const navItems = role === 'investor' ? investorNavItems : founderNavItems
-  const Header = role === 'investor' ? 'Investor Platform' : 'Founder Platform'
+  const Header = "Daftar OS"
   const pathname = usePathname()
   const [createDaftarOpen, setCreateDaftarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
