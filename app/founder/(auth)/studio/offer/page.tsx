@@ -400,9 +400,9 @@ function OfferCard({
           <p className="text-sm text-muted-foreground">Collaboration: {offer.collaboration.join(", ")}</p>
 
           {/* Status Information */}
-          {offer.status !== "pending" && (
+          {offer.status !== "pending" && offer.logs?.[0]?.user?.founder && (
             <p className="text-sm text-muted-foreground mt-1">
-              {getStatusInfo()}<FounderProfile founder={offer.logs?.[0].user.founder} />
+              {getStatusInfo()}<FounderProfile founder={offer.logs[0].user.founder} />
             </p>
           )}
         </div>
