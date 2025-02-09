@@ -189,10 +189,9 @@ export default function FounderPitchPage() {
     setRecordedVideo(null)
     setActiveTab("preview")
   }
+  const [templateName, setTemplateName] = useState("template1")
 
-  const handleQuestionsUpdate = (newQuestions: Question[]) => {
-    const templateName = `template${Object.keys(templates).length + 1}`
-
+  const handleQuestionsUpdate = (newQuestions: Question[], templateName: string) => {
     // Add new template
     setTemplates(prev => ({
       ...prev,
@@ -225,20 +224,22 @@ export default function FounderPitchPage() {
     }
   }
 
+  const handleDeleteTemplate = (templateName: string) => {
+    setTemplates(prev => {
+      const newTemplates = { ...prev }
+      delete newTemplates[templateName]
+      return newTemplates
+    })
+
+    toast({
+      title: "Template deleted",
+      description: "The template has been removed",
+    })
+  }
+
   return (
     <Card className="border-none bg-[#0e0e0e]">
       <CardContent className="pt-6">
-        <div className="mb-6 p-4 bg-blue-600/10 rounded-lg">
-          <h3 className="text-sm font-medium mb-2">Instructions</h3>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• You must create exactly 6 questions for your pitch</li>
-            <li>• Each question must be filled out</li>
-            <li>• Click "Sample Pitch" to use our recommended questions</li>
-            <li>• Create custom questions and save them as templates</li>
-            <li>• Use "Add to Pitch" to apply your custom questions</li>
-          </ul>
-        </div>
-
 
         <div className="grid grid-cols-3 gap-8">
           {/* Left Section: Video + Tabs */}
@@ -358,7 +359,7 @@ export default function FounderPitchPage() {
               </Select>
             </div>
             {/* Description Section */}
-            <div className="space-y-4 border-t pt-6">
+            <div className="space-y-4  border-t pt-6">
               <h2 className="text-lg font-medium">Why Video Pitching?</h2>
               <p className="text-sm text-muted-foreground">
                 Pitch OS helps founders connect through video pitches in the language they're most comfortable with. By understanding the "why" and "what" of a founder's journey, it becomes easier to decide whether to meet them in person and offer support.
@@ -381,12 +382,12 @@ export default function FounderPitchPage() {
                   <div
                     key={question.id}
                     className={`flex gap-3 items-start p-4 rounded-lg cursor-pointer transition-colors ${selectedQuestion.id === question.id
-                      ? 'bg-blue-600/10 border border-blue-600'
+                      ? ''
                       : 'bg-muted/50 hover:bg-muted/70 border border-transparent'
                       }`}
                     onClick={() => setSelectedQuestion(question)}
                   >
-                    <span className="text-xs font-medium text-blue-600 mt-0.5">
+                    <span className="text-xs font-medium  mt-0.5">
                       {String(question.id).padStart(2, '0')}
                     </span>
                     <span className="text-sm">{question.question}</span>
@@ -394,13 +395,6 @@ export default function FounderPitchPage() {
                 ))}
               </div>
             </ScrollArea>
-
-            <Button
-              onClick={() => router.push("/investor/studio/investor-pitch")}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-4"
-            >
-              Save & Continue
-            </Button>
           </div>
         </div>
       </CardContent>
@@ -410,6 +404,7 @@ export default function FounderPitchPage() {
         onOpenChange={setQuestionsOpen}
         onQuestionsUpdate={handleQuestionsUpdate}
         onApplyTemplate={applyTemplate}
+        onDeleteTemplate={handleDeleteTemplate}
         templates={templates}
       />
     </Card>

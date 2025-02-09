@@ -81,14 +81,7 @@ function FaqsContent() {
   return (
     <div className="space-y-6 container mx-auto px-4">
       <ScrollArea className="gap-8 h-[calc(100vh-11rem)]">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            {mode === 'edit' ? 'Edit FAQs' : 'Add FAQs'}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {mode === 'edit' ? 'Update program FAQs' : 'Add program FAQs'}
-          </p>
-        </div>
+
 
         <ScrollArea className="gap-8 h-[calc(100vh-11rem)]">
           <div className="max-w-6xl">

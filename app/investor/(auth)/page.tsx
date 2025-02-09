@@ -1,9 +1,12 @@
 "use client"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function Page() {
     const router = useRouter()
-    router.push('/investor/scout')
+    useEffect(() => {
+        router.push('/investor/scout')
+    }, [])
     return (
         <>
         </>

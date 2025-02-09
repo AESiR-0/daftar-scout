@@ -152,14 +152,8 @@ export function TeamAnalysisSection({
                                         </div>
                                     </div>
 
-                                    <Button
-                                        onClick={handleSubmit}
-                                        disabled={!belief || editor?.isEmpty || isSubmitting}
-                                        className="w-full bg-blue-600 hover:bg-blue-700"
-                                    >
-                                        Submit Analysis
-                                    </Button>
                                 </div>
+
                             </CardContent>
                         </Card>
                     </div>
@@ -177,7 +171,7 @@ export function TeamAnalysisSection({
                             </CardHeader>
                             <CardContent>
                                 {!hasSubmitted ? (
-                                    <div className="flex items-center justify-center h-[400px] text-sm text-muted-foreground">
+                                    <div className="flex items-center justify-center  h-[400px] text-sm text-muted-foreground">
                                         Submit your analysis to see team's feedback
                                     </div>
                                 ) : (
@@ -230,7 +224,15 @@ export function TeamAnalysisSection({
                             </CardContent>
                         </Card>
                     </div>
+
                 </div>
+                <Button
+                    onClick={handleSubmit}
+                    disabled={!belief || editor?.isEmpty || isSubmitting}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                    Submit Analysis
+                </Button>
             </CardContent>
         </Card>
     )

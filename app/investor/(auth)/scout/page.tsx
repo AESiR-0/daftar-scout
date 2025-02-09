@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useState } from "react"
-import { BarChart2 } from "lucide-react"
 import { InsightsDialog } from "@/components/dialogs/insights-dialog"
 
 const scouttatus = {
@@ -65,12 +64,12 @@ export default function scoutPage() {
   }, {} as typeof scouttatus)
 
   return (
-    <div className="space-y-6 max-w-7xl container mx-auto">
+    <div className="space-y-6 px-20 container mx-auto">
       <div className="flex items-center justify-end gap-2">
         <Link href="/investor/studio">
           <Button
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700 text-white h-9"
+            className="bg-muted-foreground hover:bg-muted-foreground/80 text-white h-9"
           >
             New Scout
           </Button>
@@ -100,9 +99,9 @@ export default function scoutPage() {
                   key={program.title}
                   href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}`}
                 >
-                  <div className="p-4 m-2 rounded-[0.3rem] hover:border-blue-500 hover:border   bg-[#1f1f1f] transition-colors">
+                  <div className="p-4 m-2 rounded-[0.3rem] hover:border-muted-foreground hover:border   bg-[#1f1f1f] transition-colors">
                     <h3 className="font-medium text-sm text-foreground">{program.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{program.postedby}</p>
+                    <p className="text-xs text-muted-foreground mt-1"> Collaborator : <span className="font-medium">{program.postedby}</span></p>
                   </div>
                 </Link>
               ))}

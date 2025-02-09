@@ -74,7 +74,7 @@ export default function DaftarPage() {
                             onClick={() => setCreateDaftarOpen(true)}>
                             New Daftar
                         </Button>
-                        <Link href="pitch-board">
+                        <Link href="/founder/pitch-board">
                             <Button size="sm" variant="outline" className="h-9">
                                 Pitch Board
                             </Button>

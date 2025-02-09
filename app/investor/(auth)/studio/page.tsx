@@ -1,9 +1,14 @@
-export default function StudioPage() {
+"use client"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+
+export default function Page() {
+    const router = useRouter()
+    useEffect(() => {
+        router.push('/investor/studio/details')
+    }, [])
     return (
-        <div className="flex h-[50vh] justify-center items-center">
-            <p className="text-lg text-gray-600">
-                Click on any item in the top bar to get started
-            </p>
-        </div>
+        <>
+        </>
     )
 }

@@ -51,7 +51,6 @@ export default function DetailsPage() {
     <Card className="border-none bg-[#0e0e0e]">
       <CardHeader>
         <CardTitle>
-          {mode === 'edit' ? 'Edit Scout Details' : 'Create New Scout'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -67,37 +66,13 @@ export default function DetailsPage() {
 
           <div className="space-y-2">
             <Label>Description</Label>
-            <div className="min-h-[400px] border rounded-lg">
-              <Editor
-                defaultValue={details.description}
-                onUpdate={(editor: any) => {
-                  if (editor) {
-                    setDetails(prev => ({
-                      ...prev,
-                      description: editor.getHTML()
-                    }))
-                  }
-                }}
-                disableLocalStorage
-                className="min-h-[400px]"
-                editorProps={{
-                  attributes: {
-                    class: " border-none  max-w-none p-4  min-h-[400px]"
-                  }
-                }}
-              />
+            <div className="  rounded-lg">
+              <textarea name="" id="" className="w-full h-[250px] bg-transparent text-white border p-4 rounded-lg"></textarea>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSave}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            {mode === 'edit' ? 'Update Scout' : 'Create Scout'}
-          </Button>
-        </div>
+
       </CardContent>
     </Card>
   )

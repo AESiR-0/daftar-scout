@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, usePathname, useRouter } from "next/navigation"
 import {
   ArrowLeft, Search, Filter, Share2,
   BarChart2, Bell, Pencil, PlayCircle,
@@ -21,6 +21,7 @@ import { UpdatesDialog } from "@/components/dialogs/updates-dialog"
 import { LaunchProgramDialog } from "@/components/dialogs/launch-program-dialog"
 import Link from "next/link"
 import { InsightsDialog } from "@/components/dialogs/insights-dialog"
+import { useSearch } from "@/lib/context/search-context"
 
 interface ColumnPitch {
   id: string;
@@ -89,10 +90,91 @@ const programDetails = {
   ]
 }
 
+// Add this type for scout status
+type ScoutStatus = 'planning' | 'scheduled' | 'active' | 'completed'
+
+interface Scout {
+  id: string;
+  name: string;
+  status: ScoutStatus;
+  // ... other scout properties
+}
+
+// This should be replaced with actual API call or data fetching
+const scouttatus = {
+  planning: [
+    {
+      title: "Green Energy Initiative",
+      postedby: "John Doe",
+      status: "Planning",
+    },
+    {
+      title: "Healthcare Tech Fund",
+      postedby: "Sarah Johnson",
+      status: "Planning",
+    },
+  ],
+  scheduled: [
+    {
+      title: "AI Ventures",
+      postedby: "John Doe",
+      status: "Scheduled",
+    },
+  ],
+  open: [
+    {
+      title: "Tech Startup Fund",
+      postedby: "John Doe",
+      status: "Open",
+    },
+    {
+      title: "Real Estate Growth",
+      postedby: "John Doe",
+      status: "Open",
+    },
+  ],
+  closed: [
+    {
+      title: "Fintech Innovation",
+      postedby: "John Doe",
+      status: "Closed",
+    },
+  ],
+}
+const getScoutStatus = (scoutName: string): string => {
+  const planningScout = scouttatus.planning.find(scout =>
+    scout.title.toLowerCase().split(' ').join('-') === scoutName.toLowerCase()
+  )?.status
+
+  const scheduledScout = scouttatus.scheduled.find(scout =>
+    scout.title.toLowerCase().split(' ').join('-') === scoutName.toLowerCase()
+  )?.status
+
+  return planningScout || scheduledScout || 'active'
+}
+
+
 export default function ProgramDetailsPage() {
   const router = useRouter()
+  const pathname = usePathname()
+  const scout = pathname.split('/').pop()
   const params = useParams()
-  const { pitchId, slug } = params;
+
+  if (!scout) {
+    return <div>Scout not found</div>
+  }
+  else {
+    const scoutStatus = getScoutStatus(scout)
+
+    if (scoutStatus === 'Planning' || scoutStatus === 'Scheduled') {
+      return <div className="text-center flex-col text-xl text-muted-foreground flex items-center justify-center h-96">
+        <span className="text-2xl font-bold">Scout is in {scoutStatus} status</span>
+        <Button className="mt-4 bg-muted hover:bg-muted/80" onClick={() => router.back()}>
+          <span className="text-md ">Go Back</span>
+        </Button>
+      </div>
+    }
+  }
   const [endScoutingOpen, setEndScoutingOpen] = useState(false)
   const [updatesOpen, setUpdatesOpen] = useState(false)
   const [launchProgramOpen, setLaunchProgramOpen] = useState(false)
@@ -127,24 +209,7 @@ export default function ProgramDetailsPage() {
     <div className="space-y-6 max-w-6xl container mx-auto">
       {/* Header Section */}
       <div className="flex items-end justify-between gap-2">
-        {/* Stats and Search Section */}
-        <div className="flex items-end justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Pitches:</span>
-              <span className="text-xs font-medium">24</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Shared:</span>
-              <span className="text-xs font-medium">12</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Last date to pitch:</span>
-              <span className="text-xs font-medium">March 30, 2024</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             size="sm"
             variant="outline"
@@ -171,8 +236,13 @@ export default function ProgramDetailsPage() {
           >
             Updates
           </Button>
-
-
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setInsightsOpen(true)}
+          >
+            Insights
+          </Button>
           <Button
             variant={"outline"}
             className="text-white"
@@ -187,6 +257,7 @@ export default function ProgramDetailsPage() {
           >
             <Share2 className="h-4 w-4" />
           </Button>
+
         </div>
       </div>
 
@@ -215,7 +286,7 @@ export default function ProgramDetailsPage() {
                   <div className="h-6 flex items-center justify-end gap-2 mb-2">
                     {pitch.isDeleted && (
                       <div onClick={() => router.push(`/scout/${params.slug}/details/${pitch.id}/report`)}>
-                        <span className="text-xs text-red-600 font-medium">Deleted</span>
+                        <span className="text-xs  font-medium">Deleted {" "}</span>
                         <span className="text-xs text-muted-foreground">
                           {new Date(pitch.deletedAt!).toLocaleDateString('en-US', {
                             month: 'short',

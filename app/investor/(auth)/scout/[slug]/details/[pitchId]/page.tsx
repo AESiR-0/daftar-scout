@@ -14,18 +14,13 @@ import { InvestorsNote } from "./components/investors-note";
 import { DocumentsSection } from "./components/documents-section";
 import { FoundersPitchSection } from "./components/founders-pitch";
 import { TeamAnalysisSection } from "./components/team-analysis";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card"
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Link from '@tiptap/extension-link'
+import MeetingsPage from "@/app/founder/(auth)/studio/meetings/page";
 import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { MakeOfferSection } from "./components/make-offer-section";
 import { DeclinePitchDialog } from "./components/decline-pitch-dialog"
+import { TeamDialog } from "@/components/ui/team-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Import ApexCharts with NoSSR
 const Chart = dynamic(() => import("react-apexcharts"), {
@@ -77,10 +72,22 @@ interface Profile {
   avatar: string
 }
 
+interface TeamMemberDetails {
+  name: string;
+  age: string;
+  email: string;
+  phone: string;
+  gender: string;
+  location: string;
+  language: string[];
+  imageUrl?: string;
+}
+
 interface PitchDetails {
   daftarName: string;
   pitchName: string;
   status: string;
+  teamMembers: TeamMemberDetails[];
   sections: {
     investorsNote: string;
     documentation: Document[];
@@ -90,45 +97,46 @@ interface PitchDetails {
   };
 }
 
-/** ------------- Chart Config -------------- **/
-const chartConfig: any = {
-  options: {
-    chart: {
-      type: "area" as any,
-      background: "transparent",
-      toolbar: { show: false }
-    },
-    stroke: {
-      curve: "smooth" as any,
-      width: 2
-    },
-    fill: {
-      type: "gradient" as any,
-      gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.4,
-        opacityTo: 0.1,
-        stops: [0, 90, 100]
-      }
-    },
-    colors: ["#2563eb"],
-    theme: { mode: "dark" },
-    grid: { borderColor: "#334155" },
-    xaxis: {
-      categories: ["Jan", "Feb", "Mar", "Apr", "May"],
-      labels: { style: { colors: "#94a3b8" } }
-    },
-    yaxis: {
-      labels: { style: { colors: "#94a3b8" } }
-    }
-  }
-};
+// const chartConfig: any = {
+//   options: {
+//     chart: {
+//       type: "area" as any,
+//       background: "transparent",
+//       toolbar: { show: false }
+//     },
+//     stroke: {
+//       curve: "smooth" as any,
+//       width: 2
+//     },
+//     fill: {
+//       type: "gradient" as any,
+//       gradient: {
+//         shadeIntensity: 1,
+//         opacityFrom: 0.4,
+//         opacityTo: 0.1,
+//         stops: [0, 90, 100]
+//       }
+//     },
+//     colors: ["#2563eb"],
+//     theme: { mode: "dark" },
+//     grid: { borderColor: "#334155" },
+//     xaxis: {
+//       categories: ["Jan", "Feb", "Mar", "Apr", "May"],
+//       labels: { style: { colors: "#94a3b8" } }
+//     },
+//     yaxis: {
+//       labels: { style: { colors: "#94a3b8" } }
+//     }
+//   }
+// };
 
 const sections = [
+  { id: "founders-pitch", label: "Founder's Pitch" },
+  { id: "team-size", label: "Team Size" },
+  { id: "team-analysis", label: "Team's Analysis" },
   { id: "investors-note", label: "Investor's Note" },
   { id: "documents", label: "Documents" },
-  { id: "founders-pitch", label: "Founder's Pitch" },
-  { id: "team-analysis", label: "Team's Analysis" },
+  { id: "meetings", label: "Meetings" },
   { id: "make-offer", label: "Make an Offer" },
 ] as const;
 
@@ -143,6 +151,28 @@ export default function PitchDetailsPage() {
     daftarName: "Tech Startup",
     pitchName: "AI Chatbot",
     status: "In Review",
+    teamMembers: [
+      {
+        name: "Alex Johnson",
+        age: "25",
+        email: "alex@example.com",
+        phone: "1234567890",
+        gender: "Male",
+        location: "New York, NY",
+        language: ["English", "Hindi"],
+        imageUrl: "https://example.com/alex.jpg"
+      },
+      {
+        name: "Emily Smith",
+        age: "28",
+        email: "emily@example.com",
+        phone: "9876543210",
+        gender: "Female",
+        location: "San Francisco, CA",
+        language: ["English", "Spanish"],
+        imageUrl: "https://example.com/emily.jpg"
+      }
+    ],
     sections: {
       investorsNote: "This is a promising startup with great potential...",
       documentation: [
@@ -381,6 +411,12 @@ export default function PitchDetailsPage() {
     }
   };
 
+  // Add helper function for initials
+  const getInitials = (name: string) => {
+    const words = name.split(' ');
+    return words.length > 1 ? words[0][0] + words[1][0] : name[0];
+  };
+
   return (
     <ScrollArea className="h-[calc(100vh-6rem)]">
       <div className="max-w-6xl mx-auto px-6">
@@ -403,7 +439,7 @@ export default function PitchDetailsPage() {
           </div>
           <Button
             variant="ghost"
-            className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+            className="bg-muted text-foreground hover:bg-muted-foreground hover:text-black"
             onClick={() => setDeclineDialogOpen(true)}
           >
             Decline Pitch
@@ -417,10 +453,69 @@ export default function PitchDetailsPage() {
           )}
           {activeSection === "documents" && (
             <DocumentsSection
-              documents={pitchDetails.sections.documentation}
-              onUpload={handleUploadDocument}
-              onDelete={handleDeleteDocument}
             />
+          )}
+          {activeSection === "team-size" && (
+            <div className="space-y-6">
+              <Card className="border-none bg-[#0e0e0e]">
+                <CardHeader>
+                  <CardTitle>Team Members ({pitchDetails.teamMembers.length})</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {pitchDetails.teamMembers.map((member) => (
+                      <div key={member.email} className="p-4 border rounded-lg space-y-4">
+                        <div className="flex items-start gap-4">
+                          <Avatar className="h-12 w-12 text-xl">
+                            {member.imageUrl ? (
+                              <AvatarImage src={member.imageUrl} alt={member.name} />
+                            ) : (
+                              <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div className="flex-1 space-y-1">
+                            <h4 className="text-lg font-medium">{member.name}</h4>
+                            <div className="flex gap-4 text-sm text-muted-foreground">
+                              <span>{member.age} years</span>
+                              <span>•</span>
+                              <span>{member.gender}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Contact</p>
+                            <p>{member.email}</p>
+                            <p>{member.phone}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Location</p>
+                            <p>{member.location}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Preferred Languages
+                          </p>
+                          <div className="flex gap-2 flex-wrap">
+                            {member.language.map((lang) => (
+                              <Badge key={lang} variant="secondary">
+                                {lang}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          {activeSection === "meetings" && (
+            <MeetingsPage />
           )}
           {activeSection === "founders-pitch" && (
             <FoundersPitchSection
@@ -436,7 +531,7 @@ export default function PitchDetailsPage() {
             />
           )}
           {activeSection === "make-offer" && (
-            <MakeOfferSection onSubmit={handleMakeOffer} />
+            <MakeOfferSection />
           )}
         </div>
       </div>

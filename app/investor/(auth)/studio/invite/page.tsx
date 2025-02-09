@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import formatDate from "@/lib/formatDate"
 
 interface UploadedFile {
   id: string
@@ -43,7 +44,7 @@ function InviteContent() {
       email: 'john@startup.com',
       company: 'Tech Innovators',
       status: 'accepted',
-      invitedAt: '2024-03-20 14:30'
+      invitedAt: formatDate(new Date().toISOString())
     },
     {
       id: '2',
@@ -51,7 +52,7 @@ function InviteContent() {
       email: 'sarah@newco.io',
       company: 'NewCo Solutions',
       status: 'pending',
-      invitedAt: '2024-03-20 15:45'
+      invitedAt: formatDate('2024-03-20 15:45')
     },
     {
       id: '3',
@@ -59,7 +60,7 @@ function InviteContent() {
       email: 'mike@futuretech.com',
       company: 'Future Tech',
       status: 'declined',
-      invitedAt: '2024-03-20 16:15'
+      invitedAt: formatDate('2024-03-20 16:15')
     }
   ])
   const mode = pathname.split('/')[3]
@@ -76,7 +77,7 @@ function InviteContent() {
         id: Date.now().toString() + Math.random(),
         name: file.name,
         size: formatFileSize(file.size),
-        uploadedAt: new Date().toLocaleString()
+        uploadedAt: formatDate(new Date().toISOString())
       }))
       setFiles(prev => [...prev, ...newFiles])
     }
@@ -121,13 +122,10 @@ function InviteContent() {
         <div className="space-y-2">
           <h3 className="text-sm font-medium">File Format Requirements</h3>
           <div className="text-xs text-muted-foreground space-y-1">
-            <p>The Excel/CSV file should contain the following columns:</p>
+            <p>The Excel/CSV file should contain atleast two columns with headers:</p>
             <ul className="list-disc pl-4 space-y-0.5">
               <li>Founder Name</li>
               <li>Email Address</li>
-              <li>Company Name</li>
-              <li>Industry/Sector</li>
-              <li>Stage</li>
             </ul>
           </div>
         </div>
@@ -190,7 +188,7 @@ function InviteContent() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRemove(file.id)}
-                    className="text-xs text-red-500 hover:text-red-600"
+                    className="text-xs "
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -218,9 +216,9 @@ function InviteContent() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className={`text-xs px-2 py-1 rounded-full ${person.status === 'accepted' ? 'bg-green-500/10 text-green-500' :
-                      person.status === 'declined' ? 'bg-red-500/10 text-red-500' :
-                        'bg-yellow-500/10 text-yellow-500'
+                  <span className={`text-xs px-2 py-1 rounded-full ${person.status === 'accepted' ? '' :
+                    person.status === 'declined' ? '' :
+                      ''
                     }`}>
                     {person.status.charAt(0).toUpperCase() + person.status.slice(1)}
                   </span>
@@ -230,7 +228,7 @@ function InviteContent() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs text-red-500 hover:text-red-600"
+                        className="text-xs "
                       >
                         Withdraw
                       </Button>
@@ -246,7 +244,7 @@ function InviteContent() {
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleWithdraw(person.id)}
-                          className="bg-red-500 hover:bg-red-600"
+                          className=""
                         >
                           Withdraw
                         </AlertDialogAction>
@@ -259,15 +257,6 @@ function InviteContent() {
           </div>
         </div>
 
-        <div className="flex justify-center pt-4">
-          <Button
-            onClick={handleSave}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-            disabled={files.length === 0}
-          >
-            Save
-          </Button>
-        </div>
       </div>
     </div>
   )

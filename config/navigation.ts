@@ -113,6 +113,11 @@ export const investorStudioNavItems = [
     icon: CheckCircle,
   },
   {
+    title: "Meetings",
+    url: "/investor/studio/meetings",
+    icon: Calendar,
+  },
+  {
     title: "Schedule",
     url: "/investor/studio/schedule",
     icon: Calendar,

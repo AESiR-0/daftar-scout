@@ -159,8 +159,8 @@ export default function InvestorPitchPage() {
                       </>
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                        <div className="p-4 rounded-full bg-blue-500/10 mb-4">
-                          <Upload className="h-8 w-8 text-blue-500" />
+                        <div className="p-4 rounded-full mb-4">
+                          <Upload className="h-8 w-8 " />
                         </div>
                         <p className="text-sm font-medium">Upload your investor pitch video</p>
                         <p className="text-xs text-muted-foreground mt-1">MP4, WebM or Ogg (max. 100MB)</p>
@@ -172,8 +172,8 @@ export default function InvestorPitchPage() {
                 <TabsContent value="record" className="mt-0">
                   <div className="aspect-video bg-muted rounded-lg relative">
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                      <div className="p-4 rounded-full bg-blue-500/10">
-                        <Video className="h-8 w-8 text-blue-500" />
+                      <div className="p-4 rounded-full ">
+                        <Video className="h-8 w-8 " />
                       </div>
                       <div className="text-center">
                         <p className="text-sm font-medium">
@@ -220,7 +220,7 @@ export default function InvestorPitchPage() {
             {/* Right Section: Info */}
             <div className="space-y-6">
               <div className="rounded-lg border bg-card p-6 space-y-4">
-                <div className="flex items-center gap-2 text-blue-500">
+                <div className="flex items-center gap-2 ">
                   <Info className="h-5 w-5" />
                   <h2 className="font-medium">Why Share Your Vision?</h2>
                 </div>
@@ -261,12 +261,7 @@ export default function InvestorPitchPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button
-                onClick={() => router.push("/investor/studio/faqs")}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Save & Continue
-              </Button>
+           
             </div>
           </div>
         </div>

@@ -78,7 +78,7 @@ export function AppSidebar({ role }: { role: string }) {
           <div>
             {/* Daftar Selector - Only show for investor role */}
             {!isCollapsed && role === 'investor' && (
-              <div className="px-4 mb-4">
+              <div className="px-4 mb-10">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button

@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Undo2 } from "lucide-react";
+import { CheckCircle, XCircle, Undo2, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileHoverCard } from "@/components/ui/hover-card-profile";
 import formatDate from "@/lib/formatDate";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FounderProfile, FounderProfileProps } from "@/components/FounderProfile";
 
 // Offer interface
 interface Offer {
@@ -22,7 +24,7 @@ interface Offer {
   logs?: {
     action: string;
     timestamp: string;
-    user: string;
+    user: FounderProfileProps;
   }[];
 }
 
@@ -46,7 +48,18 @@ const dummyOffers: Offer[] = [
       {
         action: "Offer Received",
         timestamp: formatDate(new Date().toISOString()),
-        user: getRandomUser(),
+        user: {
+          founder: {
+            name: getRandomUser(),
+            age: "25",
+            email: "john.doe@example.com",
+            phone: "1234567890",
+            gender: "Male",
+            location: "New York, NY",
+            language: ["English", "Spanish"],
+            imageUrl: "https://example.com/john-doe.jpg"
+          }
+        },
       },
     ],
   },
@@ -62,12 +75,34 @@ const dummyOffers: Offer[] = [
       {
         action: "Offer Received",
         timestamp: formatDate(new Date().toISOString()),
-        user: getRandomUser(),
+        user: {
+          founder: {
+            name: getRandomUser(),
+            age: "25",
+            email: "john.doe@example.com",
+            phone: "1234567890",
+            gender: "Male",
+            location: "New York, NY",
+            language: ["English", "Spanish"],
+            imageUrl: "https://example.com/john-doe.jpg"
+          }
+        },
       },
       {
         action: "Offer Accepted",
         timestamp: formatDate(new Date().toISOString()),
-        user: getRandomUser(),
+        user: {
+          founder: {
+            name: getRandomUser(),
+            age: "25",
+            email: "john.doe@example.com",
+            phone: "1234567890",
+            gender: "Male",
+            location: "New York, NY",
+            language: ["English", "Spanish"],
+            imageUrl: "https://example.com/john-doe.jpg"
+          }
+        },
       },
     ],
   },
@@ -82,12 +117,34 @@ const dummyOffers: Offer[] = [
       {
         action: "Offer Received",
         timestamp: formatDate(new Date().toISOString()),
-        user: getRandomUser(),
+        user: {
+          founder: {
+            name: getRandomUser(),
+            age: "25",
+            email: "john.doe@example.com",
+            phone: "1234567890",
+            gender: "Male",
+            location: "New York, NY",
+            language: ["English", "Spanish"],
+            imageUrl: "https://example.com/john-doe.jpg"
+          }
+        },
       },
       {
         action: "Offer Declined",
         timestamp: formatDate(new Date().toISOString()),
-        user: getRandomUser(),
+        user: {
+          founder: {
+            name: getRandomUser(),
+            age: "25",
+            email: "john.doe@example.com",
+            phone: "1234567890",
+            gender: "Male",
+            location: "New York, NY",
+            language: ["English", "Spanish"],
+            imageUrl: "https://example.com/john-doe.jpg"
+          }
+        },
       },
     ],
   },
@@ -98,6 +155,7 @@ export default function OffersPage() {
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const { toast } = useToast();
   const [historyFilter, setHistoryFilter] = useState<"all" | "completed" | "declined" | "withdrawn">("all");
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const handleStatusUpdate = (id: string, type: "accepted" | "withdrawn", status: "completed" | "declined") => {
     setOffers(prev =>
@@ -112,7 +170,18 @@ export default function OffersPage() {
               {
                 action: status === "completed" ? "Offer Accepted" : "Offer Declined",
                 timestamp: formatDate(new Date().toISOString()),
-                user: getRandomUser(),
+                user: {
+                  founder: {
+                    name: getRandomUser(),
+                    age: "25",
+                    email: "john.doe@example.com",
+                    phone: "1234567890",
+                    gender: "Male",
+                    location: "New York, NY",
+                    language: ["English", "Spanish"],
+                    imageUrl: "https://example.com/john-doe.jpg"
+                  }
+                },
               },
               ...(offer.logs || []),
             ],
@@ -144,7 +213,18 @@ export default function OffersPage() {
               {
                 action: "Offer Withdrawn",
                 timestamp: formatDate(new Date().toISOString()),
-                user: getRandomUser(),
+                user: {
+                  founder: {
+                    name: getRandomUser(),
+                    age: "25",
+                    email: "john.doe@example.com",
+                    phone: "1234567890",
+                    gender: "Male",
+                    location: "New York, NY",
+                    language: ["English", "Spanish"],
+                    imageUrl: "https://example.com/john-doe.jpg"
+                  }
+                },
               },
               ...(offer.logs || []),
             ],
@@ -168,6 +248,11 @@ export default function OffersPage() {
     return o.status === historyFilter;
   });
 
+  const handleViewOffer = (offer: Offer) => {
+    setSelectedOffer(offer);
+    setShowDetailsModal(true);
+  };
+
   return (
     <div className="flex gap-6">
       <Card className="border-none bg-[#0e0e0e] flex-1">
@@ -185,7 +270,7 @@ export default function OffersPage() {
                 <OfferCard
                   key={offer.id}
                   offer={offer}
-                  onView={setSelectedOffer}
+                  onView={handleViewOffer}
                   onAccept={() => handleStatusUpdate(offer.id, "accepted", "completed")}
                   onDecline={() => handleStatusUpdate(offer.id, "withdrawn", "declined")}
                 />
@@ -199,8 +284,8 @@ export default function OffersPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Offer History</h2>
-              <Select 
-                value={historyFilter} 
+              <Select
+                value={historyFilter}
                 onValueChange={(value: "all" | "completed" | "declined" | "withdrawn") => setHistoryFilter(value)}
               >
                 <SelectTrigger className="w-[180px] bg-muted/50">
@@ -223,7 +308,7 @@ export default function OffersPage() {
                 <OfferCard
                   key={offer.id}
                   offer={offer}
-                  onView={setSelectedOffer}
+                  onView={handleViewOffer}
                   onWithdraw={handleWithdraw}
                 />
               ))}
@@ -234,6 +319,44 @@ export default function OffersPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Offer Details</DialogTitle>
+          </DialogHeader>
+
+          {selectedOffer && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">Scout Information</h3>
+                <p className="text-lg">{selectedOffer.scoutName}</p>
+                <p className="text-sm text-muted-foreground">Submitted on {selectedOffer.date}</p>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-semibold">Collaboration Partners</h3>
+                <ul className="list-disc list-inside">
+                  {selectedOffer.collaboration.map((partner, index) => (
+                    <li key={index} className="text-sm">{partner}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-2">
+                <div className="space-y-2">
+                  {selectedOffer.logs?.map((log, index) => (
+                    <div key={index} className="text-sm">
+                      <span className="text-muted-foreground">{log.timestamp}</span>
+                      <p>{log.action} by <FounderProfile founder={log.user.founder} /></p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -258,28 +381,43 @@ function OfferCard({
 
     switch (offer.status) {
       case "completed":
-        return `Accepted by: ${offer.acceptedBy}`;
+        return `Accepted by: `;
       case "declined":
-        return `Declined by: ${lastLog.user}`;
+        return `Declined by: `;
       case "withdrawn":
-        return `Withdrawn by: ${lastLog.user}`;
+        return `Withdrawn by:`;
       default:
         return null;
     }
   };
 
   return (
-    <div onClick={() => onView(offer)} className="flex flex-col p-4 border rounded-lg transition-colors">
-      <time className="text-xs text-muted-foreground">{offer.date}</time>
-      <p className="text-lg font-medium">{offer.scoutName}</p>
-      <p className="text-sm text-muted-foreground">Collaboration: {offer.collaboration.join(", ")}</p>
-      
-      {/* Status Information */}
-      {offer.status !== "pending" && (
-        <p className="text-sm text-muted-foreground mt-1">
-          {getStatusInfo()}
-        </p>
-      )}
+    <div className="flex flex-col p-4 border rounded-lg transition-colors">
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <time className="text-xs text-muted-foreground">{offer.date}</time>
+          <p className="text-lg font-medium">{offer.scoutName}</p>
+          <p className="text-sm text-muted-foreground">Collaboration: {offer.collaboration.join(", ")}</p>
+
+          {/* Status Information */}
+          {offer.status !== "pending" && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {getStatusInfo()}<FounderProfile founder={offer.logs?.[0].user.founder} />
+            </p>
+          )}
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="mt-1"
+          onClick={(e) => {
+            e.stopPropagation();
+            onView(offer);
+          }}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
 
       <div className="flex w-full items-center gap-2 mt-2">
         {offer.status === "pending" && (

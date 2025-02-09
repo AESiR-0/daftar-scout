@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { Combobox } from "@/components/ui/combobox"
 
 const reportReasons = [
     { id: "false-claims", label: "False Claims" },
@@ -80,6 +81,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                 : [...prev, reasonId]
         )
     }
+    const [language, setLanguage] = useState("English")
 
     const handleReport = async () => {
         if (selectedReasons.length === 0) return
@@ -132,11 +134,9 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                             size="icon"
                             onClick={() => setShowReportDialog(true)}
                         >
-                            <Flag className="h-4 w-4 text-red-500" />
+                            <Flag className="h-4 w-4 " />
                         </Button>
-                        <Button onClick={onScheduleMeeting} variant="outline">
-                            Schedule Meeting
-                        </Button>
+
                     </div>
                 </div>
             </CardHeader>
@@ -158,6 +158,21 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                     <p className="text-sm text-muted-foreground">No video available</p>
                                 </div>
                             )}
+                            <Combobox
+                                placeholder="Select video's language"
+                                value={language}
+                                options={
+                                    [
+                                        "English",
+                                        "Spanish",
+                                        "French",
+                                        "German",
+                                        "Italian",
+                                        "Portuguese",
+                                    ]
+                                }
+                                onSelect={(value) => setLanguage(value)}
+                            />
 
                             {/* Founder Details Grid */}
                             <div className="grid grid-cols-2 gap-4">
@@ -196,6 +211,14 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                         <Badge key={sector} variant="outline">{sector}</Badge>
                                     ))}
                                 </div>
+                                <div className="flex flex-col gap-2 mt-2">
+                                    <h3>Founder's Ask</h3>
+                                    <div className="max-w-4xl border border-muted-foreground/50 rounded-lg p-4">
+                                        <p className="text-sm text-muted-foreground">
+                                            We are seeking $500,000 in funding to accelerate our product development and expand our marketing efforts. Additionally, we are looking for strategic partnerships in the AI/ML sector to enhance our technological capabilities and market reach. Any introductions to potential partners or advisors with experience in scaling SaaS businesses would be highly appreciated.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Founder's Specific Questions */}
@@ -230,7 +253,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                         className={cn(
                                             "p-4 rounded-[0.3rem] cursor-pointer transition-colors",
                                             selectedQuestion.id === item.id
-                                                ? "bg-blue-500/10 text-blue-500"
+                                                ? "bg-muted/50 "
                                                 : "bg-muted/50 hover:bg-muted/70"
                                         )}
                                         onClick={() => setSelectedQuestion(item)}

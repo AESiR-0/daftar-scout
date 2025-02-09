@@ -6,11 +6,16 @@ import { Input } from "@/components/ui/input"
 import { FileText, Download, Eye, Search, Upload, Trash2, EyeOff } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { ProfileHoverCard } from "@/components/ui/hover-card-profile"
-import { Mail, Phone, Languages } from "lucide-react"
 import formatDate from "@/lib/formatDate"
 import { useToast } from "@/hooks/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
 interface Document {
   id: string
@@ -44,40 +49,6 @@ interface UserProfile {
   languages: string[]
   daftar: string
 }
-
-const documents: Document[] = [
-  {
-    id: "1",
-    name: "Business Plan.pdf",
-    uploadedBy: "John Smith",
-    daftar: "Tech Innovation Fund",
-    uploadedAt: formatDate("2024-03-20T14:30:00"),
-    type: "private",
-    size: "2.4 MB",
-    isHidden: false,
-    logs: [
-      {
-        action: "Uploaded",
-        timestamp: "2024-03-20T14:30:00",
-        user: "John Smith"
-      },
-      {
-        action: "Viewed",
-        timestamp: "2024-03-21T09:15:00",
-        user: "Sarah Johnson"
-      }
-    ]
-  },
-  {
-    id: "2",
-    name: "Financial Projections.xlsx",
-    uploadedBy: "Sarah Johnson",
-    daftar: "Venture Capital LLC",
-    uploadedAt: formatDate("2024-03-19T10:15:00"),
-    type: "received",
-    size: "1.8 MB"
-  }
-]
 
 const dummyActivity: ActivityLog[] = [
   {
@@ -125,7 +96,7 @@ const userProfiles: Record<string, UserProfile> = {
 
 export default function DocumentsPage() {
   const { toast } = useToast()
-  const [documents, setDocuments] = useState<Document[]>([
+  const [documentsList, setDocumentsList] = useState<Document[]>([
     {
       id: "1",
       name: "Business Plan.pdf",
@@ -164,7 +135,10 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("private")
 
-  const filteredDocuments = documents.filter(doc =>
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
+
+  const filteredDocuments = documentsList.filter(doc =>
     doc.type === activeTab &&
     (doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.uploadedBy.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -186,35 +160,44 @@ export default function DocumentsPage() {
 
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files
-      if (files) {
-        Array.from(files).forEach(file => {
-          const newDoc: Document = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: file.name,
-            uploadedBy: "John Smith",
-            daftar: "Tech Innovation Fund",
-            uploadedAt: new Date().toISOString(),
-            type: "private",
-            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-            isHidden: false
-          }
-
-          setDocuments(prev => [...prev, newDoc])
-          addActivityLog({
-            action: "Uploaded",
-            documentName: file.name,
-            user: "John Smith",
-            timestamp: new Date().toISOString()
-          })
-          toast({
-            title: "File uploaded",
-            description: `Successfully uploaded ${file.name}`
-          })
-        })
+      if (files && files.length > 0) {
+        setSelectedFiles(files)
+        setIsUploadModalOpen(true)
       }
     }
 
     input.click()
+  }
+
+  const handleUploadConfirm = (type: "private" | "sent") => {
+    if (selectedFiles) {
+      Array.from(selectedFiles).forEach(file => {
+        const newDoc: Document = {
+          id: Math.random().toString(36).substr(2, 9),
+          name: file.name,
+          uploadedBy: "John Smith",
+          daftar: "Tech Innovation Fund",
+          uploadedAt: formatDate(new Date().toISOString()),
+          type: type,
+          size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+          isHidden: false
+        }
+
+        setDocumentsList(prev => [...prev, newDoc])
+        addActivityLog({
+          action: "Uploaded",
+          documentName: file.name,
+          user: "John Smith",
+          timestamp: formatDate(new Date().toISOString())
+        })
+        toast({
+          title: "File uploaded",
+          description: `Successfully uploaded ${file.name}`
+        })
+      })
+    }
+    setIsUploadModalOpen(false)
+    setSelectedFiles(null)
   }
 
   const handleDownload = (doc: Document) => {
@@ -226,7 +209,7 @@ export default function DocumentsPage() {
       action: "Downloaded",
       documentName: doc.name,
       user: "John Smith",
-      timestamp: new Date().toISOString()
+      timestamp: formatDate("2024-03-19T10:15:00")
     })
   }
 
@@ -239,14 +222,14 @@ export default function DocumentsPage() {
       action: "Viewed",
       documentName: doc.name,
       user: "John Smith",
-      timestamp: new Date().toISOString()
+      timestamp: formatDate("2024-03-19T10:15:00")
     })
   }
 
   const handleDelete = (docId: string) => {
-    const doc = documents.find(d => d.id === docId)
+    const doc = documentsList.find(d => d.id === docId)
     if (doc) {
-      setDocuments(prev => prev.filter(d => d.id !== docId))
+      setDocumentsList(prev => prev.filter(d => d.id !== docId))
       toast({
         title: "Document deleted",
         description: `Successfully deleted ${doc.name}`
@@ -255,20 +238,20 @@ export default function DocumentsPage() {
         action: "Deleted",
         documentName: doc.name,
         user: "John Smith",
-        timestamp: new Date().toISOString()
+        timestamp: formatDate("2024-03-19T10:15:00")
       })
     }
   }
 
   const handleToggleVisibility = (docId: string) => {
-    setDocuments(prev => prev.map(doc => {
+    setDocumentsList(prev => prev.map(doc => {
       if (doc.id === docId) {
         const newVisibility = !doc.isHidden
         addActivityLog({
           action: newVisibility ? "Hidden" : "Unhidden",
           documentName: doc.name,
           user: "John Smith",
-          timestamp: new Date().toISOString()
+          timestamp: formatDate("2024-03-19T10:15:00")
         })
         toast({
           title: newVisibility ? "Document hidden" : "Document visible",
@@ -281,122 +264,157 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="flex gap-6">
-      <Card className="border-none bg-[#0e0e0e] flex-1">
-        <CardHeader>
-          <CardTitle>Documents</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Tabs defaultValue="private" onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
-            <div className="flex items-center justify-between mb-6">
-              <TabsList>
-                <TabsTrigger value="private">Private</TabsTrigger>
-                <TabsTrigger value="received">Received</TabsTrigger>
-                <TabsTrigger value="sent">Sent</TabsTrigger>
-              </TabsList>
+    <>
+      <div className="flex gap-6">
+        <Card className="border-none bg-[#0e0e0e] flex-1">
+          <CardHeader>
+            <CardTitle>Documents</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Tabs defaultValue="private" onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
+              <div className="flex items-center justify-between mb-6">
+                <TabsList>
+                  <TabsTrigger value="private">Private</TabsTrigger>
+                  <TabsTrigger value="received">Received</TabsTrigger>
+                  <TabsTrigger value="sent">Sent</TabsTrigger>
+                </TabsList>
 
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search documents..."
-                    className="pl-9 w-[300px]"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                {activeTab === "private" && (
-                  <Button variant="outline" onClick={handleUpload}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <TabsContent value="private" className="space-y-4">
-              <DocumentsList
-                documents={filteredDocuments}
-                canDelete={activeTab === "private"}
-                onDownload={handleDownload}
-                onView={handleView}
-                onDelete={handleDelete}
-                onToggleVisibility={handleToggleVisibility}
-              />
-            </TabsContent>
-
-            <TabsContent value="received" className="space-y-4">
-              <DocumentsList
-                documents={filteredDocuments}
-                canDelete={false}
-                onDownload={handleDownload}
-                onView={handleView}
-                onDelete={handleDelete}
-                onToggleVisibility={handleToggleVisibility}
-              />
-            </TabsContent>
-
-            <TabsContent value="sent" className="space-y-4">
-              <DocumentsList
-                documents={filteredDocuments}
-                canDelete={false}
-                onDownload={handleDownload}
-                onView={handleView}
-                onDelete={handleDelete}
-                onToggleVisibility={handleToggleVisibility}
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      <Card className="border-none bg-[#0e0e0e] w-80">
-        <CardHeader>
-          <CardTitle className="text-lg">Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex flex-col space-y-2 pb-4 border-b last:border-0"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {activity.action === "Uploaded" && <Upload className="h-4 w-4 text-green-500" />}
-                    {activity.action === "Downloaded" && <Download className="h-4 w-4 text-blue-500" />}
-                    {activity.action === "Viewed" && <Eye className="h-4 w-4 text-yellow-500" />}
-                    <span className="text-sm font-medium">{activity.action}</span>
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search documents..."
+                      className="pl-9 w-[300px]"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                   </div>
-                  <time className="text-xs text-muted-foreground">
-                    {new Date(activity.timestamp).toLocaleString()}
-                  </time>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  <ProfileHoverCard
-                    {...(userProfiles[activity.user] || {
-                      name: activity.user,
-                      designation: "Team Member",
-                      email: "contact@example.com",
-                      phone: "+1 (555) 000-0000",
-                      languages: ["English"],
-                      daftar: ""
-                    })}
-                  >
-                    <span className="cursor-pointer hover:text-blue-600">{activity.user}</span>
-                  </ProfileHoverCard>
-                  {' '}
-                  {activity.action.toLowerCase()} {' '}
-                  <span className="font-medium text-foreground">
-                    {activity.documentName}
-                  </span>
+                  {activeTab === "private" && (
+                    <Button variant="outline" onClick={handleUpload}>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload
+                    </Button>
+                  )}
                 </div>
               </div>
-            ))}
+
+              <TabsContent value="private" className="space-y-4">
+                <DocumentsList
+                  documents={filteredDocuments}
+                  canDelete={activeTab === "private"}
+                  onDownload={handleDownload}
+                  onView={handleView}
+                  onDelete={handleDelete}
+                  onToggleVisibility={handleToggleVisibility}
+                />
+              </TabsContent>
+
+              <TabsContent value="received" className="space-y-4">
+                <DocumentsList
+                  documents={filteredDocuments}
+                  canDelete={false}
+                  onDownload={handleDownload}
+                  onView={handleView}
+                  onDelete={handleDelete}
+                  onToggleVisibility={handleToggleVisibility}
+                />
+              </TabsContent>
+
+              <TabsContent value="sent" className="space-y-4">
+                <DocumentsList
+                  documents={filteredDocuments}
+                  canDelete={false}
+                  onDownload={handleDownload}
+                  onView={handleView}
+                  onDelete={handleDelete}
+                  onToggleVisibility={handleToggleVisibility}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none bg-[#0e0e0e] w-80">
+          <CardHeader>
+            <CardTitle className="text-lg">Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex flex-col space-y-2 pb-4 border-b last:border-0"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {activity.action === "Uploaded" && <Upload className="h-4 w-4 " />}
+                      {activity.action === "Downloaded" && <Download className="h-4 w-4 " />}
+                      {activity.action === "Viewed" && <Eye className="h-4 w-4 " />}
+                      <span className="text-sm font-medium">{activity.action}</span>
+                    </div>
+                    <time className="text-xs text-muted-foreground">
+                      {activity.timestamp}
+                    </time>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    <ProfileHoverCard
+                      {...(userProfiles[activity.user] || {
+                        name: activity.user,
+                        designation: "Team Member",
+                        email: "contact@example.com",
+                        phone: "+1 (555) 000-0000",
+                        languages: ["English"],
+                        daftar: ""
+                      })}
+                    >
+                      <span className="cursor-pointer hover:text-muted-foreground">{activity.user}</span>
+                    </ProfileHoverCard>
+                    {' '}
+                    {activity.action.toLowerCase()} {' '}
+                    <span className="font-medium text-foreground">
+                      {activity.documentName}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Documents</DialogTitle>
+            <DialogDescription>
+              Choose how you want to share these documents
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <Button
+              variant="outline"
+              className="flex py-2 flex-col items-center justify-center h-24 space-y-1"
+              onClick={() => handleUploadConfirm("private")}
+            >
+              <EyeOff className="h-6 w-6" />
+              <span>Keep Private</span>
+              <span className="text-xs text-muted-foreground">Only visible to your Daftar</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              className="flex py-2 flex-col items-center justify-center h-24 space-y-1"
+              onClick={() => handleUploadConfirm("sent")}
+            >
+              <Upload className="h-6 w-6" />
+              <span>Send to Investors</span>
+              <span className="text-xs text-muted-foreground">Share with all investors</span>
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
@@ -424,104 +442,63 @@ function DocumentsList({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 w-full">
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className={`flex flex-col p-4 border rounded-lg hover:border-blue-600 transition-colors ${doc.isHidden ? 'opacity-50' : ''
+          className={`flex flex-col w-full p-4 border rounded-lg hover:border-muted-foreground transition-colors ${doc.isHidden ? 'opacity-50' : ''
             }`}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm font-medium">{doc.name}</p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex  w-full items-center justify-between">
+            <div className="flex w-full items-center gap-3">
+              <div className="w-full">
+                <div className=" flex w-full items-center justify-between font-medium">
+                  <span>{doc.name}</span>
+                  <span className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDownload(doc)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onView(doc)}
+                    >
+                      <Eye className={`h-4 w-4 ${doc.isHidden ? 'text-muted-foreground' : ''}`} />
+                    </Button>
+
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className=""
+                        onClick={() => onDelete(doc.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </span>
+                </div>
+                <div className="flex py-2 flex-col text-xs text-muted-foreground">
                   <ProfileHoverCard
                     {...userProfiles[doc.uploadedBy]}
                   >
-                    <span className="cursor-pointer hover:text-blue-600">{doc.uploadedBy}</span>
+                    <span className="cursor-pointer hover:text-muted-foreground"> Uploaded By {" "}{doc.uploadedBy}</span>
                   </ProfileHoverCard>
-                  <span>•</span>
                   <ProfileHoverCard name={doc.daftar} daftar={doc.daftar}>
-                    <span className="cursor-pointer hover:text-blue-600">{doc.daftar}</span>
+                    <span className="cursor-pointer hover:text-muted-foreground">{doc.daftar}</span>
                   </ProfileHoverCard>
-                  <span>•</span>
-                  <span>{doc.size}</span>
-                  <span>•</span>
-                  <span>{new Date(doc.uploadedAt).toLocaleString()}</span>
+                  <span>{formatDate(doc.uploadedAt)}</span>
                 </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDownload(doc)}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onView(doc)}
-              >
-                <Eye className={`h-4 w-4 ${doc.isHidden ? 'text-red-500' : ''}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onToggleVisibility(doc.id)}
-              >
-                {doc.isHidden ? (
-                  <Eye className="h-4 w-4" />
-                ) : (
-                  <EyeOff className="h-4 w-4" />
-                )}
-              </Button>
-              {canDelete && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
-                  onClick={() => onDelete(doc.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
           </div>
-
-          {doc.logs && doc.logs.length > 0 && (
-            <div className="mt-4 border-t pt-3">
-              <p className="text-xs font-medium mb-2">Activity Log</p>
-              <div className="space-y-2">
-                {doc.logs.map((log, index) => (
-                  <div key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{log.action}</span>
-                    <span>by</span>
-                    <ProfileHoverCard
-                      {...(userProfiles[log.user] || {
-                        name: log.user,
-                        designation: "Team Member",
-                        email: "contact@example.com",
-                        phone: "+1 (555) 000-0000",
-                        languages: ["English"],
-                        daftar: ""
-                      })}
-                    >
-                      <span className="cursor-pointer hover:text-blue-600">{log.user}</span>
-                    </ProfileHoverCard>
-                    <span>•</span>
-                    <span>{new Date(log.timestamp).toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-      ))}
-    </div>
+      ))
+      }
+    </div >
   )
 } 
