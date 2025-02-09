@@ -18,7 +18,7 @@ interface MeetingDetails {
     time: string;
     location: string;
     program: string;
-    collaboration: string;
+    collaboration: string[];
     pitchName: string;
     daftarName: string;
     attendees: string[];
@@ -37,13 +37,12 @@ const pitchDetails = {
             time: "14:30",
             location: "Virtual Meeting",
             program: "Tech Innovation Fund",
-            collaboration: "Daftar OS",
+            collaboration: ["Daftar OS", "Nithin Kamath"],
             pitchName: "AI Chatbot",
             daftarName: "Tech Startup",
             attendees: ["John Doe", "Sarah Smith", "Mike Johnson"],
             agenda: "Discuss project scope, timeline, and initial requirements"
         },
-        // Add more meetings...
     ],
 }
 
@@ -64,12 +63,9 @@ export default function MeetingsPage() {
     }
 
     return (
-        <StudioCard 
-            title="Meetings" 
-            description="Schedule and manage your meetings with investors."
-        >
-            <ScrollArea className="h-[calc(100vh-12rem)]">
-                <div className="space-y-6">
+        <StudioCard     >
+            <ScrollArea className="h-[calc(100vh-10rem)]">
+                <div className="space-y-6 mx-auto">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <h2 className="text-lg font-semibold">Meeting History</h2>
@@ -77,6 +73,10 @@ export default function MeetingsPage() {
                                 {pitchDetails.meetings.length} Meetings
                             </Badge>
                         </div>
+                        <Button variant="outline" onClick={() => setScheduleMeetingOpen(true)}>
+                            <Calendar className="h-4 w-4" />
+                            Schedule Meeting
+                        </Button>
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
@@ -85,7 +85,7 @@ export default function MeetingsPage() {
                             {pitchDetails.meetings.map((meeting) => (
                                 <div
                                     key={meeting.id}
-                                    className={`p-4 border rounded-[0.3rem] space-y-2 cursor-pointer hover:border-blue-600 transition-colors ${selectedMeeting === meeting.id ? 'border-blue-600' : ''
+                                    className={`p-4 border rounded-[0.3rem] space-y-2 cursor-pointer  transition-colors ${selectedMeeting === meeting.id ? 'border-gray-600' : ''
                                         }`}
                                     onClick={() => handleMeetingClick(meeting.id)}
                                 >
@@ -125,17 +125,17 @@ export default function MeetingsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1">
+                                    <div className=" flex gap-2 ">
                                         <p className="text-sm text-muted-foreground">Collaboration</p>
-                                        <p className="text-sm">{selectedMeetingDetails.collaboration}</p>
+                                        <p className="text-sm">{selectedMeetingDetails.collaboration.join(", ")}</p>
                                     </div>
 
-                                    <div className="space-y-1">
+                                    <div className="flex gap-2">
                                         <p className="text-sm text-muted-foreground">Pitch</p>
                                         <p className="text-sm">{selectedMeetingDetails.pitchName}</p>
                                     </div>
 
-                                    <div className="space-y-1">
+                                    <div className="flex gap-2">
                                         <p className="text-sm text-muted-foreground">Daftar</p>
                                         <p className="text-sm">{selectedMeetingDetails.daftarName}</p>
                                     </div>
@@ -166,23 +166,17 @@ export default function MeetingsPage() {
                                 </div>
 
                                 <div className="flex items-center justify-end gap-2 pt-4">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                                    
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="text-red-500 hover:text-red-600"
+                                        className=""
                                     >
                                         Reject
                                     </Button>
                                     <Button
                                         size="sm"
-                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                        className=" text-white"
                                     >
                                         Accept
                                     </Button>

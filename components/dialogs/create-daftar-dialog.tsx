@@ -76,15 +76,16 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
             //     city: "",
             // });
             console.log("Daftar created successfully:", formData);
+            onSuccess(formData.name)
             toast({
                 title: "Daftar created successfully!",
-                description: "Your daftar has been created successfully!",
+                description: "Your Daftar has been created successfully!",
                 variant: "success",
             });
             onOpenChange(false);
         } catch (error) {
-            console.error("Error creating daftar:", error);
-            toast({ title: "Error creating daftar ", description: (error as Error).message, variant: "error" }); // Use toaster for error message
+            console.error("Error creating Daftar:", error);
+            toast({ title: "Error creating Daftar ", description: (error as Error).message, variant: "error" }); // Use toaster for error message
         } finally {
             setIsCreating(false);
         }
@@ -102,7 +103,7 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                         <div className="space-y-2">
                             <Label>Daftar Name</Label>
                             <Input
-                                placeholder="Enter daftar name"
+                                placeholder="Enter Daftar name"
                                 value={formData.name}
                                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                             />
@@ -149,7 +150,7 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                         <div className="flex justify-center pt-4">
                             <Button
                                 onClick={handleSubmit}
-                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                className="bg-muted hover:bg-muted/50 text-white"
                                 disabled={!formData.name || !formData.structure || !formData.country}
                             >
                                 Publish

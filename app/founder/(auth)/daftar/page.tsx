@@ -62,34 +62,31 @@ export default function DaftarPage() {
     const [selectedDaftar, setSelectedDaftar] = useState<typeof daftarsData[0] | null>(null)
     const [createDaftarOpen, setCreateDaftarOpen] = useState(false)
     return (
-        <div className={`space-y-6 container mx-auto ${teamDialogOpen ? "opacity-0 pointer-events-none" : ""}`}>
+        <div className={` px-20 overflow-hidden container mx-auto ${teamDialogOpen ? "opacity-0 pointer-events-none" : ""}`}>
 
             <div className="flex gap-6">
 
                 {/* Daftars and Pitches Section */}
-                <div className="space-y-6 w-[70%]">
+                <div className="space-y-6 w-full">
                     {/* Header with Search and Actions */}
                     <div className="flex px-4 mx-auto items-center justify-between">
-                        <h2 className="text-lg font-semibold">My Daftar</h2>
-                        <div className="flex items-center gap-2">
-                            <Button size="sm" className="h-9 bg-blue-600 hover:bg-blue-700 text-white"
-                                onClick={() => setCreateDaftarOpen(true)}>
-                                New Daftar
+                        <Button size="sm" className="h-9 bg-muted hover:bg-muted/50  text-white"
+                            onClick={() => setCreateDaftarOpen(true)}>
+                            New Daftar
+                        </Button>
+                        <Link href="pitch-board">
+                            <Button size="sm" variant="outline" className="h-9">
+                                Pitch Board
                             </Button>
-                            <Link href="pitch-board">
-                                <Button size="sm" variant="outline" className="h-9">
-                                    Pitch Board
-                                </Button>
-                            </Link>
-                        </div>
+                        </Link>
                     </div>
                     {/* {filteredDaftars.map((daftar) =>  */}
-                    <ScrollArea className="h-[500px]">
-                        <div className=" mx-auto px-4">
+                    <ScrollArea className="h-[30rem]">
+                        <div className=" mx-auto px-4 space-y-5">
                             {daftarsData.map((daftar) => (
                                 <div
                                     key={daftar.name}
-                                    className="border rounded-[0.3rem] divide-y cursor-pointer hover:border-blue-600"
+                                    className="border bg-[#1a1a1a]  hover:bg-[#252525]  rounded-[0.3rem] divide-y cursor-pointer hover:border-muted-foreground"
                                     onClick={(e: any) => {
                                         if (!teamDialogOpen) {
                                             e.preventDefault()
@@ -118,22 +115,19 @@ export default function DaftarPage() {
                                                 key={pitch.name}
                                                 className="p-4 hover:bg-muted/50"
                                             >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="space-y-1">
-                                                        <p className="text-sm font-medium">{pitch.name}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Pitched on {formatDate(pitch.date)}
-                                                        </p>
+                                                <Link href={`/founder/incuhub/${daftar.name.split(' ').join('-')}`}>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="space-y-1">
+                                                            <p className="text-sm font-medium">{pitch.name}</p>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Pitched on {formatDate(pitch.date)}
+                                                            </p>
+                                                        </div>
+                                                        <span className={"text-xs"}>
+                                                            {pitch.status}
+                                                        </span>
                                                     </div>
-                                                    <span className={cn(
-                                                        "text-xs",
-                                                        pitch.status === "Accepted" && "text-green-600",
-                                                        pitch.status === "Rejected" && "text-red-600",
-                                                        pitch.status === "Pending" && "text-muted-foreground"
-                                                    )}>
-                                                        {pitch.status}
-                                                    </span>
-                                                </div>
+                                                </Link>
                                             </div>
                                         ))}
                                     </div>
@@ -141,49 +135,6 @@ export default function DaftarPage() {
                             ))}
                         </div>
                     </ScrollArea>
-                </div>
-
-                {/* Daftar Details Section */}
-                <div className="space-y-6 px-4 mx-auto w-[30%]">
-                    {selectedDaftar ? (
-                        <>
-                            {/* Team Section */}
-                            <div className="border rounded-[0.3rem]">
-                                <div className="p-4 border-b">
-                                    <h3 className="font-medium">Team</h3>
-                                </div>
-                                <div className="p-4 space-y-4">
-                                    <div className="space-y-2">
-                                        <p className="text-sm text-muted-foreground">Owner</p>
-                                        <p className="text-sm font-medium">{selectedDaftar.team.owner}</p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <p className="text-sm text-muted-foreground">Members</p>
-                                        <div className="space-y-3">
-                                            {selectedDaftar.team.members.map((member) => (
-                                                <div key={member.email} className="flex items-center justify-between">
-                                                    <div>
-                                                        <p className="text-sm font-medium">{member.name}</p>
-                                                        <p className="text-xs text-muted-foreground">{member.email}</p>
-                                                    </div>
-                                                    <span className="text-xs text-muted-foreground">
-                                                        {member.role}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Subscription Section */}
-
-                        </>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-sm text-muted-foreground">
-                            <p>Select a daftar to view details</p>
-                        </div>
-                    )}
                 </div>
             </div>
             <CreateDaftarDialog

@@ -1,7 +1,19 @@
+interface FounderProfileProps {
+    name: string
+    age: string
+    email: string
+    phone: string
+    gender: string
+    location: string
+    language: string[]
+    imageUrl?: string
+    createdAt: string
+}
+
 export interface Pitch {
     id: string
     name: string
-    status: 'Accepted' | 'Pending' | 'Rejected' | 'Pitched' | 'Scout Interested' | 'Not Matched' | 'Planning'
+    status: 'Accepted' | "Ice box" | "Invitation Sent" | "Deal Cancelled" | "Deleted by Founder"
     date: string
     scoutName: string
     postedBy: string
@@ -14,15 +26,7 @@ export interface Daftar {
     pitchCount: number
     team: {
         owner: string
-        members: Array<{
-            name: string
-            role: string
-            email: string
-            phoneNumber?: string
-            preferredLanguage?: string
-            age?: string
-            gender?: 'Male' | 'Female' | 'Other' | ''
-        }>
+        members: Array<FounderProfileProps>
     }
     subscription: {
         plan: string
@@ -54,8 +58,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "John Doe",
             members: [
-                { name: "Sarah Smith", role: "Lead Analyst", email: "sarah@example.com" },
-                { name: "Mike Johnson", role: "Investment Manager", email: "mike@example.com" }
+                { name: "Sarah Smith", email: "sarah@example.com", age: "25", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "Spanish"], createdAt: "2024-01-01" },
+                { name: "Mike Johnson", email: "mike@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Los Angeles", language: ["English", "French"], createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -68,7 +72,7 @@ export const daftarsData: Daftar[] = [
             {
                 id: "scout-1",
                 name: "AI Healthcare Solution",
-                status: "Planning",
+                status: "Ice box",
                 date: "2024-03-20",
                 scoutName: "Tech Innovation Fund",
                 postedBy: "John Doe",
@@ -77,7 +81,7 @@ export const daftarsData: Daftar[] = [
             {
                 id: "scout-2",
                 name: "E-commerce Platform",
-                status: "Accepted",
+                status: "Deleted by Founder",
                 date: "2024-03-20",
                 scoutName: "MENA Growth Capital",
                 postedBy: "Hassan Ahmed",
@@ -95,8 +99,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "Jane Smith",
             members: [
-                { name: "Alex Wong", role: "Financial Analyst", email: "alex@example.com" },
-                { name: "Lisa Chen", role: "Investment Director", email: "lisa@example.com" }
+                { name: "Alex Wong", email: "alex@example.com", age: "28", phone: "1234567890", gender: "Male", location: "San Francisco", language: ["English", "Chinese"], createdAt: "2024-01-01" },
+                { name: "Lisa Chen", email: "lisa@example.com", age: "32", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "French"], createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -106,8 +110,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-3", name: "Islamic Banking Platform", status: "Accepted", date: "2024-03-10", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-4", name: "Crypto Trading Bot", status: "Pending", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-3", name: "Islamic Banking Platform", status: "Invitation Sent", date: "2024-03-10", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
+            { id: "scout-4", name: "Crypto Trading Bot", status: "Deleted by Founder", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
         ]
     },
     {
@@ -117,8 +121,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "Maria Garcia",
             members: [
-                { name: "Emma Wilson", role: "Program Director", email: "emma@example.com" },
-                { name: "Sophie Lee", role: "Investment Analyst", email: "sophie@example.com" }
+                { name: "Emma Wilson", email: "emma@example.com", age: "27", phone: "1234567890", gender: "Female", location: "London", language: ["English", "Spanish"], createdAt: "2024-01-01" },
+                { name: "Sophie Lee", email: "sophie@example.com", age: "31", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "French"], createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -129,7 +133,7 @@ export const daftarsData: Daftar[] = [
         },
         pitches: [
             { id: "scout-5", name: "EdTech Platform", status: "Accepted", date: "2024-03-18", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-6", name: "Health Tech App", status: "Rejected", date: "2024-03-22", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-6", name: "Health Tech App", status: "Invitation Sent", date: "2024-03-22", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
         ]
     },
     {
@@ -139,8 +143,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "David Kim",
             members: [
-                { name: "Rachel Green", role: "Impact Assessment Lead", email: "rachel@example.com" },
-                { name: "Tom Brown", role: "Portfolio Manager", email: "tom@example.com" }
+                { name: "Rachel Green", email: "rachel@example.com", age: "29", phone: "1234567890", gender: "Female", location: "London", language: ["English", "Spanish"], createdAt: "2024-01-01" },
+                { name: "Tom Brown", email: "tom@example.com", age: "33", phone: "1234567890", gender: "Male", location: "New York", language: ["English", "French"], createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -150,8 +154,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-7", name: "Sustainable Agriculture Tech", status: "Pending", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-8", name: "Clean Energy Solution", status: "Accepted", date: "2024-03-15", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-7", name: "Sustainable Agriculture Tech", status: "Invitation Sent", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
+            { id: "scout-8", name: "Clean Energy Solution", status: "Deal Cancelled", date: "2024-03-15", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
         ]
     },
     {
@@ -161,8 +165,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "Hassan Ahmed",
             members: [
-                { name: "Fatima Al-Sayed", role: "Regional Director", email: "fatima@example.com" },
-                { name: "Omar Khan", role: "Investment Manager", email: "omar@example.com" }
+                { name: "Fatima Al-Sayed", email: "fatima@example.com", age: "35", phone: "1234567890", gender: "Female", location: "Dubai", language: ["English", "Arabic"], createdAt: "2024-01-01" },
+                { name: "Omar Khan", email: "omar@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Cairo", language: ["English", "Arabic"], createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -173,7 +177,7 @@ export const daftarsData: Daftar[] = [
         },
         pitches: [
             { id: "scout-9", name: "E-commerce Platform", status: "Accepted", date: "2024-03-20", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-10", name: "Last-Mile Logistics", status: "Pending", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-10", name: "Last-Mile Logistics", status: "Deleted by Founder", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
         ]
     },
     {
@@ -183,8 +187,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "Ahmad Ibrahim",
             members: [
-                { name: "Zainab Hassan", role: "Shariah Compliance", email: "zainab@example.com" },
-                { name: "Yusuf Ali", role: "Tech Analyst", email: "yusuf@example.com" }
+                { name: "Zainab Hassan", email: "zainab@example.com", age: "35", phone: "1234567890", gender: "Female", location: "Dubai", language: ["English", "Arabic"], createdAt: "2024-01-01" },
+                { name: "Yusuf Ali", email: "yusuf@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Cairo", language: ["English", "Arabic"], createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -194,8 +198,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-11", name: "Halal Food Delivery", status: "Rejected", date: "2024-03-12", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-12", name: "Islamic Fintech App", status: "Pending", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-11", name: "Halal Food Delivery", status: "Invitation Sent", date: "2024-03-12", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
+            { id: "scout-12", name: "Islamic Fintech App", status: "Deleted by Founder", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
         ]
     }
 ] 

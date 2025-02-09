@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckSquare, CheckSquare2, XSquare } from "lucide-react";
 import {
     HoverCard,
     HoverCardContent,
     HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import formatDate from "@/lib/formatDate";
+import { FounderProfile } from "@/components/FounderProfile";
 
 // Sample approval data (Team Logs)
 const approvalRequests = [
@@ -22,9 +23,13 @@ const approvalRequests = [
         date: formatDate("2024-03-20T14:30:00"),
         status: "approved",
         profile: {
+            name: "John Smith",
+            age: "30",
+            gender: "Male",
             email: "john.smith@example.com",
-            linkedin: "https://linkedin.com/in/johnsmith",
-            experience: "10+ years in Tech Leadership",
+            phone: "1234567890",
+            location: "New York, NY",
+            language: ["English", "Tamil"],
         },
     },
     {
@@ -34,9 +39,13 @@ const approvalRequests = [
         date: formatDate("2024-03-19T10:15:00"),
         status: "pending",
         profile: {
+            name: "Sarah Johnson",
+            age: "28",
+            gender: "Female",
             email: "sarah.johnson@example.com",
-            linkedin: "https://linkedin.com/in/sarahjohnson",
-            experience: "6+ years in Product Management",
+            phone: "0987654321",
+            language: ["English", "Spanish"],
+            location: "San Francisco, CA",
         },
     },
     {
@@ -46,9 +55,13 @@ const approvalRequests = [
         date: formatDate("2024-03-18T16:45:00"),
         status: "approved",
         profile: {
+            name: "Michael Chen",
+            age: "35",
+            gender: "Male",
             email: "michael.chen@example.com",
-            linkedin: "https://linkedin.com/in/michaelchen",
-            experience: "15+ years in Tech Advising",
+            phone: "0987654321",
+            language: ["English", "Chinese"],
+            location: "San Francisco, CA",
         },
     },
 ];
@@ -58,25 +71,16 @@ export default function PitchPage() {
     const [specificAsks, setSpecificAsks] = useState("");
 
     return (
-        <div className="container max-w-6xl mx-auto py-6 space-y-6 flex gap-8">
+        <div className="px-3 container mx-auto py-6 space-y-6 flex gap-8">
             {/* Left Section: Pitch & Questions */}
             <div className="w-2/3 space-y-6">
-                {/* Page Header */}
-                <div>
-                    <h1 className="text-xl font-semibold">Pitch</h1>
-                    <p className="text-sm text-muted-foreground">
-                        What are you looking for from the investor?
-                    </p>
-                </div>
-
                 <ScrollArea className="space-y-6">
                     {/* Specific Asks Section */}
                     <div className="space-y-2">
-                        <Label>Specific Asks for Investor</Label>
+                        <Label>Got any specific asks for Investor?</Label>
                         <Textarea
                             value={specificAsks}
                             onChange={(e) => setSpecificAsks(e.target.value)}
-                            placeholder="What specific support or resources are you looking for?"
                             className="min-h-[100px] resize-none  rounded-md"
                         />
                     </div>
@@ -96,18 +100,7 @@ export default function PitchPage() {
                             className="flex items-center justify-between p-3 border rounded-md hover:bg-muted transition-all"
                         >
                             <div className="space-y-1">
-                                <HoverCard>
-                                    <HoverCardTrigger className="font-medium cursor-pointer hover:underline">
-                                        {request.username}
-                                    </HoverCardTrigger>
-                                    <HoverCardContent className="w-64 p-4 space-y-2">
-                                        <h3 className="text-sm font-medium">{request.username}</h3>
-                                        <p className="text-xs text-muted-foreground">{request.designation}</p>
-                                        <p className="text-xs text-muted-foreground">📧 {request.profile.email}</p>
-                                        <p className="text-xs text-muted-foreground">🔗 <a href={request.profile.linkedin} target="_blank" className="text-blue-600 hover:underline">LinkedIn</a></p>
-                                        <p className="text-xs text-muted-foreground">💼 {request.profile.experience}</p>
-                                    </HoverCardContent>
-                                </HoverCard>
+                                <FounderProfile founder={request.profile} />
 
                                 <p className="text-xs text-muted-foreground">{request.designation}</p>
                                 <p className="text-xs text-muted-foreground">
@@ -116,9 +109,9 @@ export default function PitchPage() {
                             </div>
 
                             {request.status === "approved" ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                <CheckSquare2 className="h-5 w-5 " />
                             ) : (
-                                <XCircle className="h-5 w-5 text-yellow-500" />
+                                <XSquare className="h-5 w-5 " />
                             )}
                         </div>
                     ))}

@@ -9,9 +9,11 @@ import { Upload, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadVideo } from "@/lib/actions/video";
 import { useToast } from "@/hooks/use-toast";
+import { Combobox } from "@/components/ui/combobox";
 
 export default function InvestorQuestionsPage() {
     const [questionId, setQuestionId] = useState(questions[0]?.id);
+    const [language, setLanguage] = useState("English");
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const path = usePathname();
@@ -56,20 +58,15 @@ export default function InvestorQuestionsPage() {
     };
 
     return (
-        <Card className="w-full border-none my-0 p-0 bg-[#0e0e0e] max-w-6xl mx-auto">
+        <Card className="w-full border-none my-0 p-0 bg-[#0e0e0e] container mx-auto">
             <CardHeader>
-                <CardTitle className="text-2xl font-bold">Investor Questions</CardTitle>
-                <CardDescription>
-                    <p className="text-sm text-gray-500">
-                        Curated questions by the investors to help you prepare your pitch better.
-                    </p>
-                </CardDescription>
+                <CardTitle className="text-2xl font-bold"> </CardTitle>
             </CardHeader>
             <CardContent className="border-none">
                 <div className="flex justify-between gap-10">
                     <div className="w-1/2">
                         <div className="space-y-4">
-                            <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center">
+                            <div className="border-2 flex flex-col border-dashed border-gray-700 rounded-lg p-6 text-center">
                                 {previewUrl ? (
                                     <div className="space-y-4">
                                         <video
@@ -120,7 +117,23 @@ export default function InvestorQuestionsPage() {
                                     ref={fileInputRef}
                                     onChange={(e) => handleFileChange(e, questionId)}
                                 />
+
                             </div>
+                            <Combobox
+                                placeholder="Select video's language"
+                                value={language}
+                                options={
+                                    [
+                                        "English",
+                                        "Spanish",
+                                        "French",
+                                        "German",
+                                        "Italian",
+                                        "Portuguese",
+                                    ]
+                                }
+                                onSelect={(value) => setLanguage(value)}
+                            />
                         </div>
                     </div>
                     <div className="w-1/2">

@@ -1,25 +1,17 @@
 "use client"
 
-import { ScoutDetails, getScoutDetailsByName } from "@/lib/dummy-data/scout-details"
+import { getScoutDetailsByName } from "@/lib/dummy-data/scout-details"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ShareButton } from "@/components/share-button"
-import { Metadata } from "next"
 import { useState } from "react"
 import { SelectDaftarDialog } from "@/components/dialogs/select-daftar-dialog"
+import { InvestorProfile } from "@/components/InvestorProfile"
 
-function LoadingScreen() {
-    return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
-        </div>
-    );
-}
+
 
 function ErrorPage() {
     return (
@@ -27,7 +19,7 @@ function ErrorPage() {
             <h1 className="text-2xl font-bold text-white">Scout Not Found</h1>
             <Link
                 href="/founder/incuhub"
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                className="px-4 py-2 bg-muted hover:bg-muted/50 text-white rounded transition-colors"
             >
                 Go Back
             </Link>
@@ -39,11 +31,10 @@ const collaborationDetails = {
     image: "https://github.com/shadcn.png",
     daftarName: "Daftar OS",
     structure: "Technology Platform",
-    team: "25+ members",
+    onDaftarSince: "2022-01-15",
+    bigPicture: "Building the future of investment and startup collaboration in MENA region",
     website: "https://daftar.com",
     location: "Dubai, UAE",
-    vision: "Building the future of investment and startup collaboration in MENA region",
-    memberSince: "2022-01-15"
 }
 
 export default function Page() {
@@ -79,48 +70,10 @@ export default function Page() {
                                     <h1 className="text-2xl font-bold">{Scout.title}</h1>
                                     <div className="flex items-center gap-2 mt-1">
                                         <div className="text-sm text-muted-foreground">
-                                            In collaboration with{" "}
-                                            <HoverCard>
-                                                <HoverCardTrigger className="inline-flex items-center gap-1 text-blue-600 hover:underline cursor-pointer">
-                                                    {Scout.collaboration}
-                                                </HoverCardTrigger>
-                                                <HoverCardContent className="w-72">
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar className="h-10 w-10">
-                                                            <AvatarImage src={collaborationDetails.image} />
-                                                            <AvatarFallback>DO</AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <h4 className="text-sm font-medium">{collaborationDetails.daftarName}</h4>
-                                                            <p className="text-xs text-muted-foreground">{collaborationDetails.structure}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="mt-3 space-y-2 text-xs">
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-muted-foreground">Team:</p>
-                                                            <p>{collaborationDetails.team}</p>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-muted-foreground">Website:</p>
-                                                            <Link href={collaborationDetails.website} target="_blank" className="text-blue-600 hover:underline">{collaborationDetails.website}</Link>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-muted-foreground">Location:</p>
-                                                            <p>{collaborationDetails.location}</p>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-muted-foreground">Member since:</p>
-                                                            <p>{new Date(collaborationDetails.memberSince).toLocaleDateString()}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="mt-3 pt-3">
-                                                        <p className="text-xs text-muted-foreground">The Big Picture</p>
-                                                        <p className="text-xs mt-1">{collaborationDetails.vision}</p>
-                                                    </div>
-                                                </HoverCardContent>
-                                            </HoverCard>
+                                            Collaborator : {" "}
+                                            <InvestorProfile
+                                                investor={collaborationDetails}
+                                            />
                                         </div>
                                     </div>
                                     <p className="text-xs text-muted-foreground font-bold mt-2">
@@ -133,7 +86,7 @@ export default function Page() {
                                         description={Scout.description}
                                     />
                                     <Button
-                                        className="bg-blue-600 border hover:bg-blue-700 text-white"
+                                        className="bg-muted hover:bg-muted/50 text-white"
                                         onClick={() => setShowDaftarDialog(true)}
                                     >
                                         Pitch Now
@@ -168,7 +121,7 @@ export default function Page() {
                                 </TabsContent>
 
                                 <TabsContent value="details" className="border-l-4 px-5 py-5">
-                                    <div className="p-2 bg-muted/50 space-y-2">
+                                    <div className="p-2 pt-0  space-y-3">
                                         {Object.entries(Scout.details).map(([key, value]) => (
                                             <div key={key} className="rounded-[0.3rem] ">
                                                 <p className="text-sm text-muted-foreground capitalize">{key}: <span className="font-medium">{value}</span></p>
@@ -191,7 +144,7 @@ export default function Page() {
                                 <TabsContent value="updates" className="border-l-4 px-5 py-5">
                                     <div className="space-y-4">
                                         {Scout.updates.map((update, index) => (
-                                            <div key={index} className="p-4 rounded-[0.3rem] bg-muted/50">
+                                            <div key={index} className="p-4 pt-0 rounded-[0.3rem] ">
                                                 <p className="text-sm text-muted-foreground">{new Date(update.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                                 <p className="text-sm text-muted-foreground">{update.content}</p>
                                             </div>

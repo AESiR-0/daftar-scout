@@ -18,9 +18,9 @@ interface ProfileHoverCardProps {
   languages?: string[]
 }
 
-export function ProfileHoverCard({ 
-  name, 
-  daftar, 
+export function ProfileHoverCard({
+  name,
+  daftar,
   children,
   designation = "Investment Associate",
   email = "user@example.com",
@@ -36,12 +36,12 @@ export function ProfileHoverCard({
         <div className="flex gap-4">
           <Avatar className="h-12 w-12">
             <AvatarImage src="" />
-            <AvatarFallback className="text-lg">{name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+            <AvatarFallback className="text-lg">{name ? name.split(' ').map(n => n[0]).join('') : " "}</AvatarFallback>
           </Avatar>
           <div className="space-y-1">
             <h4 className="text-sm font-semibold">{name}</h4>
             <p className="text-sm text-muted-foreground">
-              {designation} at {daftar}
+              {designation}
             </p>
             <div className="flex flex-col gap-1.5 pt-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">

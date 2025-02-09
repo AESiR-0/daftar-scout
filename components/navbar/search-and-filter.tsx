@@ -60,7 +60,7 @@ const searchPlaceholders = {
   scout: 'Search scout...',
   meetings: 'Search meetings...',
   incubation: 'Search incubation scout...',
-  daftar: 'Search daftar...',
+  daftar: 'Search Daftar...',
   'pitch-board': 'Search pitches...',
   collaboration: 'Search collaboration...',
   document: 'Search document...',

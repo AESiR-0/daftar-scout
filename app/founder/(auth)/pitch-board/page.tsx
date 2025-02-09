@@ -10,9 +10,10 @@ import { daftarsData } from "@/lib/dummy-data/daftars"
 // Transform daftars data into pitch board format
 const pitches = daftarsData.flatMap(daftar => daftar.pitches)
 
-// Group pitches by status
+// Group pitches by status - redefining the status mapping
 const groupedPitches = pitches.reduce((acc, pitch) => {
-    const status = pitch.status
+    // Map the status to our new categories
+    let status = pitch.status
     if (!acc[status]) {
         acc[status] = []
     }
@@ -37,15 +38,14 @@ export default function PitchBoardPage() {
         const filtered = statusPitches.filter(pitch => {
             const matchesSearch =
                 pitch.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                pitch.postedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 pitch.scoutName.toLowerCase().includes(searchQuery.toLowerCase())
 
             const matchesFilter = filterValue === 'all' ||
-                (filterValue === 'planning' && status === 'Planning') ||
-                (filterValue === 'pitched' && status === 'Pitched') ||
-                (filterValue === 'offer' && status === 'Offer Received') ||
+                (filterValue === 'icebox' && status === 'Ice Box') ||
+                (filterValue === 'invitation' && status === 'Invitation Sent') ||
                 (filterValue === 'accepted' && status === 'Accepted') ||
-                (filterValue === 'cancelled' && status === 'Deal Cancelled')
+                (filterValue === 'cancelled' && status === 'Deal Cancelled') ||
+                (filterValue === 'deleted' && status === 'Deleted by Founder')
 
             return matchesSearch && matchesFilter
         })
@@ -53,18 +53,18 @@ export default function PitchBoardPage() {
     }, {} as Record<string, typeof pitches>)
 
     return (
-        <div className="space-y-6 container w-full flex-col items-center justify-center mx-auto px-4">
-            <div className="flex items-center justify-between w-full">
+        <div className="space-y-6 mx-auto flex-col items-center justify-center  px-20   ">
+            <div className="flex items-center justify-between ">
                 <h2 className="text-lg font-semibold">Pitch Board</h2>
                 <div className="flex items-center gap-2">
                     <Button
                         size="sm"
-                        className="h-9 bg-blue-600 hover:bg-blue-700 text-white"
+                        className="h-9 bg-muted hover:bg-muted/80 text-white"
                         onClick={() => setCreateDaftarOpen(true)}
                     >
                         New Daftar
                     </Button>
-                    <Link href="/daftar">
+                    <Link href="/founder/daftar">
                         <Button size="sm" variant="outline" className="h-9">
                             My Daftar
                         </Button>
@@ -72,7 +72,7 @@ export default function PitchBoardPage() {
                 </div>
             </div>
 
-            <ScrollArea className="w-[calc(100vw-14rem)] whitespace-nowrap rounded-lg">
+            <ScrollArea className="w-[calc(100vw-24rem)] flex justify-center items-center   rounded-lg">
                 <div className="flex gap-6 p-1">
                     {Object.entries(filteredPitches).map(([status, pitches]) => (
                         <div
@@ -95,7 +95,7 @@ export default function PitchBoardPage() {
                                     {pitches.map((pitch) => (
                                         <Link
                                             key={pitch.id}
-                                            href={`/pitch-board/${pitch.id}`}
+                                            href={`/founder/incuhub/${pitch.name.split(' ').join('-')}`}
                                         >
                                             <div className="p-4 rounded-[0.3rem] mb-2 bg-background border 
                                                 hover:bg-muted hover:border-muted 
@@ -105,17 +105,14 @@ export default function PitchBoardPage() {
                                                 <div className="space-y-3">
                                                     <div>
                                                         <h4 className="font-medium text-sm">{pitch.name}</h4>
-                                                        <p className="text-xs text-muted-foreground mt-1">
-                                                            Scout: {pitch.scoutName}
-                                                        </p>
-                                                    </div>
-                                                    <div className="pt-2">
-                                                        <p className="text-xs mt-1">
-                                                            Posted by {pitch.postedBy}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            From {pitch.daftar}
-                                                        </p>
+                                                        <div className="flex justify-between items-center mt-1">
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Collaborator : {pitch.scoutName}
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                Posted on {formatDate(pitch.date)}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

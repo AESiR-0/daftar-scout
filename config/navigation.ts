@@ -137,7 +137,7 @@ export const founderStudioNavItems = [
     icon: HelpCircle,
   },
   {
-    title: "Pitch",
+    title: "Ask",
     url: "/founder/studio/pitch",
     icon: Video,
   },

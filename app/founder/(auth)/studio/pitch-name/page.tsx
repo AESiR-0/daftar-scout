@@ -9,9 +9,7 @@ export default function PitchNamePage() {
     const pitchId = pathname.split('/')[-1]
 
     return (
-        <StudioCard
-            title="Create Your Pitch"
-            description="Please fill in the following details to create your pitch."
+        <StudioCard 
         >
             <PitchNameForm mode="Create" pitch={pitchId} />
         </StudioCard>

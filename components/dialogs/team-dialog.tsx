@@ -4,8 +4,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mail, UserMinus, Trash2, Loader2, Languages, Phone, User } from "lucide-react"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Mail, UserMinus, Trash2, Loader2, Languages, Phone, User, MapPin } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 // import { api } from "@/lib/api-client"
 import { useToast } from "@/hooks/use-toast"
 import { Daftar } from "@/lib/dummy-data/daftars"
@@ -36,21 +36,26 @@ interface TeamDialogProps {
 }
 
 interface TeamMemberDetails {
-  preferredLanguage: string
-  age: string
-  gender: 'Male' | 'Female' | 'Other' | ''
-  phoneNumber: string
+  name: string;
+  age: string;
+  email: string;
+  phone: string;
+  gender: string;
+  location: string;
+  language: string[];
+  imageUrl?: string;
 }
 
 export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDialogProps) {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    designation: "",
-    email: "",
+  const [formData, setFormData] = useState<TeamMemberDetails>({
+    name: "",
     age: "",
-    gender: "" as TeamMemberDetails['gender'],
-    phoneNumber: ""
+    email: "",
+    phone: "",
+    gender: "",
+    location: "",
+    language: [],
+    imageUrl: ""
   })
   // const { inviteTeamMember } = api.founderTeam
   const [isInviting, setIsInviting] = useState(false)
@@ -62,6 +67,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
   // Get all team members without owner distinction
   const teamMembers = daftarData ? [
     ...daftarData.team.members
+
   ] : []
 
   const pendingInvites = daftarData?.pendingInvites || []
@@ -83,13 +89,14 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
         variant: "success",
       })
       setFormData({
-        firstName: "",
-        lastName: "",
-        designation: "",
-        email: "",
+        name: "",
         age: "",
-        gender: "" as TeamMemberDetails['gender'],
-        phoneNumber: ""
+        email: "",
+        phone: "",
+        gender: "",
+        location: "",
+        language: [],
+        imageUrl: ""
       })
       onOpenChange(false)
       window.location.reload()
@@ -106,10 +113,10 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
     }
   }
 
-  const isFormValid = formData.firstName &&
-    formData.lastName &&
-    formData.designation &&
-    formData.email
+  const isFormValid = formData.name &&
+    formData.age &&
+    formData.email &&
+    formData.phone
 
   const handleRemoveMember = (memberEmail: string) => {
     setMemberToRemove(memberEmail)
@@ -141,6 +148,10 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
       variant: "success",
     })
   }
+  const getInitials = (name: string) => {
+    const words = name.split(' ')
+    return words.length > 1 ? words[0][0] + words[1][0] : name[0]
+  }
 
   const handleLeaveTeam = () => {
     toast({
@@ -167,147 +178,81 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                     {teamMembers.length}
                   </span>
                 </TabsTrigger>
+                <TabsTrigger value="invite" className="flex items-center gap-1">
+                  Invite Member
+                </TabsTrigger>
                 <TabsTrigger value="pending" className="flex items-center gap-1">
                   Pending Invites
                   <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
                     {pendingInvites.length}
                   </span>
                 </TabsTrigger>
-                <TabsTrigger value="leave" className="text-red-600">
+                <TabsTrigger value="leave" className="">
                   Leave Team
                 </TabsTrigger>
               </TabsList>
             </div>
             <ScrollArea className="h-[calc(100%-4rem)]">
               <TabsContent value="team" className="mt-0 overflow-auto">
-                <div className="grid grid-cols-2 gap-6">
-                  {/* Team Members List */}
-                  <div className="space-y-4">
-                    {teamMembers.map((member) => (
-                      <div
-                        key={member.email}
-                        className="p-4 rounded-[0.3rem] border space-y-4"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-4">
-                            <Avatar className="h-12 w-12">
-                              <AvatarFallback>
-                                {member.name.split(' ').map(n => n[0]).join('')}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h3 className="font-medium">{member.name}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {member.role}
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleRemoveMember(member.email)}
-                          >
-                            <UserMinus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div className="flex items-center gap-2">
-                              <Mail className="h-4 w-4 text-muted-foreground" />
-                              <span>{member.email}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-muted-foreground" />
-                              <span>{member.phoneNumber || 'Not provided'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Languages className="h-4 w-4 text-muted-foreground" />
-                              <span>{member.preferredLanguage || 'Not specified'}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span>{member.gender || 'Not specified'}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Invite Form */}
-                  <div className="p-4 rounded-[0.3rem] border space-y-4 h-fit">
-                    <h3 className="font-medium">Invite Team Member</h3>
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <Input
-                          placeholder="First Name"
-                          value={formData.firstName}
-                          onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                        />
-                        <Input
-                          placeholder="Last Name"
-                          value={formData.lastName}
-                          onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                        />
-                      </div>
-                      <Input
-                        placeholder="Designation"
-                        value={formData.designation}
-                        onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-                      />
-                      <Input
-                        type="email"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      />
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <label className="text-sm text-muted-foreground">Gender</label>
-                          <Select
-                            value={formData.gender}
-                            onValueChange={(value: TeamMemberDetails['gender']) =>
-                              setFormData(prev => ({ ...prev, gender: value }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select gender" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Male">Male</SelectItem>
-                              <SelectItem value="Female">Female</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Input
-                          type="tel"
-                          placeholder="Phone Number"
-                          value={formData.phoneNumber}
-                          onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                        />
-                      </div>
-                      <Input
-                        type="number"
-                        placeholder="Age"
-                        value={formData.age}
-                        onChange={(e) => setFormData(prev => ({ ...prev, age: e.target.value }))}
-                      />
-                      <Button
-                        onClick={handleSendInvite}
-                        disabled={isInviting || !isFormValid}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        {isInviting ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Sending Invite...
-                          </>
+                <div className="space-y-3">
+                  {teamMembers.map((member) => (
+                    <div key={member.email}>
+                      <Avatar className="h-12 w-12 mb-2 text-xl">
+                        {member.imageUrl ? (
+                          <AvatarImage src={member.imageUrl} alt={member.name} />
                         ) : (
-                          'Send Invite'
+                          <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
                         )}
-                      </Button>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <h4 className="text-sm font-medium">{member.name}</h4>
+                        <h4 className="text-xs py-1 flex gap-3 text-muted-foreground">
+                          <span> {member.age}</span>
+                          <span>{member.gender}</span>
+                        </h4>
+                      </div>
+                      <div className="flex text-xs pb-1 justify-between">
+                        <p>{member.email}</p>
+                        <p>{member.phone}</p>
+                      </div>
+                      <div className="flex text-xs justify-between ">
+                        <span>
+                          Preferred language to connect with investors
+                        </span>
+                        <span className="flex gap-2 flex-wrap">
+                          {member.language.map((language) => (
+                            <span key={language} className="bg-muted p-1 rounded-md">{language}</span>
+                          ))}</span>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="invite" className="mt-0">
+                <div className="p-4 rounded-[0.3rem] border space-y-4">
+                  <h3 className="font-medium">Invite Team Member</h3>
+                  <div className="space-y-3">
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    />
+                    <Button
+                      onClick={handleSendInvite}
+                      disabled={isInviting || !formData.email}
+                      className="w-full"
+                    >
+                      {isInviting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending Invite...
+                        </>
+                      ) : (
+                        'Send Invite'
+                      )}
+                    </Button>
                   </div>
                 </div>
               </TabsContent>
@@ -330,7 +275,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text- hover:text-red-700 hover:bg-red-50"
                           onClick={() => handleWithdrawInvite(invite.email)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -344,13 +289,13 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
               <TabsContent value="leave" className="mt-0">
                 <div className="p-6 space-y-4">
                   <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-red-600">Leave Team</h3>
+                    <h3 className="text-lg font-semibold ">Leave Team</h3>
                     <p className="text-sm text-muted-foreground">
                       Are you sure you want to leave this team? This action cannot be undone.
                     </p>
                   </div>
-                  <div className="space-y-2 rounded-md bg-red-500/10 p-4">
-                    <p className="text-sm font-medium text-red-600">What happens when you leave:</p>
+                  <div className="space-y-2 rounded-md  p-4">
+                    <p className="text-sm font-medium ">What happens when you leave:</p>
                     <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                       <li>You will lose access to all team resources</li>
                       <li>Your contributions will remain with the team</li>
@@ -358,7 +303,6 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                     </ul>
                   </div>
                   <Button
-                    variant="destructive"
                     className="w-full"
                     onClick={() => setShowLeaveConfirmDialog(true)}
                   >
@@ -368,8 +312,8 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
               </TabsContent>
             </ScrollArea>
           </Tabs>
-        </DialogContent>
-      </Dialog>
+        </DialogContent >
+      </Dialog >
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -396,7 +340,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLeaveTeam}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg- hover:bg-red-700"
             >
               Yes, leave team
             </AlertDialogAction>

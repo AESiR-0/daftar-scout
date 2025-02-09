@@ -9,9 +9,12 @@ export default function StudioLayout({
 
     return (
         <div className="bg-[#0e0e0e]">
-            <ScrollArea className="h-[calc(100vh-8rem)]">
+            <ScrollArea className="h-[calc(100vh-8rem)] mx-auto px-3">
                 <StudioNav />
-                {children}
+                <div className="max-w-6xl mx-auto">
+                    {children}
+                </div>
+
             </ScrollArea>
         </div>
     )

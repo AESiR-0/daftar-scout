@@ -1,9 +1,20 @@
 import formatDate from "@/lib/formatDate"
 
+interface Collaborator {
+    name: string
+    imageUrl?: string
+    daftarName: string
+    structure: string
+    website: string
+    location: string
+    onDaftarSince: string
+    bigPicture: string
+}
+
 export interface ScoutDetails {
-    title: string
     slug: string
-    collaboration: string
+    title: string
+    collaborators: Collaborator[]
     description: string
     videoUrl: string
     about: string
@@ -12,7 +23,7 @@ export interface ScoutDetails {
         Location: string
         Gender: string
         Age: string
-        ExpertiseLevel: string
+        Stage: string
         Sector: string
     }
     requirements: {
@@ -37,7 +48,28 @@ export const scoutDetailsData: ScoutDetails[] = [
     {
         title: "Tech Talent Scout Program",
         slug: "tech-talent-scout-program",
-        collaboration: "Daftar OS",
+        collaborators: [
+            {
+                name: "Daftar OS",
+                daftarName: "Daftar Open Source",
+                structure: "Technology Company",
+                website: "https://daftar.com",
+                location: "Dubai, UAE",
+                onDaftarSince: "2023-01-15",
+                bigPicture: "Building the future of startup ecosystem",
+                imageUrl: "/daftar-logo.png"
+            },
+            {
+                name: "Nithin Kamath",
+                daftarName: "Nithin Kamath",
+                structure: "Angel Investor",
+                website: "https://nithinkamath.me",
+                location: "Bangalore, India",
+                onDaftarSince: "2023-03-20",
+                bigPicture: "Democratizing financial markets in India",
+                imageUrl: "/nithin-profile.png"
+            }
+        ],
         description: "Early stage technology companies investment program focused on innovative solutions",
         videoUrl: "https://example.com/video.mp4",
         about: `Our program focuses on early-stage technology startups with innovative solutions. 
@@ -46,8 +78,8 @@ export const scoutDetailsData: ScoutDetails[] = [
             Community: "Open",
             Location: "UAE",
             Gender: "All",
-            Age: "18-35",
-            ExpertiseLevel: "Mid to Senior",
+            Age: "18 to 35 Yrs",
+            Stage: "Seed",
             Sector: "Technology",
         },
         requirements: {
@@ -86,7 +118,28 @@ export const scoutDetailsData: ScoutDetails[] = [
     {
         title: "FinTech Innovation Hub",
         slug: "fintech-innovation-hub",
-        collaboration: "Islamic Finance Initiative",
+        collaborators: [
+            {
+                name: "Islamic Finance Initiative",
+                daftarName: "Islamic Finance Initiative",
+                structure: "Financial Institution",
+                website: "https://islamicfinanceinitiative.com",
+                location: "Malaysia",
+                onDaftarSince: "2023-02-15",
+                bigPicture: "Promoting Islamic finance through technology",
+                imageUrl: "/islamic-finance-initiative-logo.png"
+            },
+            {
+                name: "GUSEC",
+                daftarName: "Global University of Islamic Finance",
+                structure: "Educational Institution",
+                website: "https://guse.edu.my",
+                location: "Malaysia",
+                onDaftarSince: "2023-03-01",
+                bigPicture: "Leading Islamic finance education",
+                imageUrl: "/guse-logo.png"
+            }
+        ],
         description: "Supporting innovative financial technology solutions with Islamic finance principles",
         videoUrl: "https://example.com/fintech-video.mp4",
         about: `We are dedicated to fostering innovation in Islamic finance through technology. 
@@ -95,8 +148,8 @@ export const scoutDetailsData: ScoutDetails[] = [
             Community: "Muslim",
             Location: "Malaysia",
             Gender: "All",
-            Age: "21-45",
-            ExpertiseLevel: "Pre-seed to Seed",
+            Age: "21 to 45 Yrs",
+            Stage: "Pre-seed to Seed",
             Sector: "FinTech",
         },
         requirements: {
@@ -131,7 +184,28 @@ export const scoutDetailsData: ScoutDetails[] = [
     {
         title: "Women in Tech Fund",
         slug: "women-in-tech-fund",
-        collaboration: "Female Founders Alliance",
+        collaborators: [
+            {
+                name: "Female Founders Alliance",
+                daftarName: "Female Founders Alliance",
+                structure: "Networking Group",
+                website: "https://femalefoundersalliance.com",
+                location: "Singapore",
+                onDaftarSince: "2023-01-01",
+                bigPicture: "Empowering women in tech entrepreneurship",
+                imageUrl: "/female-founders-alliance-logo.png"
+            },
+            {
+                name: "IIMA",
+                daftarName: "Institute of International Management",
+                structure: "Educational Institution",
+                website: "https://iima.edu.sg",
+                location: "Singapore",
+                onDaftarSince: "2023-02-15",
+                bigPicture: "Leading management education in Asia",
+                imageUrl: "/iima-logo.png"
+            }
+        ],
         description: "Empowering women-led technology startups across Southeast Asia",
         videoUrl: "https://example.com/wit-video.mp4",
         about: `Our mission is to bridge the gender gap in tech entrepreneurship. 
@@ -140,8 +214,8 @@ export const scoutDetailsData: ScoutDetails[] = [
             Community: "All",
             Location: "Singapore",
             Gender: "Female",
-            Age: "20-50",
-            ExpertiseLevel: "Seed",
+            Age: "20 to 50 Yrs",
+            Stage: "Seed",
             Sector: "Technology",
         },
         requirements: {

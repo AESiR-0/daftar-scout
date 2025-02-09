@@ -2,9 +2,7 @@
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { investorStudioNavItems, founderStudioNavItems } from "@/config/navigation"
-// import { useRole } from "@/contexts/role-context"
 import Link from "next/link"
 
 interface StudioNavProps {
@@ -15,15 +13,11 @@ interface StudioNavProps {
 
 export function StudioNav({ className, mode, programId }: StudioNavProps) {
   const pathname = usePathname()
-  // const { role } = useRole()
   const role = pathname.includes('founder/') ? 'founder' : 'investor'
   const [isScrolled, setIsScrolled] = useState(false)
 
   // Get nav items based on role
   const navItems = role === 'investor' ? investorStudioNavItems : founderStudioNavItems
-
-  // Debug log
-  console.log("StudioNav Props:", { mode, programId, pathname })
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,7 +50,7 @@ export function StudioNav({ className, mode, programId }: StudioNavProps) {
         className
       )}
     >
-      <div className="flex h-14 items-center justify-between px-4 border-b">
+      <div className="flex h-14 items-center justify-center px-4 border-b">
         <div className="flex items-center space-x-2">
           <nav className="flex items-center space-x-1">
             {navItems.map((item) => {

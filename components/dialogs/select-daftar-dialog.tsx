@@ -34,20 +34,18 @@ export function SelectDaftarDialog({ open, onOpenChange, scoutSlug }: SelectDaft
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-2xl">
           <DialogTitle className="text-xl font-semibold mb-4">
-            Select Daftar to Pitch From
+            Select Pitch from Daftar
           </DialogTitle>
 
           <div className="space-y-4">
             <Button
               onClick={() => setCreateDaftarOpen(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create New Daftar
+              className="w-full bg-muted hover:bg-muted/50"
+            >New Daftar
             </Button>
 
             <div className="text-sm text-muted-foreground">
-              or select from existing daftars:
+              or select from existing Daftars
             </div>
 
             <ScrollArea className="h-[300px] pr-4">
@@ -56,13 +54,11 @@ export function SelectDaftarDialog({ open, onOpenChange, scoutSlug }: SelectDaft
                   <button
                     key={daftar.id}
                     onClick={() => handleDaftarSelect(daftar.id)}
-                    className="w-full p-4 border rounded-lg hover:border-blue-500/50 transition-colors text-left flex items-center justify-between group"
+                    className="w-full p-4 border rounded-lg hover:bg-muted transition-colors text-left flex items-center justify-between group"
                   >
                     <div>
                       <h3 className="font-medium">{daftar.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {daftar.team.members.length + 1} team members · {daftar.pitchCount} pitches
-                      </p>
+                     
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                   </button>
@@ -77,8 +73,9 @@ export function SelectDaftarDialog({ open, onOpenChange, scoutSlug }: SelectDaft
         open={createDaftarOpen}
         onOpenChange={setCreateDaftarOpen}
         onSuccess={(daftarId: string) => {
-          setCreateDaftarOpen(false)
+          router.push(`/founder/studio?daftar=${daftarId}`)
           handleDaftarSelect(daftarId)
+          setCreateDaftarOpen(false)
         }}
       />
     </>
