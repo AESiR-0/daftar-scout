@@ -1,6 +1,8 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { MapPin, Phone } from "lucide-react"
+import { Mail } from "lucide-react"
 
 export interface FounderProfileProps {
     founder: {
@@ -44,24 +46,29 @@ export function FounderProfile({ founder }: FounderProfileProps) {
                 </Avatar>
                 <div className="flex flex-col">
                     <h4 className="text-sm font-medium">{founder.name}</h4>
-                    <h4 className="text-xs  flex gap-3 text-muted-foreground">
-                        <span> {founder.age}</span>
+                    <h4 className="text-xs  flex gap-1 text-muted-foreground">
                         <span>{founder.gender}</span>
+                        <span> {founder.age}</span>
                     </h4>
                 </div>
                 <div className="flex text-xs flex-col">
-                    <p>{founder.email}</p>
-                    <p>{founder.phone}</p>
-                </div>
-
-                <div className="mt-3 space-y-2 text-xs">
                     <div className="flex items-center gap-2">
+                        <Mail className="h-3 w-3" />
+                        <p className="underline">{founder.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Phone className="h-3 w-3" />
+                        <p>{founder.phone}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <MapPin className="h-3 w-3" />
                         <p>{founder.location}</p>
                     </div>
+
                 </div>
-                <br />
-                <div className="flex text-xs flex-col gap-2">
+                <div className="flex text-xs flex-col gap-1">
                     <span>
+
                         Preferred language to connect with investors
                     </span>
                     <span className="flex gap-2 flex-wrap">
@@ -69,6 +76,12 @@ export function FounderProfile({ founder }: FounderProfileProps) {
                             <span key={language} className="bg-muted p-1 rounded-md">{language}</span>
                         ))}</span>
                 </div>
+                <br />
+                <div className="text-xs">
+                    <strong>On Daftar Since</strong> <br /> {formatDate(new Date().toISOString())}
+                </div>
+
+
 
 
 

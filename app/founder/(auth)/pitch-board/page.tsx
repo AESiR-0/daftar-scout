@@ -95,7 +95,7 @@ export default function PitchBoardPage() {
                                     {pitches.map((pitch) => (
                                         <Link
                                             key={pitch.id}
-                                            href={`/founder/incuhub/${pitch.name.split(' ').join('-')}`}
+                                            href={`/founder/scout/${pitch.name.split(' ').join('-')}`}
                                         >
                                             <div className="p-4 rounded-[0.3rem] mb-2 bg-background border 
                                                 hover:bg-muted hover:border-muted 
@@ -105,9 +105,9 @@ export default function PitchBoardPage() {
                                                 <div className="space-y-3">
                                                     <div>
                                                         <h4 className="font-medium text-sm">{pitch.name}</h4>
-                                                        <div className="flex justify-between items-center mt-1">
+                                                        <div className="flex flex-col justify-between  mt-1">
                                                             <p className="text-xs text-muted-foreground">
-                                                                Collaborator : {pitch.scoutName}
+                                                                Collaboration : <span className=""> {pitch.scoutName}</span>
                                                             </p>
                                                             <p className="text-xs text-muted-foreground">
                                                                 Posted on {formatDate(pitch.date)}

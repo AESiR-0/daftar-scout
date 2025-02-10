@@ -30,10 +30,11 @@ export function InvestorProfile({ investor }: InvestorProfileProps) {
 
     return (
         <HoverCard>
-            <HoverCardTrigger className="inline-flex items-center hover:underline cursor-pointer">
+            <HoverCardTrigger className="inline-flex underline items-center hover:underline cursor-pointer">
                 {investor.daftarName}
             </HoverCardTrigger>
             <HoverCardContent className="w-72">
+
                 <Avatar className="h-20 w-20 mb-5 text-3xl">
                     {investor.imageUrl ? (
                         <AvatarImage src={investor.imageUrl} alt={investor.daftarName} />
@@ -62,8 +63,8 @@ export function InvestorProfile({ investor }: InvestorProfileProps) {
                     <p className="text-xs mt-1">{investor.bigPicture}</p>
                 </div>
                 <br />
-                <div className="flex flex-col items-center gap-2">
-                    <p className="text-muted-foreground">On daftar since:</p>
+                <div className="flex flex-col items-start ">
+                    <p className="text-muted-foreground">On Daftar Since</p>
                     <p>{formatDate(investor.onDaftarSince)}</p>
                 </div>
             </HoverCardContent>

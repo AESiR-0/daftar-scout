@@ -32,7 +32,7 @@ export const founderNavItems = [
   // },
   {
     title: "Scout",
-    url: "/founder/incuhub",
+    url: "/founder/scout",
     icon: Building,
   },
   {

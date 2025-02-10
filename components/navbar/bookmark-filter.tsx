@@ -10,7 +10,7 @@ export function BookmarkFilter() {
     const { showBookmarked, toggleFilter } = useBookmarks()
 
     // Only show in incuhub page
-    if (pathname !== "/founder/incuhub") return null
+    if (pathname !== "/founder/scout") return null
 
     return (
         <Button

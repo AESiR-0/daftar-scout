@@ -18,7 +18,7 @@ function ErrorPage() {
         <div className="flex flex-col items-center justify-center min-h-screen gap-4">
             <h1 className="text-2xl font-bold text-white">Scout Not Found</h1>
             <Link
-                href="/founder/incuhub"
+                href="/founder/scout"
                 className="px-4 py-2 bg-muted hover:bg-muted/50 text-white rounded transition-colors"
             >
                 Go Back
@@ -70,7 +70,7 @@ export default function Page() {
                                     <h1 className="text-2xl font-bold">{Scout.title}</h1>
                                     <div className="flex items-center gap-2 mt-1">
                                         <div className="text-sm text-muted-foreground">
-                                            Collaborator : {" "}
+                                            Collaboration : {" "}
                                             <InvestorProfile
                                                 investor={collaborationDetails}
                                             />
@@ -124,7 +124,7 @@ export default function Page() {
                                     <div className="p-2 pt-0  space-y-3">
                                         {Object.entries(Scout.details).map(([key, value]) => (
                                             <div key={key} className="rounded-[0.3rem] ">
-                                                <p className="text-sm text-muted-foreground capitalize">{key}: <span className="font-medium">{value}</span></p>
+                                                <p className="text-sm text-muted-foreground ">{key}: <span className="font-medium">{value}</span></p>
                                             </div>
                                         ))}
                                     </div>
@@ -134,7 +134,7 @@ export default function Page() {
                                     <div className="space-y-4">
                                         {Scout.faqs.map((faq, index) => (
                                             <div key={index} className="space-y-2">
-                                                <h3 className="font-medium">{faq.question}</h3>
+                                                <h3 className="text-muted-foreground">{faq.question}</h3>
                                                 <p className="text-sm text-muted-foreground">{faq.answer}</p>
                                             </div>
                                         ))}

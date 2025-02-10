@@ -7,32 +7,32 @@ interface Question {
 export let questions: Question[] = [
     {
         id: 1,
-        question: "What inspired you to start this company?",
+        question: "Introduce yourself.",
         videoUrl: ""
     },
     {
         id: 2,
-        question: "How do you plan to scale your business?",
+        question: "How did you come up with the idea?",
         videoUrl: "https://example.com/scaling-strategy-video.mp4"
     },
     {
         id: 3,
-        question: "What makes your solution unique in the market?",
+        question: "What is the problem are you solving, and why is it really important for you to solve it?",
         videoUrl: ""
     },
     {
         id: 4,
-        question: "Can you explain your revenue model?",
+        question: "Who are your customers, and why would they pay for it?",
         videoUrl: "https://example.com/revenue-model-video.mp4"
     },
     {
         id: 5,
-        question: "What are your key metrics and traction so far?",
+        question: "How much have you worked on your startup, and where do you see it in 3 years?",
         videoUrl: ""
     },
     {
         id: 6,
-        question: "How do you plan to use the investment?",
+        question: "What challenges are you facing, and what support do you need?",
         videoUrl: ""
     }
 ] 

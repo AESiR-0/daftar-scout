@@ -54,7 +54,7 @@ export function DaftarProfile({ collaborator }: { collaborator: any }) {
                         <p className="mt-1 min-h-[100px] p-3 bg-muted rounded-lg">{collaborator.daftarDetails.biggerPicture}</p>
                     </div>
                     <div className="">
-                        <span className="text-foreground">On Daftar since</span>
+                        <span className="text-foreground">On Daftar Since</span>
                         <p className="mt-1  text-muted-foreground rounded-lg">{formatDate(new Date(collaborator.daftarDetails.founded).toISOString())}</p>
                     </div>
                 </div>

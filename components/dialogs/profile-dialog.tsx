@@ -176,14 +176,13 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                           <AvatarFallback>UN</AvatarFallback>
                         </Avatar>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 text-left">
                         <Button
                           variant="outline"
-                          className="w-full relative overflow-hidden"
+                          className="w-full text-left relative overflow-hidden"
                           size="sm"
                         >
-                          <Camera className="h-4 w-4 mr-2" />
-                          Change Photo
+                          <span>Change Photo</span>
                           <input
                             type="file"
                             className="absolute inset-0 opacity-0 cursor-pointer"
@@ -195,11 +194,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                           variant="outline"
                           size="sm"
                           className={cn(
-                            'w-full',
+                            'w-full text-left',
                             isEditing && " text-white"
                           )}
                         >
-                          <Pencil className="h-4 w-4 mr-2" />
                           {isEditing ? "Save Changes" : "Edit Profile"}
                         </Button>
                         <Button
@@ -211,7 +209,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                             signOut()
                           }}
                         >
-                          <LogOut className="h-4 w-4 mr-2" />
                           Sign Out
                         </Button>
                       </div>
@@ -306,7 +303,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                         </div>
                       </div>
                       <div className="">
-                        <span className="text-xs text-muted-foreground"><strong> On Daftar since </strong> <br /> {formatDate(new Date().toISOString())}</span>
+                        <span className="text-xs text-muted-foreground"><strong> On Daftar Since </strong> <br /> {formatDate(new Date().toISOString())}</span>
                       </div>
                     </div>
                   </div>
@@ -367,10 +364,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
               <div className="max-w-md mx-auto space-y-8">
                 <div className="text-center space-y-2">
                   <div className="h-12 w-12 rounded-full  flex items-center justify-center mx-auto">
-                    <Trash2 className="h-6 w-6 " />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    This action cannot be undone. All your data will be permanently removed.
+                    This action cannot be undone.
+                    <br />
+                    All your data will be permanently removed.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -379,15 +377,13 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     onClick={handleDeleteAccount}
                     className="bg-muted hover:bg-muted/50"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Account
+                    Delete
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => setActiveTab("profile")}
                   >
-                    Cancel
-                  </Button>
+                    Withdraw                  </Button>
                 </div>
               </div>
             </div>

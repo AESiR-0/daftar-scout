@@ -334,7 +334,7 @@ export default function DocumentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-none bg-[#0e0e0e] w-80">
+        {/* <Card className="border-none bg-[#0e0e0e] w-80">
           <CardHeader>
             <CardTitle className="text-lg">Recent Activity</CardTitle>
           </CardHeader>
@@ -379,7 +379,7 @@ export default function DocumentsPage() {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>

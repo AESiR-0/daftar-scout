@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "../ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import formatDate  from "@/lib/formatDate"
+
 
 interface TeamDialogProps {
   open: boolean
@@ -173,22 +175,22 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
             <div className="flex items-center justify-between mb-4">
               <TabsList>
                 <TabsTrigger value="team" className="flex items-center gap-1">
-                  Team Members
+                  Members
                   <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
                     {teamMembers.length}
                   </span>
                 </TabsTrigger>
                 <TabsTrigger value="invite" className="flex items-center gap-1">
-                  Invite Member
+                  Invite
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="flex items-center gap-1">
-                  Pending Invites
+                  Pending
                   <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
                     {pendingInvites.length}
                   </span>
                 </TabsTrigger>
                 <TabsTrigger value="leave" className="">
-                  Leave Team
+                  Exit
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -265,13 +267,15 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                       className="p-4 rounded-[0.3rem] border flex items-center justify-between"
                     >
                       <div>
-                        <p className="text-sm font-medium">{invite.email}</p>
+                        <p className="text-sm font-medium">New Member</p>
                         <p className="text-xs text-muted-foreground">{invite.designation}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Sent on {formatDate(invite.sentAt)}
+                        </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <p className="text-xs text-muted-foreground">
-                          Sent on {new Date(invite.sentAt).toLocaleDateString()}
-                        </p>
+
+
                         <Button
                           variant="ghost"
                           size="sm"
@@ -303,7 +307,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                     </ul>
                   </div>
                   <Button
-                    className="w-full"
+                    className="w-[15%]"
                     onClick={() => setShowLeaveConfirmDialog(true)}
                   >
                     Leave Team

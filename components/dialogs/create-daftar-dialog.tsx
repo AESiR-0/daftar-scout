@@ -109,24 +109,26 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label>Daftar Structure</Label>
-                            <Select
-                                value={formData.structure}
-                                onValueChange={(value) => setFormData(prev => ({ ...prev, structure: value }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select structure" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {daftarStructures.map((structure) => (
-                                        <SelectItem key={structure} value={structure.toLowerCase()}>
-                                            {structure}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {window.location.pathname.includes('investor') && (
+                            <div className="space-y-2">
+                                <Label>Daftar Structure</Label>
+                                <Select
+                                    value={formData.structure}
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, structure: value }))}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select structure" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {daftarStructures.map((structure) => (
+                                            <SelectItem key={structure} value={structure.toLowerCase()}>
+                                                {structure}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
 
                         <div className="space-y-2">
                             <Label>Country</Label>
@@ -151,7 +153,7 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                             <Button
                                 onClick={handleSubmit}
                                 className="bg-muted hover:bg-muted/50 text-white"
-                                disabled={!formData.name || !formData.structure || !formData.country}
+                                disabled={!formData.name || !formData.country}
                             >
                                 Publish
                             </Button>

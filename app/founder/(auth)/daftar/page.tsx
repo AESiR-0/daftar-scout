@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { useSearch } from "@/lib/context/search-context"
 import { daftarsData } from "@/lib/dummy-data/daftars"
 import { TeamDialog } from "@/components/dialogs/team-dialog"
-import { Filter, Users } from "lucide-react"
+import { ChevronRight, Filter, Users } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 // Add these interfaces at the top
 interface TeamMember {
@@ -69,7 +69,7 @@ export default function DaftarPage() {
                 {/* Daftars and Pitches Section */}
                 <div className="space-y-6 w-full">
                     {/* Header with Search and Actions */}
-                    <div className="flex px-4 mx-auto items-center justify-between">
+                    <div className="flex px-4 mx-auto items-center justify-end gap-5">
                         <Button size="sm" className="h-9 bg-muted hover:bg-muted/50  text-white"
                             onClick={() => setCreateDaftarOpen(true)}>
                             New Daftar
@@ -115,19 +115,20 @@ export default function DaftarPage() {
                                                 key={pitch.name}
                                                 className="p-4 hover:bg-muted/50"
                                             >
-                                                <Link href={`/founder/incuhub/${daftar.name.split(' ').join('-')}`}>
+                                                <Link href={`/founder/scout/${pitch.name.split(' ').join('-')}`}>
                                                     <div className="flex items-center justify-between">
                                                         <div className="space-y-1">
                                                             <p className="text-sm font-medium">{pitch.name}</p>
                                                             <p className="text-xs text-muted-foreground">
-                                                                Pitched on {formatDate(pitch.date)}
+                                                                Status: {pitch.status}
                                                             </p>
                                                         </div>
                                                         <span className={"text-xs"}>
-                                                            {pitch.status}
+                                                            <ChevronRight className="h-4 w-4" />
                                                         </span>
                                                     </div>
                                                 </Link>
+
                                             </div>
                                         ))}
                                     </div>

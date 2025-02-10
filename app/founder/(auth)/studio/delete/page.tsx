@@ -97,7 +97,6 @@ export default function DeletePage() {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <FounderProfile founder={member} />
-                        <p className="text-xs text-muted-foreground">{member.role}</p>
                       </div>
                     </div>
                     <Checkbox
@@ -137,7 +136,7 @@ export default function DeletePage() {
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={!userConsent || deleteClicked}
-                className="w-full bg-muted hover:bg-muted/50"
+                className="w-[12%] bg-muted hover:bg-muted/50"
               >
                 Delete
               </Button>

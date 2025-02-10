@@ -74,22 +74,24 @@ export default function InvestorQuestionsPage() {
                                             controls
                                             className="w-full rounded-[0.3rem] aspect-video"
                                         />
-                                        <Button
-                                            variant="outline"
-                                            onClick={clearVideo}
-                                            className="w-full"
-                                        >
-                                            <X className="h-4 w-4 mr-2" />
-                                            Remove Video
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleUploadVideo(e, questionId)}
-                                            className="w-full"
-                                        >
-                                            <Upload className="h-4 w-4 mr-2" />
-                                            Upload Video
-                                        </Button>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="outline"
+                                                onClick={clearVideo}
+                                                className="w-full"
+                                            >
+                                                <X className="h-4 w-4 mr-2" />
+                                                Remove Video
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleUploadVideo(e, questionId)}
+                                                className="w-full"
+                                            >
+                                                <Upload className="h-4 w-4 mr-2" />
+                                                Upload Video
+                                            </Button>
+                                        </div>
                                     </div>
                                 ) : (
                                     <div
@@ -117,23 +119,25 @@ export default function InvestorQuestionsPage() {
                                     ref={fileInputRef}
                                     onChange={(e) => handleFileChange(e, questionId)}
                                 />
-
+                                <div className="mt-5">
+                                    <Combobox
+                                        placeholder="Select video's language"
+                                        value={language}
+                                        options={
+                                            [
+                                                "English",
+                                                "Spanish",
+                                                "French",
+                                                "German",
+                                                "Italian",
+                                                "Portuguese",
+                                            ]
+                                        }
+                                        onSelect={(value) => setLanguage(value)}
+                                    />
+                                </div>
                             </div>
-                            <Combobox
-                                placeholder="Select video's language"
-                                value={language}
-                                options={
-                                    [
-                                        "English",
-                                        "Spanish",
-                                        "French",
-                                        "German",
-                                        "Italian",
-                                        "Portuguese",
-                                    ]
-                                }
-                                onSelect={(value) => setLanguage(value)}
-                            />
+
                         </div>
                     </div>
                     <div className="w-1/2">
