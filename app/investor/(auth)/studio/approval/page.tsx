@@ -2,9 +2,9 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { InvestorProfile } from "@/components/InvestorProfile"
-import { CheckCircle2, ClipboardCheck, Users2, Calendar } from "lucide-react"
+import { Users2, Calendar } from "lucide-react"
 import formatDate from "@/lib/formatDate"
 import {
   AlertDialog,

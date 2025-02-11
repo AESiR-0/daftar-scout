@@ -109,7 +109,7 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                             />
                         </div>
 
-                        {window.location.pathname.includes('investor') && (
+                        {typeof window !== 'undefined' && window.location.pathname.includes('investor') && (
                             <div className="space-y-2">
                                 <Label>Daftar Structure</Label>
                                 <Select

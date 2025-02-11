@@ -50,7 +50,6 @@ const scouttatus = {
 export default function scoutPage() {
   const { searchQuery, filterValue } = useSearch()
   const [insightsOpen, setInsightsOpen] = useState(false)
-  const [studioOpen, setStudioOpen] = useState(false)
 
   // Filter scout based on search query and filter value
   const filteredscout = Object.entries(scouttatus).reduce((acc, [key, scout]) => {

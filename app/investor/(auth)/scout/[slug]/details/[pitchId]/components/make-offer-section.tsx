@@ -381,7 +381,7 @@ export function MakeOfferSection() {
                   key={offer.id}
                   offer={offer}
                   onView={handleViewOffer}
-                  onWithdraw={handleWithdraw}
+                  onWithdraw={() => handleWithdraw(offer.id)}
                 />
               ))}
               {logOffers.length === 0 && (

@@ -19,7 +19,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { MakeOfferSection } from "./components/make-offer-section";
 import { DeclinePitchDialog } from "./components/decline-pitch-dialog"
-import { TeamDialog } from "@/components/ui/team-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Import ApexCharts with NoSSR
