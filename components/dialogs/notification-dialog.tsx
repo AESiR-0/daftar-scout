@@ -8,6 +8,10 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
 
 const sections = [
   { id: "requests", label: "Requests", count: 3 },
@@ -136,7 +140,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("requests")
   const [data, setData] = useState(generateLiveData())
-  const [filter, setFilter] = useState("all")
+  const [date, setDate] = useState<Date | undefined>(undefined)
 
   // Simulate live updates
   useEffect(() => {
@@ -209,6 +213,13 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
     return `${Math.floor(minutes / 60)}h ago`
   }
 
+  const filterByDate = (itemDate: string) => {
+    if (!date) return true
+    
+    const compareDate = new Date(itemDate)
+    return compareDate.toDateString() === date.toDateString()
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTitle></DialogTitle>
@@ -255,24 +266,43 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
               <h2 className="text-lg font-semibold">
                 {navItems.find(item => item.value === activeTab)?.title}
               </h2>
-              <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-[150px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter" />
-                </SelectTrigger>
-                <SelectContent align="end">
-                  <SelectItem value="all">All Notifications</SelectItem>
-                  <SelectItem value="high">High Priority</SelectItem>
-                  <SelectItem value="medium">Medium Priority</SelectItem>
-                  <SelectItem value="low">Low Priority</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-[200px] justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      <span>{date ? format(date, "PPP") : "Pick a date"}</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                {date && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDate(undefined)}
+                    className="h-9 w-9 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Notification Cards */}
             <div className="space-y-4">
               {activeTab === "requests" && data.requests
-                .filter(request => filter === "all" || request.priority === filter)
+                .filter(request => filterByDate(request.date))
                 .map((request) => (
                   <div
                     key={request.id}
@@ -322,7 +352,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
                 ))}
 
               {activeTab === "alerts" && data.alerts
-                .filter(alert => filter === "all" || alert.priority === filter)
+                .filter(alert => filterByDate(alert.date))
                 .map((alert) => (
                   <div
                     key={alert.id}
@@ -341,7 +371,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
                 ))}
 
               {activeTab === "updates" && data.updates
-                .filter(update => filter === "all" || update.priority === filter)
+                .filter(update => filterByDate(update.date))
                 .map((update) => (
                   <div
                     key={update.id}
@@ -360,7 +390,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
                 ))}
 
               {activeTab === "program-links" && data["program-links"]
-                .filter(item => filter === "all" || item.priority === filter)
+                .filter(item => filterByDate(item.date))
                 .map((item) => (
                   <div
                     key={item.id}
@@ -382,7 +412,7 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
                 ))}
 
               {activeTab === "stories" && data.stories
-                .filter(story => filter === "all" || story.priority === filter)
+                .filter(story => filterByDate(story.date))
                 .map((story) => (
                   <div
                     key={story.id}
