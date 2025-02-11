@@ -3,7 +3,6 @@ import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
 import { Search, Filter, Bell, MessageSquare, AlertTriangle, RefreshCcw, Link2, BookOpen, Check, X } from "lucide-react"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -56,7 +55,7 @@ const generateLiveData = () => {
         title: "Meeting in 30 minutes",
         message: "Upcoming meeting with Tech Startup team",
         type: "meeting",
-        date: new Date(now.getTime() + 30 * 60000).toISOString(), // 30 minutes from now
+        date: new Date(now.getTime() + 30 * 60000).toISOString(),
         priority: "high"
       },
       {
@@ -64,11 +63,64 @@ const generateLiveData = () => {
         title: "Document Review Required",
         message: "Financial model needs your review",
         type: "document",
-        date: new Date(now.getTime() + 2 * 3600000).toISOString(), // 2 hours from now
+        date: new Date(now.getTime() + 2 * 3600000).toISOString(),
         priority: "medium"
       }
     ],
-    // ... other sections with live timestamps
+    updates: [
+      {
+        id: "1",
+        title: "Portfolio Update",
+        message: "TechStart Inc. reached $1M ARR milestone",
+        type: "milestone",
+        date: new Date(now.getTime() - 1 * 3600000).toISOString(),
+        priority: "medium"
+      },
+      {
+        id: "2",
+        title: "Investment Round Closed",
+        message: "MedTech Hub successfully closed Series A",
+        type: "investment",
+        date: new Date(now.getTime() - 2 * 3600000).toISOString(),
+        priority: "high"
+      }
+    ],
+    "program-links": [
+      {
+        id: "1",
+        title: "New Program Available",
+        message: "AI Accelerator Program open for applications",
+        link: "/programs/ai-accelerator",
+        date: new Date(now.getTime() - 12 * 3600000).toISOString(),
+        priority: "high"
+      },
+      {
+        id: "2",
+        title: "Program Update",
+        message: "Climate Tech Fund - New resources added",
+        link: "/programs/climate-tech",
+        date: new Date(now.getTime() - 24 * 3600000).toISOString(),
+        priority: "medium"
+      }
+    ],
+    stories: [
+      {
+        id: "1",
+        title: "Founder Story: From Idea to IPO",
+        message: "Read how TechStart transformed the industry",
+        type: "success-story",
+        date: new Date(now.getTime() - 2 * 24 * 3600000).toISOString(),
+        priority: "medium"
+      },
+      {
+        id: "2",
+        title: "Investment Journey",
+        message: "Key lessons from our top performing portfolio",
+        type: "case-study",
+        date: new Date(now.getTime() - 3 * 24 * 3600000).toISOString(),
+        priority: "low"
+      }
+    ]
   }
 }
 
@@ -217,59 +269,139 @@ export function NotificationDialog({ open, onOpenChange }: NotificationDialogPro
               </Select>
             </div>
 
-            {/* Request Cards with Enhanced UI */}
+            {/* Notification Cards */}
             <div className="space-y-4">
               {activeTab === "requests" && data.requests
                 .filter(request => filter === "all" || request.priority === filter)
                 .map((request) => (
                   <div
                     key={request.id}
-                    className="border rounded-lg p-4 hover:border-blue-500/50 transition-colors"
+                    className="bg-card border rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:border-primary/50"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="space-y-1">
-                        <h3 className="font-medium">{request.title}</h3>
-                        <p className="text-sm text-muted-foreground">{request.daftar}</p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={getPriorityColor(request.priority)}
-                      >
-                        {request.priority}
-                      </Badge>
-                    </div>
+                    <div className="flex justify-between gap-4">
+                      {/* Left Column - Details */}
+                      <div className="flex-1 space-y-3">
+                        <div className="space-y-1">
+                          <h3 className="font-medium">{request.title}</h3>
+                          <p className="text-sm text-muted-foreground">{request.daftar}</p>
+                        </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground mb-4">
-                      <div>Role: {request.role}</div>
-                      <div>Program: {request.program}</div>
-                      <div className="col-span-2">
-                        {formatTimeAgo(request.date)}
+                        <div className="space-y-1 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Role:</span> {request.role}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Program:</span> {request.program}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column - Buttons */}
+                      <div className="flex flex-col justify-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAccept(request)}
+                          className="bg-primary hover:bg-primary/90 w-24"
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDecline(request)}
+                          className="text-destructive hover:bg-destructive/10 w-24"
+                        >
+                          Decline
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDecline(request)}
-                        className="text-red-500 hover:bg-red-500/10"
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Decline
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => handleAccept(request)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        <Check className="h-4 w-4 mr-2" />
-                        Accept
-                      </Button>
+                    <div className="text-right mt-2">
+                      <span className="text-xs text-muted-foreground">{formatTimeAgo(request.date)}</span>
                     </div>
                   </div>
                 ))}
 
-              {/* Similar enhanced UI for other sections... */}
+              {activeTab === "alerts" && data.alerts
+                .filter(alert => filter === "all" || alert.priority === filter)
+                .map((alert) => (
+                  <div
+                    key={alert.id}
+                    className="bg-card border rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:border-primary/50"
+                  >
+                    <div className="flex justify-between gap-4">
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-medium">{alert.title}</h3>
+                        <p className="text-sm text-muted-foreground">{alert.message}</p>
+                      </div>
+                    </div>
+                    <div className="text-right mt-2">
+                      <span className="text-xs text-muted-foreground">{formatTimeAgo(alert.date)}</span>
+                    </div>
+                  </div>
+                ))}
+
+              {activeTab === "updates" && data.updates
+                .filter(update => filter === "all" || update.priority === filter)
+                .map((update) => (
+                  <div
+                    key={update.id}
+                    className="bg-card border rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:border-primary/50"
+                  >
+                    <div className="flex justify-between gap-4">
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-medium">{update.title}</h3>
+                        <p className="text-sm text-muted-foreground">{update.message}</p>
+                      </div>
+                    </div>
+                    <div className="text-right mt-2">
+                      <span className="text-xs text-muted-foreground">{formatTimeAgo(update.date)}</span>
+                    </div>
+                  </div>
+                ))}
+
+              {activeTab === "program-links" && data["program-links"]
+                .filter(item => filter === "all" || item.priority === filter)
+                .map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-card border rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:border-primary/50"
+                  >
+                    <div className="flex justify-between gap-4">
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-medium">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">{item.message}</p>
+                        <Button variant="link" className="p-0 h-auto text-xs">
+                          View Program
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-right mt-2">
+                      <span className="text-xs text-muted-foreground">{formatTimeAgo(item.date)}</span>
+                    </div>
+                  </div>
+                ))}
+
+              {activeTab === "stories" && data.stories
+                .filter(story => filter === "all" || story.priority === filter)
+                .map((story) => (
+                  <div
+                    key={story.id}
+                    className="bg-card border rounded-lg p-4 hover:shadow-md transition-all duration-200 hover:border-primary/50"
+                  >
+                    <div className="flex justify-between gap-4">
+                      <div className="flex-1 space-y-2">
+                        <h3 className="font-medium">{story.title}</h3>
+                        <p className="text-sm text-muted-foreground">{story.message}</p>
+                        <Button variant="link" className="p-0 h-auto text-xs">
+                          Read More
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-right mt-2">
+                      <span className="text-xs text-muted-foreground">{formatTimeAgo(story.date)}</span>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         </ScrollArea>
