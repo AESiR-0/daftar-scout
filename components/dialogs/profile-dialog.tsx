@@ -59,6 +59,21 @@ interface FeedbackEntry {
   createdAt: string
 }
 
+interface DaftarOption {
+  id: string;
+  name: string;
+}
+
+interface DaftarDesignation {
+  [daftarId: string]: string;
+}
+
+const daftarOptions: DaftarOption[] = [
+  { id: "1", name: "Women's Network" },
+  { id: "2", name: "Young Professionals Network" },
+  { id: "3", name: "Swiggy" },
+];
+
 const navItems = [
   { title: "Profile", value: "profile", icon: UserCircle },
   { title: "Feature Request", value: "feature", icon: MessageSquarePlus },
@@ -71,6 +86,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const [activeTab, setActiveTab] = useState("profile")
   const [isEditing, setIsEditing] = useState(false)
   const [featureRequest, setFeatureRequest] = useState("")
+  const [selectedDaftar, setSelectedDaftar] = useState<string>("")
+  const [designations, setDesignations] = useState<DaftarDesignation>({})
 
   // Sample feedback history - in real app, this would come from an API
   const [feedbackHistory] = useState<FeedbackEntry[]>([
@@ -115,6 +132,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   }
 
   const handleProfileSave = () => {
+    console.log('Saving designations:', designations);
+    
     toast({
       title: "Profile updated",
       description: "Your profile changes have been saved successfully.",
@@ -129,6 +148,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       variant: "destructive"
     })
     onOpenChange(false)
+  }
+
+  const handleDaftarChange = (daftarId: string) => {
+    setSelectedDaftar(daftarId)
   }
 
   return (
@@ -227,13 +250,43 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                         <Label>Email</Label>
                         <Input disabled={!isEditing} defaultValue="john@example.com" type="email" />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 w-full">
                         <Label>Phone</Label>
                         <Input disabled={!isEditing} defaultValue="+1234567890" />
                       </div>
+                    
+                      <div className="space-y-2">
+                        <Label>Daftar</Label>
+                        <Select 
+                          disabled={!isEditing} 
+                          value={selectedDaftar}
+                          onValueChange={handleDaftarChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Daftar" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {daftarOptions.map((daftar) => (
+                              <SelectItem key={daftar.id} value={daftar.id}>
+                                {daftar.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="space-y-2">
                         <Label>Designation</Label>
-                        <Input disabled={!isEditing} defaultValue="Founder" />
+                        <Input 
+                          disabled={!isEditing || !selectedDaftar}
+                          value={designations[selectedDaftar] || ''}
+                          onChange={(e) => 
+                            setDesignations(prev => ({
+                              ...prev,
+                              [selectedDaftar]: e.target.value
+                            }))
+                          }
+                          placeholder={selectedDaftar ? "Enter designation" : "Select a Daftar first"}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label>Age</Label>

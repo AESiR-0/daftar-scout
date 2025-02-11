@@ -11,10 +11,11 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogProps) {
     const [email, setEmail] = useState("")
+    const [designation, setDesignation] = useState("")
 
     const handleInvite = () => {
         // Handle invite logic here
-        console.log("Inviting:", email)
+        console.log("Inviting:", { email, designation })
         onOpenChange(false)
     }
 
@@ -35,7 +36,21 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
-                    <Button onClick={handleInvite} className="w-full">
+                    <div className="space-y-2">
+                        <Label htmlFor="designation">Designation</Label>
+                        <Input
+                            id="designation"
+                            type="text"
+                            placeholder="Enter designation (e.g. Software Engineer)"
+                            value={designation}
+                            onChange={(e) => setDesignation(e.target.value)}
+                        />
+                    </div>
+                    <Button 
+                        onClick={handleInvite} 
+                        className="w-full"
+                        disabled={!email || !designation}
+                    >
                         Send Invitation
                     </Button>
                 </div>

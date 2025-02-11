@@ -10,7 +10,7 @@ export function LoginClient({ role }: { role: string }) {
         setIsLoading(true)
         try {
             await signIn("google", {
-                callbackUrl: `/${role}`, state: `${window.location.origin}${role}`,
+                callbackUrl: `/${role}/`, state: `${window.location.origin}${role}`,
             },
             )
         } catch (error) {

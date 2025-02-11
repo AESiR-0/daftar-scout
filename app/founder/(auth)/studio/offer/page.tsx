@@ -369,7 +369,7 @@ function OfferCard({
       case "declined":
         return `Declined by: `;
       case "withdrawn":
-        return `Withdrawn by:`;
+        return `Withdrawn by: `;
       default:
         return null;
     }
@@ -379,15 +379,20 @@ function OfferCard({
     <div className="flex flex-col p-4 border rounded-lg transition-colors">
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <time className="text-xs text-muted-foreground">{offer.date}</time>
+          {offer.status === "pending" && (
+            <time className="text-xs text-muted-foreground">{offer.date}</time>
+          )}
           <p className="text-lg font-medium">{offer.scoutName}</p>
           <p className="text-sm text-muted-foreground">Collaboration: {offer.collaboration.join(", ")}</p>
 
-          {/* Status Information */}
+          {/* Status Information with Date Below */}
           {offer.status !== "pending" && offer.logs?.[0]?.user?.founder && (
-            <p className="text-sm text-muted-foreground ">
-              {getStatusInfo()}<FounderProfile founder={offer.logs[0].user.founder} />
-            </p>
+            <div className="mt-1">
+              <p className="text-sm text-muted-foreground">
+                {getStatusInfo()}<FounderProfile founder={offer.logs[0].user.founder} />
+              </p>
+              <time className="text-xs text-muted-foreground block mt-1">{offer.date}</time>
+            </div>
           )}
         </div>
 

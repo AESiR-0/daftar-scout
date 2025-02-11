@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from "../ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import formatDate  from "@/lib/formatDate"
+import formatDate from "@/lib/formatDate"
+import { Label } from "../ui/label"
 
 
 interface TeamDialogProps {
@@ -45,6 +46,7 @@ interface TeamMemberDetails {
   gender: string;
   location: string;
   language: string[];
+  designation: string;
   imageUrl?: string;
 }
 
@@ -53,6 +55,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
     name: "",
     age: "",
     email: "",
+    designation: "",
     phone: "",
     gender: "",
     location: "",
@@ -97,6 +100,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
         phone: "",
         gender: "",
         location: "",
+        designation: "",
         language: [],
         imageUrl: ""
       })
@@ -240,7 +244,16 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                       placeholder="Email"
                       value={formData.email}
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    />
+                    /><div className="space-y-2">
+                      <Label htmlFor="designation">Designation</Label>
+                      <Input
+                        id="designation"
+                        type="text"
+                        placeholder="Enter designation (e.g. Software Engineer)"
+                        value={formData.designation}
+                        onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+                      />
+                    </div>
                     <Button
                       onClick={handleSendInvite}
                       disabled={isInviting || !formData.email}
