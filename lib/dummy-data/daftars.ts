@@ -12,10 +12,12 @@ interface FounderProfileProps {
 
 export interface Pitch {
     id: string
-    name: string
-    status: 'Accepted' | "Ice box" | "Invitation Sent" | "Deal Cancelled" | "Deleted by Founder"
+    name: string 
+    status: 'Accepted' | "Ice box" | "Invitation Sent" | "Deal Cancelled" | "Deleted by Founder" | "Planning" | "Pitched"
     date: string
     scoutName: string
+    organizers: string[]
+    pitchName: string
     postedBy: string
     daftar: string
 }
@@ -72,18 +74,22 @@ export const daftarsData: Daftar[] = [
             {
                 id: "scout-1",
                 name: "AI Healthcare Solution",
-                status: "Ice box",
+                status: "Planning",
                 date: "2024-03-20",
                 scoutName: "Tech Innovation Fund",
+                organizers: ["John Doe", "Sarah Smith"],
+                pitchName: "Healthcare AI Revolution",
                 postedBy: "John Doe",
                 daftar: "Tech Innovation Fund"
             },
             {
                 id: "scout-2",
                 name: "E-commerce Platform",
-                status: "Deleted by Founder",
+                status: "Pitched",
                 date: "2024-03-20",
                 scoutName: "MENA Growth Capital",
+                organizers: ["Hassan Ahmed", "Fatima Al-Sayed"],
+                pitchName: "NextGen E-commerce",
                 postedBy: "Hassan Ahmed",
                 daftar: "MENA Growth Capital"
             }
@@ -110,8 +116,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-3", name: "Islamic Banking Platform", status: "Invitation Sent", date: "2024-03-10", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-4", name: "Crypto Trading Bot", status: "Deleted by Founder", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-3", name: "Islamic Banking Platform", status: "Invitation Sent", date: "2024-03-10", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Islamic Banking Platform" },
+            { id: "scout-4", name: "Crypto Trading Bot", status: "Deleted by Founder", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Crypto Trading Bot" }
         ]
     },
     {
@@ -132,8 +138,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-5", name: "EdTech Platform", status: "Accepted", date: "2024-03-18", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-6", name: "Health Tech App", status: "Invitation Sent", date: "2024-03-22", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-5", name: "EdTech Platform", status: "Accepted", date: "2024-03-18", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "EdTech Platform" },
+            { id: "scout-6", name: "Health Tech App", status: "Invitation Sent", date: "2024-03-22", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Health Tech App" }
         ]
     },
     {
@@ -154,8 +160,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-7", name: "Sustainable Agriculture Tech", status: "Invitation Sent", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-8", name: "Clean Energy Solution", status: "Deal Cancelled", date: "2024-03-15", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-7", name: "Sustainable Agriculture Tech", status: "Invitation Sent", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Sustainable Agriculture Tech" },
+            { id: "scout-8", name: "Clean Energy Solution", status: "Deal Cancelled", date: "2024-03-15", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Clean Energy Solution" }
         ]
     },
     {
@@ -176,8 +182,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-9", name: "E-commerce Platform", status: "Accepted", date: "2024-03-20", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-10", name: "Last-Mile Logistics", status: "Deleted by Founder", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-9", name: "E-commerce Platform", status: "Accepted", date: "2024-03-20", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "E-commerce Platform" },
+            { id: "scout-10", name: "Last-Mile Logistics", status: "Deleted by Founder", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Last-Mile Logistics" }
         ]
     },
     {
@@ -198,8 +204,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-11", name: "Halal Food Delivery", status: "Invitation Sent", date: "2024-03-12", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" },
-            { id: "scout-12", name: "Islamic Fintech App", status: "Deleted by Founder", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund" }
+            { id: "scout-11", name: "Halal Food Delivery", status: "Invitation Sent", date: "2024-03-12", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Halal Food Delivery" },
+            { id: "scout-12", name: "Islamic Fintech App", status: "Deleted by Founder", date: "2024-03-28", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Islamic Fintech App" }
         ]
     }
 ] 
