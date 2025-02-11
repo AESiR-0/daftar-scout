@@ -174,9 +174,9 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogTitle className="px-6 pt-6"> </DialogTitle>
 
-        <DialogContent className="max-w-3xl h-2/3">
-          <Tabs defaultValue="team" className="w-full h-full">
-            <div className="flex items-center justify-between mb-4">
+        <DialogContent className="max-w-3xl h-[80vh] p-0">
+          <Tabs defaultValue="team" className="w-full h-full flex flex-col">
+            <div className="px-6 pt-6">
               <TabsList>
                 <TabsTrigger value="team" className="flex items-center gap-1">
                   Members
@@ -198,37 +198,57 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                 </TabsTrigger>
               </TabsList>
             </div>
-            <ScrollArea className="h-[calc(100%-4rem)]">
-              <TabsContent value="team" className="mt-0 overflow-auto">
-                <div className="space-y-3">
+            
+            <ScrollArea className="flex-1 px-6 pb-6">
+              <TabsContent value="team" className="mt-4 data-[state=active]:block">
+                <div className="space-y-4">
                   {teamMembers.map((member) => (
-                    <div key={member.email}>
-                      <Avatar className="h-12 w-12 mb-2 text-xl">
-                        {member.imageUrl ? (
-                          <AvatarImage src={member.imageUrl} alt={member.name} />
-                        ) : (
-                          <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <h4 className="text-sm font-medium">{member.name}</h4>
-                        <h4 className="text-xs py-1 flex gap-3 text-muted-foreground">
-                          <span> {member.age}</span>
+                    <div key={member.email} className="p-4 border rounded-lg space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-12 w-12 text-xl">
+                          {member.imageUrl ? (
+                            <AvatarImage src={member.imageUrl} alt={member.name} />
+                          ) : (
+                            <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div>
+                          <h4 className="text-sm font-medium">{member.name}</h4>
+                          <p className="text-sm text-muted-foreground">{member.designation}</p>
+                        </div>
+                      </div>
+
+                      <div className="text-xs space-y-2">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <User className="h-3 w-3" />
+                          <span>{member.age}</span>
+                          <span>•</span>
                           <span>{member.gender}</span>
-                        </h4>
-                      </div>
-                      <div className="flex text-xs pb-1 justify-between">
-                        <p>{member.email}</p>
-                        <p>{member.phone}</p>
-                      </div>
-                      <div className="flex text-xs justify-between ">
-                        <span>
-                          Preferred language to connect with investors
-                        </span>
-                        <span className="flex gap-2 flex-wrap">
-                          {member.language.map((language) => (
-                            <span key={language} className="bg-muted p-1 rounded-md">{language}</span>
-                          ))}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Mail className="h-3 w-3" />
+                          <span>{member.email}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="h-3 w-3" />
+                          <span>{member.phone}</span>
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Languages className="h-3 w-3" />
+                            <span>Preferred languages:</span>
+                          </div>
+                          <div className="flex gap-2 flex-wrap pl-5">
+                            {member.language.map((language) => (
+                              <span key={language} className="bg-muted px-2 py-1 rounded-md">
+                                {language}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -329,8 +349,8 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
               </TabsContent>
             </ScrollArea>
           </Tabs>
-        </DialogContent >
-      </Dialog >
+        </DialogContent>
+      </Dialog>
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

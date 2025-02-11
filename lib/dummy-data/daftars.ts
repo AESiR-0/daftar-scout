@@ -1,6 +1,7 @@
 interface FounderProfileProps {
     name: string
     age: string
+    designation: string
     email: string
     phone: string
     gender: string
@@ -60,8 +61,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "John Doe",
             members: [
-                { name: "Sarah Smith", email: "sarah@example.com", age: "25", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "Spanish"], createdAt: "2024-01-01" },
-                { name: "Mike Johnson", email: "mike@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Los Angeles", language: ["English", "French"], createdAt: "2024-01-01" }
+                { name: "Sarah Smith", email: "sarah@example.com", age: "25", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "Spanish"], designation: "CEO", createdAt: "2024-01-01" },
+                { name: "Mike Johnson", email: "mike@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Los Angeles", language: ["English", "French"], designation: "CTO", createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -105,8 +106,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "Jane Smith",
             members: [
-                { name: "Alex Wong", email: "alex@example.com", age: "28", phone: "1234567890", gender: "Male", location: "San Francisco", language: ["English", "Chinese"], createdAt: "2024-01-01" },
-                { name: "Lisa Chen", email: "lisa@example.com", age: "32", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "French"], createdAt: "2024-01-01" }
+                { name: "Alex Wong", email: "alex@example.com", age: "28", phone: "1234567890", gender: "Male", location: "San Francisco", language: ["English", "Chinese"], designation: "CEO", createdAt: "2024-01-01" },
+                { name: "Lisa Chen", email: "lisa@example.com", age: "32", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "French"], designation: "COO", createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -127,8 +128,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "Maria Garcia",
             members: [
-                { name: "Emma Wilson", email: "emma@example.com", age: "27", phone: "1234567890", gender: "Female", location: "London", language: ["English", "Spanish"], createdAt: "2024-01-01" },
-                { name: "Sophie Lee", email: "sophie@example.com", age: "31", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "French"], createdAt: "2024-01-01" }
+                { name: "Emma Wilson", email: "emma@example.com", age: "27", phone: "1234567890", gender: "Female", location: "London", language: ["English", "Spanish"], designation: "CEO", createdAt: "2024-01-01" },
+                { name: "Sophie Lee", email: "sophie@example.com", age: "31", phone: "1234567890", gender: "Female", location: "New York", language: ["English", "French"], designation: "CTO", createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -149,8 +150,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "David Kim",
             members: [
-                { name: "Rachel Green", email: "rachel@example.com", age: "29", phone: "1234567890", gender: "Female", location: "London", language: ["English", "Spanish"], createdAt: "2024-01-01" },
-                { name: "Tom Brown", email: "tom@example.com", age: "33", phone: "1234567890", gender: "Male", location: "New York", language: ["English", "French"], createdAt: "2024-01-01" }
+                { name: "Rachel Green", email: "rachel@example.com", age: "29", phone: "1234567890", gender: "Female", location: "London", language: ["English", "Spanish"], designation: "COO", createdAt: "2024-01-01" },
+                { name: "Tom Brown", email: "tom@example.com", age: "33", phone: "1234567890", gender: "Male", location: "New York", language: ["English", "French"], designation: "Founder", createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -171,8 +172,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "Hassan Ahmed",
             members: [
-                { name: "Fatima Al-Sayed", email: "fatima@example.com", age: "35", phone: "1234567890", gender: "Female", location: "Dubai", language: ["English", "Arabic"], createdAt: "2024-01-01" },
-                { name: "Omar Khan", email: "omar@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Cairo", language: ["English", "Arabic"], createdAt: "2024-01-01" }
+                { name: "Fatima Al-Sayed", email: "fatima@example.com", age: "35", phone: "1234567890", gender: "Female", location: "Dubai", language: ["English", "Arabic"], designation: "Co-Founder", createdAt: "2024-01-01" },
+                { name: "Omar Khan", email: "omar@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Cairo", language: ["English", "Arabic"], designation: "Co-Founder", createdAt: "2024-01-01" }
             ]
         },
         subscription: {
@@ -193,8 +194,8 @@ export const daftarsData: Daftar[] = [
         team: {
             owner: "Ahmad Ibrahim",
             members: [
-                { name: "Zainab Hassan", email: "zainab@example.com", age: "35", phone: "1234567890", gender: "Female", location: "Dubai", language: ["English", "Arabic"], createdAt: "2024-01-01" },
-                { name: "Yusuf Ali", email: "yusuf@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Cairo", language: ["English", "Arabic"], createdAt: "2024-01-01" }
+                { name: "Zainab Hassan", email: "zainab@example.com", age: "35", phone: "1234567890", gender: "Female", location: "Dubai", language: ["English", "Arabic"], designation: "CTO", createdAt: "2024-01-01" },
+                { name: "Yusuf Ali", email: "yusuf@example.com", age: "30", phone: "1234567890", gender: "Male", location: "Cairo", language: ["English", "Arabic"], designation: "Co-Founder", createdAt: "2024-01-01" }
             ]
         },
         subscription: {
