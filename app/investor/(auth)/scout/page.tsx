@@ -10,38 +10,38 @@ const scouttatus = {
   planning: [
     {
       title: "Green Energy Initiative",
-      postedby: "John Doe",
+      postedby: "Nithin Kamath",
       status: "Planning",
     },
     {
       title: "Healthcare Tech Fund",
-      postedby: "Sarah Johnson",
+      postedby: "Anupam Mittal",
       status: "Planning",
     },
   ],
   scheduled: [
     {
       title: "AI Ventures",
-      postedby: "John Doe",
+      postedby: "Aman Gupta",
       status: "Scheduled",
     },
   ],
   open: [
     {
       title: "Tech Startup Fund",
-      postedby: "John Doe",
+      postedby: "GUSEC",
       status: "Open",
     },
     {
       title: "Real Estate Growth",
-      postedby: "John Doe",
+      postedby: "Y Combinator",
       status: "Open",
     },
   ],
   closed: [
     {
       title: "Fintech Innovation",
-      postedby: "John Doe",
+      postedby: "Narayan Murthy",
       status: "Closed",
     },
   ],
@@ -100,7 +100,7 @@ export default function scoutPage() {
                 >
                   <div className="p-4 m-2 rounded-[0.35rem]  hover:border-muted-foreground hover:border   bg-background transition-colors">
                     <h3 className="font-medium text-sm text-foreground">{program.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-1"> Collaborator : <span className="font-medium">{program.postedby}</span></p>
+                    <p className="text-xs text-muted-foreground mt-1"> Collaboration : <span className="font-medium">{program.postedby}</span></p>
                   </div>
                 </Link>
               ))}
