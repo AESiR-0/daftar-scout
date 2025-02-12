@@ -133,7 +133,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
   const handleProfileSave = () => {
     console.log('Saving designations:', designations);
-    
+
     toast({
       title: "Profile updated",
       description: "Your profile changes have been saved successfully.",
@@ -240,25 +240,48 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
                   {/* Profile Details */}
                   <div className="col-span-2 space-y-6">
-
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label>Name</Label>
-                        <Input disabled={!isEditing} defaultValue="John Doe" />
+                        <Label>First Name</Label>
+                        <Input disabled={!isEditing} defaultValue="John" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Last Name</Label>
+                        <Input disabled={!isEditing} defaultValue="Doe" />
                       </div>
                       <div className="space-y-2">
                         <Label>Email</Label>
                         <Input disabled={!isEditing} defaultValue="john@example.com" type="email" />
                       </div>
+                      
                       <div className="space-y-2 w-full">
                         <Label>Phone</Label>
                         <Input disabled={!isEditing} defaultValue="+1234567890" />
                       </div>
-                    
+
+                      <div className="space-y-2">
+                        <Label>Gender</Label>
+                        <Select disabled={!isEditing}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                            <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Age</Label>
+                        <Input disabled={!isEditing} defaultValue="25" />
+                      </div>
+
                       <div className="space-y-2">
                         <Label>Daftar</Label>
-                        <Select 
-                          disabled={!isEditing} 
+                        <Select
+                          disabled={!isEditing}
                           value={selectedDaftar}
                           onValueChange={handleDaftarChange}
                         >
@@ -276,10 +299,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       </div>
                       <div className="space-y-2">
                         <Label>Designation</Label>
-                        <Input 
+                        <Input
                           disabled={!isEditing || !selectedDaftar}
                           value={designations[selectedDaftar] || ''}
-                          onChange={(e) => 
+                          onChange={(e) =>
                             setDesignations(prev => ({
                               ...prev,
                               [selectedDaftar]: e.target.value
@@ -287,13 +310,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                           }
                           placeholder={selectedDaftar ? "Enter designation" : "Select a Daftar first"}
                         />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Age</Label>
-                        <Input disabled={!isEditing} defaultValue="25" />
-                      </div>
-
-                      <div className="space-y-2">
+                      </div><div className="space-y-2 col-span-2">
                         <Label>Country</Label>
                         <Select disabled={!isEditing}>
                           <SelectTrigger>

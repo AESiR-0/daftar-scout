@@ -14,6 +14,7 @@ export interface FounderProfileProps {
         location: string
         language: string[]
         imageUrl?: string
+        designation: string
     }
 }
 
@@ -33,7 +34,7 @@ export function FounderProfile({ founder }: FounderProfileProps) {
 
     return (
         <HoverCard>
-            <HoverCardTrigger className="inline-flex items-center  hover:underline cursor-pointer">
+            <HoverCardTrigger className="inline-flex items-center underline-offset-1 underline cursor-pointer">
                 {founder.name}
             </HoverCardTrigger>
             <HoverCardContent className="w-72">
@@ -45,7 +46,8 @@ export function FounderProfile({ founder }: FounderProfileProps) {
                     )}
                 </Avatar>
                 <div className="flex flex-col">
-                    <h4 className="text-sm font-medium">{founder.name}</h4>
+                     <h4 className="text-sm font-medium">{founder.name}</h4>
+                    <h4 className="text-sm font-medium">{founder.designation}</h4>
                     <h4 className="text-xs  flex gap-1 text-muted-foreground">
                         <span>{founder.gender}</span>
                         <span> {founder.age}</span>
@@ -66,10 +68,11 @@ export function FounderProfile({ founder }: FounderProfileProps) {
                     </div>
 
                 </div>
+                <br />
                 <div className="flex text-xs flex-col gap-1">
                     <span>
 
-                        Preferred language to connect with investors
+                        Preferred languages to speak with investors
                     </span>
                     <span className="flex gap-2 flex-wrap">
                         {founder.language.map((language) => (

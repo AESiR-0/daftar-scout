@@ -30,6 +30,7 @@ const approvalRequests = [
             phone: "1234567890",
             location: "New York, NY",
             language: ["English", "Tamil"],
+            designation: "Co-Founder & CTO",
         },
     },
     {
@@ -43,6 +44,7 @@ const approvalRequests = [
             age: "28",
             gender: "Female",
             email: "sarah.johnson@example.com",
+            designation: "Product Lead",
             phone: "0987654321",
             language: ["English", "Spanish"],
             location: "San Francisco, CA",
@@ -60,6 +62,7 @@ const approvalRequests = [
             gender: "Male",
             email: "michael.chen@example.com",
             phone: "0987654321",
+            designation: "Technical Advisor",
             language: ["English", "Chinese"],
             location: "San Francisco, CA",
         },
@@ -102,7 +105,6 @@ export default function PitchPage() {
                             <div className="space-y-1">
                                 <FounderProfile founder={request.profile} />
 
-                                <p className="text-xs text-muted-foreground">{request.designation}</p>
                                 <p className="text-xs text-muted-foreground">
                                     {request.date}
                                 </p>

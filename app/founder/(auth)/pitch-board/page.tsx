@@ -8,7 +8,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { daftarsData } from "@/lib/dummy-data/daftars"
 
 // Define the status order based on user role
-const founderStatusOrder = ["Planning", "Inbox", "Accepted", "Declined", "Withdrawn", "Deleted"]
+const founderStatusOrder = [ "Inbox", "Accepted", "Declined", "Withdrawn", "Deleted"]
 const investorStatusOrder = ["Planning", "Scheduled", "Open", "Closed"]
 
 // Use founder status order by default (you can make this dynamic based on user role)
@@ -58,15 +58,9 @@ export default function PitchBoardPage() {
     return (
         <div className="space-y-6 mx-auto flex-col items-center justify-center  px-20   ">
             <div className="flex items-center justify-between ">
-                <h2 className="text-lg font-semibold">Pitch Board</h2>
+                <h2 className="text-lg font-semibold">Deal Board</h2>
                 <div className="flex items-center gap-2">
-                    <Button
-                        size="sm"
-                        className="h-9 bg-muted hover:bg-muted/80 text-white"
-                        onClick={() => setCreateDaftarOpen(true)}
-                    >
-                        New Daftar
-                    </Button>
+                  
                     <Link href="/founder/daftar">
                         <Button size="sm" variant="outline" className="h-9">
                             My Daftar
@@ -98,7 +92,7 @@ export default function PitchBoardPage() {
                                         {statusPitches.map((pitch) => (
                                             <Link
                                                 key={pitch.id}
-                                                href={`/founder/scout/${pitch.name.split(' ').join('-')}`}
+                                                href={`/founder/studio`}
                                             >
                                                 <div className="p-4 rounded-[0.35rem]  mb-2 bg-background border 
                                                     hover:bg-muted hover:border-muted 

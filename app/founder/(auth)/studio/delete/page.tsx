@@ -18,6 +18,7 @@ interface TeamMember {
   phone: string
   gender: string
   location: string
+  designation: string
   language: string[]
   imageUrl?: string
 }
@@ -33,6 +34,7 @@ const teamMembers: TeamMember[] = [
     phone: "+91 9876543210",
     gender: "Male",
     location: "Bangalore, India",
+    designation: "Founder",
     language: ["English", "Hindi"],
     isApproved: false,
     isUser: true
@@ -45,6 +47,7 @@ const teamMembers: TeamMember[] = [
     phone: "+91 9876543211",
     gender: "Female",
     location: "Mumbai, India",
+    designation: "CTO",
     language: ["English", "Marathi"],
     isApproved: false,
     isUser: false
@@ -110,7 +113,7 @@ export default function DeletePage() {
               </div>
 
               {deleteClicked && pendingApprovals > 0 && (
-                <p className="text-sm text-yellow-600 font-medium mb-4">
+                <p className="text-sm  font-medium mb-4">
                   Waiting for approval from {pendingApprovals} team member{pendingApprovals !== 1 ? 's' : ''}
                 </p>
               )}

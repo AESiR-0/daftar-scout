@@ -76,12 +76,12 @@ export default function DaftarPage() {
                         </Button>
                         <Link href="/founder/pitch-board">
                             <Button size="sm" variant="outline" className="h-9">
-                                Pitch Board
+                                Deal Board
                             </Button>
                         </Link>
                     </div>
                     {/* {filteredDaftars.map((daftar) =>  */}
-                    <ScrollArea className="h-[30rem]">
+                    <ScrollArea className="h-[calc(100vh-10rem)]">
                         <div className=" mx-auto px-4 space-y-5">
                             {daftarsData.map((daftar) => (
                                 <div

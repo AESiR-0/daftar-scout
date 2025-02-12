@@ -23,6 +23,7 @@ import { ScrollArea } from "../ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import formatDate from "@/lib/formatDate"
 import { Label } from "../ui/label"
+import { FounderProfile } from "@/components/FounderProfile"
 
 
 interface TeamDialogProps {
@@ -39,7 +40,8 @@ interface TeamDialogProps {
 }
 
 interface TeamMemberDetails {
-  name: string;
+  firstName: string;
+  lastName: string;
   age: string;
   email: string;
   phone: string;
@@ -52,14 +54,15 @@ interface TeamMemberDetails {
 
 export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDialogProps) {
   const [formData, setFormData] = useState<TeamMemberDetails>({
-    name: "",
+    firstName: "",
+    lastName: "",
     age: "",
     email: "",
-    designation: "",
     phone: "",
     gender: "",
     location: "",
     language: [],
+    designation: "",
     imageUrl: ""
   })
   // const { inviteTeamMember } = api.founderTeam
@@ -94,7 +97,8 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
         variant: "success",
       })
       setFormData({
-        name: "",
+        firstName: "",
+        lastName: "",
         age: "",
         email: "",
         phone: "",
@@ -119,8 +123,8 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
     }
   }
 
-  const isFormValid = formData.name &&
-    formData.age &&
+  const isFormValid = formData.firstName &&
+    formData.lastName &&
     formData.email &&
     formData.phone
 
@@ -175,9 +179,9 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
         <DialogTitle className="px-6 pt-6"> </DialogTitle>
 
         <DialogContent className="max-w-3xl h-[80vh] p-0">
-          <Tabs defaultValue="team" className="w-full h-full flex flex-col">
-            <div className="px-6 pt-6">
-              <TabsList>
+          <Tabs defaultValue="team" className="w-full  h-full flex flex-col">
+            <div className="px-6 pt-6 ">
+              <TabsList className="rounded-[0.35rem]">
                 <TabsTrigger value="team" className="flex items-center gap-1">
                   Members
                   <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
@@ -198,86 +202,112 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                 </TabsTrigger>
               </TabsList>
             </div>
-            
+
             <ScrollArea className="flex-1 px-6 pb-6">
-              <TabsContent value="team" className="mt-4 data-[state=active]:block">
-                <div className="space-y-4">
-                  {teamMembers.map((member) => (
-                    <div key={member.email} className="p-4 border rounded-lg space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12 text-xl">
-                          {member.imageUrl ? (
-                            <AvatarImage src={member.imageUrl} alt={member.name} />
-                          ) : (
-                            <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div>
-                          <h4 className="text-sm font-medium">{member.name}</h4>
-                          <p className="text-sm text-muted-foreground">{member.designation}</p>
-                        </div>
+              <TabsContent value="team" className="mt-4  data-[state=active]:block">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  {teamMembers.map((founder) => (
+                    <div key={founder.email} className="p-4 border rounded-[0.35rem]">
+
+                      <Avatar className="h-20 w-20 mb-5 text-3xl">
+                        {founder.imageUrl ? (
+                          <AvatarImage src={founder.imageUrl} alt={founder.name} />
+                        ) : (
+                          <AvatarFallback>{getInitials(founder.name)}</AvatarFallback>
+                        )}
+                      </Avatar>
+                      <div className="flex flex-col ">
+                        <h4 className="text-sm font-medium">{founder.name}</h4>
+                        <h4 className="text-sm font-medium">{founder.designation}</h4>
+                        <h4 className="text-xs  flex gap-1 text-muted-foreground">
+                          <span>{founder.gender}</span>
+                          <span> {founder.age}</span>
+                        </h4>
                       </div>
-
-                      <div className="text-xs space-y-2">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <User className="h-3 w-3" />
-                          <span>{member.age}</span>
-                          <span>•</span>
-                          <span>{member.gender}</span>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-muted-foreground">
+                      <div className="flex text-xs flex-col">
+                        <div className="flex items-center gap-2">
                           <Mail className="h-3 w-3" />
-                          <span>{member.email}</span>
+                          <p className="underline">{founder.email}</p>
                         </div>
-
-                        <div className="flex items-center gap-2 text-muted-foreground">
+                        <div className="flex items-center gap-2">
                           <Phone className="h-3 w-3" />
-                          <span>{member.phone}</span>
+                          <p>{founder.phone}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3 w-3" />
+                          <p>{founder.location}</p>
                         </div>
 
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Languages className="h-3 w-3" />
-                            <span>Preferred languages:</span>
-                          </div>
-                          <div className="flex gap-2 flex-wrap pl-5">
-                            {member.language.map((language) => (
-                              <span key={language} className="bg-muted px-2 py-1 rounded-md">
-                                {language}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
                       </div>
+                      <br />
+                      <div className="flex text-xs flex-col gap-1">
+                        <span>
+
+                          Preferred languages to speak with investors
+                        </span>
+                        <span className="flex gap-2 flex-wrap">
+                          {founder.language.map((language) => (
+                            <span key={language} className="bg-muted p-1 rounded-md">{language}</span>
+                          ))}</span>
+                      </div>
+                      <br />
+                      <div className="text-xs">
+                        <strong>On Daftar Since</strong> <br /> {formatDate(new Date().toISOString())}
+                      </div>
+
+
+
+
+
+
                     </div>
                   ))}
                 </div>
               </TabsContent>
 
               <TabsContent value="invite" className="mt-0">
-                <div className="p-4 rounded-[0.35rem]  border space-y-4">
+                <div className="p-4 rounded-[0.35rem] border space-y-4">
                   <h3 className="font-medium">Invite Team Member</h3>
-                  <div className="space-y-3">
-                    <Input
-                      type="email"
-                      placeholder="Email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    /><div className="space-y-2">
-                      <Label htmlFor="designation">Designation</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>First Name</Label>
                       <Input
-                        id="designation"
-                        type="text"
-                        placeholder="Enter designation (e.g. Software Engineer)"
-                        value={formData.designation}
-                        onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        placeholder="Enter first name"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Last Name</Label>
+                      <Input
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        placeholder="Enter last name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Designation</Label>
+                      <Input
+                        value={formData.designation}
+                        onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                        placeholder="Enter designation"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Email</Label>
+                      <Input
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="Enter email address"
+                        type="email"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-4">
                     <Button
                       onClick={handleSendInvite}
-                      disabled={isInviting || !formData.email}
-                      className="w-full"
+                      disabled={!formData.firstName || !formData.lastName || !formData.email || !formData.designation}
+                      className="bg-primary hover:bg-primary/90"
                     >
                       {isInviting ? (
                         <>
@@ -285,7 +315,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                           Sending Invite...
                         </>
                       ) : (
-                        'Send Invite'
+                        'Send Invitation'
                       )}
                     </Button>
                   </div>
