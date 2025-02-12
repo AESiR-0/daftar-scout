@@ -280,7 +280,7 @@ export default function ProgramDetailsPage() {
   return (
     <div className="space-y-6 max-w-6xl container mx-auto">
       {/* Header Section */}
-      <div className="flex items-end justify-between gap-2">
+      <div className="flex items-end justify-end w-full gap-2">
         <div className="flex items-center justify-end gap-3">
           <Button
             size="sm"
