@@ -81,7 +81,7 @@ export default function scoutPage() {
         {Object.entries(filteredscout).map(([status, scout]) => (
           <div
             key={status}
-            className="bg-[#0e0e0e] rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
+            className=" bg-muted/30  rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -92,13 +92,13 @@ export default function scoutPage() {
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-5 ">
               {scout.map((program) => (
                 <Link
                   key={program.title}
                   href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}`}
                 >
-                  <div className="p-4 m-2 rounded-[0.35rem]  hover:border-muted-foreground hover:border   bg-[#1f1f1f] transition-colors">
+                  <div className="p-4 m-2 rounded-[0.35rem]  hover:border-muted-foreground hover:border   bg-background transition-colors">
                     <h3 className="font-medium text-sm text-foreground">{program.title}</h3>
                     <p className="text-xs text-muted-foreground mt-1"> Collaborator : <span className="font-medium">{program.postedby}</span></p>
                   </div>

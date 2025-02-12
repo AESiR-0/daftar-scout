@@ -88,7 +88,7 @@ export default function PitchBoardPage() {
                                 </div>
 
                                 <ScrollArea className="h-[calc(100vh-16rem)]">
-                                    <div className="space-y-3 pr-4">
+                                    <div className="space-y-3 ">
                                         {statusPitches.map((pitch) => (
                                             <Link
                                                 key={pitch.id}

@@ -22,6 +22,7 @@ import { LaunchProgramDialog } from "@/components/dialogs/launch-program-dialog"
 import Link from "next/link"
 import { InsightsDialog } from "@/components/dialogs/insights-dialog"
 import { useSearch } from "@/lib/context/search-context"
+import { formatDate } from "@/lib/format-date"
 
 interface ColumnPitch {
   id: string;
@@ -97,6 +98,7 @@ interface Scout {
   id: string;
   name: string;
   status: ScoutStatus;
+  scheduledDate?: string;
   // ... other scout properties
 }
 
@@ -107,6 +109,7 @@ const scouttatus = {
       title: "Green Energy Initiative",
       postedby: "John Doe",
       status: "Planning",
+      scheduledDate: "2024-04-15"
     },
     {
       title: "Healthcare Tech Fund",
@@ -119,6 +122,7 @@ const scouttatus = {
       title: "AI Ventures",
       postedby: "John Doe",
       status: "Scheduled",
+      scheduledDate: "2024-04-20"
     },
   ],
   open: [
@@ -141,18 +145,25 @@ const scouttatus = {
     },
   ],
 }
-const getScoutStatus = (scoutName: string): string => {
+
+const getScoutStatus = (scoutName: string): { status: string; scheduledDate?: string } => {
   const planningScout = scouttatus.planning.find(scout =>
     scout.title.toLowerCase().split(' ').join('-') === scoutName.toLowerCase()
-  )?.status
-
+  )
+  
   const scheduledScout = scouttatus.scheduled.find(scout =>
     scout.title.toLowerCase().split(' ').join('-') === scoutName.toLowerCase()
-  )?.status
+  )
 
-  return planningScout || scheduledScout || 'active'
+  if (planningScout) {
+    return { status: planningScout.status, scheduledDate: planningScout.scheduledDate }
+  }
+  if (scheduledScout) {
+    return { status: scheduledScout.status, scheduledDate: scheduledScout.scheduledDate }
+  }
+  
+  return { status: 'active' }
 }
-
 
 export default function ProgramDetailsPage() {
   const router = useRouter()
@@ -164,20 +175,76 @@ export default function ProgramDetailsPage() {
     return <div>Scout not found</div>
   }
   else {
-    const scoutStatus = getScoutStatus(scout)
+    const { status: scoutStatus, scheduledDate } = getScoutStatus(scout)
 
     if (scoutStatus === 'Planning' || scoutStatus === 'Scheduled') {
-      return <div className="text-center flex-col text-xl text-muted-foreground flex items-center justify-center gap-3 h-96">
-        <div className="text-2xl font-bold">No pitches available</div>
-        <div className="text-sm text-muted-foreground">
-          <p>
-            <span>Scout is in {scoutStatus} status</span>
-          </p>
+      return (
+        <div className="space-y-6 max-w-6xl container mx-auto">
+          {/* Header Section */}
+          <div className="flex items-end justify-between w-full gap-2">
+            <div className="flex items-center justify-end w-full gap-3">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setLaunchProgramOpen(true)}
+              >
+                <span className="text-xs">Launch Program</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setEndScoutingOpen(true)}
+              >
+                End Scouting
+              </Button>
+              <Link href={`/investor/studio/details?mode=edit&programId=${params.slug}`}>
+                <Button variant="outline" size="sm">
+                  <span className="text-xs">Studio</span>
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setUpdatesOpen(true)}
+              >
+                Updates
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInsightsOpen(true)}
+              >
+                Insights
+              </Button>
+              <Button
+                variant={"outline"}
+                className="text-white"
+                size="sm"
+                onClick={() => {
+                  const url = window.location.href;
+                  navigator.clipboard.writeText(url).then(() => {
+                    // You may want to add a toast notification here
+                    alert("Link copied to clipboard!");
+                  });
+                }}
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+
+            </div>
+          </div>
+
+          {/* Updated message section */}
+          <div className="text-center flex-col text-xl text-muted-foreground flex items-start justify-start gap-3 h-96">
+            <div className="text-2xl font-bold">The Scout is not live</div>
+            {scheduledDate && (
+              <div className="text-sm text-muted-foreground">
+                <p>Scheduled Date: {formatDate(scheduledDate)}</p>
+              </div>
+            )}
+          </div>
         </div>
-        <Button className="mt-4 bg-muted hover:bg-muted/80" onClick={() => router.back()}>
-          <span className="text-md ">Go Back</span>
-        </Button>
-      </div>
+      )
     }
   }
   const [endScoutingOpen, setEndScoutingOpen] = useState(false)
@@ -214,7 +281,7 @@ export default function ProgramDetailsPage() {
     <div className="space-y-6 max-w-6xl container mx-auto">
       {/* Header Section */}
       <div className="flex items-end justify-between gap-2">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end gap-3">
           <Button
             size="sm"
             variant="outline"
