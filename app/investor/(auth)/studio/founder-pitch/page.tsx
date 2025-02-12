@@ -57,34 +57,34 @@ const questionsData = {
   defaultQuestions: [
     {
       id: 1,
-      question: "What problem are you solving?",
+      question: "Introduce yourself",
       videoUrl: "/videos/problem.mp4",
       previewImage: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4"
     },
     {
       id: 2,
-      question: "How big is the market opportunity?",
+      question: "How did you come up with the idea  ",
       videoUrl: "/videos/market.mp4",
       previewImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f"
     },
     {
       id: 3,
-      question: "What's your unique solution?",
+      question: "What is the problem are you solving, and why is it really important for you to solve it",
       videoUrl: "/videos/solution.mp4"
     },
     {
       id: 4,
-      question: "Who is your target customer?",
+      question: "Who are your customers, and why would they pay for it",
       videoUrl: "/videos/customer.mp4"
     },
     {
       id: 5,
-      question: "What's your business model?",
+      question: "How much have you worked on your startup, and where do you see it in 3 years",
       videoUrl: "/videos/business.mp4"
     },
     {
       id: 6,
-      question: "Who is on your team?",
+      question: "What challenges are you facing, and what support do you need",
       videoUrl: "/videos/team.mp4"
     }
   ],

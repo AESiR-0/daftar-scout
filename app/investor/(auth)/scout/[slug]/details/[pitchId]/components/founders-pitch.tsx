@@ -59,12 +59,12 @@ interface FoundersPitchSectionProps {
 }
 
 const defaultQuestions = [
-    { id: 1, question: "What inspired you to start this venture?" },
-    { id: 2, question: "What problem are you solving and for whom?" },
-    { id: 3, question: "What's your unique value proposition?" },
-    { id: 4, question: "Who are your competitors and what's your advantage?" },
-    { id: 5, question: "What's your business model and go-to-market strategy?" },
-    { id: 6, question: "What are your funding requirements and use of funds?" },
+    { id: 1, question: "Introduce yourself" },
+    { id: 2, question: "How did you come up with the idea" },
+    { id: 3, question: "What is the problem are you solving, and why is it really important for you to solve it" },
+    { id: 4, question: "Who are your customers, and why would they pay for it" },
+    { id: 5, question: "How much have you worked on your startup, and where do you see it in 3 years" },
+    { id: 6, question: "What challenges are you facing, and what support do you need" },
 ]
 
 export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitchSectionProps) {
