@@ -6,7 +6,7 @@ import { Modal } from '../Modal'
 export function HeroSection() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     return (
-        <header className="text-left z-1 py-5 px-5">
+        <header className="text-left z-1 pt-5 pb-2 px-5">
             <h1 className="text-4xl md:text-4xl">
                 <span className='flex items-center justify-between'>
                     <span className="flex items-center">
@@ -14,7 +14,7 @@ export function HeroSection() {
                         <span className=''>
                             <span className='text-blue-500'>Daftar</span> Operating System
                         </span></span>
-                    <span onClick={() => setIsModalOpen(true)} className="text-white rounded flex items-center hover:scale-95 py-2 px-2 transition-all duration-300 hover:cursor-pointer bg-blue-500 text-lg  rounded-md">
+                    <span onClick={() => setIsModalOpen(true)} className="text-white rounded flex items-center hover:scale-95 py-2 px-2 transition-all duration-300 hover:cursor-pointer bg-blue-500 text-lg  ">
                         Our Story
                     </span>
                 </span>
