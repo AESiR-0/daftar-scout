@@ -98,7 +98,7 @@ export default function scoutPage() {
                   key={program.title}
                   href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}`}
                 >
-                  <div className="p-4 m-2 rounded-[0.3rem] hover:border-muted-foreground hover:border   bg-[#1f1f1f] transition-colors">
+                  <div className="p-4 m-2 rounded-[0.35rem]  hover:border-muted-foreground hover:border   bg-[#1f1f1f] transition-colors">
                     <h3 className="font-medium text-sm text-foreground">{program.title}</h3>
                     <p className="text-xs text-muted-foreground mt-1"> Collaborator : <span className="font-medium">{program.postedby}</span></p>
                   </div>
@@ -106,7 +106,7 @@ export default function scoutPage() {
               ))}
 
               {scout.length === 0 && (
-                <div className="text-center py-8 text-sm text-muted-foreground bg-background/5 rounded-[0.3rem] border border-border">
+                <div className="text-center py-8 text-sm text-muted-foreground bg-background/5 rounded-[0.35rem]  border border-border">
                   No scout in {status}
                 </div>
               )}

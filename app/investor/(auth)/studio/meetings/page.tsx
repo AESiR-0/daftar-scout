@@ -85,7 +85,7 @@ export default function MeetingsPage() {
                             {pitchDetails.meetings.map((meeting) => (
                                 <div
                                     key={meeting.id}
-                                    className={`p-4 border rounded-[0.3rem] space-y-2 cursor-pointer  transition-colors ${selectedMeeting === meeting.id ? 'border-gray-600' : ''
+                                    className={`p-4 border rounded-[0.35rem]  space-y-2 cursor-pointer  transition-colors ${selectedMeeting === meeting.id ? 'border-gray-600' : ''
                                         }`}
                                     onClick={() => handleMeetingClick(meeting.id)}
                                 >
@@ -105,7 +105,7 @@ export default function MeetingsPage() {
 
                         {/* Meeting Details */}
                         {selectedMeetingDetails && (
-                            <div className="border rounded-[0.3rem] p-4 space-y-4">
+                            <div className="border rounded-[0.35rem]  p-4 space-y-4">
                                 <div className="space-y-4">
                                     <div>
                                         <h3 className="font-medium">{selectedMeetingDetails.name}</h3>

@@ -164,7 +164,7 @@ export function UpdatesDialog({
                             {updates.map((update) => (
                                 <div
                                     key={update.id}
-                                    className="p-4 rounded-[0.3rem] border group bg-background"
+                                    className="p-4 rounded-[0.35rem]  border group bg-background"
                                 >
                                     <div className="flex items-start justify-between">
                                         <p className="text-sm text-muted-foreground">

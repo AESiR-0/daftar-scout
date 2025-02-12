@@ -75,19 +75,19 @@ export default function PitchBoardPage() {
                 </div>
             </div>
 
-            <ScrollArea className="w-[calc(100vw-24rem)] flex justify-center items-center   rounded-lg">
+            <ScrollArea className="w-[calc(100vw-24rem)] flex justify-center items-center   rounded-[0.35rem] ">
                 <div className="flex gap-6 p-1">
                     {statusOrder.map(status => {
                         const statusPitches = filteredPitches[status] || []
                         return (
                             <div
                                 key={status}
-                                className="flex-none w-[300px] bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)]"
+                                className="flex-none w-[300px] bg-muted/30 rounded-[0.35rem]  p-4 min-h-[calc(100vh-12rem)]"
                             >
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-2">
                                         <h3 className="font-medium">{status}</h3>
-                                        <div className="text-xs text-muted-foreground bg-muted rounded-[0.3rem] px-2 py-1">
+                                        <div className="text-xs text-muted-foreground bg-muted rounded-[0.35rem]  px-2 py-1">
                                             {statusPitches.length}
                                         </div>
                                     </div>
@@ -100,7 +100,7 @@ export default function PitchBoardPage() {
                                                 key={pitch.id}
                                                 href={`/founder/scout/${pitch.name.split(' ').join('-')}`}
                                             >
-                                                <div className="p-4 rounded-[0.3rem] mb-2 bg-background border 
+                                                <div className="p-4 rounded-[0.35rem]  mb-2 bg-background border 
                                                     hover:bg-muted hover:border-muted 
                                                     transition-all duration-200 ease-in-out
                                                     cursor-pointer"

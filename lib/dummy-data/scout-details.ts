@@ -52,7 +52,7 @@ export const scoutDetailsData: ScoutDetails[] = [
             {
                 name: "Daftar OS",
                 daftarName: "Daftar Open Source",
-                structure: "Technology Company",
+                structure: "Investment Banker",
                 website: "https://daftar.com",
                 location: "Dubai, UAE",
                 onDaftarSince: "2023-01-15",

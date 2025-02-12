@@ -132,7 +132,7 @@ function InviteContent() {
 
         {/* Upload Section */}
         <div
-          className="border-2 border-dashed rounded-[0.3rem] p-8"
+          className="border-2 border-dashed rounded-[0.35rem]  p-8"
           onClick={handleUpload}
         >
           <div className="flex flex-col items-center gap-2 cursor-pointer">
@@ -157,7 +157,7 @@ function InviteContent() {
             {files.map((file) => (
               <div
                 key={file.id}
-                className="flex items-center justify-between p-4 rounded-[0.3rem] bg-muted/50"
+                className="flex items-center justify-between p-4 rounded-[0.35rem]  bg-muted/50"
               >
                 <div className="flex items-center gap-3">
                   <div>
@@ -205,7 +205,7 @@ function InviteContent() {
             {invitedPeople.map((person) => (
               <div
                 key={person.id}
-                className="flex items-center justify-between p-4 rounded-[0.3rem] bg-muted/50"
+                className="flex items-center justify-between p-4 rounded-[0.35rem]  bg-muted/50"
               >
                 <div className="flex items-center gap-3">
                   <div>

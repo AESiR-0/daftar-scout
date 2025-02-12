@@ -72,7 +72,7 @@ export default function InvestorQuestionsPage() {
                                         <video
                                             src={previewUrl}
                                             controls
-                                            className="w-full rounded-[0.3rem] aspect-video"
+                                            className="w-full rounded-[0.35rem]  aspect-video"
                                         />
                                         <div className="flex gap-2">
                                             <Button
@@ -146,7 +146,7 @@ export default function InvestorQuestionsPage() {
                                 {questions.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="p-4 rounded-[0.3rem] bg-muted/50 cursor-pointer hover:bg-muted/70 transition-colors"
+                                        className="p-4 rounded-[0.35rem]  bg-muted/50 cursor-pointer hover:bg-muted/70 transition-colors"
                                         onClick={() => {
                                             setQuestionId(item.id);
                                             const question = questions.find(q => q.id === item.id);

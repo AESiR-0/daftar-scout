@@ -6,6 +6,7 @@ import { BookmarkButton } from "@/components/bookmark-button"
 import { useBookmarks } from "@/lib/context/bookmark-context"
 import { daftarsData } from "@/lib/dummy-data/daftars"
 import { InvestorProfile } from "@/components/InvestorProfile"
+import { ChevronRight } from "lucide-react"
 
 export default function IncubationPage() {
     const router = useRouter()
@@ -17,18 +18,18 @@ export default function IncubationPage() {
 
     return (
         <div className="container mx-auto px-20 py-6">
-            <div className="space-y-10">
+            <div className="space-y-5">
                 {filteredScouts.map((scout) => (
                     <div onClick={() => router.push(`/founder/scout/${scout.slug}`)} key={scout.slug}>
 
-                        <div className="bg-[#1a1a1a]  hover:bg-[#252525] py-3 p-4 transition-colors">
+                        <div className="bg-[#1a1a1a] rounded-[0.35rem]  hover:bg-[#252525] hover:border hover:border-muted-foreground py-3 p-4 transition-colors cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="flex-1 ">
                                     <h2 className="text-xl ">{scout.title}</h2>
                                     <div className="text-xs mt-2 space-y-1 text-muted-foreground">
-                                        <div className="flex items-center  gap-1">
-                                            Collaboration: {scout.collaborators.map((collaborator, index) => (
-                                                <span className="underline" key={collaborator.daftarName} onClick={(e) => e.preventDefault()}>
+                                        <div className="flex items-center  ">
+                                            <span className="pr-1">Collaboration: </span>  {scout.collaborators.map((collaborator, index) => (
+                                                <span className=" " key={collaborator.daftarName} onClick={(e) => e.preventDefault()}>
                                                     {index > 0 && ", "}
                                                     <InvestorProfile
                                                         investor={collaborator}
@@ -46,6 +47,7 @@ export default function IncubationPage() {
                                         isBookmarked={bookmarkedSlugs.has(scout.slug)}
                                         onToggle={() => toggleBookmark(scout.slug)}
                                     />
+                                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
                                 </div>
                             </div>
                         </div>

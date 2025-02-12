@@ -31,7 +31,7 @@ export default function ReceivedDocumentsPage() {
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center justify-between p-4 border rounded-[0.3rem]"
+              className="flex items-center justify-between p-4 border rounded-[0.35rem] "
             >
               <div className="flex items-center gap-3">
                 <FileText className="h-5 w-5 text-blue-600" />

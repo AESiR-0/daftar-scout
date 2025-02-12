@@ -167,7 +167,7 @@ export default function MeetingsPage() {
       <div className="flex gap-6">
         {/* Calendar and Pending Column */}
         <div className="space-y-6">
-          <div className="border rounded-[0.3rem] p-4">
+          <div className="border rounded-[0.35rem]  p-4">
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -190,7 +190,7 @@ export default function MeetingsPage() {
               pendingMeetings.map((meeting) => (
                 <div
                   key={meeting.id}
-                  className="p-3 border rounded-[0.3rem] space-y-2 cursor-pointer hover:border-blue-600"
+                  className="p-3 border rounded-[0.35rem]  space-y-2 cursor-pointer hover:border-blue-600"
                   onClick={() => setSelectedMeeting(meeting)}
                 >
                   <div className="flex items-start justify-between">
@@ -234,7 +234,7 @@ export default function MeetingsPage() {
                 <div
                   key={meeting.id}
                   className={cn(
-                    "flex items-center gap-4 p-3 border rounded-[0.3rem] cursor-pointer hover:border-blue-600",
+                    "flex items-center gap-4 p-3 border rounded-[0.35rem]  cursor-pointer hover:border-blue-600",
                     selectedMeeting?.id === meeting.id && "border-blue-600"
                   )}
                   onClick={() => setSelectedMeeting(meeting)}
@@ -338,14 +338,14 @@ export default function MeetingsPage() {
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-[0.3rem]"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-[0.35rem] "
                     onClick={() => handleAccept(selectedMeeting.id)}
                   >
                     Accept
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-red-600 hover:bg-red-700 rounded-[0.3rem] text-white"
+                    className="bg-red-600 hover:bg-red-700 rounded-[0.35rem]  text-white"
                     onClick={() => handleReject(selectedMeeting.id)}
                   >
                     Reject

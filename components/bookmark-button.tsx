@@ -17,7 +17,7 @@ export function BookmarkButton({ isBookmarked, onToggle }: BookmarkButtonProps) 
         onToggle?.()
         toast({
             title: isBookmarked ? "Removed from bookmarks" : "Added to bookmarks",
-            description: isBookmarked ? "Program removed from your bookmarks" : "Program added to your bookmarks"
+            description: isBookmarked ? "Scout removed from your bookmarks" : "Scout added to your bookmarks"
         })
     }
 

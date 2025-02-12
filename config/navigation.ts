@@ -132,6 +132,11 @@ export const investorStudioNavItems = [
 
 export const founderStudioNavItems = [
   {
+    title: "Scout Details",
+    url: "/founder/studio/scout-details",
+    icon: FileSpreadsheet,
+  },
+  {
     title: "Pitch Name",
     url: "/founder/studio/pitch-name",
     icon: FileText,

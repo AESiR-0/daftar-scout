@@ -180,7 +180,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
               <TabsList>
                 <TabsTrigger value="team" className="flex items-center gap-1">
                   Members
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
                     {teamMembers.length}
                   </span>
                 </TabsTrigger>
@@ -189,7 +189,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="flex items-center gap-1">
                   Pending
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
                     {pendingInvites.length}
                   </span>
                 </TabsTrigger>
@@ -256,7 +256,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
               </TabsContent>
 
               <TabsContent value="invite" className="mt-0">
-                <div className="p-4 rounded-[0.3rem] border space-y-4">
+                <div className="p-4 rounded-[0.35rem]  border space-y-4">
                   <h3 className="font-medium">Invite Team Member</h3>
                   <div className="space-y-3">
                     <Input
@@ -297,7 +297,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                   {pendingInvites.map((invite) => (
                     <div
                       key={invite.email}
-                      className="p-4 rounded-[0.3rem] border flex items-center justify-between"
+                      className="p-4 rounded-[0.35rem]  border flex items-center justify-between"
                     >
                       <div>
                         <p className="text-sm font-medium">New Member</p>

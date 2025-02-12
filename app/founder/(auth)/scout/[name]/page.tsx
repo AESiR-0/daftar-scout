@@ -59,7 +59,7 @@ export default function Page() {
                                     <video
                                         src={Scout.videoUrl}
                                         controls
-                                        className="w-full h-full object-cover rounded-[0.3rem]"
+                                        className="w-full h-full object-cover rounded-[0.35rem] "
                                     />
                                 </div>
                             </div>
@@ -102,13 +102,13 @@ export default function Page() {
                                     <TabsTrigger value="details">Details</TabsTrigger>
                                     <TabsTrigger value="faqs" className="flex items-center gap-1">
                                         FAQs
-                                        <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
+                                        <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
                                             {Scout.faqs.length}
                                         </span>
                                     </TabsTrigger>
                                     <TabsTrigger value="updates" className="flex items-center gap-1">
                                         Updates
-                                        <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.3rem]">
+                                        <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
                                             {Scout.updates.length}
                                         </span>
                                     </TabsTrigger>
@@ -123,7 +123,7 @@ export default function Page() {
                                 <TabsContent value="details" className="border-l-4 px-5 py-5">
                                     <div className="p-2 pt-0  space-y-3">
                                         {Object.entries(Scout.details).map(([key, value]) => (
-                                            <div key={key} className="rounded-[0.3rem] ">
+                                            <div key={key} className="rounded-[0.35rem]  ">
                                                 <p className="text-sm text-muted-foreground ">{key}: <span className="font-medium">{value}</span></p>
                                             </div>
                                         ))}
@@ -142,9 +142,9 @@ export default function Page() {
                                 </TabsContent>
 
                                 <TabsContent value="updates" className="border-l-4 px-5 py-5">
-                                    <div className="space-y-4">
+                                    <div className="space-y-2   ">
                                         {Scout.updates.map((update, index) => (
-                                            <div key={index} className="p-4 pt-0 rounded-[0.3rem] ">
+                                            <div key={index} className="p-4 pb-0 pt-0 rounded-[0.35rem]  ">
                                                 <p className="text-sm text-muted-foreground">{new Date(update.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                                                 <p className="text-sm text-muted-foreground">{update.content}</p>
                                             </div>

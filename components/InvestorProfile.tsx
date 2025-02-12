@@ -30,7 +30,7 @@ export function InvestorProfile({ investor }: InvestorProfileProps) {
 
     return (
         <HoverCard>
-            <HoverCardTrigger className="inline-flex underline items-center hover:underline cursor-pointer">
+            <HoverCardTrigger className="underline hover:underline cursor-pointer">
                 {investor.daftarName}
             </HoverCardTrigger>
             <HoverCardContent className="w-72">

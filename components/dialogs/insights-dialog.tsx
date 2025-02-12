@@ -63,7 +63,7 @@ export function InsightsDialog({ open, onOpenChange }: InsightsDialogProps) {
       <DialogContent className="max-w-4xl p-0 gap-0">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 rounded-[0.3rem] bg-accent/50">
+            <div className="p-2 rounded-[0.35rem]  bg-accent/50">
               <BarChart2 className="h-4 w-4" />
             </div>
             <h2 className="text-lg font-semibold">Scout Performance</h2>
@@ -73,7 +73,7 @@ export function InsightsDialog({ open, onOpenChange }: InsightsDialogProps) {
             <div className="space-y-6">
               {/* Performance Metrics Grid */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 border rounded-[0.3rem] space-y-2">
+                <div className="p-4 border rounded-[0.35rem]  space-y-2">
                   <div className="flex items-center gap-2">
                     <Target className="h-4 w-4 " />
                     <span className="text-sm font-medium">Conversion Rate</span>
@@ -82,7 +82,7 @@ export function InsightsDialog({ open, onOpenChange }: InsightsDialogProps) {
                   <p className="text-xs text-muted-foreground">Of pitches accepted</p>
                 </div>
 
-                <div className="p-4 border rounded-[0.3rem] space-y-2">
+                <div className="p-4 border rounded-[0.35rem]  space-y-2">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     <span className="text-sm font-medium">Avg Response Time</span>
@@ -91,7 +91,7 @@ export function InsightsDialog({ open, onOpenChange }: InsightsDialogProps) {
                   <p className="text-xs text-muted-foreground">To review pitches</p>
                 </div>
 
-                <div className="p-4 border rounded-[0.3rem] space-y-2">
+                <div className="p-4 border rounded-[0.35rem]  space-y-2">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 " />
                     <span className="text-sm font-medium">Recent Activity</span>
@@ -104,7 +104,7 @@ export function InsightsDialog({ open, onOpenChange }: InsightsDialogProps) {
               </div>
 
               {/* Top Sectors */}
-              <div className="p-4 border rounded-[0.3rem] space-y-3">
+              <div className="p-4 border rounded-[0.35rem]  space-y-3">
                 <h3 className="text-sm font-medium">Top Performing Sectors</h3>
                 <div className="flex gap-2">
                   {scoutMetrics.topSectors.map((sector, index) => (
@@ -132,7 +132,7 @@ export function InsightsDialog({ open, onOpenChange }: InsightsDialogProps) {
                       </div>
 
                       <div className="flex-1 pb-4">
-                        <div className="p-3 border rounded-[0.3rem] space-y-2">
+                        <div className="p-3 border rounded-[0.35rem]  space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium">
                               {event.title}

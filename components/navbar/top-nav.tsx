@@ -100,7 +100,7 @@ export function TopNav({ role }: { role: string }) {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-[0.3rem]"
+            className="rounded-[0.35rem] "
             onClick={() => setProfileOpen(true)}
           >
             <Avatar className="h-8 w-8">

@@ -23,7 +23,7 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
           <DialogTitle>End Scouting?</DialogTitle>
           <DialogDescription className="space-y-2">
             <p>Are you sure you want to end the scouting process?</p>
-            <div className="mt-4 p-3 bg-muted rounded-[0.3rem] text-sm">
+            <div className="mt-4 p-3 bg-muted rounded-[0.35rem]  text-sm">
               <p className="font-medium mb-2">Note:</p>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                 <li>All applications on hold will be moved to rejected</li>

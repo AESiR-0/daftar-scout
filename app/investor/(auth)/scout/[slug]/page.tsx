@@ -302,7 +302,7 @@ export default function ProgramDetailsPage() {
                       </div>
                     )}
                   </div>
-                  <div className="p-4 rounded-[0.3rem] mb-2 bg-background border shadow-sm hover:border-blue-600 transition-colors">
+                  <div className="p-4 rounded-[0.35rem]  mb-2 bg-background border shadow-sm hover:border-blue-600 transition-colors">
                     <div>
                       <h4 className="font-medium text-sm">{pitch.pitchName}</h4>
                       <p className="text-xs text-muted-foreground mt-1">{pitch.daftarName}</p>

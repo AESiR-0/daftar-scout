@@ -150,11 +150,11 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                     <video
                                         src={selectedVideo}
                                         controls
-                                        className="w-full rounded-[0.3rem] aspect-video bg-muted"
+                                        className="w-full rounded-[0.35rem]  aspect-video bg-muted"
                                     />
                                 </div>
                             ) : (
-                                <div className="w-full aspect-video bg-muted rounded-[0.3rem] flex items-center justify-center">
+                                <div className="w-full aspect-video bg-muted rounded-[0.35rem]  flex items-center justify-center">
                                     <p className="text-sm text-muted-foreground">No video available</p>
                                 </div>
                             )}
@@ -251,7 +251,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                     <div
                                         key={item.id}
                                         className={cn(
-                                            "p-4 rounded-[0.3rem] cursor-pointer transition-colors",
+                                            "p-4 rounded-[0.35rem]  cursor-pointer transition-colors",
                                             selectedQuestion.id === item.id
                                                 ? "bg-muted/50 "
                                                 : "bg-muted/50 hover:bg-muted/70"

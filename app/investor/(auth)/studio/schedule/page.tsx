@@ -72,7 +72,7 @@ function ScheduleContent() {
             {programSteps.map((step) => (
               <div
                 key={step.id}
-                className="flex items-center gap-3 p-3 rounded-[0.3rem] bg-muted/50"
+                className="flex items-center gap-3 p-3 rounded-[0.35rem]  bg-muted/50"
               >
                 <div className={cn(
                   "h-6 w-6 rounded-full flex items-center justify-center",

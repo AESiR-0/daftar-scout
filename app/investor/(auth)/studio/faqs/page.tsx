@@ -110,7 +110,7 @@ function FaqsContent() {
             {/* FAQs List */}
             <div className="space-y-4">
               {details.faqs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-sm text-muted-foreground bg-muted/50 rounded-[0.3rem]">
+                <div className="flex flex-col items-center justify-center py-8 text-sm text-muted-foreground bg-muted/50 rounded-[0.35rem] ">
                   <p>No FAQs added yet</p>
                   <p>Add questions and answers above</p>
                 </div>
@@ -118,7 +118,7 @@ function FaqsContent() {
                 details.faqs.map((faq, index) => (
                   <div
                     key={faq.id}
-                    className="space-y-2 p-4 rounded-[0.3rem] bg-muted/50"
+                    className="space-y-2 p-4 rounded-[0.35rem]  bg-muted/50"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 space-y-1">

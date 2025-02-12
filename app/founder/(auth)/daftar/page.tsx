@@ -86,7 +86,7 @@ export default function DaftarPage() {
                             {daftarsData.map((daftar) => (
                                 <div
                                     key={daftar.name}
-                                    className="border bg-[#1a1a1a]  hover:bg-[#252525]  rounded-[0.3rem] divide-y cursor-pointer hover:border-muted-foreground"
+                                    className="border bg-[#1a1a1a]  hover:bg-[#252525]  rounded-[0.35rem]  divide-y cursor-pointer hover:border-muted-foreground"
                                     onClick={(e: any) => {
                                         if (!teamDialogOpen) {
                                             e.preventDefault()
@@ -115,7 +115,7 @@ export default function DaftarPage() {
                                                 key={pitch.name}
                                                 className="p-4 hover:bg-muted/50"
                                             >
-                                                <Link href={`/founder/scout/${pitch.name.split(' ').join('-')}`}>
+                                                <Link href={`/founder/studio`}>
                                                     <div className="flex items-center justify-between">
                                                         <div className="space-y-1">
                                                             <p className="text-sm font-medium">{pitch.name}</p>
