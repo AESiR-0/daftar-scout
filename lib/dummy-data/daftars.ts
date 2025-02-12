@@ -14,7 +14,7 @@ interface FounderProfileProps {
 export interface Pitch {
     id: string
     name: string 
-    status: 'Accepted' | "Ice box" | "Invitation Sent" | "Deal Cancelled" | "Deleted by Founder" | "Planning" | "Pitched"
+    status: 'Accepted' | "Ice box" | "Invitation Sent" | "Deal Cancelled" | "Deleted by Founder" | "Planning" | "Pitched" | "Withdrawn" | "Declined" | "Invitation Sent" | "Deleted" | "Inbox"
     date: string
     scoutName: string
     organizers: string[]
@@ -86,7 +86,7 @@ export const daftarsData: Daftar[] = [
             {
                 id: "scout-2",
                 name: "E-commerce Platform",
-                status: "Pitched",
+                status: "Deleted",
                 date: "2024-03-20",
                 scoutName: "MENA Growth Capital",
                 organizers: ["Hassan Ahmed", "Fatima Al-Sayed"],
@@ -117,8 +117,8 @@ export const daftarsData: Daftar[] = [
             features: scoutingFeatures
         },
         pitches: [
-            { id: "scout-3", name: "Islamic Banking Platform", status: "Invitation Sent", date: "2024-03-10", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Islamic Banking Platform" },
-            { id: "scout-4", name: "Crypto Trading Bot", status: "Deleted by Founder", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Crypto Trading Bot" }
+            { id: "scout-3", name: "Islamic Banking Platform", status: "Inbox", date: "2024-03-10", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Islamic Banking Platform" },
+            { id: "scout-4", name: "Crypto Trading Bot", status: "Withdrawn", date: "2024-03-25", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Crypto Trading Bot" }
         ]
     },
     {
@@ -140,7 +140,7 @@ export const daftarsData: Daftar[] = [
         },
         pitches: [
             { id: "scout-5", name: "EdTech Platform", status: "Accepted", date: "2024-03-18", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "EdTech Platform" },
-            { id: "scout-6", name: "Health Tech App", status: "Invitation Sent", date: "2024-03-22", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Health Tech App" }
+            { id: "scout-6", name: "Health Tech App", status: "Declined", date: "2024-03-22", scoutName: "Tech Innovation Fund", postedBy: "John Doe", daftar: "Tech Innovation Fund", organizers: ["John Doe", "Sarah Smith"], pitchName: "Health Tech App" }
         ]
     },
     {

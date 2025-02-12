@@ -7,8 +7,12 @@ import { CreateDaftarDialog } from "@/components/dialogs/create-daftar-dialog"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { daftarsData } from "@/lib/dummy-data/daftars"
 
-// Define the status order
-const statusOrder = ["Planning", "Pitched", "Offer Received", "Accepted", "Deal Cancelled"]
+// Define the status order based on user role
+const founderStatusOrder = ["Planning", "Inbox", "Accepted", "Declined", "Withdrawn", "Deleted"]
+const investorStatusOrder = ["Planning", "Scheduled", "Open", "Closed"]
+
+// Use founder status order by default (you can make this dynamic based on user role)
+const statusOrder = founderStatusOrder
 
 // Transform daftars data into pitch board format
 const pitches = daftarsData.flatMap(daftar => daftar.pitches)
@@ -31,7 +35,7 @@ export default function PitchBoardPage() {
     const { searchQuery, filterValue } = useSearch()
     const [createDaftarOpen, setCreateDaftarOpen] = useState(false)
 
-    // Update filter logic
+    // Update filter logic for new status categories
     const filteredPitches = Object.entries(groupedPitches).reduce((acc, [status, statusPitches]) => {
         const filtered = statusPitches.filter(pitch => {
             const matchesSearch =
@@ -40,10 +44,11 @@ export default function PitchBoardPage() {
 
             const matchesFilter = filterValue === 'all' ||
                 (filterValue === 'planning' && status === 'Planning') ||
-                (filterValue === 'pitched' && status === 'Pitched') ||
-                (filterValue === 'offer' && status === 'Offer Received') ||
+                (filterValue === 'inbox' && status === 'Inbox') ||
                 (filterValue === 'accepted' && status === 'Accepted') ||
-                (filterValue === 'cancelled' && status === 'Deal Cancelled')
+                (filterValue === 'declined' && status === 'Declined') ||
+                (filterValue === 'withdrawn' && status === 'Withdrawn') ||
+                (filterValue === 'deleted' && status === 'Deleted')
 
             return matchesSearch && matchesFilter
         })
