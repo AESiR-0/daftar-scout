@@ -58,6 +58,7 @@ interface TeamAnalysis {
     name: string
     role: string
     avatar: string
+    daftarName: string
   }
   belief: 'yes' | 'no'
   note: string
@@ -69,6 +70,7 @@ interface Profile {
   name: string
   role: string
   avatar: string
+  daftarName: string
 }
 
 interface TeamMemberDetails {
@@ -80,6 +82,7 @@ interface TeamMemberDetails {
   location: string;
   language: string[];
   imageUrl?: string;
+  designation: string;
 }
 
 interface PitchDetails {
@@ -159,7 +162,8 @@ export default function PitchDetailsPage() {
         gender: "Male",
         location: "New York, NY",
         language: ["English", "Hindi"],
-        imageUrl: "https://example.com/alex.jpg"
+        imageUrl: "https://example.com/alex.jpg",
+        designation: "Chief Technology Officer"
       },
       {
         name: "Emily Smith",
@@ -169,7 +173,8 @@ export default function PitchDetailsPage() {
         gender: "Female",
         location: "San Francisco, CA",
         language: ["English", "Spanish"],
-        imageUrl: "https://example.com/emily.jpg"
+        imageUrl: "https://example.com/emily.jpg",
+        designation: "Product Manager"
       }
     ],
     sections: {
@@ -226,7 +231,8 @@ export default function PitchDetailsPage() {
           analyst: {
             name: 'Sarah Johnson',
             role: 'Investment Analyst',
-            avatar: '/avatars/sarah.jpg'
+            avatar: '/avatars/sarah.jpg',
+            daftarName: 'Tech Startup'
           },
           belief: 'yes',
           note: '<p>The team has shown exceptional capability...</p>',
@@ -237,7 +243,8 @@ export default function PitchDetailsPage() {
           analyst: {
             name: 'Mike Wilson',
             role: 'Senior Scout',
-            avatar: '/avatars/mike.jpg'
+            avatar: '/avatars/mike.jpg',
+            daftarName: 'Tech Startup'
           },
           belief: 'no',
           note: '<p>While the idea is promising, I have concerns about...</p>',
@@ -254,7 +261,8 @@ export default function PitchDetailsPage() {
     id: 'current-user',
     name: 'Current User',
     role: 'Investment Analyst',
-    avatar: '/avatars/current-user.jpg'
+    avatar: '/avatars/current-user.jpg',
+    daftarName: 'Tech Startup'
   }
 
   const handleSubmitAnalysis = async (data: {
@@ -416,6 +424,17 @@ export default function PitchDetailsPage() {
     return words.length > 1 ? words[0][0] + words[1][0] : name[0];
   };
 
+  // Add this helper function near the getInitials function
+  const formatLanguages = (languages: string[]) => {
+    if (languages.length === 0) return '';
+    if (languages.length === 1) return languages[0];
+    if (languages.length === 2) return `${languages[0]} and ${languages[1]}`;
+    
+    const lastLanguage = languages[languages.length - 1];
+    const otherLanguages = languages.slice(0, -1).join(', ');
+    return `${otherLanguages} and ${lastLanguage}`;
+  };
+
   return (
     <ScrollArea className="h-[calc(100vh-6rem)]">
       <div className="max-w-6xl mx-auto px-6">
@@ -474,6 +493,7 @@ export default function PitchDetailsPage() {
                           </Avatar>
                           <div className="flex-1 space-y-1">
                             <h4 className="text-lg font-medium">{member.name}</h4>
+                            <p className="text-sm text-blue-500">{member.designation}</p>
                             <div className="flex gap-4 text-sm text-muted-foreground">
                               <span>{member.age} years</span>
                               <span>•</span>
@@ -498,13 +518,9 @@ export default function PitchDetailsPage() {
                           <p className="text-sm text-muted-foreground mb-2">
                             Preferred Languages
                           </p>
-                          <div className="flex gap-2 flex-wrap">
-                            {member.language.map((lang) => (
-                              <Badge key={lang} variant="secondary">
-                                {lang}
-                              </Badge>
-                            ))}
-                          </div>
+                          <p className="text-sm">
+                            {formatLanguages(member.language)}
+                          </p>
                         </div>
                       </div>
                     ))}

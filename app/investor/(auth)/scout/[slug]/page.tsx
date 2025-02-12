@@ -167,8 +167,13 @@ export default function ProgramDetailsPage() {
     const scoutStatus = getScoutStatus(scout)
 
     if (scoutStatus === 'Planning' || scoutStatus === 'Scheduled') {
-      return <div className="text-center flex-col text-xl text-muted-foreground flex items-center justify-center h-96">
-        <span className="text-2xl font-bold">Scout is in {scoutStatus} status</span>
+      return <div className="text-center flex-col text-xl text-muted-foreground flex items-center justify-center gap-3 h-96">
+        <div className="text-2xl font-bold">No pitches available</div>
+        <div className="text-sm text-muted-foreground">
+          <p>
+            <span>Scout is in {scoutStatus} status</span>
+          </p>
+        </div>
         <Button className="mt-4 bg-muted hover:bg-muted/80" onClick={() => router.back()}>
           <span className="text-md ">Go Back</span>
         </Button>
