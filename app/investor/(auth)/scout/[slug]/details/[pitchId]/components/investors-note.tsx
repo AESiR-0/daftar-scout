@@ -31,7 +31,7 @@ export function InvestorsNote({ note }: InvestorsNoteProps) {
   return (
     <Card className="border-none bg-[#0e0e0e]">
       <CardHeader>
-        <CardTitle>Investor's Note</CardTitle>
+        
       </CardHeader>
       <CardContent>
         <div className="border rounded-md">

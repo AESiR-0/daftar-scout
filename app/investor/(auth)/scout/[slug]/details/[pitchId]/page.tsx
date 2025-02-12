@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Eye, Upload, Trash2, Router } from "lucide-react";
+import { FileText, Download, Eye, Upload, Trash2, Router, Flag } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ReportDialog } from "@/components/dialogs/report-dialog";
@@ -429,7 +429,7 @@ export default function PitchDetailsPage() {
     if (languages.length === 0) return '';
     if (languages.length === 1) return languages[0];
     if (languages.length === 2) return `${languages[0]} and ${languages[1]}`;
-    
+
     const lastLanguage = languages[languages.length - 1];
     const otherLanguages = languages.slice(0, -1).join(', ');
     return `${otherLanguages} and ${lastLanguage}`;
@@ -455,13 +455,20 @@ export default function PitchDetailsPage() {
               </Button>
             ))}
           </div>
-          <Button
-            variant="ghost"
-            className="bg-muted text-foreground hover:bg-muted-foreground hover:text-black"
-            onClick={() => setDeclineDialogOpen(true)}
-          >
-            Decline Pitch
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setReportDialogOpen(true)}
+            >
+              <Flag className="h-4 w-4 " />
+            </Button>
+
+          </div>
+          <ReportDialog
+            open={reportDialogOpen}
+            onOpenChange={setReportDialogOpen}
+          />
         </div>
 
         {/* Content */}
@@ -496,7 +503,6 @@ export default function PitchDetailsPage() {
                             <p className="text-sm text-blue-500">{member.designation}</p>
                             <div className="flex gap-4 text-sm text-muted-foreground">
                               <span>{member.age} years</span>
-                              <span>•</span>
                               <span>{member.gender}</span>
                             </div>
                           </div>
@@ -552,10 +558,7 @@ export default function PitchDetailsPage() {
       </div>
 
       {/* Dialogs */}
-      <ReportDialog
-        open={reportDialogOpen}
-        onOpenChange={setReportDialogOpen}
-      />
+
       <ScheduleMeetingDialog
         open={scheduleMeetingOpen}
         onOpenChange={setScheduleMeetingOpen}
