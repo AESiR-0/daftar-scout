@@ -39,12 +39,12 @@ export function TopNav({ role }: { role: string }) {
     pathname.includes('meetings') ||
     pathname.includes('incubation') ||
     pathname.includes('/daftar') ||
-    pathname.includes('/pitch-board') ||
+    pathname.includes('/deal-board') ||
     pathname.includes('/studio/collaboration') ||
     pathname.includes('/studio/document')
 
-  // Show daftar selector on pitch-board and daftar pages
-  const showDaftarSelector = pathname.includes('/pitch-board') || pathname.includes('/daftar')
+  // Show daftar selector on deal-board and daftar pages
+  const showDaftarSelector = pathname.includes('/deal-board') || pathname.includes('/daftar')
 
   const handleActionClick = (action: string) => {
     switch (action) {

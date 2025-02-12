@@ -35,7 +35,7 @@ const filterOptions = {
     { value: 'active', label: 'Active' },
     { value: 'archived', label: 'Archived' },
   ],
-  'pitch-board': [
+  'deal-board': [
     { value: 'all', label: 'All Pitches' },
     { value: 'planning', label: 'Planning' },
     { value: 'pitched', label: 'Pitched' },
@@ -61,7 +61,7 @@ const searchPlaceholders = {
   meetings: 'Search meetings...',
   incubation: 'Search incubation scout...',
   daftar: 'Search Daftar...',
-  'pitch-board': 'Search pitches...',
+  'deal-board': 'Search pitches...',
   collaboration: 'Search collaboration...',
   document: 'Search document...',
 }

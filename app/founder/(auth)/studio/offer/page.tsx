@@ -52,6 +52,7 @@ const dummyOffers: Offer[] = [
           founder: {
             name: getRandomUser(),
             age: "25",
+            designation: "CTO",
             email: "john.doe@example.com",
             phone: "1234567890",
             gender: "Male",
@@ -81,6 +82,7 @@ const dummyOffers: Offer[] = [
             age: "25",
             email: "john.doe@example.com",
             phone: "1234567890",
+            designation: "Co-Founder",
             gender: "Male",
             location: "New York, NY",
             language: ["English", "Spanish"],
@@ -96,6 +98,7 @@ const dummyOffers: Offer[] = [
             name: getRandomUser(),
             age: "25",
             email: "john.doe@example.com",
+            designation: "Co-Founder",
             phone: "1234567890",
             gender: "Male",
             location: "New York, NY",
@@ -123,6 +126,7 @@ const dummyOffers: Offer[] = [
             age: "25",
             email: "john.doe@example.com",
             phone: "1234567890",
+            designation: "CXO",
             gender: "Male",
             location: "New York, NY",
             language: ["English", "Spanish"],
@@ -161,6 +165,7 @@ export default function OffersPage() {
                     email: "john.doe@example.com",
                     phone: "1234567890",
                     gender: "Male",
+                    designation: "Founder",
                     location: "New York, NY",
                     language: ["English", "Spanish"],
                     imageUrl: "https://example.com/john-doe.jpg"
@@ -205,6 +210,7 @@ export default function OffersPage() {
                     phone: "1234567890",
                     gender: "Male",
                     location: "New York, NY",
+                    designation: "CEO",
                     language: ["English", "Spanish"],
                     imageUrl: "https://example.com/john-doe.jpg"
                   }
