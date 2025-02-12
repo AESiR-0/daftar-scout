@@ -588,6 +588,9 @@ export function DaftarDialog({ open, onOpenChange }: DaftarDialogProps) {
                       </div>
                     )
                   })}
+                  <div className="">
+                        <span className="text-xs text-muted-foreground"><strong> Deleted Daftar On </strong> <br /> {formatDate(new Date().toISOString())}</span>
+                      </div>
                 </div>
               </div>
             </div>
