@@ -20,6 +20,7 @@ interface TeamMember {
   location: string
   language: string[]
   imageUrl?: string
+  designation: string
 }
 
 // Get the first daftar's team data
@@ -35,7 +36,8 @@ const teamMembers: TeamMember[] = [
     location: "Bangalore, India",
     language: ["English", "Hindi"],
     isApproved: false,
-    isUser: true
+    isUser: true,
+    designation: "Founder & CEO"
   },
   {
     name: "Jane Smith",
@@ -47,7 +49,8 @@ const teamMembers: TeamMember[] = [
     location: "Mumbai, India",
     language: ["English", "Marathi"],
     isApproved: false,
-    isUser: false
+    isUser: false,
+    designation: "Founder & CEO"
   },
   // Add more team members as needed
 ]
