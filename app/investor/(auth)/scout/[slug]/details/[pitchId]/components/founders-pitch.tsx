@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { Flag } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import {
     Dialog,
@@ -19,6 +18,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Combobox } from "@/components/ui/combobox"
+import Link from "next/link"
 
 const reportReasons = [
     { id: "false-claims", label: "False Claims" },
@@ -118,151 +118,138 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
 
     const selectedVideo = pitch.questions.find(q => q.id === selectedQuestion.id)?.videoUrl
 
-    return (
-        <Card className="w-full border-none my-0 p-0 bg-[#0e0e0e]">
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-2xl font-bold">Founder's Pitch</CardTitle>
-                        <CardDescription>
-                            Curated questions by the investors to help understand the startup better.
-                        </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setShowReportDialog(true)}
-                        >
-                            <Flag className="h-4 w-4 " />
-                        </Button>
+    // Helper function to format sectors
+    const formatSectors = (sectors: string[]) => {
+        if (sectors.length === 0) return '';
+        if (sectors.length === 1) return sectors[0];
+        if (sectors.length === 2) return `${sectors[0]} and ${sectors[1]}`;
 
-                    </div>
-                </div>
-            </CardHeader>
+        return sectors.slice(0, -2).join(', ') +
+            ', ' +
+            sectors.slice(-2, -1) +
+            ' and ' +
+            sectors.slice(-1);
+    }
+
+    return (
+        <Card className="w-full border-none my-5 p-0 bg-[#0e0e0e]">
             <CardContent className="border-none">
-                <div className="flex justify-between gap-10">
-                    {/* Left side - Video Player and Details */}
-                    <div className="w-1/2">
-                        <div className="space-y-4">
+                <div className="flex flex-col gap-6">
+                    {/* Top section - Questions and Video */}
+                    <div className="flex justify-between gap-10">
+                        {/* Left side - Video Player */}
+                        <div className="w-1/2">
                             {selectedVideo ? (
                                 <div className="space-y-4">
                                     <video
                                         src={selectedVideo}
                                         controls
-                                        className="w-full rounded-[0.35rem]  aspect-video bg-muted"
+                                        className="w-full rounded-[0.35rem] aspect-video bg-muted"
                                     />
                                 </div>
                             ) : (
-                                <div className="w-full aspect-video bg-muted rounded-[0.35rem]  flex items-center justify-center">
+                                <div className="w-full aspect-video bg-muted rounded-[0.35rem] flex items-center justify-center">
                                     <p className="text-sm text-muted-foreground">No video available</p>
                                 </div>
                             )}
                             <Combobox
                                 placeholder="Select video's language"
                                 value={language}
-                                options={
-                                    [
-                                        "English",
-                                        "Spanish",
-                                        "French",
-                                        "German",
-                                        "Italian",
-                                        "Portuguese",
-                                    ]
-                                }
+                                options={[
+                                    "English",
+                                    "Spanish",
+                                    "French",
+                                    "German",
+                                    "Italian",
+                                    "Portuguese",
+                                ]}
                                 onSelect={(value) => setLanguage(value)}
                             />
+                        </div>
 
-                            {/* Founder Details Grid */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-[#1f1f1f] rounded-lg">
-                                    <p className="text-sm text-muted-foreground mb-2">Status</p>
-                                    <Badge variant="secondary">{pitch.status}</Badge>
-                                </div>
-                                <div className="p-4 bg-[#1f1f1f] rounded-lg">
-                                    <p className="text-sm text-muted-foreground mb-2">Stage</p>
-                                    <Badge variant="secondary">{pitch.stage}</Badge>
-                                </div>
-                                <div className="p-4 bg-[#1f1f1f] rounded-lg">
-                                    <p className="text-sm text-muted-foreground mb-2">Location</p>
-                                    <p className="text-sm">{pitch.location}</p>
-                                </div>
-                                {pitch.demoLink && (
-                                    <div className="p-4 bg-[#1f1f1f] rounded-lg">
-                                        <p className="text-sm text-muted-foreground mb-2">Demo</p>
-                                        <a
-                                            href={pitch.demoLink}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-sm text-blue-500 hover:underline"
+                        {/* Right side - Questions List */}
+                        <div className="w-1/2">
+                            <ScrollArea className="h-[calc(100vh-16rem)]">
+                                <div className="space-y-4 pr-4">
+                                    {defaultQuestions.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className={cn(
+                                                "p-4 rounded-[0.35rem] cursor-pointer transition-colors",
+                                                selectedQuestion.id === item.id
+                                                    ? "bg-muted/50"
+                                                    : "bg-muted/50 hover:bg-muted/70"
+                                            )}
+                                            onClick={() => setSelectedQuestion(item)}
                                         >
-                                            View Demo
-                                        </a>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Sectors */}
-                            <div className="space-y-2">
-                                <p className="text-sm text-muted-foreground">Sectors</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {pitch.sectors.map((sector) => (
-                                        <Badge key={sector} variant="outline">{sector}</Badge>
+                                            <h3 className="text-sm font-medium">{item.question}</h3>
+                                        </div>
                                     ))}
                                 </div>
-                                <div className="flex flex-col gap-2 mt-2">
-                                    <h3>Founder's Ask</h3>
-                                    <div className="max-w-4xl border border-muted-foreground/50 rounded-lg p-4">
-                                        <p className="text-sm text-muted-foreground">
-                                            We are seeking $500,000 in funding to accelerate our product development and expand our marketing efforts. Additionally, we are looking for strategic partnerships in the AI/ML sector to enhance our technological capabilities and market reach. Any introductions to potential partners or advisors with experience in scaling SaaS businesses would be highly appreciated.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Founder's Specific Questions */}
-                            {pitch.founderQuestions && pitch.founderQuestions.length > 0 && (
-                                <div className="space-y-3">
-                                    <p className="text-sm text-muted-foreground">Founder's Responses</p>
-                                    <div className="space-y-3">
-                                        {pitch.founderQuestions.map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className="p-4 bg-[#1f1f1f] rounded-lg space-y-2"
-                                            >
-                                                <p className="text-sm font-medium">{item.question}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {item.answer}
-                                                </p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                            </ScrollArea>
                         </div>
                     </div>
 
-                    {/* Right side - Questions List */}
-                    <div className="w-1/2">
-                        <ScrollArea className="h-[calc(100vh-16rem)]">
-                            <div className="space-y-4 pr-4">
-                                {defaultQuestions.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className={cn(
-                                            "p-4 rounded-[0.35rem]  cursor-pointer transition-colors",
-                                            selectedQuestion.id === item.id
-                                                ? "bg-muted/50 "
-                                                : "bg-muted/50 hover:bg-muted/70"
-                                        )}
-                                        onClick={() => setSelectedQuestion(item)}
-                                    >
-                                        <h3 className="text-sm font-medium">{item.question}</h3>
-                                    </div>
-                                ))}
+                    {/* Bottom section - Information */}
+                    <div className="space-y-6">
+                        {/* Founder Details Grid */}
+                        <div className="grid grid-cols-1 bg-[#1f1f1f] gap-5 p-5">
+                            <div className="   rounded-lg">
+                                <p className="text-sm text-muted-foreground mb-2">Stage</p>
+                                {pitch.stage}
                             </div>
-                        </ScrollArea>
+                            <div className="   rounded-lg">
+                                <p className="text-sm text-muted-foreground mb-2">Location</p>
+                                <p className="text-sm">{pitch.location}</p>
+                            </div>
+                            <div className="   rounded-lg">
+                                <p className="text-sm text-muted-foreground mb-2">Demo Link</p>
+                                {pitch.demoLink ? (
+                                    <Link
+                                        href={pitch.demoLink}
+                                        className="text-sm  hover:underline"
+                                    >
+                                        View Demo
+                                    </Link>
+                                ) : (
+                                    <span className="text-sm">No Demo Link</span>
+                                )}
+                            </div>
+                            <div className="rounded-lg">
+                                <p className="text-sm text-muted-foreground mb-2">Sectors</p>
+                                <p className="text-sm">{formatSectors(pitch.sectors)}</p>
+                            </div>
+                        </div>
+
+                        {/* Founder's Ask */}
+                        <div className="flex flex-col">
+                            <h3 className="text-md pl-4  text-foreground">Founder's Ask</h3>
+                            <div className="  rounded-[0.35rem] p-4">
+                                <p className="text-sm text-muted-foreground">
+                                    We are seeking $500,000 in funding to accelerate our product development and expand our marketing efforts. Additionally, we are looking for strategic partnerships in the AI/ML sector to enhance our technological capabilities and market reach. Any introductions to potential partners or advisors with experience in scaling SaaS businesses would be highly appreciated.
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Founder's Specific Questions */}
+                        {pitch.founderQuestions && pitch.founderQuestions.length > 0 && (
+                            <div className="space-y-3">
+                                <p className="text-sm text-muted-foreground">Founder's Responses</p>
+                                <div className="space-y-3">
+                                    {pitch.founderQuestions.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className="p-4 bg-[#1f1f1f] rounded-[0.35rem] space-y-2"
+                                        >
+                                            <p className="text-sm font-medium">{item.question}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {item.answer}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </CardContent>
