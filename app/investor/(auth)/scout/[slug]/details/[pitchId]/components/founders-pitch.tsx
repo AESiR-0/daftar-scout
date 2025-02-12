@@ -134,10 +134,8 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
     return (
         <Card className="w-full border-none my-5 p-0 bg-[#0e0e0e]">
             <CardContent className="border-none">
-                <div className="flex flex-col gap-6">
-                    {/* Top section - Questions and Video */}
-                    <div className="flex justify-between gap-10">
-                        {/* Left side - Video Player */}
+                <div className="flex flex-col justify-center">
+                    <div className="flex  gap-10">
                         <div className="w-1/2">
                             {selectedVideo ? (
                                 <div className="space-y-4">
@@ -166,8 +164,6 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                 onSelect={(value) => setLanguage(value)}
                             />
                         </div>
-
-                        {/* Right side - Questions List */}
                         <div className="w-1/2">
                             <ScrollArea className="h-[calc(100vh-16rem)]">
                                 <div className="space-y-4 pr-4">
@@ -189,21 +185,19 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                             </ScrollArea>
                         </div>
                     </div>
-
-                    {/* Bottom section - Information */}
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         {/* Founder Details Grid */}
-                        <div className="grid grid-cols-1 bg-[#1f1f1f] gap-5 p-5">
-                            <div className="   rounded-lg">
-                                <p className="text-sm text-muted-foreground mb-2">Stage</p>
+                        <div className="grid grid-cols-1 bg-[#1f1f1f] gap-3 py-3 px-5">
+                            <div className=" flex  items-center gap-2 rounded-[0.35rem]">
+                                <p className="text-sm text-muted-foreground ">Stage</p>
                                 {pitch.stage}
                             </div>
-                            <div className="   rounded-lg">
-                                <p className="text-sm text-muted-foreground mb-2">Location</p>
+                            <div className=" flex  items-center gap-2 rounded-[0.35rem]">
+                                <p className="text-sm text-muted-foreground">Location</p>
                                 <p className="text-sm">{pitch.location}</p>
                             </div>
-                            <div className="   rounded-lg">
-                                <p className="text-sm text-muted-foreground mb-2">Demo Link</p>
+                            <div className="  flex gap-2  rounded-[0.35rem]">
+                                <p className="text-sm text-muted-foreground">Demo Link</p>
                                 {pitch.demoLink ? (
                                     <Link
                                         href={pitch.demoLink}
@@ -215,8 +209,8 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                     <span className="text-sm">No Demo Link</span>
                                 )}
                             </div>
-                            <div className="rounded-lg">
-                                <p className="text-sm text-muted-foreground mb-2">Sectors</p>
+                            <div className="flex gap-2  rounded-[0.35rem]">
+                                <p className="text-sm text-muted-foreground">Sectors</p>
                                 <p className="text-sm">{formatSectors(pitch.sectors)}</p>
                             </div>
                         </div>
