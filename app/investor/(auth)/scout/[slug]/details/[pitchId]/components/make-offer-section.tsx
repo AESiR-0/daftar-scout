@@ -60,7 +60,8 @@ const dummyOffers: Offer[] = [
             gender: "Male",
             location: "New York, NY",
             language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg"
+            imageUrl: "https://example.com/john-doe.jpg",
+            designation: "Founder & CEO"
           }
         },
       },
@@ -87,7 +88,8 @@ const dummyOffers: Offer[] = [
             gender: "Male",
             location: "New York, NY",
             language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg"
+            imageUrl: "https://example.com/john-doe.jpg",
+            designation: "Founder & CEO"
           }
         },
       },
@@ -103,7 +105,8 @@ const dummyOffers: Offer[] = [
             gender: "Male",
             location: "New York, NY",
             language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg"
+            imageUrl: "https://example.com/john-doe.jpg",
+            designation: "Founder & CEO"
           }
         },
       },
@@ -129,7 +132,8 @@ const dummyOffers: Offer[] = [
             gender: "Male",
             location: "New York, NY",
             language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg"
+            imageUrl: "https://example.com/john-doe.jpg",
+            designation: "Founder & CEO"
           }
         },
       },
@@ -145,7 +149,8 @@ const dummyOffers: Offer[] = [
             gender: "Male",
             location: "New York, NY",
             language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg"
+            imageUrl: "https://example.com/john-doe.jpg",
+            designation: "Founder & CEO"
           }
         },
       },
@@ -173,30 +178,29 @@ export function MakeOfferSection() {
     setOffers(prev =>
       prev.map(offer => {
         if (offer.id === id) {
+          const newLog = {
+            action: status === "completed" ? "Offer Accepted" : "Offer Declined",
+            timestamp: formatDate(new Date().toISOString()),
+            user: {
+              founder: {
+                name: getRandomUser(),
+                age: "25",
+                email: "john.doe@example.com",
+                phone: "1234567890",
+                gender: "Male",
+                location: "New York, NY",
+                language: ["English", "Spanish"],
+                imageUrl: "https://example.com/john-doe.jpg",
+                designation: "Founder & CEO"
+              }
+            },
+          };
           return {
             ...offer,
             status,
             type,
             acceptedBy: status === "completed" ? getRandomUser() : undefined,
-            logs: [
-              {
-                action: status === "completed" ? "Offer Accepted" : "Offer Declined",
-                timestamp: formatDate(new Date().toISOString()),
-                user: {
-                  founder: {
-                    name: getRandomUser(),
-                    age: "25",
-                    email: "john.doe@example.com",
-                    phone: "1234567890",
-                    gender: "Male",
-                    location: "New York, NY",
-                    language: ["English", "Spanish"],
-                    imageUrl: "https://example.com/john-doe.jpg"
-                  }
-                },
-              },
-              ...(offer.logs || []),
-            ],
+            logs: [newLog, ...(offer.logs || [])]
           };
         }
         return offer;
@@ -216,30 +220,29 @@ export function MakeOfferSection() {
     setOffers(prev =>
       prev.map(offer => {
         if (offer.id === id) {
+          const newLog = {
+            action: "Offer Withdrawn",
+            timestamp: formatDate(new Date().toISOString()),
+            user: {
+              founder: {
+                name: getRandomUser(),
+                age: "25",
+                email: "john.doe@example.com",
+                phone: "1234567890",
+                gender: "Male",
+                location: "New York, NY",
+                language: ["English", "Spanish"],
+                imageUrl: "https://example.com/john-doe.jpg",
+                designation: "Founder & CEO"
+              }
+            },
+          };
           return {
             ...offer,
             status: "withdrawn",
             type: "withdrawn",
             acceptedBy: undefined,
-            logs: [
-              {
-                action: "Offer Withdrawn",
-                timestamp: formatDate(new Date().toISOString()),
-                user: {
-                  founder: {
-                    name: getRandomUser(),
-                    age: "25",
-                    email: "john.doe@example.com",
-                    phone: "1234567890",
-                    gender: "Male",
-                    location: "New York, NY",
-                    language: ["English", "Spanish"],
-                    imageUrl: "https://example.com/john-doe.jpg"
-                  }
-                },
-              },
-              ...(offer.logs || []),
-            ],
+            logs: [newLog, ...(offer.logs || [])]
           };
         }
         return offer;
@@ -289,7 +292,8 @@ export function MakeOfferSection() {
               gender: "Male",
               location: "New York, NY",
               language: ["English", "Spanish"],
-              imageUrl: "https://example.com/john-doe.jpg"
+              imageUrl: "https://example.com/john-doe.jpg",
+              designation: "Founder & CEO"
             }
           },
         },
