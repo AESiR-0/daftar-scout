@@ -9,6 +9,8 @@ import { daftarsData } from "@/lib/dummy-data/daftars"
 import { TeamDialog } from "@/components/dialogs/team-dialog"
 import { ChevronRight, Filter, Users } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useRouter } from "next/navigation"
+
 // Add these interfaces at the top
 interface TeamMember {
     name: string;
@@ -23,6 +25,27 @@ interface DaftarSubscription {
     features: string[];
 }
 
+// Dummy data for pitches
+const pitchesData = [
+  {
+    id: "1",
+    title: "AI-Powered Healthcare Solution",
+    lastDate: "2024-04-15",
+    slug: "ai-healthcare"
+  },
+  {
+    id: "2",
+    title: "Sustainable Energy Platform",
+    lastDate: "2024-04-20",
+    slug: "sustainable-energy"
+  },
+  {
+    id: "3",
+    title: "EdTech Learning System",
+    lastDate: "2024-04-25",
+    slug: "edtech-learning"
+  }
+]
 
 const overview = {
     totalDaftars: 5,
@@ -58,93 +81,32 @@ const formatDate = (date: string) => {
 }
 
 export default function DaftarPage() {
-    const [teamDialogOpen, setTeamDialogOpen] = useState(false)
-    const [selectedDaftar, setSelectedDaftar] = useState<typeof daftarsData[0] | null>(null)
-    const [createDaftarOpen, setCreateDaftarOpen] = useState(false)
     return (
-        <div className={` px-20 overflow-hidden container mx-auto ${teamDialogOpen ? "opacity-0 pointer-events-none" : ""}`}>
-
-            <div className="flex gap-6">
-
-                {/* Daftars and Pitches Section */}
-                <div className="space-y-6 w-full">
-                    {/* Header with Search and Actions */}
-                    <div className="flex px-4 mx-auto items-center justify-end gap-5">
-                        <Button size="sm" className="h-9 bg-muted hover:bg-muted/50  text-white"
-                            onClick={() => setCreateDaftarOpen(true)}>
-                            New Daftar
-                        </Button>
-                        <Link href="/founder/deal-board">
-                            <Button size="sm" variant="outline" className="h-9">
-                                Deal Board
-                            </Button>
-                        </Link>
-                    </div>
-                    {/* {filteredDaftars.map((daftar) =>  */}
-                    <ScrollArea className="h-[calc(100vh-10rem)]">
-                        <div className=" mx-auto px-4 space-y-5">
-                            {daftarsData.map((daftar) => (
-                                <div
-                                    key={daftar.name}
-                                    className="border bg-[#1a1a1a]  hover:bg-[#252525]  rounded-[0.35rem]  divide-y cursor-pointer hover:border-muted-foreground"
-                                    onClick={(e: any) => {
-                                        if (!teamDialogOpen) {
-                                            e.preventDefault()
-                                            setSelectedDaftar(daftar)
-                                        }
-
-                                    }}
-                                >
-                                    <div className="p-4">
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="font-medium">{daftar.name}</h3>
-                                            <Button onClick={() => {
-                                                setSelectedDaftar(daftar)
-                                                setTeamDialogOpen(true)
-                                            }} variant="secondary" size="sm" className="text-xs">
-                                                <Users className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    {teamDialogOpen && (
-                                        <TeamDialog daftarData={selectedDaftar} open={teamDialogOpen} onOpenChange={setTeamDialogOpen} />
-                                    )}
-                                    <div className="divide-y">
-                                        {daftar.pitches.map((pitch) => (
-                                            <div
-                                                key={pitch.name}
-                                                className="p-4 hover:bg-muted/50"
-                                            >
-                                                <Link href={`/founder/studio`}>
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="space-y-1">
-                                                            <p className="text-sm font-medium">{pitch.name}</p>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                Status: {pitch.status}
-                                                            </p>
-                                                        </div>
-                                                        <span className={"text-xs"}>
-                                                            <ChevronRight className="h-4 w-4" />
-                                                        </span>
-                                                    </div>
-                                                </Link>
-
+        <div className="container mx-auto px-5">
+            <div className="bg-[#1a1a1a] rounded-[0.35rem] p-6">
+                <div className="space-y-4">
+                    {daftarsData.map((daftar) => (
+                        daftar.pitches.map((pitch) => (
+                            <div 
+                                key={pitch.name}
+                                className="border-b border-border last:border-0 pb-4 last:pb-0 hover:bg-[#252525] rounded-[0.35rem] transition-colors cursor-pointer"
+                            >
+                                <Link href="/founder/studio">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <h3 className="text-medium">{pitch.name}</h3>
+                                            <div className="text-xs text-muted-foreground space-y-1">
+                                                <div>Status: {pitch.status}</div>
                                             </div>
-                                        ))}
+                                        </div>
+                                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </ScrollArea>
+                                </Link>
+                            </div>
+                        ))
+                    ))}
                 </div>
             </div>
-            <CreateDaftarDialog
-                open={createDaftarOpen}
-                onOpenChange={setCreateDaftarOpen}
-                onSuccess={() => {
-                    setCreateDaftarOpen(false)
-                }}
-            />
-        </div >
+        </div>
     )
 } 

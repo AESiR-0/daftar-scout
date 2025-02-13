@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, DollarSign, Building, Play, ScrollText, Folder, Bell, Calendar, Crown, FileText, Video, MessageCircle, HelpCircle, UserPlus, Trash2, FileSpreadsheet, Users2, CheckCircle } from "lucide-react"
+import { LayoutDashboard, Users, DollarSign, Building, Play, ScrollText, Folder, Bell, Calendar, Crown, FileText, Video, MessageCircle, HelpCircle, UserPlus, Trash2, FileSpreadsheet, Users2, CheckCircle, Presentation } from "lucide-react"
 
 export const investorNavItems = [
   // {
@@ -31,25 +31,25 @@ export const founderNavItems = [
   //   icon: LayoutDashboard,
   // },
   {
-    title: "Scout",
-    url: "/founder/scout",
+    title: "Pitch",
+    url: "/founder/pitch",
     icon: Building,
   },
-  {
-    title: "My Daftar",
-    url: "/founder/daftar",
-    icon: DollarSign,
-  },
-  {
-    title: "Meetings",
-    url: "/founder/meetings",
-    icon: Calendar,
-  },
-  {
-    title: "Go Premium",
-    url: "/founder/premium",
-    icon: Crown,
-  }
+  // {
+  //   title: "My Daftar",
+  //   url: "/founder/daftar",
+  //   icon: DollarSign,
+  // },
+  // {
+  //   title: "Meetings",
+  //   url: "/founder/meetings",
+  //   icon: Calendar,
+  // },
+  // {
+  //   title: "Go Premium",
+  //   url: "/founder/premium",
+  //   icon: Crown,
+  // }
 ]
 
 export const topNavConfig = {
@@ -142,19 +142,19 @@ export const founderStudioNavItems = [
     icon: FileText,
   },
   {
+    title: "Team",
+    url: "/founder/studio/team",
+    icon: Users2,
+  },
+  {
     title: "Investor's Questions",
     url: "/founder/studio/investor-questions",
     icon: HelpCircle,
   },
   {
-    title: "Ask",
+    title: "Pitch",
     url: "/founder/studio/pitch",
     icon: Video,
-  },
-  {
-    title: "Meetings",
-    url: "/founder/studio/meetings",
-    icon: Calendar,
   },
   {
     title: "Documents",
@@ -178,6 +178,16 @@ export const founderStudioNavItems = [
   {
     title: "Offer",
     url: "/founder/studio/offer",
+    icon: FileSpreadsheet,
+  },
+  {
+    title: "Insights",
+    url: "/founder/studio/insights",
+    icon: FileSpreadsheet,
+  },
+  {
+    title: "Bill",
+    url: "/founder/studio/bill",
     icon: FileSpreadsheet,
   },
   {

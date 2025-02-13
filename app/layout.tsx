@@ -3,6 +3,7 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster"
 import Link from "next/link";
+import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,7 +21,10 @@ export default function RootLayout({
         className={`subpixel-antialiased font-poppins`}
       >
         <ToastProvider>
-          {children}
+          <div className="relative flex min-h-screen flex-col">
+            {children}
+            <Footer />
+          </div>
         </ToastProvider>
         <Toaster />
         {/* <div className="w-full bg-[#0e0e0e] py-2 z-50 ">
