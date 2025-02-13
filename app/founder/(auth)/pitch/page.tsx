@@ -3,10 +3,9 @@
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
-import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import  DaftarPage from "@/app/founder/(auth)/daftar/page"
-import ScoutPage from "@/app/founder/(auth)/scout/page"
+import  DaftarPage from "@/app/founder/(auth)/daftar/daftarPage"
+import ScoutPage from "@/app/founder/(auth)/scout/scoutPage"
 export default function PitchPage() {
   const [selectedTab, setSelectedTab] = useState("pitches")
   

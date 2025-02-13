@@ -10,6 +10,10 @@ export function AppSidebar({ role }: { role: string }) {
   const navItems = role === 'investor' ? investorNavItems : founderNavItems
   const pathname = usePathname()
 
+  if (pathname === '/founder/loading') {
+    return null
+  }
+
   return (
     <div className="border-r bg-[#0e0e0e] w-[60px] min-h-screen">
       <div className="flex h-full justify-between pb-10 flex-col">
@@ -17,8 +21,8 @@ export function AppSidebar({ role }: { role: string }) {
         <div>
           {/* Header */}
           <div className="space-y-4 px-4 py-5">
-            <Link 
-              href={`${role === 'investor' ? '/investor' : '/founder'}`} 
+            <Link
+              href={`${role === 'investor' ? '/investor' : '/founder'}`}
               className="flex justify-center items-center"
             >
               <Avatar className="h-8 w-8">
@@ -50,5 +54,6 @@ export function AppSidebar({ role }: { role: string }) {
         </div>
       </div>
     </div>
+
   )
 }

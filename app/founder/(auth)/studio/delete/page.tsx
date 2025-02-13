@@ -75,7 +75,7 @@ export default function DeletePage() {
   const pendingApprovals = approvals.filter(member => !member.isApproved).length
 
   return (
-    <div className="flex gap-6">
+    <div className="flex px-5 gap-6">
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardHeader>
           <CardTitle> </CardTitle>

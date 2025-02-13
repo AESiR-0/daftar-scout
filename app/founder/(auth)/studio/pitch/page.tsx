@@ -74,7 +74,7 @@ export default function PitchPage() {
     const [specificAsks, setSpecificAsks] = useState("");
 
     return (
-        <div className="px-3 container mx-auto py-6 space-y-6 flex gap-8">
+        <div className="px-10 container mx-auto py-5 space-y-6 flex gap-8">
             {/* Left Section: Pitch & Questions */}
             <div className="w-2/3 space-y-6">
                 <ScrollArea className="space-y-6">

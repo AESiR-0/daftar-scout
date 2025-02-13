@@ -82,7 +82,7 @@ export default function PitchNameForm({ pitch, mode }: { pitch: string; mode: st
     };
 
     return (
-        <Card className="w-full border-none my-0 p-0 bg-[#0e0e0e] mx-auto">
+        <Card className="w-full border-none  bg-[#0e0e0e] mx-auto">
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex gap-10 justify-between">
@@ -92,6 +92,7 @@ export default function PitchNameForm({ pitch, mode }: { pitch: string; mode: st
                                 type="text"
                                 placeholder="Enter your pitch name (max 100 characters)"
                                 value={pitchName}
+                                maxLength={100}
                                 onChange={(e) => setPitchName(e.target.value)}
                                 className="rounded w-full"
                             />

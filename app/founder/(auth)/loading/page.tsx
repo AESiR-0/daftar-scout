@@ -26,7 +26,7 @@ export default function LoadingPage() {
       
       // Third phase: Redirect after showing welcome message
       const redirectTimeout = setTimeout(() => {
-        router.push('/founder/scout')
+        router.push('/founder/pitch')
       }, 2000) // Wait 2 seconds after showing welcome message
 
       return () => clearTimeout(redirectTimeout)
