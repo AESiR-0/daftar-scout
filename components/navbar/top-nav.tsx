@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import Link from "next/link"
 import { Play, FileText, Bell, ChevronRight, Folder, ChevronDown } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { daftarsData } from "@/lib/dummy-data/daftars"
@@ -37,6 +38,9 @@ export function TopNav({ role }: { role: string }) {
   const [journalOpen, setJournalOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [daftarOpen, setDaftarOpen] = useState(false)
+  const [hasNewPlay, setHasNewPlay] = useState(true)
+  const [hasNewNotifications, setHasNewNotifications] = useState(true)
+  const [hasNewProfileUpdates, setHasNewProfileUpdates] = useState(true)
 
   // Only show search on specific pages
   const showSearch = pathname.includes('/scout') ||
@@ -87,40 +91,62 @@ export function TopNav({ role }: { role: string }) {
           </div>
 
         </div> */}
-        <div className="flex items-center justify-start">
-          <p className="text-sm font-medium">DaftarOS</p>
-        </div>
-
-        <div className="ml-auto flex items-center space-x-4">
-
-          {navActions.map((action: NavAction) => (
-            <Button
-              key={action.action}
-              variant={'icon' in action ? "ghost" : "link"}
-              size={'icon' in action ? "icon" : "sm"}
-              className={'icon' in action ? "" : "text-foreground hover:text-foreground/80 w-fit"}
-              onClick={() => handleActionClick(action.action)}
-            >
-              {'icon' in action ? (
-                <action.icon className="h-5 w-5" />
-              ) : (
-                <span className="text-xs font-light">{action.text}</span>
-              )}
-            </Button>
-          ))}
-
-          <BookmarkFilter />
+        <div className="flex items-center justify-start gap-3">
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-[0.35rem] "
-            onClick={() => setProfileOpen(true)}
+            className="rounded-[0.35rem]"
+            onClick={() => router.back()}
           >
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-              <AvatarFallback>UN</AvatarFallback>
-            </Avatar>
+            <ChevronRight className="h-4 w-4 rotate-180" />
           </Button>
+          <Link href="/founder">
+            <p className="text-sm font-medium">Daftar OS</p>
+          </Link>
+        </div>
+
+        <div className="ml-auto flex items-center space-x-4">
+          {navActions.map((action: NavAction) => (
+            <div key={action.action} className="relative">
+              <Button
+                variant={'icon' in action ? "ghost" : "link"}
+                size={'icon' in action ? "icon" : "sm"}
+                className={'icon' in action ? "" : "text-foreground rounded-[0.35rem] hover:text-foreground/80 w-fit"}
+                onClick={() => handleActionClick(action.action)}
+              >
+                {'icon' in action ? (
+                  <action.icon className="h-5 w-5" />
+                ) : (
+                  <span className="text-xs font-light">{action.text}</span>
+                )}
+              </Button>
+              {'icon' in action && action.icon === Play && hasNewPlay && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full" />
+              )}
+              {'icon' in action && action.icon === Bell && hasNewNotifications && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full" />
+              )}
+            </div>
+          ))}
+
+          <div onClick={() => router.push('/founder/pitch')}>
+            <BookmarkFilter />
+          </div>
+
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-[0.35rem]"
+              onClick={() => setProfileOpen(true)}
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                <AvatarFallback>UN</AvatarFallback>
+              </Avatar>
+            </Button>
+            {hasNewProfileUpdates && <span className="absolute top-0 right-0 h-2 w-2 bg-blue-500 rounded-full" />}
+          </div>
         </div>
         {/* {showSearch && <SearchAndFilter />} */}
         <ProfileDialog

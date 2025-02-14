@@ -180,7 +180,7 @@ export default function PitchPage() {
             {/* Right Section: Action & Errors */}
             <div className="w-1/3 border-l pl-6 space-y-6">
                 <Button 
-                    className="w-full bg-muted hover:bg-muted/50"
+                    className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
                     size="lg"
                     onClick={() => setShowPaymentDialog(true)}
                 >
@@ -188,9 +188,12 @@ export default function PitchPage() {
                 </Button>
 
                 <Card className="p-4 border bg-muted/10">
-                    <h3 className="text-sm font-medium mb-2">Please fix this issue:</h3>
+                    <h3 className="text-sm font-medium mb-2">Pitch not shared:</h3>
                     <p className="text-xs text-muted-foreground">
-                        Data mismatch: Please ensure all team members have approved the pitch
+                        Reason
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        Please check your team&apos;s approval and ensure all members have approved the pitch.
                     </p>
                 </Card>
             </div>

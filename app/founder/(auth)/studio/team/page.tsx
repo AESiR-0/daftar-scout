@@ -314,7 +314,7 @@ export default function TeamPage() {
             className="w-[25%] bg-muted hover:bg-muted/50"
             disabled={!newMember.firstName || !newMember.lastName || !newMember.email || !newMember.designation}
           >
-            Invite Member
+            Invite
           </Button>
         </div>
       </div>

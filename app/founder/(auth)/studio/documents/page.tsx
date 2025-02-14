@@ -430,7 +430,7 @@ function DocumentsList({
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className={`bg-[#1a1a1a] p-6 rounded-lg ${doc.isHidden ? 'opacity-50' : ''}`}
+          className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${doc.isHidden ? 'opacity-50' : ''}`}
         >
           <div className="flex items-start justify-between">
             <div className="space-y-1">

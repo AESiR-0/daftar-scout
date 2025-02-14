@@ -425,7 +425,7 @@ export function ProfileDialog({
                 variant="outline" 
                 onClick={handleDeleteAccount}
               >
-                Delete Account
+                Delete
               </Button>
             </div>
           </Card>

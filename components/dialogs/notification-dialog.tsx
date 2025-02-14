@@ -101,7 +101,7 @@ export function NotificationDialog({
                 filteredNotifications.map((notification) => (
                   <Card key={notification.id} className={cn(
                     "border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors",
-                    !notification.isRead && "border-l-2 border-l-primary pl-3"
+                    !notification.isRead && "border-l-2 border-l-primary"
                   )}>
                     <div className="p-4 space-y-2">
                       <h4 className="text-sm font-medium">{notification.title}</h4>

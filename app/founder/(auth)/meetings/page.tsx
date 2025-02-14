@@ -151,18 +151,7 @@ export default function MeetingsPage() {
   }
 
   return (
-    <div className="space-y-6 container mx-auto px-10">
-      {/* Header - Removed local search, kept only Schedule button */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Meetings</h2>
-        <Button
-          className="bg-blue-600 hover:bg-blue-700 text-white"
-          onClick={() => setScheduleOpen(true)}
-        >
-          <span className="text-xs">Schedule Meeting</span>
-        </Button>
-      </div>
-
+    <div className="space-y-6 container mx-auto px-4">
       {/* Three Column Layout */}
       <div className="flex gap-6">
         {/* Calendar and Pending Column */}
@@ -179,32 +168,13 @@ export default function MeetingsPage() {
               }}
             />
           </div>
-
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium">Waiting Confirmation</h3>
-            {pendingMeetings.length === 0 ? (
-              <div className="text-sm text-muted-foreground">
-                No pending meetings
-              </div>
-            ) : (
-              pendingMeetings.map((meeting) => (
-                <div
-                  key={meeting.id}
-                  className="p-3 border rounded-[0.35rem]  space-y-2 cursor-pointer hover:border-blue-600"
-                  onClick={() => setSelectedMeeting(meeting)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-medium text-sm">{meeting.title}</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(meeting.date)} at {meeting.time}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <Button
+          variant="outline"
+          className=" rounded-[0.35rem] w-full"
+          onClick={() => setScheduleOpen(true)}
+        >
+          <span className="text-xs">Schedule Meeting</span>
+        </Button>
         </div>
 
         {/* Selected Date Schedule Column */}
@@ -216,9 +186,6 @@ export default function MeetingsPage() {
                   ? "Today's Schedule"
                   : "Schedule"}
               </h3>
-              <p className="text-sm text-muted-foreground">
-                {selectedDate ? formatDate(selectedDate.toISOString()) : ''}
-              </p>
             </div>
           </div>
 
@@ -244,9 +211,6 @@ export default function MeetingsPage() {
                   </div>
                   <div className="flex-1">
                     <div className="font-medium text-sm">{meeting.title}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {meeting.attendees.join(", ")}
-                    </div>
                   </div>
                 </div>
               ))
@@ -267,7 +231,7 @@ export default function MeetingsPage() {
                         {selectedMeeting.status}
                       </Badge>
                       {isToday(selectedMeeting.date) && (
-                        <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                        <Badge variant="outline" className="">
                           Today
                         </Badge>
                       )}
@@ -338,14 +302,16 @@ export default function MeetingsPage() {
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-[0.35rem] "
+                    variant="outline"
+                    className="rounded-[0.35rem] "
                     onClick={() => handleAccept(selectedMeeting.id)}
                   >
                     Accept
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-red-600 hover:bg-red-700 rounded-[0.35rem]  text-white"
+                    variant="outline"
+                    className="rounded-[0.35rem]"
                     onClick={() => handleReject(selectedMeeting.id)}
                   >
                     Reject
@@ -354,7 +320,7 @@ export default function MeetingsPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-red-600 hover:text-red-700"
+                      className="rounded-[0.35rem] "
                       onClick={() => handleDelete(selectedMeeting.id)}
                     >
                       <Trash2 className="h-4 w-4" />

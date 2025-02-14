@@ -8,7 +8,7 @@ export default function BillPage() {
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="p-6">
           <p className="text-muted-foreground">
-            No data available: your startup is not pitched to investors
+            No data available.
           </p>
         </CardContent>
       </Card>

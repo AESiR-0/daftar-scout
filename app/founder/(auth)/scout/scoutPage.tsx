@@ -24,9 +24,11 @@ export default function IncubationPage() {
                     {filteredScouts.map((scout) => (
                         <div
                             key={scout.slug}
-                            className="border-b border-border last:border-0 pb-4 last:pb-0 hover:bg-[#252525] rounded-[0.35rem] transition-colors cursor-pointer"
+                            className="group border-b border-border last:border-0 last:pb-0"
                         >
-                            <div onClick={() => router.push(`/founder/scout/${scout.slug}`)} className="flex items-center justify-between">
+                            <div onClick={() => router.push(`/founder/scout/${scout.slug}`)} 
+                                className="flex items-center justify-between px-4 py-2 rounded-[0.35rem] transition-all duration-200 hover:bg-muted/40"
+                            >
                                 <div className="flex-1">
                                     <h3 className="text-medium">{scout.title}</h3>
                                     <div className="text-xs text-muted-foreground space-y-1">
@@ -44,11 +46,13 @@ export default function IncubationPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-6">
-                                    <BookmarkButton
-                                        isBookmarked={bookmarkedSlugs.has(scout.slug)}
-                                        onToggle={() => toggleBookmark(scout.slug)}
-                                    />
-                                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <BookmarkButton
+                                            isBookmarked={bookmarkedSlugs.has(scout.slug)}
+                                            onToggle={() => toggleBookmark(scout.slug)}
+                                        />
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
                                 </div>
                             </div>
                         </div>
