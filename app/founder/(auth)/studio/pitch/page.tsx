@@ -188,7 +188,7 @@ export default function PitchPage() {
                 </Button>
 
                 <Card className="p-4 border bg-muted/10">
-                    <h3 className="text-sm font-medium mb-2">Pitch not shared:</h3>
+                    <h3 className="text-sm font-medium mb-2">Pitch not shared</h3>
                     <p className="text-xs text-muted-foreground">
                         Reason
                     </p>
