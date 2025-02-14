@@ -5,14 +5,13 @@ import { usePathname } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckSquare, CheckSquare2, XSquare } from "lucide-react";
-import {
-    HoverCard,
-    HoverCardContent,
-    HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import formatDate from "@/lib/formatDate";
+import { CheckSquare2, XSquare } from "lucide-react";
 import { FounderProfile } from "@/components/FounderProfile";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card } from "@/components/ui/card";
+import { PaymentDialog } from "@/components/dialogs/payment-dialog";
+import  formatDate  from "@/lib/formatDate"
 
 // Sample approval data (Team Logs)
 const approvalRequests = [
@@ -72,6 +71,8 @@ const approvalRequests = [
 export default function PitchPage() {
     const pathname = usePathname();
     const [specificAsks, setSpecificAsks] = useState("");
+    const [isReady, setIsReady] = useState(false);
+    const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
     return (
         <div className="px-10 container mx-auto py-5 space-y-6 flex gap-8">
@@ -84,41 +85,75 @@ export default function PitchPage() {
                         <Textarea
                             value={specificAsks}
                             onChange={(e) => setSpecificAsks(e.target.value)}
-                            className="min-h-[100px] resize-none  rounded-md"
+                            className="min-h-[100px] resize-none rounded-md"
                         />
                     </div>
 
-
-                </ScrollArea>
-            </div>
-
-            {/* Right Section: Team Logs (Approvals) */}
-            <div className="w-1/3 border-l pl-6 space-y-6">
-                <h2 className="text-lg font-medium">Team Approvals</h2>
-
-                <ScrollArea className="h-[calc(100vh-8rem)] space-y-3">
-                    {approvalRequests.map((request) => (
-                        <div
-                            key={request.id}
-                            className="flex items-center justify-between p-3 border rounded-md hover:bg-muted transition-all"
+                    {/* Ready to Pitch Checkbox */}
+                    <div className="flex items-center space-x-2 pt-4">
+                        <Checkbox 
+                            id="ready" 
+                            checked={isReady}
+                            onCheckedChange={(checked) => setIsReady(checked as boolean)}
+                            className="border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
+                        />
+                        <label
+                            htmlFor="ready"
+                            className="text-sm font-medium leading-none"
                         >
-                            <div className="space-y-1">
-                                <FounderProfile founder={request.profile} />
+                            All set, let's pitch
+                        </label>
+                    </div>
 
-                                <p className="text-xs text-muted-foreground">
-                                    {request.date}
-                                </p>
-                            </div>
-
-                            {request.status === "approved" ? (
-                                <CheckSquare2 className="h-5 w-5 " />
-                            ) : (
-                                <XSquare className="h-5 w-5 " />
-                            )}
+                    {/* Team Approvals Section */}
+                    <div className="pt-6">
+                        <h2 className="text-lg font-medium mb-4">Team Approvals</h2>
+                        <div className="space-y-3">
+                            {approvalRequests.map((request) => (
+                                <div
+                                    key={request.id}
+                                    className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-all"
+                                >
+                                    <div className="space-y-1">
+                                        <FounderProfile founder={request.profile} />
+                                        <p className="text-xs text-muted-foreground">
+                                            {request.date}
+                                        </p>
+                                    </div>
+                                    {request.status === "approved" ? (
+                                        <CheckSquare2 className="h-5 w-5" />
+                                    ) : (
+                                        <XSquare className="h-5 w-5" />
+                                    )}
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </ScrollArea>
             </div>
+
+            {/* Right Section: Action & Errors */}
+            <div className="w-1/3 border-l pl-6 space-y-6">
+                <Button 
+                    className="w-full bg-muted hover:bg-muted/50"
+                    size="lg"
+                    onClick={() => setShowPaymentDialog(true)}
+                >
+                    Pitch Now
+                </Button>
+
+                <Card className="p-4 border bg-muted/10">
+                    <h3 className="text-sm font-medium mb-2">Please fix this issue:</h3>
+                    <p className="text-xs text-muted-foreground">
+                        Data mismatch: Please ensure all team members have approved the pitch
+                    </p>
+                </Card>
+            </div>
+
+            <PaymentDialog 
+                open={showPaymentDialog} 
+                onOpenChange={setShowPaymentDialog}
+            />
         </div>
     );
 }
