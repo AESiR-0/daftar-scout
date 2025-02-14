@@ -46,12 +46,10 @@ export default function IncubationPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-6">
-                                    <div onClick={(e) => e.stopPropagation()}>
-                                        <BookmarkButton
-                                            isBookmarked={bookmarkedSlugs.has(scout.slug)}
-                                            onToggle={() => toggleBookmark(scout.slug)}
-                                        />
-                                    </div>
+                                    <BookmarkButton
+                                        isBookmarked={bookmarkedSlugs.has(scout.slug)}
+                                        onToggle={() => toggleBookmark(scout.slug)}
+                                    />
                                     <ChevronRight className="w-5 h-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
                                 </div>
                             </div>

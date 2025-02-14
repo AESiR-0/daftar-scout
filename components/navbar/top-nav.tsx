@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Play, FileText, Bell, ChevronRight, Folder, ChevronDown } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
@@ -41,6 +41,7 @@ export function TopNav({ role }: { role: string }) {
   const [hasNewPlay, setHasNewPlay] = useState(true)
   const [hasNewNotifications, setHasNewNotifications] = useState(true)
   const [hasNewProfileUpdates, setHasNewProfileUpdates] = useState(true)
+  const [studioEntryPoint, setStudioEntryPoint] = useState<string>("")
 
   // Only show search on specific pages
   const showSearch = pathname.includes('/scout') ||
@@ -53,6 +54,20 @@ export function TopNav({ role }: { role: string }) {
 
   // Show daftar selector on deal-board and daftar pages
   const showDaftarSelector = pathname.includes('/deal-board') || pathname.includes('/daftar')
+
+  // Add this effect to track studio entry
+  useEffect(() => {
+    if (pathname.includes('/studio')) {
+      // Only set entry point when first entering studio
+      if (!studioEntryPoint) {
+        const prevPath = document.referrer
+        setStudioEntryPoint(prevPath || '/founder/pitch')
+      }
+    } else {
+      // Reset entry point when leaving studio
+      setStudioEntryPoint("")
+    }
+  }, [pathname])
 
   const handleActionClick = (action: string) => {
     switch (action) {
@@ -67,6 +82,15 @@ export function TopNav({ role }: { role: string }) {
         break
       default:
         break
+    }
+  }
+
+  // Update the back button handler
+  const handleBack = () => {
+    if (pathname.includes('/studio') && studioEntryPoint) {
+      router.push(studioEntryPoint)
+    } else {
+      router.back()
     }
   }
 
@@ -96,7 +120,7 @@ export function TopNav({ role }: { role: string }) {
             variant="ghost"
             size="icon"
             className="rounded-[0.35rem]"
-            onClick={() => router.back()}
+            onClick={handleBack}
           >
             <ChevronRight className="h-4 w-4 rotate-180" />
           </Button>
