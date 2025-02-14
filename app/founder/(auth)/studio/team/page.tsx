@@ -2,22 +2,26 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { FounderProfile } from "@/components/FounderProfile"
-import { Mail, Phone, MapPin, PlusCircle, X } from "lucide-react"
+import { Mail, MapPin, X, Phone } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface TeamMember {
+  id: string
   firstName: string
   lastName: string
   email: string
-  phone: string
+  designation: string
   age: string
   gender: string
   location: string
   language: string[]
-  designation: string
   imageUrl?: string
+  status: 'active' | 'pending'
+  isCurrentUser?: boolean
+  joinDate: string
+  phone: string
 }
 
 export default function TeamPage() {
@@ -34,149 +38,276 @@ export default function TeamPage() {
     return firstName?.[0] + (lastName?.[0] || '')
   }
 
-  const [members, setMembers] = useState<TeamMember[]>([])
-  const [showInviteForm, setShowInviteForm] = useState(false)
+  const [members, setMembers] = useState<TeamMember[]>([
+    {
+      id: '1',
+      firstName: 'Current',
+      lastName: 'User',
+      email: 'current@user.com',
+      designation: 'Founder',
+      age: '28',
+      gender: 'Male',
+      location: 'Dubai, UAE',
+      language: ['English', 'Arabic'],
+      status: 'active',
+      isCurrentUser: true,
+      joinDate: '2024-01-15',
+      phone: '+971526374859'
+    },
+    {
+      id: '2',
+      firstName: 'Sarah',
+      lastName: 'Ahmed',
+      email: 'sarah.ahmed@example.com',
+      designation: 'CTO',
+      age: '32',
+      gender: 'Female',
+      location: 'Abu Dhabi, UAE',
+      language: ['English', 'Arabic', 'French'],
+      status: 'active',
+      joinDate: '2024-02-01',
+      phone: '+971526374859'
+    },
+    {
+      id: '3',
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      designation: 'Product Manager',
+      age: '30',
+      gender: 'Male',
+      location: 'Dubai, UAE',
+      language: ['English', 'Spanish'],
+      status: 'pending',
+      joinDate: '2024-03-10',
+      phone: '+971526374859'
+    }
+  ])
   const [newMember, setNewMember] = useState<TeamMember>({
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    designation: "",
     age: "25",
     gender: "Not Specified",
     location: "Not Specified",
     language: ["English"],
-    designation: "Team Member",
-    imageUrl: undefined
+    status: 'pending',
+    id: '2',
+    joinDate: '2024-03-10',
+    phone: '+971526374859'
   })
 
+  const activeMembers = members.filter(m => m.status === 'active')
+  const pendingMembers = members.filter(m => m.status === 'pending')
+
   const handleInvite = () => {
-    if (newMember.firstName && newMember.lastName && newMember.email && newMember.phone) {
+    if (newMember.firstName && newMember.lastName && newMember.email && newMember.designation) {
       setMembers([...members, newMember])
       setNewMember({
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
+        designation: "",
         age: "25",
         gender: "Not Specified",
         location: "Not Specified",
         language: ["English"],
-        designation: "Team Member",
-        imageUrl: undefined
+        status: 'pending',
+        id: '2',
+        joinDate: '2024-03-10',
+        phone: '+971526374859'
       })
-      setShowInviteForm(false)
     }
   }
 
-  return (
-    <div className="space-y-6 px-4">
-      {/* Header */}
-      <div className="flex items-center mt-4 justify-between">
-        <h1 className="text-2xl font-semibold">Team Members</h1>
-        <Button variant="outline" onClick={() => setShowInviteForm(true)} disabled={showInviteForm}>
-          Invite Member
-        </Button>
-      </div>
+  const handleCancelInvite = (id: string) => {
+    setMembers(members.filter(member => member.id !== id))
+  }
 
-      {/* Invite Form */}
-      {showInviteForm && (
-        <div className="bg-[#1a1a1a] rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium">Invite Team Member</h2>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setShowInviteForm(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              placeholder="First Name"
-              value={newMember.firstName}
-              onChange={(e) => setNewMember({ ...newMember, firstName: e.target.value })}
-            />
-            <Input
-              placeholder="Last Name"
-              value={newMember.lastName}
-              onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
-            />
-            <Input
-              placeholder="Email"
-              type="email"
-              value={newMember.email}
-              onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-            />
-            <Input
-              placeholder="Phone"
-              type="tel"
-              value={newMember.phone}
-              onChange={(e) => setNewMember({ ...newMember, phone: e.target.value })}
-            />
-            <Button 
-              onClick={handleInvite}
-              className="col-span-2"
-              disabled={!newMember.firstName || !newMember.lastName || !newMember.email || !newMember.phone}
-            >
-              Invite Member
-            </Button>
+  const handleRemoveMember = (id: string) => {
+    setMembers(members.filter(member => member.id !== id))
+  }
+
+  const handleWithdraw = () => {
+    // Handle withdraw logic
+    console.log('Withdrawing from team')
+  }
+
+  const MemberCard = ({ member }: { member: TeamMember }) => (
+    <div className="bg-[#1a1a1a] p-6 rounded-lg">
+      <div className="flex justify-between items-start">
+        <div className="flex gap-4">
+          <Avatar className="h-60 w-60 rounded-lg">
+            {member.imageUrl ? (
+              <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-lg" />
+            ) : (
+              <AvatarFallback className="rounded-lg text-xl">{getInitials(member.firstName)}</AvatarFallback>
+            )}
+          </Avatar>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="text-lg">{member.firstName} {member.lastName}</h4>
+            </div>
+            <p className="text-sm text-muted-foreground">{member.designation}</p>
+
+            <div className="space-y-2 mt-4">
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  
+                  <span>{member.gender}</span>
+                  <span>•</span>
+                  <span>{member.age} years</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p>{member.email}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p>{member.phone}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p>{member.location}</p>
+                </div>
+              </div>
+
+              <p className="text-sm pt-1 text-muted-foreground">
+                Preferred languages to connect with investors: {member.language.join(', ')}
+              </p>
+
+              <p className="text-xs pt-2 text-muted-foreground">
+                On Daftar Since <br /> {formatDate(member.joinDate)}
+              </p>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* Team Members List */}
-      <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {members.map((member, index) => (
-          <Card className="p-4" key={index}>
-            <Avatar className="h-20 w-20 mb-5 text-3xl">
-                    {member.imageUrl ? (
-                        <AvatarImage src={member.imageUrl} alt={member.firstName} />
-                    ) : (
-                        <AvatarFallback>{getInitials(member.firstName)}</AvatarFallback>
-                    )}
-                </Avatar>
-                <div className="flex flex-col">
-                     <h4 className="text-sm font-medium">{member.firstName} {member.lastName}</h4>
-                    <h4 className="text-sm font-medium">{member.designation}</h4>
-                    <h4 className="text-xs  flex gap-1 text-muted-foreground">
-                        <span>{member.gender}</span>
-                        <span> {member.age}</span>
-                    </h4>
-                </div>
-                <div className="flex text-xs flex-col">
-                    <div className="flex items-center gap-2">
-                        <Mail className="h-3 w-3" />
-                        <p className="underline">{member.email}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Phone className="h-3 w-3" />
-                        <p>{member.phone}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <MapPin className="h-3 w-3" />
-                        <p>{member.location}</p>
-                    </div>
-
-                </div>
-                <br />
-                <div className="flex text-xs flex-col gap-1">
-                    <span>
-
-                        Preferred languages to speak with investors
-                    </span>
-                    <span className="flex gap-2 flex-wrap">
-                        {member.language.map((language) => (
-                            <span key={language} className="bg-muted p-1 rounded-md">{language}</span>
-                        ))}</span>
-                </div>
-                <br />
-                <div className="text-xs">
-                    <strong>On Daftar Since</strong> <br /> {formatDate(new Date().toISOString())}
-                </div>
-          </Card>
-        ))}
+        {member.isCurrentUser ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleWithdraw}
+            className="flex items-center gap-2"
+          >
+            Exit
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleRemoveMember(member.id)}
+            className="flex items-center gap-2"
+          >
+            Remove
+          </Button>
+        )}
       </div>
+
+
+    </div>
+  )
+
+  const PendingCard = ({ member }: { member: TeamMember }) => (
+    <div className="bg-[#1a1a1a] p-6 rounded-lg">
+      <div className="flex justify-between items-start">
+        <div className="flex gap-4">
+          <Avatar className="h-12 w-12">
+            {member.imageUrl ? (
+              <AvatarImage src={member.imageUrl} alt={member.firstName} />
+            ) : (
+              <AvatarFallback>{getInitials(member.firstName)}</AvatarFallback>
+            )}
+          </Avatar>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="font-medium">{member.firstName} {member.lastName}</h4>
+              {member.isCurrentUser && (
+                <span className="text-xs bg-muted px-2 py-0.5 rounded">You</span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">{member.designation}</p>
+            <p className="text-sm text-muted-foreground">{member.email}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleCancelInvite(member.id)}
+          className="text-red-500 hover:text-red-600"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="space-y-4 px-10">
+      {/* Invite Form */}
+      <div className="bg-[#1a1a1a] rounded-lg p-6 mt-8">
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            placeholder="First Name"
+            value={newMember.firstName}
+            onChange={(e) => setNewMember({ ...newMember, firstName: e.target.value })}
+          />
+          <Input
+            placeholder="Last Name"
+            value={newMember.lastName}
+            onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
+          />
+          <Input
+            placeholder="Email"
+            type="email"
+            value={newMember.email}
+            onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+          />
+          <Input
+            placeholder="Designation"
+            value={newMember.designation}
+            onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
+          />
+          <Button
+            onClick={handleInvite}
+            className="w-[25%] bg-muted hover:bg-muted/50"
+            disabled={!newMember.firstName || !newMember.lastName || !newMember.email || !newMember.designation}
+          >
+            Invite Member
+          </Button>
+        </div>
+      </div>
+
+      {/* Tabs and Members List */}
+      <Tabs defaultValue="Team" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="Team" className="flex items-center gap-2">
+            Team
+            <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
+              {activeMembers.length}
+            </span>
+          </TabsTrigger>
+          <TabsTrigger value="Pending" className="flex items-center gap-2">
+            Pending
+            <span className="bg-muted px-2 py-0.5 rounded-[0.35rem] text-xs">
+              {pendingMembers.length}
+            </span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="Team">
+          <div className="space-y-4">
+            {activeMembers.map((member) => (
+              <MemberCard key={member.id} member={member} />
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="Pending">
+          <div className="space-y-4">
+            {pendingMembers.map((member) => (
+              <PendingCard key={member.id} member={member} />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 } 

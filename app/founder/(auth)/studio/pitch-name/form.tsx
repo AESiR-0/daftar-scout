@@ -99,7 +99,7 @@ export default function PitchNameForm({ pitch, mode }: { pitch: string; mode: st
                         </div>
 
                         <div className="w-1/2 space-y-2">
-                            <Label>Pitch Location</Label>
+                            <Label>Pitching From</Label>
                             <Combobox
                                 options={countries}
                                 value={selectedCountry}

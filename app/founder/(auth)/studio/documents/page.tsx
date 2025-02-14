@@ -22,6 +22,7 @@ interface Document {
   name: string
   uploadedBy: string
   daftar: string
+  scoutName: string
   uploadedAt: string
   type: "private" | "received" | "sent"
   size: string
@@ -105,6 +106,7 @@ export default function DocumentsPage() {
       uploadedAt: formatDate("2024-03-20T14:30:00"),
       type: "private",
       size: "2.4 MB",
+      scoutName: "innovation fund",
       isHidden: false,
       logs: [
         {
@@ -126,7 +128,8 @@ export default function DocumentsPage() {
       daftar: "Venture Capital LLC",
       uploadedAt: formatDate("2024-03-19T10:15:00"),
       type: "received",
-      size: "1.8 MB"
+      size: "1.8 MB",
+      scoutName: "AI Fund",
     }
   ])
 
@@ -137,6 +140,10 @@ export default function DocumentsPage() {
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
+
+  const privateCount = documentsList.filter(doc => doc.type === 'private').length
+  const receivedCount = documentsList.filter(doc => doc.type === 'received').length
+  const sentCount = documentsList.filter(doc => doc.type === 'sent').length
 
   const filteredDocuments = documentsList.filter(doc =>
     doc.type === activeTab &&
@@ -180,7 +187,8 @@ export default function DocumentsPage() {
           uploadedAt: formatDate(new Date().toISOString()),
           type: type,
           size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-          isHidden: false
+          isHidden: false,
+          scoutName: "AI Fund"
         }
 
         setDocumentsList(prev => [...prev, newDoc])
@@ -265,18 +273,30 @@ export default function DocumentsPage() {
 
   return (
     <>
-      <div className="flex px-5 gap-6">
+      <div className="flex px-5 mt-10 gap-6">
         <Card className="border-none bg-[#0e0e0e] flex-1">
-          <CardHeader>
-            <CardTitle>Documents</CardTitle>
-          </CardHeader>
           <CardContent className="space-y-6">
             <Tabs defaultValue="private" onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
               <div className="flex items-center justify-between mb-6">
                 <TabsList>
-                  <TabsTrigger value="private">Private</TabsTrigger>
-                  <TabsTrigger value="received">Received</TabsTrigger>
-                  <TabsTrigger value="sent">Sent</TabsTrigger>
+                  <TabsTrigger value="private" className="flex items-center gap-2">
+                    Private
+                    <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
+                      {privateCount}
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger value="received" className="flex items-center gap-2">
+                    Received
+                    <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
+                      {receivedCount}
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger value="sent" className="flex items-center gap-2">
+                    Sent
+                    <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
+                      {sentCount}
+                    </span>
+                  </TabsTrigger>
                 </TabsList>
 
                 <div className="flex items-center gap-4">
@@ -441,64 +461,87 @@ function DocumentsList({
     )
   }
 
+  const renderMetadata = (doc: Document) => {
+    switch (doc.type) {
+      case 'private':
+        return (
+          <>
+            <span>Uploaded by {doc.uploadedBy}</span>
+            <div>{formatDate(doc.uploadedAt)}</div>
+          </>
+        )
+      case 'received':
+        return (
+          <>
+            <span>From Scout: {doc.scoutName}</span>
+            <div>{formatDate(doc.uploadedAt)}</div>
+          </>
+        )
+      case 'sent':
+        return (
+          <>
+            <span>Uploaded by {doc.uploadedBy}</span>
+            <span>{doc.daftar}</span>
+            <div>{formatDate(doc.uploadedAt)}</div>
+          </>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
-    <div className="space-y-3 w-full">
+    <div className="space-y-4">
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className={`flex flex-col w-full p-4 border rounded-lg hover:border-muted-foreground transition-colors ${doc.isHidden ? 'opacity-50' : ''
-            }`}
+          className={`bg-[#1a1a1a] p-6 rounded-lg ${doc.isHidden ? 'opacity-50' : ''}`}
         >
-          <div className="flex  w-full items-center justify-between">
-            <div className="flex w-full items-center gap-3">
-              <div className="w-full">
-                <div className=" flex w-full items-center justify-between font-medium">
-                  <span>{doc.name}</span>
-                  <span className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDownload(doc)}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onView(doc)}
-                    >
-                      <Eye className={`h-4 w-4 ${doc.isHidden ? 'text-muted-foreground' : ''}`} />
-                    </Button>
-
-                    {canDelete && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className=""
-                        onClick={() => onDelete(doc.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </span>
-                </div>
-                <div className="flex py-2 flex-col text-xs text-muted-foreground">
-                  <ProfileHoverCard
-                    {...userProfiles[doc.uploadedBy]}
-                  >
-                    <span className="cursor-pointer hover:text-muted-foreground"> Uploaded By {" "}{doc.uploadedBy}</span>
-                  </ProfileHoverCard>
-                  <ProfileHoverCard name={doc.daftar} daftar={doc.daftar}>
-                    <span className="cursor-pointer hover:text-muted-foreground">{doc.daftar}</span>
-                  </ProfileHoverCard>
-                  <span>{formatDate(doc.uploadedAt)}</span>
+          <div className="flex items-start justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <FileText className="h-8 w-8" />
+                <div>
+                  <h3 className="font-medium">{doc.name}</h3>
+                  <p className="text-xs text-muted-foreground">{doc.size}</p>
                 </div>
               </div>
             </div>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDownload(doc)}
+                className="hover:bg-muted/50"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onView(doc)}
+                className="hover:bg-muted/50"
+              >
+                <Eye className={`h-4 w-4 ${doc.isHidden ? 'text-muted-foreground' : ''}`} />
+              </Button>
+              {canDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-muted/50"
+                  onClick={() => onDelete(doc.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+            {renderMetadata(doc)}
           </div>
         </div>
-      ))
-      }
-    </div >
+      ))}
+    </div>
   )
 } 

@@ -58,10 +58,7 @@ export default function InvestorQuestionsPage() {
     };
 
     return (
-        <Card className="w-full border-none my-0 p-0 bg-[#0e0e0e] container mx-auto">
-            <CardHeader>
-                <CardTitle className="text-2xl font-bold"> </CardTitle>
-            </CardHeader>
+        <Card className="w-full border-none mt-10 px-4 bg-[#0e0e0e] container mx-auto">
             <CardContent className="border-none">
                 <div className="flex justify-between gap-10">
                     <div className="w-1/2">
