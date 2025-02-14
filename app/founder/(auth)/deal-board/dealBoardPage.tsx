@@ -56,20 +56,9 @@ export default function PitchBoardPage() {
     }, {} as Record<string, typeof pitches>)
 
     return (
-        <div className="space-y-6 mx-auto flex-col items-center justify-center  px-20   ">
-            <div className="flex items-center justify-between ">
-                <h2 className="text-lg font-semibold">Deal Board</h2>
-                <div className="flex items-center gap-2">
-                  
-                    <Link href="/founder/daftar">
-                        <Button size="sm" variant="outline" className="h-9">
-                            My Daftar
-                        </Button>
-                    </Link>
-                </div>
-            </div>
+        <div className="space-y-6 mx-auto flex-col items-center justify-center px-4   ">
 
-            <ScrollArea className="w-[calc(100vw-24rem)] flex justify-center items-center   rounded-[0.35rem] ">
+            <ScrollArea className="w-[calc(100vw-12rem)] flex justify-center items-center   rounded-[0.35rem] ">
                 <div className="flex gap-6 p-1">
                     {statusOrder.map(status => {
                         const statusPitches = filteredPitches[status] || []
@@ -104,12 +93,9 @@ export default function PitchBoardPage() {
                                                             <h4 className="font-medium text-sm">{pitch.name}</h4>
                                                             <div className="flex flex-col gap-1 mt-1">
                                                                 <p className="text-xs text-muted-foreground mb-2">
-                                                                    Collaboration: {pitch.organizers.join(', ')}
+                                                                    Collaboration: Nithin Kamath, Piyush Bansal, Aman Gupta
                                                                 </p>
-                                                                <p className="text-xs font-medium">{pitch.pitchName}</p>
-                                                                <p className="text-xs text-muted-foreground">
-                                                                    by {pitch.daftar}
-                                                                </p>
+                                                                <p className="text-xs font-medium">Pitch: {pitch.pitchName}</p>
                                                             </div>
                                                         </div>
                                                     </div>

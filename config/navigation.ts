@@ -54,14 +54,13 @@ export const founderNavItems = [
 
 export const topNavConfig = {
   investor: [
-    { icon: Play, action: 'play' },
-    { icon: ScrollText, action: 'journal' },
-    { icon: Folder, action: 'daftar' },
-    { icon: Bell, action: 'notifications' },
+    { text: 'Journal', action: 'journal' },
+    { text: 'Subscription', action: 'subscription' }
   ],
   founder: [
+    { text: 'Journal', action: 'journal' },
+    { text: 'Subscription', action: 'subscription' },
     { icon: Play, action: 'play' },
-    { icon: ScrollText, action: 'journal' },
     { icon: Bell, action: 'notifications' },
   ]
 }

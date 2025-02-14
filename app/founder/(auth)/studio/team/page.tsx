@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Mail, MapPin, X, Phone } from "lucide-react"
+import { Mail, MapPin, X, Phone, Pencil, Check, Trash2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -36,6 +36,15 @@ export default function TeamPage() {
   const getInitials = (name: string) => {
     const [firstName, lastName] = name.split(' ')
     return firstName?.[0] + (lastName?.[0] || '')
+  }
+
+  const formatPhoneNumber = (phone: string) => {
+    // Match country code (anything from start until last 10 digits)
+    const match = phone.match(/^(.+?)(\d{10})$/)
+    if (match) {
+      return `${match[1]} ${match[2]}`
+    }
+    return phone
   }
 
   const [members, setMembers] = useState<TeamMember[]>([
@@ -134,6 +143,14 @@ export default function TeamPage() {
     console.log('Withdrawing from team')
   }
 
+  const [isEditing, setIsEditing] = useState(false)
+  const [editDesignation, setEditDesignation] = useState("")
+
+  const handleSaveDesignation = () => {
+    // Update member designation logic here
+    setIsEditing(false)
+  }
+
   const MemberCard = ({ member }: { member: TeamMember }) => (
     <div className="bg-[#1a1a1a] p-6 rounded-lg">
       <div className="flex justify-between items-start">
@@ -147,32 +164,49 @@ export default function TeamPage() {
           </Avatar>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-lg">{member.firstName} {member.lastName}</h4>
+              <h4 className="text-xl font-medium">{member.firstName} {member.lastName}</h4>
             </div>
-            <p className="text-sm text-muted-foreground">{member.designation}</p>
 
             <div className="space-y-2 mt-4">
               <div className="space-y-1 text-sm text-muted-foreground">
+                {isEditing && member.isCurrentUser ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editDesignation}
+                      onChange={(e) => setEditDesignation(e.target.value)}
+                      className="h-8"
+                      placeholder="Enter your designation"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleSaveDesignation}
+                      className="h-8 w-8"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">{member.designation}</p>
+                )}
                 <div className="flex items-center gap-2">
-                  
-                  <span>{member.gender}</span>
+                  <span>{member.age}</span>
                   <span>•</span>
-                  <span>{member.age} years</span>
+                  <span>{member.gender}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <p>{member.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <p>{member.phone}</p>
+                  <p>{formatPhoneNumber(member.phone)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <p>{member.location}</p>
                 </div>
+                <p className="text-sm text-muted-foreground">
+                  Preferred languages to connect with investors: {member.language.join(', ')}
+                </p>
               </div>
-
-              <p className="text-sm pt-1 text-muted-foreground">
-                Preferred languages to connect with investors: {member.language.join(', ')}
-              </p>
 
               <p className="text-xs pt-2 text-muted-foreground">
                 On Daftar Since <br /> {formatDate(member.joinDate)}
@@ -180,28 +214,38 @@ export default function TeamPage() {
             </div>
           </div>
         </div>
-        {member.isCurrentUser ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleWithdraw}
-            className="flex items-center gap-2"
-          >
-            Exit
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleRemoveMember(member.id)}
-            className="flex items-center gap-2"
-          >
-            Remove
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {member.isCurrentUser && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsEditing(!isEditing)}
+              className="h-8 w-8"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          {member.isCurrentUser ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleWithdraw}
+              className="h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleRemoveMember(member.id)}
+              className="h-8 w-8"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
-
-
     </div>
   )
 
@@ -254,16 +298,16 @@ export default function TeamPage() {
             value={newMember.lastName}
             onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
           />
+            <Input
+              placeholder="Designation"
+              value={newMember.designation}
+              onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
+            />
           <Input
             placeholder="Email"
             type="email"
             value={newMember.email}
             onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-          />
-          <Input
-            placeholder="Designation"
-            value={newMember.designation}
-            onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
           />
           <Button
             onClick={handleInvite}

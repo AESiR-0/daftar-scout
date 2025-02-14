@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { Play, FileText, Bell, ChevronRight, Folder, ChevronDown } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { daftarsData } from "@/lib/dummy-data/daftars"
 import {
   Select,
@@ -24,15 +24,19 @@ import { DaftarDialog } from "@/components/dialogs/daftar-dialog"
 import { SearchAndFilter } from "./search-and-filter"
 import { BookmarkFilter } from "@/components/navbar/bookmark-filter"
 
+type NavAction = 
+  | { icon: any; action: string }
+  | { text: string; action: string }
+
 export function TopNav({ role }: { role: string }) {
   const navActions = role === "investor" ? topNavConfig["investor"] : topNavConfig["founder"]
   const pathname = usePathname()
+  const router = useRouter()
   const paths = pathname.split('/').filter(Boolean)
   const [profileOpen, setProfileOpen] = useState(false)
   const [journalOpen, setJournalOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [daftarOpen, setDaftarOpen] = useState(false)
-  const [selectedDaftar, setSelectedDaftar] = useState(daftarsData[0]?.id || '')
 
   // Only show search on specific pages
   const showSearch = pathname.includes('/scout') ||
@@ -83,20 +87,29 @@ export function TopNav({ role }: { role: string }) {
           </div>
 
         </div> */}
+        <div className="flex items-center justify-start">
+          <p className="text-sm font-medium">DaftarOS</p>
+        </div>
 
         <div className="ml-auto flex items-center space-x-4">
-          <BookmarkFilter />
-          {navActions.map((action: { action: string; icon: any }) => (
+
+          {navActions.map((action: NavAction) => (
             <Button
               key={action.action}
-              variant="ghost"
-              size="icon"
+              variant={'icon' in action ? "ghost" : "link"}
+              size={'icon' in action ? "icon" : "sm"}
+              className={'icon' in action ? "" : "text-foreground hover:text-foreground/80 w-fit"}
               onClick={() => handleActionClick(action.action)}
             >
-              <action.icon className="h-5 w-5" />
+              {'icon' in action ? (
+                <action.icon className="h-5 w-5" />
+              ) : (
+                <span className="text-xs font-light">{action.text}</span>
+              )}
             </Button>
           ))}
 
+          <BookmarkFilter />
           <Button
             variant="ghost"
             size="icon"
@@ -109,7 +122,7 @@ export function TopNav({ role }: { role: string }) {
             </Avatar>
           </Button>
         </div>
-        {showSearch && <SearchAndFilter />}
+        {/* {showSearch && <SearchAndFilter />} */}
         <ProfileDialog
           open={profileOpen}
           onOpenChange={setProfileOpen}

@@ -104,7 +104,7 @@ export default function InvestorQuestionsPage() {
                                                 Click to upload or drag and drop
                                             </p>
                                             <p className="text-xs text-gray-500">
-                                                MP4, WebM or Ogg (max. 100MB)
+                                                MP4, WebM or Ogg (max. 20MB)
                                             </p>
                                         </div>
                                     </div>

@@ -53,39 +53,42 @@ export default function Page() {
         <StudioCard>
             <div className="container mx-auto px-4">
                 {/* Video Section */}
-                <div className="relative aspect-video h-[39rem]">
-                    <video
-                        src={Scout.videoUrl}
-                        controls
-                        className="w-full h-full object-cover rounded-[0.35rem]"
-                    />
+                <div className="flex justify-center">
+                    <div className="relative aspect-video h-[30rem] w-[75%]">
+                        <video
+                            src={Scout.videoUrl}
+                            controls
+                            className="w-full h-full object-cover rounded-[0.35rem]"
+                        />
+                    </div>
                 </div>
 
                 {/* Title and Actions Section */}
-                <div className="flex items-center justify-between mt-4">
-                    <div>
+                <div className="mt-8">
+                    <div className="flex items-center justify-between">
                         <h1 className="text-2xl font-bold">{Scout.title}</h1>
-                        <div className="flex items-center gap-2 mt-1">
-                            <div className="text-sm text-muted-foreground">
-                                Collaboration: {" "}
-                                <InvestorProfile investor={collaborationDetails} />
-                            </div>
+                        <div className="flex text-md items-center gap-4">
+                            <ShareButton
+                                title={Scout.title}
+                                description={Scout.description}
+                            />
+                            <Button
+                                className="bg-muted hover:bg-muted/50 text-white"
+                                onClick={() => setShowDaftarDialog(true)}
+                            >
+                                Pitch Now
+                            </Button>
                         </div>
-                        <p className="text-xs text-muted-foreground font-bold mt-2">
+                    </div>
+
+                    <div className="mt-2 space-y-2">
+                        <div className="text-sm text-muted-foreground">
+                            Collaboration: {" "}
+                            <InvestorProfile investor={collaborationDetails} />
+                        </div>
+                        <p className="text-xs text-muted-foreground font-bold">
                             Last date for pitch: {Scout.lastPitchDate}
                         </p>
-                    </div>
-                    <div className="flex text-md items-center gap-4">
-                        <ShareButton
-                            title={Scout.title}
-                            description={Scout.description}
-                        />
-                        <Button
-                            className="bg-muted hover:bg-muted/50 text-white"
-                            onClick={() => setShowDaftarDialog(true)}
-                        >
-                            Pitch Now
-                        </Button>
                     </div>
                 </div>
 

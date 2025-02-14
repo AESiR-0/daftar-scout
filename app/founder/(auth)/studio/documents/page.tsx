@@ -135,7 +135,6 @@ export default function DocumentsPage() {
 
   const [recentActivity, setRecentActivity] = useState<ActivityLog[]>(dummyActivity)
 
-  const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("private")
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
@@ -145,11 +144,7 @@ export default function DocumentsPage() {
   const receivedCount = documentsList.filter(doc => doc.type === 'received').length
   const sentCount = documentsList.filter(doc => doc.type === 'sent').length
 
-  const filteredDocuments = documentsList.filter(doc =>
-    doc.type === activeTab &&
-    (doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      doc.uploadedBy.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
+  const filteredDocuments = documentsList.filter(doc => doc.type === activeTab)
 
   const addActivityLog = (newActivity: Omit<ActivityLog, 'id'>) => {
     const activity: ActivityLog = {
@@ -299,23 +294,10 @@ export default function DocumentsPage() {
                   </TabsTrigger>
                 </TabsList>
 
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search documents..."
-                      className="pl-9 w-[300px]"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                  {activeTab === "private" && (
-                    <Button variant="outline" onClick={handleUpload}>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload
-                    </Button>
-                  )}
-                </div>
+                <Button variant="outline" onClick={handleUpload}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload
+                </Button>
               </div>
 
               <TabsContent value="private" className="space-y-4">
@@ -353,53 +335,6 @@ export default function DocumentsPage() {
             </Tabs>
           </CardContent>
         </Card>
-
-        {/* <Card className="border-none bg-[#0e0e0e] w-80">
-          <CardHeader>
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex flex-col space-y-2 pb-4 border-b last:border-0"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {activity.action === "Uploaded" && <Upload className="h-4 w-4 " />}
-                      {activity.action === "Downloaded" && <Download className="h-4 w-4 " />}
-                      {activity.action === "Viewed" && <Eye className="h-4 w-4 " />}
-                      <span className="text-sm font-medium">{activity.action}</span>
-                    </div>
-                    <time className="text-xs text-muted-foreground">
-                      {activity.timestamp}
-                    </time>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    <ProfileHoverCard
-                      {...(userProfiles[activity.user] || {
-                        name: activity.user,
-                        designation: "Team Member",
-                        email: "contact@example.com",
-                        phone: "+1 (555) 000-0000",
-                        languages: ["English"],
-                        daftar: ""
-                      })}
-                    >
-                      <span className="cursor-pointer hover:text-muted-foreground">{activity.user}</span>
-                    </ProfileHoverCard>
-                    {' '}
-                    {activity.action.toLowerCase()} {' '}
-                    <span className="font-medium text-foreground">
-                      {activity.documentName}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
 
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>

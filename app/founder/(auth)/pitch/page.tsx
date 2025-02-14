@@ -6,6 +6,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import  DaftarPage from "@/app/founder/(auth)/daftar/daftarPage"
 import ScoutPage from "@/app/founder/(auth)/scout/scoutPage"
+import DealBoardPage from "../deal-board/dealBoardPage"
 export default function PitchPage() {
   const [selectedTab, setSelectedTab] = useState("pitches")
   
@@ -51,7 +52,7 @@ export default function PitchPage() {
         {selectedTab === "pitches" && <DaftarPage />}
         {selectedTab === "meetings" && <div>Meetings Content</div>}
         {selectedTab === "scout" && <ScoutPage />}
-        {selectedTab === "dealBoard" && <div>Deal Board Content</div>}
+        {selectedTab === "dealBoard" && <DealBoardPage />}
       </div>
     </div>
   )

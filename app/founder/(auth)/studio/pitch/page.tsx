@@ -8,13 +8,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { CheckSquare2, XSquare } from "lucide-react";
 import { FounderProfile } from "@/components/FounderProfile";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import { PaymentDialog } from "@/components/dialogs/payment-dialog";
 import  formatDate  from "@/lib/formatDate"
 
+interface ApprovalRequest {
+    id: string;
+    username: string;
+    designation: string;
+    date: string;
+    status: "approved" | "pending";
+    profile: {
+        name: string;
+        age: string;
+        gender: string;
+        email: string;
+        phone: string;
+        location: string;
+        language: string[];
+        designation: string;
+    };
+}
+
 // Sample approval data (Team Logs)
-const approvalRequests = [
+const initialApprovalRequests: ApprovalRequest[] = [
     {
         id: "1",
         username: "John Smith",
@@ -71,8 +88,32 @@ const approvalRequests = [
 export default function PitchPage() {
     const pathname = usePathname();
     const [specificAsks, setSpecificAsks] = useState("");
-    const [isReady, setIsReady] = useState(false);
     const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+    const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>(initialApprovalRequests);
+    
+
+    // Add approval counts calculation
+    const totalMembers = approvalRequests.length;
+    const approvedCount = approvalRequests.filter(req => req.status === "approved").length;
+
+    // Add state for current user (for demo, let's use John Smith as current user)
+    const [currentUserId] = useState("1");
+
+    // Add function to handle approval toggle
+    const handleApprovalToggle = (requestId: string) => {
+        if (requestId !== currentUserId) return;
+        
+        setApprovalRequests(prev => prev.map(req => {
+            if (req.id === requestId) {
+                return {
+                    ...req,
+                    status: req.status === "approved" ? "pending" : "approved",
+                    date: formatDate(new Date().toISOString())
+                };
+            }
+            return req;
+        }));
+    };
 
     return (
         <div className="px-10 container mx-auto py-5 space-y-6 flex gap-8">
@@ -89,27 +130,16 @@ export default function PitchPage() {
                         />
                     </div>
 
-                    {/* Ready to Pitch Checkbox */}
-                    <div className="flex items-center space-x-2 pt-4">
-                        <Checkbox 
-                            id="ready" 
-                            checked={isReady}
-                            onCheckedChange={(checked) => setIsReady(checked as boolean)}
-                            className="border-white data-[state=checked]:bg-white data-[state=checked]:text-black"
-                        />
-                        <label
-                            htmlFor="ready"
-                            className="text-sm font-medium leading-none"
-                        >
-                            All set, let's pitch
-                        </label>
-                    </div>
-
                     {/* Team Approvals Section */}
                     <div className="pt-6">
-                        <h2 className="text-lg font-medium mb-4">Team Approvals</h2>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-medium">Team Approvals</h2>
+                            <span className="text-sm text-muted-foreground">
+                                {approvedCount} of {totalMembers}
+                            </span>
+                        </div>
                         <div className="space-y-3">
-                            {approvalRequests.map((request) => (
+                            {approvalRequests.map((request: ApprovalRequest) => (
                                 <div
                                     key={request.id}
                                     className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-all"
@@ -120,10 +150,25 @@ export default function PitchPage() {
                                             {request.date}
                                         </p>
                                     </div>
-                                    {request.status === "approved" ? (
-                                        <CheckSquare2 className="h-5 w-5" />
+                                    {request.id === currentUserId ? (
+                                        <button
+                                            onClick={() => handleApprovalToggle(request.id)}
+                                            className="hover:opacity-80 transition-opacity"
+                                        >
+                                            {request.status === "approved" ? (
+                                                <CheckSquare2 className="h-5 w-5" />
+                                            ) : (
+                                                <XSquare className="h-5 w-5 text-muted-foreground" />
+                                            )}
+                                        </button>
                                     ) : (
-                                        <XSquare className="h-5 w-5" />
+                                        <div>
+                                            {request.status === "approved" ? (
+                                                <CheckSquare2 className="h-5 w-5" />
+                                            ) : (
+                                                <XSquare className="h-5 w-5 text-muted-foreground" />
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             ))}

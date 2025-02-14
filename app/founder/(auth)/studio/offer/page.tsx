@@ -68,81 +68,6 @@ const dummyOffers: Offer[] = [
       },
     ],
   },
-  {
-    id: "2",
-    scoutName: scoutNames[1],
-    collaboration: ["IIM B", "John Doe", "Jane Smith"],
-    acceptedBy: getRandomUser(),
-    status: "completed",
-    type: "accepted",
-    date: formatDate(new Date().toISOString()),
-    responses: [
-      {
-        action: "Offer Received",
-        reason: "",
-        timestamp: formatDate(new Date().toISOString()),
-        user: {
-          founder: {
-            name: getRandomUser(),
-            age: "25",
-            email: "john.doe@example.com",
-            phone: "1234567890",
-            designation: "Co-Founder",
-            gender: "Male",
-            location: "New York, NY",
-            language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg"
-          }
-        },
-      },
-      {
-        action: "accepted",
-        reason: "",
-        timestamp: formatDate(new Date().toISOString()),
-        user: {
-          founder: {
-            name: getRandomUser(),
-            age: "25",
-            email: "john.doe@example.com",
-            designation: "Co-Founder",
-            phone: "1234567890",
-            gender: "Male",
-            location: "New York, NY",
-            language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg"
-          }
-        },
-      },
-    ],
-  },
-  {
-    id: "3",
-    scoutName: scoutNames[2],
-    collaboration: ["IIM C", "Alice Brown", "Bob Wilson"],
-    status: "declined",
-    type: "withdrawn",
-    date: formatDate(new Date().toISOString()),
-    responses: [
-      {
-        action: "Offer Received",
-        reason: "",
-        timestamp: formatDate(new Date().toISOString()),
-        user: {
-          founder: {
-            name: getRandomUser(),
-            age: "25",
-            email: "john.doe@example.com",
-            phone: "1234567890",
-            designation: "CXO",
-            gender: "Male",
-            location: "New York, NY",
-            language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg"
-          }
-        },
-      },
-    ],
-  },
 ];
 
 export default function OffersPage() {
@@ -264,13 +189,13 @@ export default function OffersPage() {
                   key={offer.id}
                   offer={offer}
                   onView={handleViewOffer}
-                  onAccept={(reason) => handleStatusUpdate(offer.id, "accepted", "completed", reason)}
-                  onDecline={(reason) => handleStatusUpdate(offer.id, "withdrawn", "declined", reason)}
-                  onWithdraw={(reason) => handleWithdraw(offer.id, reason)}
+                  onAccept={(reason: string) => handleStatusUpdate(offer.id, "accepted", "completed", reason)}
+                  onDecline={(reason: string) => handleStatusUpdate(offer.id, "withdrawn", "declined", reason)}
+                  onWithdraw={(reason: string) => handleWithdraw(offer.id, reason)}
                 />
               ))}
               {pendingOffers.length === 0 && (
-                <p className="text-muted-foreground text-center py-4">No pending offers</p>
+                <p className="text-muted-foreground px-4 py-4">No offers</p>
               )}
             </div>
           </div>
@@ -323,11 +248,11 @@ export default function OffersPage() {
                           .map((response, index) => (
                             <div key={index} className="flex flex-col gap-2">
                               <div className="bg-muted/5 rounded-lg p-4 space-y-2">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <span className="capitalize">{response.action} by</span>
+                                <p className="text-sm text-muted-foreground">{response.reason}</p>
+                                <div className=" items-center gap-2 text-xs text-muted-foreground">
+                                  <span className="capitalize">{response.action} by</span><br/>
                                   <FounderProfile founder={response.user.founder} />
                                 </div>
-                                <p className="text-sm text-muted-foreground">{response.reason}</p>
                                 <time className="text-xs text-muted-foreground self-end">
                                 {response.timestamp}
                               </time>
@@ -340,7 +265,7 @@ export default function OffersPage() {
 
                     {/* Action Buttons */}
                     {offer.status === "completed" && (
-                      <div className="flex justify-end mt-4">
+                      <div className="flex justify-start mt-4">
                         <Button 
                           className="bg-muted hover:bg-muted/50" 
                           variant="ghost" 
@@ -356,7 +281,7 @@ export default function OffersPage() {
                   </div>
                 ))}
                 {logOffers.length === 0 && (
-                  <p className="text-muted-foreground text-center py-4">No offer history</p>
+                  <p className="text-muted-foreground px-4 py-4">No history</p>
                 )}
               </div>
             </Card>
@@ -419,32 +344,21 @@ export default function OffersPage() {
   );
 }
 
-function OfferCard({
-  offer,
-  onView,
-  onAccept,
-  onDecline,
-  onWithdraw,
-}: {
-  offer: Offer;
-  onView: (offer: Offer) => void;
-  onAccept: (reason: string) => void;
-  onDecline: (reason: string) => void;
-  onWithdraw: (reason: string) => void;
-}) {
+function OfferCard({ offer, onView, onAccept, onDecline, onWithdraw }: { offer: Offer, onView: (offer: Offer) => void, onAccept: (reason: string) => void, onDecline: (reason: string) => void, onWithdraw: (reason: string) => void }) {
   const [showActionDialog, setShowActionDialog] = useState(false)
-  const [currentAction, setCurrentAction] = useState<"accept" | "decline" | "withdraw" | null>(null)
+  const [currentAction, setCurrentAction] = useState<"decline" | "withdraw" | null>(null)
 
   const handleAction = (action: "accept" | "decline" | "withdraw") => {
+    if (action === "accept") {
+      onAccept(""); // Accept doesn't need a reason
+      return;
+    }
     setCurrentAction(action)
     setShowActionDialog(true)
   }
 
   const handleConfirmAction = (reason: string) => {
     switch (currentAction) {
-      case "accept":
-        onAccept(reason)
-        break
       case "decline":
         onDecline(reason)
         break
@@ -457,24 +371,21 @@ function OfferCard({
   }
 
   return (
-    <div className="flex flex-col p-4 border rounded-lg transition-colors">
+    <div className="flex flex-col gap-4">
       {/* Scout Message */}
-      <div className="flex flex-col gap-2">
-        <div className="bg-muted/5 rounded-lg p-4">
-          <p className="text-sm text-muted-foreground">
-            Thank you for applying to {offer.scoutName}. We are excited to have you on board. 
-            {offer.collaboration} takes a step forward to make this happen.
-          </p>
-          <time className="text-xs text-muted-foreground">
+      <div className="bg-muted/5 rounded-lg p-4">
+        <p className="text-sm text-muted-foreground">
+          Thank you for applying to {offer.scoutName}. We are excited to have you on board. 
+          {offer.collaboration} takes a step forward to make this happen.
+        </p>
+        <time className="text-xs text-muted-foreground">
           {offer.date}
         </time>
-        </div>
-        
       </div>
 
       {/* Team Responses */}
       {offer.responses && offer.responses.length > 0 && (
-        <div className="mt-6 space-y-4">
+        <div className="space-y-4">
           {offer.responses
             .filter(response => response.action !== "Offer Received")
             .map((response, index) => (
@@ -495,9 +406,9 @@ function OfferCard({
       )}
 
       {/* Action Buttons */}
-      <div className="flex justify-end mt-4">
+      <div className="flex gap-2">
         {offer.status === "pending" && (
-          <div className="flex gap-2">
+          <>
             <Button 
               className="bg-muted hover:bg-muted/50" 
               variant="ghost" 
@@ -512,7 +423,7 @@ function OfferCard({
             >
               Decline
             </Button>
-          </div>
+          </>
         )}
 
         {offer.status === "completed" && (
@@ -526,13 +437,16 @@ function OfferCard({
         )}
       </div>
 
-      <ActionDialog
-        open={showActionDialog}
-        onOpenChange={setShowActionDialog}
-        title={`${currentAction?.charAt(0).toUpperCase()}${currentAction?.slice(1)} Offer`}
-        action={currentAction!}
-        onConfirm={handleConfirmAction}
-      />
+      {/* Action Dialog - Only for decline and withdraw */}
+      {currentAction && (
+        <ActionDialog
+          open={showActionDialog}
+          onOpenChange={setShowActionDialog}
+          title={`${currentAction.charAt(0).toUpperCase()}${currentAction.slice(1)} Offer`}
+          action={currentAction}
+          onConfirm={handleConfirmAction}
+        />
+      )}
     </div>
   );
 }

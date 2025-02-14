@@ -51,12 +51,11 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
           <DialogTitle></DialogTitle>
         </DialogHeader>
         <div className="flex flex-col h-[28rem]">
-          <div className="flex items-center gap-2 p-4 border-b">
-            <ScrollText className="h-4 w-4" />
+          <div className="flex items-center gap-2 p-4">
             <h2 className="text-sm font-medium">Journal</h2>
           </div>
 
-          <div className="flex items-center gap-2 p-2 border-b">
+          {/* <div className="flex items-center gap-2 p-2 border-b">
             <button
               onClick={() => editor?.chain().focus().toggleBold().run()}
               className={`p-2 rounded hover:bg-gray-100 ${
@@ -81,7 +80,7 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
             >
               <List className="h-4 w-4" />
             </button>
-          </div>
+          </div> */}
 
           <div className="flex-1 p-4">
             <EditorContent 

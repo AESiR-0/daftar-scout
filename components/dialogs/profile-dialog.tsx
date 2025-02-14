@@ -4,6 +4,7 @@ import { useState } from "react"
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -26,6 +27,7 @@ import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { Combobox } from "@/components/ui/combobox"
 import formatDate from "@/lib/formatDate"
+import { Card } from "@/components/ui/card"
 
 interface ProfileData {
   firstName: string
@@ -81,15 +83,16 @@ const navItems = [
   { title: "Delete Account", value: "delete", icon: Trash2 },
 ]
 
-export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
+type ProfileTab = "account" | "support" | "feedback" | "feature" | "privacy" | "delete" | "logout"
+
+export function ProfileDialog({
+  open,
+  onOpenChange,
+}: ProfileDialogProps) {
   const { toast } = useToast()
-  const [activeTab, setActiveTab] = useState("profile")
+  const [activeTab, setActiveTab] = useState<ProfileTab>("account")
   const [isEditing, setIsEditing] = useState(false)
   const [featureRequest, setFeatureRequest] = useState("")
-  const [selectedDaftar, setSelectedDaftar] = useState<string>("")
-  const [designations, setDesignations] = useState<DaftarDesignation>({})
-
-  // Sample feedback history - in real app, this would come from an API
   const [feedbackHistory] = useState<FeedbackEntry[]>([
     {
       id: '1',
@@ -110,18 +113,43 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       createdAt: '2024-03-05T09:15:00'
     }
   ])
+  const [profileData, setProfileData] = useState({
+    firstName: "John",
+    lastName: "Doe",
+    email: "john@example.com",
+    phone: "+1 234 567 890",
+    gender: "Male",
+    languages: ["English", "Hindi"],
+    joinedDate: "Feb 14, 2024"
+  })
+  const [satisfied, setSatisfied] = useState<boolean | undefined>()
+  const [feedbackText, setFeedbackText] = useState("")
+
+  const tabs: { id: ProfileTab; label: string }[] = [
+    { id: "account", label: "My Account" },
+    { id: "support", label: "Support" },
+    { id: "feedback", label: "Feedback" },
+    { id: "feature", label: "Feature Request" },
+    { id: "privacy", label: "Privacy Policy" },
+    { id: "delete", label: "Delete Account" },
+    { id: "logout", label: "Logout" }
+  ]
 
   const getStatusColor = (status: FeedbackEntry['status']) => {
     switch (status) {
       case 'completed':
         return 'bg-green-500/10 text-green-500 border-green-500/20'
       case 'in-progress':
-        return 'bg-muted-ftext-muted-foreground/10 text-muted-foreground border-muted-ftext-muted-foreground/20'
+        return 'bg-muted text-muted-foreground border-muted-foreground/20'
       case 'pending':
         return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
     }
   }
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
+
+  const handleLogout = () => {
+    signOut()
+    onOpenChange(false)
+  }
 
   const handleSubmitFeature = () => {
     toast({
@@ -129,16 +157,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       description: "Thank you for your feedback. We'll review your request shortly.",
     })
     setFeatureRequest("")
-  }
-
-  const handleProfileSave = () => {
-    console.log('Saving designations:', designations);
-
-    toast({
-      title: "Profile updated",
-      description: "Your profile changes have been saved successfully.",
-    })
-    setIsEditing(false)
   }
 
   const handleDeleteAccount = () => {
@@ -150,315 +168,319 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     onOpenChange(false)
   }
 
-  const handleDaftarChange = (daftarId: string) => {
-    setSelectedDaftar(daftarId)
+  const handleFeedbackSubmit = () => {
+    toast({
+      title: "Feedback submitted",
+      description: "Thank you for your feedback!",
+    })
+    setSatisfied(undefined)
+    setFeedbackText("")
+  }
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "account":
+        return (
+          <Card className="border-none bg-[#1a1a1a]">
+            <div className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarFallback>JD</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-lg font-medium">{`${profileData.firstName} ${profileData.lastName}`}</h3>
+                    <p className="text-sm text-muted-foreground">{profileData.email}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                </Button>
+              </div>
+
+              {isEditing ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>First Name</Label>
+                      <Input 
+                        value={profileData.firstName}
+                        onChange={(e) => setProfileData(prev => ({...prev, firstName: e.target.value}))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Last Name</Label>
+                      <Input 
+                        value={profileData.lastName}
+                        onChange={(e) => setProfileData(prev => ({...prev, lastName: e.target.value}))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Phone</Label>
+                      <Input 
+                        value={profileData.phone}
+                        onChange={(e) => setProfileData(prev => ({...prev, phone: e.target.value}))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Gender</Label>
+                      <Select 
+                        value={profileData.gender}
+                        onValueChange={(value) => setProfileData(prev => ({...prev, gender: value}))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Male">Male</SelectItem>
+                          <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                      <Label>Preferred Languages (up to 3)</Label>
+                      <div className="flex flex-wrap gap-2">
+                        
+                        {profileData.languages.length < 3 && (
+                          <Select
+                            onValueChange={(value) => {
+                              if (!profileData.languages.includes(value)) {
+                                setProfileData(prev => ({
+                                  ...prev,
+                                  languages: [...prev.languages, value]
+                                }))
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Add language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["English", "Hindi", "Spanish", "French", "German"]
+                                .filter(lang => !profileData.languages.includes(lang))
+                                .map(lang => (
+                                  <SelectItem key={lang} value={lang}>
+                                    {lang}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                        {profileData.languages.map((lang) => (
+                          <Badge key={lang} className="bg-muted">
+                            {lang}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-4 w-4 ml-1 hover:bg-transparent"
+                              onClick={() => setProfileData(prev => ({
+                                ...prev,
+                                languages: prev.languages.filter(l => l !== lang)
+                              }))}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <Button onClick={() => setIsEditing(false)} className="w-full">
+                    Save Changes
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Email:</span> {profileData.email}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Phone:</span> {profileData.phone}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Gender:</span> {profileData.gender}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Preferred Languages:</span>{" "}
+                    {profileData.languages.join(", ")}
+                  </p>
+                  <div className="text-xs pt-4">
+                    <span className="text-muted-foreground">On Daftar Since <br/> {profileData.joinedDate}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        )
+
+      case "support":
+        return (
+          <Card className="border-none bg-[#1a1a1a] p-4">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                We're in the process of setting up our ticket system, but for now, feel free to reach out to us at support@daftaros.com. Our tech team will get back to you as soon as possible.
+              </p>
+            </div>
+          </Card>
+        )
+
+      case "feedback":
+        return (
+          <Card className="border-none bg-[#1a1a1a] p-4">
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <p className="text-sm">Are you happy with us?</p>
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className={cn(
+              
+                      satisfied === true && "bg-muted"
+                    )}
+                    onClick={() => setSatisfied(true)}
+                  >
+                    Yes
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className={cn(
+                      
+                      satisfied === false && "bg-muted"
+                    )}
+                    onClick={() => setSatisfied(false)}
+                  >
+                    No
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>How can we make your experience better?</Label>
+                <Textarea
+                  placeholder="Share your thoughts..."
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+                />
+              </div>
+
+              <Button 
+                disabled={satisfied === undefined || !feedbackText.trim()}
+                onClick={handleFeedbackSubmit}
+              >
+                Submit Feedback
+              </Button>
+            </div>
+          </Card>
+        )
+
+      case "feature":
+        return (
+          <Card className="border-none bg-[#1a1a1a] p-4">
+            <div className="space-y-4">
+              <Textarea
+                placeholder="Describe the feature you'd like to see..."
+                value={featureRequest}
+                onChange={(e) => setFeatureRequest(e.target.value)}
+              />
+              <Button onClick={handleSubmitFeature} disabled={!featureRequest.trim()}>
+                Submit Request
+              </Button>
+            </div>
+          </Card>
+        )
+
+      case "privacy":
+        return (
+          <Card className="border-none bg-[#1a1a1a] p-4">
+            <div className="space-y-6">
+              {privacySections.map((section) => (
+                <div key={section.title} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <section.icon className="h-4 w-4" />
+                    <h4 className="font-medium">{section.title}</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{section.content}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )
+
+      case "delete":
+        return (
+          <Card className="border-none bg-[#1a1a1a] p-4">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Warning: This action cannot be undone. All your data will be permanently deleted.
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={handleDeleteAccount}
+              >
+                Delete Account
+              </Button>
+            </div>
+          </Card>
+        )
+
+      case "logout":
+        return (
+          <Card className="border-none bg-[#1a1a1a] p-4">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to logout?
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </div>
+          </Card>
+        )
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTitle></DialogTitle>
-      <DialogContent className="max-w-4xl h-[500px] p-0 gap-0">
-        {/* Top Navigation */}
-        <div className="border-b">
-          <nav className="flex items-center space-x-1 px-4 h-14">
-            {navItems.map((item) => (
+      <DialogContent className="max-w-2xl p-0 flex gap-0">
+        <div className="w-[200px] border-r bg-[#0e0e0e]">
+          <div className="flex flex-col space-y-1 p-4">
+            <DialogHeader className="mb-4">
+              <DialogTitle>Profile</DialogTitle>
+            </DialogHeader>
+            {tabs.map((tab) => (
               <button
-                key={item.value}
-                onClick={() => setActiveTab(item.value)}
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "relative px-3 py-2 text-sm rounded-md transition-colors",
-                  "hover:bg-accent/50",
-                  activeTab === item.value
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                  "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
+                  "hover:bg-muted/50",
+                  activeTab === tab.id ? "bg-muted" : "transparent"
                 )}
               >
-                <span className="flex items-center gap-2">
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </span>
-                {activeTab === item.value && (
-                  <span className="absolute inset-x-0 -bottom-[10px] h-[2px] bg-foreground" />
-                )}
+                <span>{tab.label}</span>
               </button>
             ))}
-          </nav>
+          </div>
         </div>
 
-        <ScrollArea className="h-[calc(500px-3.5rem)]">
-          {activeTab === "profile" && (
-            <div className="p-6">
-              <div className="max-w-3xl mx-auto">
-                <div className="grid grid-cols-3 gap-8">
-                  {/* Profile Photo Card */}
-                  <div className="space-y-4">
-                    <div className="p-6 rounded-lg space-y-4 bg-card">
-                      <div className="flex justify-center">
-                        <Avatar className="h-32 w-32 ">
-                          <AvatarImage src="https://github.com/shadcn.png" />
-                          <AvatarFallback>UN</AvatarFallback>
-                        </Avatar>
-                      </div>
-                      <div className="space-y-2 text-left">
-                        <Button
-                          variant="outline"
-                          className="w-full text-left relative overflow-hidden"
-                          size="sm"
-                        >
-                          <span>Change Photo</span>
-                          <input
-                            type="file"
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                            accept="image/*"
-                          />
-                        </Button>
-                        <Button
-                          onClick={() => isEditing ? handleProfileSave() : setIsEditing(true)}
-                          variant="outline"
-                          size="sm"
-                          className={cn(
-                            'w-full text-left',
-                            isEditing && " text-white"
-                          )}
-                        >
-                          {isEditing ? "Save Changes" : "Edit Profile"}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          size="sm"
-                          onClick={() => {
-                            onOpenChange(false)
-                            signOut()
-                          }}
-                        >
-                          Sign Out
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Profile Details */}
-                  <div className="col-span-2 space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label>First Name</Label>
-                        <Input disabled={!isEditing} defaultValue="John" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Last Name</Label>
-                        <Input disabled={!isEditing} defaultValue="Doe" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Email</Label>
-                        <Input disabled={!isEditing} defaultValue="john@example.com" type="email" />
-                      </div>
-                      
-                      <div className="space-y-2 w-full">
-                        <Label>Phone</Label>
-                        <Input disabled={!isEditing} defaultValue="+1234567890" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Gender</Label>
-                        <Select disabled={!isEditing}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select gender" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="male">Male</SelectItem>
-                            <SelectItem value="female">Female</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                            <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Age</Label>
-                        <Input disabled={!isEditing} defaultValue="25" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Daftar</Label>
-                        <Select
-                          disabled={!isEditing}
-                          value={selectedDaftar}
-                          onValueChange={handleDaftarChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Daftar" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {daftarOptions.map((daftar) => (
-                              <SelectItem key={daftar.id} value={daftar.id}>
-                                {daftar.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Designation</Label>
-                        <Input
-                          disabled={!isEditing || !selectedDaftar}
-                          value={designations[selectedDaftar] || ''}
-                          onChange={(e) =>
-                            setDesignations(prev => ({
-                              ...prev,
-                              [selectedDaftar]: e.target.value
-                            }))
-                          }
-                          placeholder={selectedDaftar ? "Enter designation" : "Select a Daftar first"}
-                        />
-                      </div><div className="space-y-2 col-span-2">
-                        <Label>Country</Label>
-                        <Select disabled={!isEditing}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="us">United States</SelectItem>
-                            <SelectItem value="uk">United Kingdom</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2 col-span-2">
-                        <Label>Languages</Label>
-                        <Combobox
-                          options={[
-                            "English",
-                            "Spanish",
-                            "French",
-                            "German",
-                            "Italian",
-                            "Portuguese",
-                            "Russian",
-                            "Chinese",
-                            "Hindi",
-                            "Tamil",
-                            "Telugu",
-                            "Malay",
-                            "Arabic",
-                            "Japanese",
-                            "Korean",
-                            "Thai",
-                            "Indonesian",
-                          ]}
-                          disabled={!isEditing}
-                          onSelect={(value) => {
-                            console.log(value);
-
-                            if (!selectedLanguages.includes(value)) {
-                              setSelectedLanguages([...selectedLanguages, value]);
-                            }
-                          }}
-                          placeholder="Choose your preferred language"
-                        />
-
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {selectedLanguages.map((language) => (
-                            <Badge
-                              key={language}
-                              variant="secondary"
-                              className="text-xs cursor-pointer hover:bg-muted"
-                              onClick={() => {
-                                if (isEditing) {
-                                  setSelectedLanguages((prev) => prev.filter((s) => s !== language))
-                                }
-                              }}
-                            >
-                              {language} <X className="h-3 w-3 ml-1" />
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="">
-                        <span className="text-xs text-muted-foreground"><strong> On Daftar Since </strong> <br /> {formatDate(new Date().toISOString())}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div className="flex-1 p-6 bg-[#0e0e0e] pt-10">
+          <ScrollArea className="h-[500px]">
+            <div className="space-y-4">
+              {renderContent()}
             </div>
-          )}
-
-          {activeTab === "feature" && (
-            <div className="p-6 mx-auto h-full">
-              <div className="flex flex-col gap-3 justify-center h-full ">
-                <Label className="text-sm font-medium">Your Request</Label>
-                <Textarea
-                  placeholder="Describe the feature you'd like to see. (max. 200 characters)"
-                  value={featureRequest}
-                  onChange={(e) => setFeatureRequest(e.target.value)}
-                  className="h-[200px] resize-none"
-                />
-                <div className="flex w-full ">
-                  <Button
-                    className="bg-muted hover:bg-muted/50 w-full text-white"
-                    disabled={!featureRequest.trim()}
-                    onClick={handleSubmitFeature}
-                  >
-                    <MessageSquarePlus className="h-4 w-4 mr-2" />
-                    Submit Request
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "privacy" && (
-            <div className="p-6">
-              <div className="max-w-3xl mx-auto space-y-8">
-                <div className="grid grid-cols-2  gap-8">
-                  {privacySections.map((section, index) => (
-                    <div
-                      key={section.title}
-                      className="p-6 border rounded-lg space-y-3 bg-card"
-                    >
-                      <h3 className="font-medium flex items-center gap-2 text-muted-foreground">
-                        <section.icon className="h-4 w-4" />
-                        {section.title}
-                      </h3>
-                      <p className="text-sm text-foreground leading-relaxed">
-                        {section.content}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "delete" && (
-            <div className="p-6">
-              <div className="max-w-md mx-auto space-y-8">
-                <div className="text-center space-y-2">
-                  <div className="h-12 w-12 rounded-full  flex items-center justify-center mx-auto">
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    This action cannot be undone.
-                    <br />
-                    All your data will be permanently removed.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    variant="destructive"
-                    onClick={handleDeleteAccount}
-                    className="bg-muted hover:bg-muted/50"
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setActiveTab("profile")}
-                  >
-                    Withdraw                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </ScrollArea>
+          </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   )
