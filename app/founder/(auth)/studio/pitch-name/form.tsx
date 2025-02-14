@@ -117,7 +117,7 @@ export default function PitchNameForm({ pitch, mode }: { pitch: string; mode: st
                         <Label>Demo Link</Label>
                         <Input type="text" placeholder="Enter your demo link" />
                     </div>
-                    <div>
+                    <div className="space-y-2">
                         <Label>Startup Stage</Label>
                         <Combobox
                             options={stages}
@@ -126,7 +126,7 @@ export default function PitchNameForm({ pitch, mode }: { pitch: string; mode: st
                             placeholder="Select Stage"
                         />
                     </div>
-                    <div>
+                    <div className="space-y-2">
                         <Label>Focus Sectors</Label>
                         <Combobox
                             options={sectors}
