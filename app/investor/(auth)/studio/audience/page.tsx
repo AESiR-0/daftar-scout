@@ -1,9 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { AgeRange } from "./components/age-range";
 import { Combobox } from "./components/combobox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MapPin } from "lucide-react";
+import dynamic from "next/dynamic";
+import "leaflet/dist/leaflet.css";
+
+// Dynamically import map component to avoid SSR issues
+const MapComponent = dynamic(() => import("@/components/map"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] bg-muted flex items-center justify-center">
+      <p className="text-sm text-muted-foreground">Loading map...</p>
+    </div>
+  ),
+});
 
 const communitiesData = [
   { label: "Auto - rickshaw drivers", value: "auto-rickshaw" },
@@ -96,63 +111,139 @@ const genders = [
   { value: "open-for-all", label: "Open For All" },
 ];
 
+interface Location {
+  country: string;
+  state: string;
+  city: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  }
+}
+
 export default function AudiencePage() {
+  const [location, setLocation] = useState<Location>({
+    country: "",
+    state: "",
+    city: ""
+  });
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedCommunities, setSelectedCommunities] = useState<string[]>(["auto-rickshaw"]);
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [selectedStages, setSelectedStages] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+
+  const handleLocationChange = async (field: keyof Location, value: string) => {
+    setLocation(prev => ({
+      ...prev,
+      [field]: value
+    }));
+
+    // Only search for coordinates when all fields are filled
+    if (field === 'city' && location.country && location.state) {
+      try {
+        const query = `${value}, ${location.state}, ${location.country}`;
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+        );
+        const data = await response.json();
+
+        if (data && data[0]) {
+          setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+        }
+      } catch (error) {
+        console.error('Error fetching coordinates:', error);
+      }
+    }
+  };
 
   return (
     <div className="container px-10 mx-auto py-6">
-      <div className="space-y-4">
-        <Combobox
-          label="Location"
-          value="Add"
-          options={[]}
-          selected={selectedLocations}
-          onChange={(value: string) => setSelectedLocations(prev => [...prev, value])}
-        />
+      <div className="space-y-6">
+        {/* Location Inputs and Map */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Country</Label>
+              <Input
+                placeholder="Enter country"
+                value={location.country}
+                onChange={(e) => handleLocationChange('country', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>State</Label>
+              <Input
+                placeholder="Enter state"
+                value={location.state}
+                onChange={(e) => handleLocationChange('state', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>City</Label>
+              <Input
+                placeholder="Enter city"
+                value={location.city}
+                onChange={(e) => handleLocationChange('city', e.target.value)}
+              />
+            </div>
+          </div>
 
-        <Combobox
-          label="Community"
-          value={communitiesData.find(c => c.value === selectedCommunities[0])?.label || "Select Community"}
-          options={communitiesData}
-          selected={selectedCommunities}
-          onChange={(value: string) => setSelectedCommunities(prev => [...prev, value])}
-        />
+          {/* Map */}
+          <div className="w-full h-[400px] rounded-lg overflow-hidden border">
+            <MapComponent coordinates={coordinates} />
+          </div>
+        </div>
 
-        <Combobox
-          label="Gender"
-          value="Add"
-          options={genders}
-          selected={selectedGenders}
-          onChange={(value: string) => setSelectedGenders(prev => [...prev, value])}
-        />
 
-        <AgeRange
-          minAge={ageRange[0].toString()}
-          maxAge={ageRange[1].toString()}
-          onMinChange={(value) => setAgeRange([Number(value), ageRange[1]])}
-          onMaxChange={(value) => setAgeRange([ageRange[0], Number(value)])}
-        />
 
-        <Combobox
-          label="Stage"
-          value="Add"
-          options={stages}
-          selected={selectedStages}
-          onChange={(value: string) => setSelectedStages(prev => [...prev, value])}
-        />
+        {/* Other inputs */}
+        <div className="space-y-4">
+          <Combobox
+            label="Community"
+            value={communitiesData.find(c => c.value === selectedCommunities[0])?.label || "Select Community"}
+            options={communitiesData}
+            selected={selectedCommunities}
+            onChange={(value: string) => setSelectedCommunities(prev => [...prev, value])}
+          />
+          {/* Age and Gender row */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <AgeRange
+                minAge={ageRange[0].toString()}
+                maxAge={ageRange[1].toString()}
+                onMinChange={(value) => setAgeRange([Number(value), ageRange[1]])}
+                onMaxChange={(value) => setAgeRange([ageRange[0], Number(value)])}
+              />
+            </div>
+            <div className="flex-1">
+              <Combobox
+                label="Gender"
+                value="Add"
+                options={genders}
+                selected={selectedGenders}
+                onChange={(value: string) => setSelectedGenders(prev => [...prev, value])}
+              />
+            </div>
+          </div>
+          <Combobox
+            label="Stage"
+            value="Add"
+            options={stages}
+            selected={selectedStages}
+            onChange={(value: string) => setSelectedStages(prev => [...prev, value])}
+          />
 
-        <Combobox
-          label="Sector"
-          value="Add"
-          options={sectors}
-          selected={selectedSectors}
-          onChange={(value: string) => setSelectedSectors(prev => [...prev, value])}
-        />
+          <Combobox
+            label="Sector"
+            value="Add"
+            options={sectors}
+            selected={selectedSectors}
+            onChange={(value: string) => setSelectedSectors(prev => [...prev, value])}
+          />
+        </div>
       </div>
     </div>
   );

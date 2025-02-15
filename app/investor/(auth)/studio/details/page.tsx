@@ -49,11 +49,7 @@ export default function DetailsPage() {
 
   return (
     <Card className="border-none bg-[#0e0e0e]">
-      <CardHeader>
-        <CardTitle>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="">
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Scout Name</Label>
@@ -65,7 +61,7 @@ export default function DetailsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label>Description</Label>
+            <Label>Scout&apos;s Vision</Label>
             <div className="  rounded-lg">
               <textarea name="" id="" className="w-full h-[250px] bg-transparent text-white border p-4 rounded-lg"></textarea>
             </div>

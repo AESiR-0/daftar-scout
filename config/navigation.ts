@@ -75,6 +75,11 @@ export const investorStudioNavItems = [
     icon: FileSpreadsheet,
   },
   {
+    title: "Audience",
+    url: "/investor/studio/audience",
+    icon: Users,
+  },
+  {
     title: "Collaboration",
     url: "/investor/studio/collaboration",
     icon: Users2,
@@ -83,11 +88,6 @@ export const investorStudioNavItems = [
     title: "Scout Document",
     url: "/investor/studio/documents",
     icon: FileText,
-  },
-  {
-    title: "Audience",
-    url: "/investor/studio/audience",
-    icon: Users,
   },
   {
     title: "Founder's Pitch",
