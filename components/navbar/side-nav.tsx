@@ -13,6 +13,9 @@ export function AppSidebar({ role }: { role: string }) {
   if (pathname === '/founder/loading') {
     return null
   }
+  else if (pathname === '/investor/loading') {
+    return null
+  }
 
   return (
     <div className="border-r bg-[#0e0e0e] w-[60px] min-h-screen">

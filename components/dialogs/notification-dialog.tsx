@@ -133,7 +133,7 @@ export function NotificationDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  role?: "founder" | "investor";
+  role?: "founder" | "investor" | undefined;
 }) {
   const [activeTab, setActiveTab] = useState<NotificationTab>(role === "investor" ? "scout-requests" : "updates");
   const [requests, setRequests] = useState<ScoutRequest[]>(scoutRequests);

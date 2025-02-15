@@ -17,7 +17,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
                         <ClientSessionProvider>
                             <div className="flex font-poppins bg-[#0e0e0e]">
                                 <AppSidebar role="investor" />
-                                <div className="w-screen flex flex-col gap-5">
+                                <div className="w-screen flex flex-col ">
                                     <div className="px-10 border-b">
                                         <TopNav role="investor" />
                                     </div>

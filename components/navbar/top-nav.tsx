@@ -184,7 +184,7 @@ export function TopNav({ role }: { role: string }) {
         <NotificationDialog
           open={notificationOpen}
           onOpenChange={setNotificationOpen}
-          role={role}
+          role={role as "founder" | "investor" | undefined}
         />
         <DaftarDialog
           open={daftarOpen}
