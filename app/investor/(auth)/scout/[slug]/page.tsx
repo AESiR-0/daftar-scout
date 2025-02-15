@@ -33,6 +33,26 @@ const columns: Record<string, { title: string; pitches: ColumnPitch[] }> = {
       },
       // Add more pitches
     ]
+  }, inDiscussion: {
+    title: "In Discussion",
+    pitches: [
+      {
+        id: "3",
+        pitchName: "Stock Market",
+        daftarName: "FinTech Pro",
+        Believer: "3"
+      }
+    ]
+  }, accepted: {
+    title: "Deal Accepted",
+    pitches: [
+      {
+        id: "4",
+        pitchName: "Learning Platform",
+        daftarName: "EduTech",
+        Believer: "5"
+      }
+    ]
   },
   dealCancelled: {
     title: "Deal Cancelled",
@@ -45,30 +65,10 @@ const columns: Record<string, { title: string; pitches: ColumnPitch[] }> = {
       }
     ]
   },
-  invitationSent: {
-    title: "Invitation Sent",
-    pitches: [
-      {
-        id: "3",
-        pitchName: "Stock Market",
-        daftarName: "FinTech Pro",
-        Believer: "3"
-      }
-    ]
-  },
-  accepted: {
-    title: "Accepted",
-    pitches: [
-      {
-        id: "4",
-        pitchName: "Learning Platform",
-        daftarName: "EduTech",
-        Believer: "5"
-      }
-    ]
-  },
+
+
   deleted: {
-    title: "Deleted",
+    title: "Pitch Deleted",
     pitches: [
       {
         id: "5",
@@ -148,7 +148,7 @@ const getScoutStatus = (scoutName: string): { status: string; scheduledDate?: st
   const planningScout = scouttatus.planning.find(scout =>
     scout.title.toLowerCase().split(' ').join('-') === scoutName.toLowerCase()
   )
-  
+
   const scheduledScout = scouttatus.scheduled.find(scout =>
     scout.title.toLowerCase().split(' ').join('-') === scoutName.toLowerCase()
   )
@@ -159,12 +159,11 @@ const getScoutStatus = (scoutName: string): { status: string; scheduledDate?: st
   if (scheduledScout) {
     return { status: scheduledScout.status, scheduledDate: scheduledScout.scheduledDate }
   }
-  
+
   return { status: 'active' }
 }
 
 export default function ProgramDetailsPage() {
-  const router = useRouter()
   const pathname = usePathname()
   const scout = pathname.split('/').pop()
   const params = useParams()
@@ -265,11 +264,6 @@ export default function ProgramDetailsPage() {
     console.log("Deleting update:", id)
   }
 
-  const handleFeedbackSubmit = (feedback: string) => {
-    // Add your feedback submission logic here
-    console.log("Submitting feedback:", feedback)
-  }
-
   const handleSubmitFeedback = (feedback: string) => {
     // Add your feedback submission logic here
     console.log("Submitting feedback:", feedback)
@@ -358,7 +352,7 @@ export default function ProgramDetailsPage() {
                       <div>
                         <h4 className="font-medium text-sm">{pitch.pitchName}</h4>
                         <p className="text-xs text-muted-foreground mt-1">{pitch.daftarName}</p>
-                        
+
                       </div>
                       <p className="text-xs mt-4 text-blue-500 font-semibold">
                         Believer {pitch.Believer} out of 5
