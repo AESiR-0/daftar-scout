@@ -152,14 +152,14 @@ export default function TeamPage() {
   }
 
   const MemberCard = ({ member }: { member: TeamMember }) => (
-    <div className="bg-[#1a1a1a] p-6 rounded-lg">
+    <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
-          <Avatar className="h-60 w-60 rounded-lg">
+          <Avatar className="h-60 w-60 rounded-[0.35rem]">
             {member.imageUrl ? (
-              <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-lg" />
+              <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
             ) : (
-              <AvatarFallback className="rounded-lg text-xl">{getInitials(member.firstName)}</AvatarFallback>
+              <AvatarFallback className="rounded-[0.35rem] text-xl">{getInitials(member.firstName)}</AvatarFallback>
             )}
           </Avatar>
           <div>
@@ -250,7 +250,7 @@ export default function TeamPage() {
   )
 
   const PendingCard = ({ member }: { member: TeamMember }) => (
-    <div className="bg-[#1a1a1a] p-6 rounded-lg">
+    <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
           <Avatar className="h-12 w-12">
@@ -286,7 +286,7 @@ export default function TeamPage() {
   return (
     <div className="space-y-4 px-10">
       {/* Invite Form */}
-      <div className="bg-[#1a1a1a] rounded-lg p-6 mt-8">
+      <div className="bg-[#1a1a1a] rounded-[0.35rem] p-6 mt-8">
         <div className="grid grid-cols-2 gap-4">
           <Input
             placeholder="First Name"

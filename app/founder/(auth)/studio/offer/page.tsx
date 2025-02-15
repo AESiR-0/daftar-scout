@@ -179,7 +179,6 @@ export default function OffersPage() {
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Offers</h2>
             <div className={cn(
               "space-y-3",
               pendingOffers.length > 2 && "overflow-auto max-h-[300px] pr-4"
@@ -219,7 +218,7 @@ export default function OffersPage() {
               </Select>
             </div>
 
-            <Card className="border bg-[#1a1a1a]">
+            <Card className="border rounded-[0.35rem] bg-[#1a1a1a]">
               <div className={cn(
                 "divide-y divide-border",
                 logOffers.length > 3 && "overflow-auto max-h-[400px]"
@@ -228,7 +227,7 @@ export default function OffersPage() {
                   <div key={offer.id} className="p-4">
                     {/* Scout Message */}
                     <div className="flex flex-col gap-2">
-                      <div className="bg-muted/5 rounded-lg p-4">
+                      <div className="bg-muted/5 rounded-[0.35rem] p-4">
                         <p className="text-sm text-muted-foreground">
                           Thank you for applying to {offer.scoutName}. We are excited to have you on board. 
                           {offer.collaboration} takes a step forward to make this happen.
@@ -247,7 +246,7 @@ export default function OffersPage() {
                           .filter(response => response.action !== "Offer Received")
                           .map((response, index) => (
                             <div key={index} className="flex flex-col gap-2">
-                              <div className="bg-muted/5 rounded-lg p-4 space-y-2">
+                              <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
                                 <p className="text-sm text-muted-foreground">{response.reason}</p>
                                 <div className=" items-center gap-2 text-xs text-muted-foreground">
                                   <span className="capitalize">{response.action} by</span><br/>
@@ -373,7 +372,7 @@ function OfferCard({ offer, onView, onAccept, onDecline, onWithdraw }: { offer: 
   return (
     <div className="flex flex-col gap-4">
       {/* Scout Message */}
-      <div className="bg-muted/5 rounded-lg p-4">
+      <div className="bg-muted/5 rounded-[0.35rem] p-4">
         <p className="text-sm text-muted-foreground">
           Thank you for applying to {offer.scoutName}. We are excited to have you on board. 
           {offer.collaboration} takes a step forward to make this happen.
@@ -390,7 +389,7 @@ function OfferCard({ offer, onView, onAccept, onDecline, onWithdraw }: { offer: 
             .filter(response => response.action !== "Offer Received")
             .map((response, index) => (
               <div key={index} className="flex flex-col gap-2">
-                <div className="bg-muted/5 rounded-lg p-4 space-y-2">
+                <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span className="capitalize">{response.action} by</span>
                     <FounderProfile founder={response.user.founder} />

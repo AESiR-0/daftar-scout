@@ -17,22 +17,22 @@ export let questions: Question[] = [
     },
     {
         id: 3,
-        question: "What is the problem are you solving, and why is it really important for you to solve it?",
+        question: "What is the problem, and why is it so important for you to solve it?",
         videoUrl: ""
     },
     {
         id: 4,
-        question: "Who are your customers, and why would they pay for it?",
+        question: "Who are your customers, and why will they pay for it?",
         videoUrl: "https://example.com/revenue-model-video.mp4"
     },
     {
         id: 5,
-        question: "How much have you worked on your startup, and where do you see it in 3 years?",
+        question: "What is the progress so far, and where do you see it in 3 years?",
         videoUrl: ""
     },
     {
         id: 6,
-        question: "What challenges are you facing, and what support do you need?",
+        question: "What are the challenges today and what support do you want?",
         videoUrl: ""
     }
 ] 

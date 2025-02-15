@@ -26,7 +26,7 @@ const notifications: NotificationItem[] = [
     id: "1",
     title: "New Pitch Received",
     description: "You have received a new pitch from Tech Startup Inc.",
-    date: "Feb 14, 2025",
+    date: "Feb 14, 2025, 10:00 AM",
     isRead: false,
     type: "updates"
   },
@@ -34,7 +34,7 @@ const notifications: NotificationItem[] = [
     id: "2",
     title: "Meeting Reminder",
     description: "Upcoming meeting with investors tomorrow at 2 PM",
-    date: "Feb 14, 2025",
+    date: "Feb 14, 2025, 10:00 AM",
     isRead: true,
     type: "alerts"
   },
@@ -42,7 +42,7 @@ const notifications: NotificationItem[] = [
     id: "3",
     title: "Platform Update",
     description: "New features have been added to the platform",
-    date: "Feb 14, 2025",
+    date: "Feb 14, 2025, 10:00 AM",
     isRead: true,
     type: "news"
   }
