@@ -6,6 +6,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { daftarsData } from "@/lib/dummy-data/daftars"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { FounderProfile } from "@/components/FounderProfile"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import formatDate from "@/lib/formatDate"
+import { X, MinusCircle, Check, Clock } from "lucide-react"
 
 interface TeamMember {
   name: string
@@ -13,46 +16,57 @@ interface TeamMember {
   role: string
   isApproved: boolean
   isUser?: boolean
-  // Add required fields for FounderProfile
-  age: string
-  phone: string
-  gender: string
-  location: string
-  language: string[]
-  imageUrl?: string
   designation: string
+  daftar: string
+  status: string
+}
+
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return <Check className="h-5 w-5 text-green-500" />
+    case 'rejected':
+      return <X className="h-5 w-5 text-destructive" />
+    case 'pending':
+      return <Clock className="h-5 w-5 text-yellow-500" />
+    default:
+      return <MinusCircle className="h-5 w-5 text-muted-foreground" />
+  }
 }
 
 // Get the first daftar's team data
 const selectedDaftar = daftarsData[0]
 const teamMembers: TeamMember[] = [
   {
-    name: "John Doe",
+    name: "John Smith",
     email: "john@example.com",
     role: "You",
-    age: "28",
-    phone: "+91 9876543210",
-    gender: "Male",
-    location: "Bangalore, India",
-    language: ["English", "Hindi"],
+    designation: "Investment Director",
+    daftar: "Tech Innovators",
+    status: "pending",
     isApproved: false,
-    isUser: true,
-    designation: "Founder & CEO"
+    isUser: true
   },
   {
-    name: "Jane Smith",
-    email: "jane@example.com",
+    name: "Sarah Johnson",
+    email: "sarah@example.com",
     role: "Team Member",
-    age: "32",
-    phone: "+91 9876543211",
-    gender: "Female",
-    location: "Mumbai, India",
-    language: ["English", "Marathi"],
+    designation: "Portfolio Manager",
+    daftar: "Tech Innovators",
+    status: "pending",
     isApproved: false,
-    isUser: false,
-    designation: "Founder & CEO"
+    isUser: false
   },
-  // Add more team members as needed
+  {
+    name: "Michael Chen",
+    email: "michael@example.com",
+    role: "Team Member",
+    designation: "Investment Analyst",
+    daftar: "Tech Startup",
+    status: "pending",
+    isApproved: false,
+    isUser: false
+  }
 ]
 
 export default function DeletePage() {
@@ -75,92 +89,97 @@ export default function DeletePage() {
   const pendingApprovals = approvals.filter(member => !member.isApproved).length
 
   return (
-    <div className="flex gap-6">
+    <div className="flex px-5 mt-14 gap-6">
       <Card className="border-none bg-[#0e0e0e] flex-1">
-        <CardHeader>
-          <CardTitle> </CardTitle>
-        </CardHeader>
         <CardContent className="space-y-6">
-          <div className="mb-8">
-            <div className="flex flex-col p-4 border rounded-lg">
-              {/* Warning Message */}
-              <p className="text-sm text-muted-foreground mb-4">
-                All data related to the program will be deleted, and the offer will be withdrawn.
-                An email will be sent to all stakeholders to notify them of this change
-              </p>
+          <div className="flex flex-col p-4 border rounded-lg space-y-6">
+            {/* Initial Warning */}
+            <p className="text-sm text-muted-foreground">
+            All data related to the scout will be deleted, and the offer will be withdrawn.
+            An email will be sent to all stakeholders to notify them of this change
+            </p>
 
-              {/* Approval List */}
-              <div className="space-y-4 mb-4">
-                {approvals.map((member) => (
-                  <div
-                    key={member.email}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <FounderProfile founder={member} />
-                        <p className="text-xs text-muted-foreground">{member.role}</p>
+            {/* Consent Checkbox */}
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="user-consent"
+                checked={userConsent}
+                onCheckedChange={(checked) => setUserConsent(checked as boolean)}
+                className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+              />
+              <label
+                htmlFor="user-consent"
+                className="text-sm text-muted-foreground"
+              >
+                I agree to delete the scout
+              </label>
+            </div>
+
+            {/* Delete Button */}
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={!userConsent || deleteClicked}
+              className="w-[12%] bg-muted hover:bg-muted/50"
+            >
+              Delete
+            </Button>
+
+            {deleteClicked && (
+              <>
+                {/* Team Approvals Section */}
+                <div className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
+                <div className="text-sm text-muted-foreground">
+                  {approvals.filter(a => a.isApproved).length} of {approvals.length}
+                </div>
+              </div>
+
+              <div>
+                {approvals.map((member) => {
+                  const approval = approvals.find(a => a.isApproved === member.isApproved) || {
+                    status: 'not_requested',
+                    isApproved: false,
+                    date: undefined
+                  }
+
+                  return (
+                    <div
+                      key={member.name}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{member.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {member.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {member.designation}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {member.daftar}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        {getStatusIcon(approval.status)}
                       </div>
                     </div>
-                    <Checkbox
-                      id={`approval-${member.email}`}
-                      checked={member.isApproved}
-                      disabled
-                      className="h-5 w-5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {deleteClicked && pendingApprovals > 0 && (
-                <p className="text-sm text-yellow-600 font-medium mb-4">
-                  Waiting for approval from {pendingApprovals} team member{pendingApprovals !== 1 ? 's' : ''}
-                </p>
-              )}
-
-              {/* Consent Checkbox */}
-              <div className="flex items-start gap-2 mb-4">
-                <Checkbox
-                  id="user-consent"
-                  checked={userConsent}
-                  onCheckedChange={(checked) => setUserConsent(checked as boolean)}
-                  className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                />
-                <label
-                  htmlFor="user-consent"
-                  className="text-sm text-muted-foreground"
-                >
-                  I agree that I have read all the data, and we are deleting the program.
-                </label>
-              </div>
-
-              {/* Delete Button */}
-              <Button
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={!userConsent || deleteClicked}
-                className="w-full bg-muted hover:bg-muted/50"
-              >
-                Delete
-              </Button>
-
-              {/* Deletion Info */}
-              <div className="mt-4">
-                <p className="text-sm text-muted-foreground">
-                  All data related to the Scout has been deleted, and the offer has been withdrawn.
-                  The Scout is no longer available.
-                </p>
-                {deleteClicked && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Request initiated on: {new Date(deletionDate).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
-                  </p>
-                )}
+                  )
+                })}
+                <div className="pt-4">
+                  <span className="text-xs text-muted-foreground">
+                    <strong>Deleted Scout On</strong> <br /> {formatDate(new Date().toISOString())}
+                  </span>
+                </div>
               </div>
             </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

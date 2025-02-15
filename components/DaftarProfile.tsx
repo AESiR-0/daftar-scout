@@ -11,9 +11,6 @@ export function DaftarProfile({ collaborator }: { collaborator: any }) {
                 <span className="text-white hover:underline">
                     {collaborator.daftarName}
                 </span>
-                <Badge variant="secondary">
-                    {collaborator.type}
-                </Badge>
             </HoverCardTrigger>
             <HoverCardContent className="w-80">
                 <div className="flex items-center gap-3">
@@ -30,10 +27,6 @@ export function DaftarProfile({ collaborator }: { collaborator: any }) {
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Structure:</span>
                         <span>{collaborator.daftarDetails.structure}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Team:</span>
-                        <span>{collaborator.daftarDetails.teamSize}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Location:</span>
@@ -55,7 +48,7 @@ export function DaftarProfile({ collaborator }: { collaborator: any }) {
                     </div>
                     <div className="">
                         <span className="text-foreground">On Daftar Since</span>
-                        <p className="mt-1  text-muted-foreground rounded-lg">{formatDate(new Date(collaborator.daftarDetails.founded).toISOString())}</p>
+                        <p className="mt-1  text-muted-foreground rounded-lg">{formatDate(new Date(collaborator.addedAt).toISOString())}</p>
                     </div>
                 </div>
             </HoverCardContent>

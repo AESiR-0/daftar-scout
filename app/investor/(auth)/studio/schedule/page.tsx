@@ -1,46 +1,24 @@
 "use client"
+
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { useRouter, usePathname } from "next/navigation"
-import { Check, AlertCircle, Calendar as CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
+import { CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { format } from "date-fns"
 
-const programSteps = [
-  { id: 'details', title: 'Program Details', status: 'completed' },
-  { id: 'document', title: 'Program Documents', status: 'completed' },
-  { id: 'audience', title: 'Target Audience', status: 'completed' },
-  { id: 'founder-pitch', title: "Founder's Pitch", status: 'completed' },
-  { id: 'investor-pitch', title: "Investor's Pitch", status: 'completed' },
-  { id: 'faqs', title: 'FAQs', status: 'completed' },
-  { id: 'invite', title: 'Database Upload', status: 'completed' },
-  { id: 'schedule', title: 'Program Schedule', status: 'pending' },
-] as const
-
-// Simulated approval status
-const teamApprovalStatus = {
-  allApproved: false,
-  collaboratorPending: true
-}
-
-function ScheduleContent() {
-  const router = useRouter()
-  const pathname = usePathname()
+export default function SchedulePage() {
   const [lastPitchDate, setLastPitchDate] = useState<Date>()
   const [launchDate, setLaunchDate] = useState<Date>()
   const [dateError, setDateError] = useState<string>("")
-
-  const handleSave = () => {
-    console.log("Saving schedule:", { lastPitchDate, launchDate })
-    router.push("/scout")
-  }
 
   const handleLaunchDateSelect = (date: Date | undefined) => {
     setLaunchDate(date)
@@ -63,117 +41,112 @@ function ScheduleContent() {
   const isDateValid = !dateError && lastPitchDate && launchDate
 
   return (
-    <div className="gap-8 container mx-auto px-4">
-      <div className="max-w-6xl space-y-8">
-        {/* Progress Section */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium">Program Creation Progress</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {programSteps.map((step) => (
-              <div
-                key={step.id}
-                className="flex items-center gap-3 p-3 rounded-[0.35rem]  bg-muted/50"
-              >
-                <div className={cn(
-                  "h-6 w-6 rounded-full flex items-center justify-center",
-                  step.status === 'completed'
-                    ? "bg-blue-100 text-blue-600"
-                    : "bg-orange-100 text-orange-600"
-                )}>
-                  {step.status === 'completed' ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4" />
-                  )}
+    <div className="container mx-auto px-10">
+      <div className="grid grid-cols-3 gap-6">
+        {/* Left Column - Date Inputs */}
+        <div className="col-span-2">
+          <Card className="border-none bg-[#0e0e0e]">
+            <CardContent className="p-6 space-y-6">
+              <div className="gap-6">
+                <div className="space-y-2">
+                  <Label>Last Day to Pitch</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !lastPitchDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {lastPitchDate ? format(lastPitchDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={lastPitchDate}
+                        onSelect={handleLastPitchDateSelect}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
-                <span className="text-sm">{step.title}</span>
+
+                <div className="mt-4 space-y-2">
+                  <Label>Program Launch Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !launchDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {launchDate ? format(launchDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={launchDate}
+                        onSelect={handleLaunchDateSelect}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Schedule Section */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-medium">Program Schedule</h3>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label>Last Day to Pitch</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal h-9",
-                      !lastPitchDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {lastPitchDate ? format(lastPitchDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={lastPitchDate}
-                    onSelect={handleLastPitchDateSelect}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="space-y-2">
-              <Label>Program Launch Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal h-9",
-                      !launchDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {launchDate ? format(launchDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={launchDate}
-                    onSelect={handleLaunchDateSelect}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-          {dateError && (
-            <p className="text-sm text-red-500 text-center">{dateError}</p>
-          )}
-        </div>
-
-        <div className="flex flex-col items-center gap-2 pt-4">
-          <Button
-            onClick={handleSave}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-            disabled={
-              !isDateValid || 
-              !teamApprovalStatus.allApproved || 
-              teamApprovalStatus.collaboratorPending
-            }
+              {dateError && (
+                <p className="text-sm text-destructive">{dateError}</p>
+              )}
+              <Button 
+            variant="outline"
+            
+            disabled={!isDateValid}
           >
-            Save
+            Go Live
           </Button>
-          {teamApprovalStatus.collaboratorPending && (
-            <p className="text-xs text-yellow-500">Waiting for team approvals</p>
-          )}
-          {!isDateValid && !dateError && (
-            <p className="text-xs text-muted-foreground">Please select both dates</p>
-          )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Actions & Status */}
+        <div className="space-y-6"> 
+          <Card className="border-none bg-[#0e0e0e]">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Schedule Blocked</h3>
+                <div className="space-y-2">
+                  <h4 className="text-sm text-muted-foreground">Pending Approvals</h4>
+                  <ul className="space-y-1">
+                    <li className="text-xs text-destructive flex items-start gap-2">
+                      <span className="mt-0.5">•</span>
+                      <span>2 team members haven't approved yet</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-sm text-muted-foreground">Schedule Issues</h4>
+                  <ul className="space-y-1">
+                    <li className="text-xs text-destructive flex items-start gap-2">
+                      <span className="mt-0.5">•</span>
+                      <span>Last pitch date not selected</span>
+                    </li>
+                    <li className="text-xs text-destructive flex items-start gap-2">
+                      <span className="mt-0.5">•</span>
+                      <span>Launch date must be before last pitch date</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
   )
 }
-
-export default ScheduleContent;

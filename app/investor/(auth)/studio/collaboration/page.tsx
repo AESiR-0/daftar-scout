@@ -1,161 +1,207 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import formatDate from "@/lib/formatDate";
 import { DaftarProfile } from "@/components/DaftarProfile";
+import { X, Plus, Info } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 
-type CollaborationStatus = "Pending" | "Accepted" | "Declined" | "Withdrawn" | "Removed";
+type CollaborationStatus = "Pending" | "Accepted" | "Declined";
 
 interface Collaborator {
   id: string;
   daftarId: string;
   daftarName: string;
-  type: string;
   status: CollaborationStatus;
   addedAt: string;
   daftarDetails: {
-    owner: string;
-    industry: string;
     structure: string;
-    teamSize: string;
-    location: string;
-    founded: string;
-    biggerPicture: string;
     website: string;
+    location: string;
+    bigPicture: string;
   };
 }
-
-const statusPriority: Record<CollaborationStatus, number> = {
-  "Pending": 1,
-  "Accepted": 2,
-  "Declined": 3,
-  "Withdrawn": 4,
-  "Removed": 5,
-};
 
 export default function CollaborationPage() {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
   const [daftarId, setDaftarId] = useState("");
-  const [activeFilter, setActiveFilter] = useState<"all" | CollaborationStatus>("all");
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-  const [locationOptions, setLocationOptions] = useState<string[]>([]);
-  const [industryOptions, setIndustryOptions] = useState<string[]>([]);
 
-  useEffect(() => {
-    fetchLocations();
-    fetchIndustries();
-  }, []);
-
-  const fetchLocations = async () => {
-    try {
-      const response = await fetch("https://restcountries.com/v3.1/all");
-      if (!response.ok) {
-        throw new Error("Failed to fetch locations");
-      }
-      const data = await response.json();
-      const formattedLocations = data
-        .map((country: any) => country.name.common)
-        .sort();
-      setLocationOptions(formattedLocations);
-    } catch (error) {
-      console.error("Error fetching locations:", error);
+  const handleInvite = () => {
+    if (daftarId.length !== 6) {
+      toast({
+        title: "Invalid Daftar ID",
+        description: "Please enter a valid 6-character Daftar ID",
+        variant: "destructive"
+      });
+      return;
     }
-  };
 
-  const fetchIndustries = async () => {
-    try {
-      const response = await fetch("https://api.mocki.io/v1/ce5f60e2"); // Replace with actual industry API
-      if (!response.ok) {
-        throw new Error("Failed to fetch industries");
+    // Add new collaborator
+    const newCollaborator: Collaborator = {
+      id: Math.random().toString(),
+      daftarId: daftarId,
+      daftarName: "tech innovators",
+      status: "Pending",
+      addedAt: new Date().toISOString(),
+      daftarDetails: {
+        structure: "Government Incubator",
+        website: "www.example.com",
+        location: "Mumbai, India",
+        bigPicture: "Building the next generation of financial infrastructure"
       }
-      const data = await response.json();
-      setIndustryOptions(data.industries || []);
-    } catch (error) {
-      console.error("Error fetching industries:", error);
-    }
-  };
+    };
 
-
-  const updateStatus = (id: string, newStatus: CollaborationStatus) => {
-    setCollaborators((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: newStatus } : c))
-    );
-    toast({ title: "Status updated", description: `Collaboration ${newStatus.toLowerCase()}` });
-  };
-
-  const filteredCollaborators = collaborators
-    .filter(
-      (collaborator) =>
-        (activeFilter === "all" || collaborator.status === activeFilter) &&
-        (collaborator.daftarName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          collaborator.daftarId.toLowerCase().includes(searchQuery.toLowerCase()))
-    )
-    .sort((a, b) => {
-      const priorityDiff = statusPriority[a.status] - statusPriority[b.status];
-      return priorityDiff !== 0 ? priorityDiff : new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+    setCollaborators([...collaborators, newCollaborator]);
+    setDaftarId("");
+    toast({
+      title: "Invitation sent",
+      description: `Invitation sent to Daftar ${daftarId}`
     });
+  };
 
-  const groupedCollaborators = filteredCollaborators.reduce((groups, collaborator) => {
-    const status = collaborator.status;
-    if (!groups[status]) {
-      groups[status] = [];
-    }
-    groups[status].push(collaborator);
-    return groups;
-  }, {} as Record<CollaborationStatus, Collaborator[]>);
+  const removeCollaborator = (id: string) => {
+    setCollaborators(collaborators.filter(c => c.id !== id));
+    toast({
+      title: "Collaborator removed"
+    });
+  };
 
   return (
-    <Card className="bg-transparent">
-      <CardHeader>
-        <CardTitle>Collaborations</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Search and Add */}
-        <div className="flex items-center gap-4">
-          <Input placeholder="Search collaborators..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-          <Input placeholder="Enter Daftar ID" value={daftarId} onChange={(e) => setDaftarId(e.target.value.toUpperCase())} maxLength={6} />
+    <div className="container px-10 mx-auto py-6">
+      <div className="grid grid-cols-3 gap-6">
+        {/* Left Column - Collaborators (2/3 width) */}
+        <div className="col-span-2">
+          <Card className="border-none bg-[#0e0e0e]">
+            <CardContent className="space-y-6">
+              {/* Invite Input */}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter Daftar ID"
+                  value={daftarId}
+                  onChange={(e) => setDaftarId(e.target.value.toUpperCase())}
+                  maxLength={6}
+                />
+                <div className="flex gap-2">
+                  <Button onClick={handleInvite} variant="outline">
+                    Invite
+                  </Button>
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold">About Collaboration</h4>
+                        <p className="text-sm text-muted-foreground">
+                          A collaborator helps your Scout connect with the right partners in a specific location and reach a larger audience.
+                          <br /><br />
+                          Since they've been working in the area for a long time, they understand the local ecosystem and speak the language founders speak.
+                          <br /><br />
+                          They're typically incubators, accelerators, angels, founder's offices, or VCs with strong local networks.
+                        </p>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
+                </div>
+              </div>
+
+              {/* Collaborators List */}
+              <div className="space-y-4">
+                {collaborators.map((collaborator) => (
+                  <div 
+                    key={collaborator.id}
+                    className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                  >
+                    <div>
+                      <DaftarProfile
+                        collaborator={{
+                          daftarName: collaborator.daftarName,
+                          daftarDetails: collaborator.daftarDetails,
+                          addedAt: collaborator.addedAt
+                        }}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Status: {collaborator.status}
+                      </p>
+                      <p className="text-xs mt-1 text-muted-foreground">
+                        {formatDate(collaborator.addedAt)}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeCollaborator(collaborator.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Status Filters */}
-        <Tabs defaultValue="all" onValueChange={(value) => setActiveFilter(value as any)}>
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="Pending">Pending</TabsTrigger>
-            <TabsTrigger value="Accepted">Accepted</TabsTrigger>
-            <TabsTrigger value="Declined">Declined</TabsTrigger>
-            <TabsTrigger value="Withdrawn">Withdrawn</TabsTrigger>
-            <TabsTrigger value="Removed">Removed</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Right Column - Info (1/3 width) */}
+        <div>
+          <Card className="border-none bg-[#0e0e0e]">
+            <CardContent className="space-y-6">
+            <h3 className="text-lg font-semibold">Support</h3>
+              <p className="text-sm text-muted-foreground">
+                Looking for the right collaborator? Whether you have someone in mind or need help finding the perfect match, Daftar's got you covered.
+                <br /><br />
+                Schedule a quick call with us, and we'll help you figure it out.
+              </p>
 
-        {/* Collaborators List */}
-        <div className="space-y-6">
-          {Object.keys(groupedCollaborators).map((status) => (
-            <div key={status} className="space-y-3">
-              <h3 className="text-sm font-medium">{status}</h3>
-              {groupedCollaborators[status as CollaborationStatus]?.map((collaborator) => (
-                <CollaboratorItem key={collaborator.id} collaborator={collaborator} updateStatus={updateStatus} />
-              ))}
-            </div>
-          ))}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Textarea 
+                    placeholder="How can we help you?"
+                    className="h-24"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Input 
+                    placeholder="When should we call you? e.g. 2:00 PM IST"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      className="w-20"
+                      placeholder="+91"
+                    />
+                    <Input
+                      className="flex-1"
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+                </div>
+
+                <Button variant="outline" className="w-full">
+                  Schedule a Meeting
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// Extracted Collaborator Item Component
-function CollaboratorItem({ collaborator, updateStatus }: { collaborator: Collaborator; updateStatus: (id: string, status: CollaborationStatus) => void }) {
-  return (
-    <div className="flex items-center justify-between p-4 border rounded-lg transition-colors">
-      <div className="space-y-1">
-        <DaftarProfile collaborator={collaborator} />
-        <p className="text-sm text-muted-foreground">Added {formatDate(new Date(collaborator.addedAt).toISOString())}</p>
       </div>
     </div>
   );

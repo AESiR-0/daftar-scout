@@ -104,21 +104,21 @@ export const investorStudioNavItems = [
     url: "/investor/studio/faqs",
     icon: HelpCircle,
   },
-  {
-    title: "Invite from Database",
-    url: "/investor/studio/invite",
-    icon: UserPlus,
-  },
+  // {
+  //   title: "Invite from Database",
+  //   url: "/investor/studio/invite",
+  //   icon: UserPlus,
+  // },
   {
     title: "Approval",
     url: "/investor/studio/approval",
     icon: CheckCircle,
   },
-  {
-    title: "Meetings",
-    url: "/investor/studio/meetings",
-    icon: Calendar,
-  },
+  // {
+  //   title: "Meetings",
+  //   url: "/investor/studio/meetings",
+  //   icon: Calendar,
+  // },
   {
     title: "Schedule",
     url: "/investor/studio/schedule",

@@ -1,27 +1,14 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
 import { useParams, usePathname, useRouter } from "next/navigation"
-import {
-  ArrowLeft, Search, Filter, Share2,
-  BarChart2, Bell, Pencil, PlayCircle,
-  StopCircle, Building
-} from "lucide-react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Share2 } from "lucide-react"
 import { EndScoutingDialog } from "@/components/dialogs/end-scouting-dialog"
 import { useState } from "react"
 import { UpdatesDialog } from "@/components/dialogs/updates-dialog"
 import { LaunchProgramDialog } from "@/components/dialogs/launch-program-dialog"
 import Link from "next/link"
 import { InsightsDialog } from "@/components/dialogs/insights-dialog"
-import { useSearch } from "@/lib/context/search-context"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { formatDate } from "@/lib/format-date"
 

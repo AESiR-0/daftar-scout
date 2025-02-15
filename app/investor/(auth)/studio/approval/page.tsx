@@ -1,250 +1,238 @@
 "use client"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
-import { InvestorProfile } from "@/components/InvestorProfile"
-import { Users2, Calendar } from "lucide-react"
-import formatDate from "@/lib/formatDate"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Checkbox } from "@/components/ui/checkbox"
 
-interface InvestorProfile {
-  name: string
-  email: string
-  role: string
-  isApproved: boolean
-  isUser?: boolean
+import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Check, Clock, MinusCircle, X } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import formatDate from "@/lib/formatDate"
+import { Button } from "@/components/ui/button"
+import { toast, useToast } from "@/hooks/use-toast"
+
+interface ApprovalRequest {
+  id: string
+  username: string
   designation: string
-  approvalDate: string
-  isCollaborator: boolean
-  age: string
-  phone: string
-  gender: string
-  location: string
-  languages: string[]
-  imageUrl?: string
-  daftarName: string
-  structure: string
-  website: string
-  onDaftarSince: string
-  bigPicture: string
+  date: string
+  daftar: string
+  status: "approved" | "pending"
+  profile: {
+    name: string
+    designation: string
+  }
 }
 
-const approvalRequests: InvestorProfile[] = [
+const initialApprovalRequests: ApprovalRequest[] = [
   {
-    name: "John Smith",
-    email: "john@example.com",
-    role: "Investment Manager",
-    designation: "Investment Manager",
-    approvalDate: "2024-03-20T14:30:00",
-    isApproved: false,
-    isCollaborator: false,
-    isUser: true,
-    age: "35",
-    phone: "+1 234-567-8900",
-    gender: "Male",
-    location: "New York, USA",
-    languages: ["English"],
-    daftarName: "Tech Innovation Fund",
-    structure: "VC Fund",
-    website: "example.com",
-    onDaftarSince: "2024-01",
-    bigPicture: "Investing in breakthrough technologies",
+    id: "1",
+    username: "John Smith",
+    designation: "Investment Director",
+    date: formatDate(new Date().toISOString()),
+    status: "approved",
+    daftar: "tech innovators",
+    profile: {
+      name: "John Smith",
+      designation: "Investment Director"
+    }
   },
   {
-    name: "Sarah Johnson",
-    email: "sarah@example.com",
-    role: "Program Director",
-    designation: "Program Director",
-    approvalDate: "2024-03-19T10:15:00",
-    isApproved: false,
-    isCollaborator: true,
-    age: "42",
-    phone: "+1 234-567-8901",
-    gender: "Female",
-    location: "San Francisco, USA",
-    languages: ["English", "Spanish"],
-    daftarName: "Healthcare Ventures",
-    structure: "Angel Network",
-    website: "healthcare.com",
-    onDaftarSince: "2024-02",
-    bigPicture: "Supporting healthcare innovations",
+    id: "2",
+    username: "Sarah Johnson",
+    designation: "Portfolio Manager",
+    date: formatDate(new Date().toISOString()),
+    status: "pending",
+    daftar: "tech innovators",
+    profile: {
+      name: "Sarah Johnson",
+      designation: "Portfolio Manager"
+    }
+  },
+  {
+    id: "3",
+    username: "Michael Chen",
+    designation: "Investment Analyst",
+    date: formatDate(new Date().toISOString()),
+    status: "pending",
+    daftar: "tech startup",
+    profile: {
+      name: "Michael Chen",
+      designation: "Investment Analyst"
+    }
   }
 ]
 
-export default function ApprovalContent() {
-  const router = useRouter()
-  const [approvals, setApprovals] = useState<InvestorProfile[]>(approvalRequests)
-  const [showConfirmation, setShowConfirmation] = useState<string | null>(null)
-  const [userConsent, setUserConsent] = useState(false)
-
-  const allApproved = approvals.every(request => request.isApproved)
-  const collaboratorPending = approvals.some(request =>
-    request.isCollaborator && !request.isApproved
-  )
-
-  const handleApproval = (email: string) => {
-    setApprovals(prev => prev.map(approval =>
-      approval.email === email
-        ? { ...approval, isApproved: true, approvalDate: new Date().toISOString() }
-        : approval
-    ))
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return <Check className="h-5 w-5 text-green-500" />
+    case 'rejected':
+      return <X className="h-5 w-5 text-destructive" />
+    case 'pending':
+      return <Clock className="h-5 w-5 text-yellow-500" />
+    default:
+      return <MinusCircle className="h-5 w-5 text-muted-foreground" />
   }
+}
 
-  const handleUserConsent = () => {
-    setUserConsent(true)
-    const currentUser = approvals.find(member => member.isUser)
-    if (currentUser) {
-      handleApproval(currentUser.email)
+// Add this interface for error tracking
+interface ErrorSummary {
+  details: {
+    title: string;
+    errors: string[];
+  }[];
+}
+
+// Add sample error data
+const sampleErrors: ErrorSummary = {
+  details: [
+    {
+      title: "Scout Details",
+      errors: [
+        "Scout name is required",
+        "Scout description is missing",
+        "Location not specified"
+      ]
+    },
+    {
+      title: "Audience",
+      errors: [
+        "Target audience not defined",
+        "Investment criteria not specified"
+      ]
+    },
+    {
+      title: "Documents",
+      errors: [
+        "Required documents not uploaded",
+        "Terms and conditions document missing"
+      ]
+    },
+    {
+      title: "Investor's Pitch",
+      errors: [
+        "Pitch video not uploaded"
+      ]
     }
-  }
+  ]
+}
 
-  const handleScheduleLaunch = () => {
-    router.push("/investor/studio/schedule")
-  }
+export default function ApprovalPage() {
+  const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>(initialApprovalRequests)
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [errors, setErrors] = useState<ErrorSummary>(sampleErrors)
+
+  // Add approval counts calculation
+  const totalMembers = approvalRequests.length
+  const approvedCount = approvalRequests.filter(req => req.status === "approved").length
 
   return (
-    <div className="flex gap-6">
-      <Card className="border-none bg-[#0e0e0e] flex-1">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Users2 className="h-4 w-4" />
-                <span className="text-sm">{approvals.length} Members</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span className="text-sm">{formatDate(new Date().toISOString())}</span>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-6">
-          <div className="mb-8">
-            <div className="flex flex-col p-6 border rounded-lg bg-card/50">
-              {/* Consent Section */}
-              <div className="mb-8 relative">
-                <div className="absolute -left-3 top-0 bottom-0 w-1 bg-gradient-to-b rounded-full" />
-                <div className="pl-6">
-                  <p className="text-sm text-muted-foreground mb-4">
-                    I agree that I have read all the data, and we're good to take the funds to the market.
-                  </p>
-                  <Button
-                    onClick={handleUserConsent}
-                    disabled={userConsent}
-                    className="w-full "
+    <div className="container mx-auto px-10">
+      <div className="grid grid-cols-3 gap-6">
+        {/* Left Column - Approval Section */}
+        <div className="col-span-2">
+          <Card className="border-none bg-[#0e0e0e]">
+            <CardContent className="p-6 space-y-6">
+              <div className="flex flex-col space-y-6">
+                <div className="flex items-center mt-4 space-x-2">
+                  <Checkbox 
+                    id="terms" 
+                    checked={termsAccepted}
+                    className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+                    onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    {userConsent ? "Approved" : "Approve"}
-                  </Button>
+                    All the data looks good to me. We can take the Scout live.
+                  </label>
                 </div>
+
+                <Button 
+                  variant="outline" 
+                  className="w-fit"
+                  disabled={!termsAccepted}
+                  onClick={() => {
+                    toast({
+                      title: "Scout Approved",
+                      description: "Your approval has been submitted successfully"
+                    })
+                  }}
+                >
+                  Approve Scout
+                </Button>
               </div>
 
-              {/* Approval List */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold mb-4">Team Approvals</h3>
-                {approvals.map((member) => (
-                  <div
-                    key={member.email}
-                    className={`flex items-center justify-between p-4 rounded-lg transition-colors bg-muted/50`}
-                  >
-                    <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
+                  <div className="text-sm text-muted-foreground">
+                    {approvedCount} of {totalMembers}
+                  </div>
+                </div>
+
+                <div className="">
+                  {approvalRequests.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                    >
                       <div className="flex items-center gap-3">
-                        <InvestorProfile investor={member} />
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            {member.isCollaborator && (
-                              <span className="text-xs px-2 py-0.5 rounded-full">
-                                Collaborator
-                              </span>
-                            )}
-                          </div>
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{member.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {member.username}
+                          </p>
                           <p className="text-xs text-muted-foreground">
-                            {member.isApproved
-                              ? `Approved ${formatDate(member.approvalDate)}`
-                              : "Awaiting approval"}
+                            {member.designation}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                          {member.daftar}
                           </p>
                         </div>
                       </div>
+                      <div className="flex items-center">
+                        {getStatusIcon(member.status)}
+                      </div>
                     </div>
-
-                    <div className="flex items-center gap-4">
-                      {!member.isUser && !member.isApproved ? (
-                        <AlertDialog open={showConfirmation === member.email} onOpenChange={() => setShowConfirmation(null)}>
-                          <AlertDialogTrigger asChild>
-                            <Checkbox
-                              onClick={() => setShowConfirmation(member.email)}
-                              className="h-5 w-5 border-2 border-gray-400  cursor-pointer"
-                            />
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirm Approval</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to approve this? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => {
-                                  handleApproval(member.email)
-                                  setShowConfirmation(null)
-                                }}
-                              >
-                                Approve
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      ) : (
-                        <Checkbox
-                          checked={member.isApproved}
-                          disabled
-                          className="h-5 w-5 border-2 border-gray-400 "
-                        />
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
 
-              {/* Action Button */}
-              {allApproved && !collaboratorPending && (
-                <div className="mt-8 pt-6 border-t">
-                  <Button
-                    onClick={handleScheduleLaunch}
-                    className="w-full bg-gradient-to-r"
-                    disabled={!userConsent}
-                  >
-                    Schedule Launch
-                  </Button>
+        {/* Right Column - Error Summary */}
+        <div className="space-y-6">
+          <Card className="border-none bg-[#0e0e0e]">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Review Required</h3>
+                <div className="space-y-6">
+                  {errors.details.map((section, index) => (
+                    <div key={index} className="space-y-2">
+                      <h4 className="text-sm text-muted-foreground">{section.title}</h4>
+                      <ul className="space-y-1">
+                        {section.errors.map((error, errorIndex) => (
+                          <li key={errorIndex} className="text-xs text-destructive flex items-start gap-2">
+                            <span className="mt-0.5">•</span>
+                            <span>{error}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
-              )}
-
-              {collaboratorPending && (
-                <div className="mt-6 p-4  rounded-lg">
-                  <p className="text-sm  text-center font-medium">
-                    Waiting for collaborator approval before proceeding
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                <p className="text-xs text-muted-foreground mt-4">
+                  Please review and fix these issues before proceeding with the approval.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

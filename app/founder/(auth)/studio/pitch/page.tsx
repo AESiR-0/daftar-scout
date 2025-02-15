@@ -8,10 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, CheckSquare2, X, Clock, MinusCircle, XSquare } from "lucide-react";
 import { FounderProfile } from "@/components/FounderProfile";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PaymentDialog } from "@/components/dialogs/payment-dialog";
 import  formatDate  from "@/lib/formatDate"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface ApprovalRequest {
     id: string;
@@ -104,6 +105,7 @@ export default function PitchPage() {
     const [specificAsks, setSpecificAsks] = useState("");
     const [showPaymentDialog, setShowPaymentDialog] = useState(false);
     const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>(initialApprovalRequests);
+    const [termsAccepted, setTermsAccepted] = useState(false)
     
 
     // Add approval counts calculation
@@ -145,6 +147,21 @@ export default function PitchPage() {
                     </div>
 
                     {/* Team Approvals Section */}
+                    <div className="flex items-center mt-4 space-x-2 mb-4">
+                        <Checkbox 
+                            id="terms" 
+                            checked={termsAccepted}
+                            className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+                            onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                        />
+                        <label
+                            htmlFor="terms"
+                            className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            I confirm that this pitch is ready for team approval and submission
+                        </label>
+                    </div>
+
                     <div className="space-y-4 mt-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
@@ -187,7 +204,7 @@ export default function PitchPage() {
             </div>
 
             {/* Right Section: Action & Errors */}
-            <div className="w-1/3 border-l pl-6 space-y-6">
+            <div className="w-1/3 pl-6 space-y-6">
                 <Button 
                     className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
                     size="lg"

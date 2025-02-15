@@ -88,7 +88,6 @@ function FaqsContent() {
             {/* Add FAQ Form */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Question</Label>
                 <Input
                   placeholder="Enter FAQ question"
                   value={newQuestion}
@@ -97,7 +96,6 @@ function FaqsContent() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Answer</Label>
                 <Textarea
                   placeholder="Enter FAQ answer"
                   value={newAnswer}
@@ -108,11 +106,10 @@ function FaqsContent() {
             </div>
 
             {/* FAQs List */}
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4">
               {details.faqs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-sm text-muted-foreground bg-muted/50 rounded-[0.35rem] ">
                   <p>No FAQs added yet</p>
-                  <p>Add questions and answers above</p>
                 </div>
               ) : (
                 details.faqs.map((faq, index) => (
@@ -123,9 +120,6 @@ function FaqsContent() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium text-blue-600">
-                            Q{String(index + 1).padStart(2, '0')}
-                          </span>
                           <p className="font-medium">{faq.question}</p>
                         </div>
                         <p className="text-sm text-muted-foreground pl-6">
@@ -152,9 +146,6 @@ function FaqsContent() {
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Add FAQ
-              </Button>
-              <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
-                {mode === 'edit' ? 'Update' : 'Save'}
               </Button>
             </div>
           </div>
