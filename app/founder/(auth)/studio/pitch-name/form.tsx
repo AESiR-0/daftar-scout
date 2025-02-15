@@ -30,6 +30,9 @@ interface Location {
     city: string;
 }
 
+// Add this regex pattern
+const locationPattern = /^([^/]+)\/([^/]+)\/([^/]+)$/;
+
 export default function PitchNameForm({ pitch, mode }: { pitch: string; mode: string }) {
     const [pitchName, setPitchName] = useState(pitch);
     const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
@@ -44,82 +47,35 @@ export default function PitchNameForm({ pitch, mode }: { pitch: string; mode: st
     });
     const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
-    // useEffect(() => {
-    //     fetchCountries();
-    // }, []);
+    const [locationInput, setLocationInput] = useState("");
 
-    // Fetch Countries
-    // const fetchCountries = async () => {
-    //     try {
-    //         const response = await fetch("https://restcountries.com/v3.1/all");
-    //         const data = await response.json();
-    //         const countryList = data.map((country: any) => country.name.common).sort();
-    //         setCountries(countryList);
-    //     } catch (error) {
-    //         console.error("Error fetching countries:", error);
-    //     }
-    // };
+    const handleLocationInput = async (value: string) => {
+        setLocationInput(value);
+        
+        // Parse location when input matches pattern (Country/State/City)
+        const match = value.match(locationPattern);
+        if (match) {
+            const [_, country, state, city] = match;
+            setLocation({
+                country: country.trim(),
+                state: state.trim(),
+                city: city.trim()
+            });
 
-    // Fetch States when a country is selected
-    // const fetchStates = async (country: string) => {
-    //     try {
-    //         const response = await fetch(`https://countriesnow.space/api/v0.1/countries/states`, {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({ country }),
-    //         });
-    //         const data = await response.json();
-    //         const stateList = data.data.states.map((state: any) => state.name).sort();
-    //         setStates(stateList);
-    //     } catch (error) {
-    //         console.error("Error fetching states:", error);
-    //     }
-    // };
-
-    // Fetch Cities when a state is selected
-    // const fetchCities = async (state: string) => {
-    //     try {
-    //         const response = await fetch(`https://countriesnow.space/api/v0.1/countries/state/cities`, {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({ country: selectedCountry, state }),
-    //         });
-    //         const data = await response.json();
-    //         setCities(data.data.sort());
-    //     } catch (error) {
-    //         console.error("Error fetching cities:", error);
-    //     }
-    // };
-
-    // const handleLocationChange = async (field: keyof Location, value: string) => {
-    //     setLocation(prev => ({
-    //         ...prev,
-    //         [field]: value
-    //     }));
-
-    //     // Only search for coordinates when all fields are filled
-    //     if (field === 'city' && location.country && location.state) {
-    //         try {
-    //             const query = `${value}, ${location.state}, ${location.country}`;
-    //             const response = await fetch(
-    //                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
-    //             );
-    //             const data = await response.json();
+            try {
+                const query = `${city}, ${state}, ${country}`;
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+                );
+                const data = await response.json();
                 
-    //             if (data && data[0]) {
-    //                 setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
-    //             }
-    //         } catch (error) {
-    //             console.error('Error fetching coordinates:', error);
-    //         }
-    //     }
-    // };
-
-    const handleLocationChange = async (field: keyof Location, value: string) => {
-        setLocation(prev => ({
-            ...prev,
-            [field]: value
-        }));
+                if (data && data[0]) {
+                    setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+                }
+            } catch (error) {
+                console.error('Error fetching coordinates:', error);
+            }
+        }
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -145,26 +101,14 @@ export default function PitchNameForm({ pitch, mode }: { pitch: string; mode: st
                         />
                     </div>
 
-                    {/* Location Inputs */}
+                    {/* Location Input */}
                     <div className="space-y-4">
-                        <Label>Pitching From</Label>
-                        <div className="flex gap-4">
-                            <Input
-                                placeholder="Enter country"
-                                value={location.country}
-                                onChange={(e) => handleLocationChange('country', e.target.value)}
-                            />
-                            <Input
-                                placeholder="Enter state"
-                                value={location.state}
-                                onChange={(e) => handleLocationChange('state', e.target.value)}
-                            />
-                            <Input
-                                placeholder="Enter city"
-                                value={location.city}
-                                onChange={(e) => handleLocationChange('city', e.target.value)}
-                            />
-                        </div>
+                        <Label>Pin Your Location</Label>
+                        <Input
+                            placeholder="Country/State/City or Place your URL"
+                            value={locationInput}
+                            onChange={(e) => handleLocationInput(e.target.value)}
+                        />
 
                         {/* Map */}
                         <div className="w-full h-[400px] rounded-lg overflow-hidden border">

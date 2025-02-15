@@ -111,17 +111,17 @@ const genders = [
   { value: "open-for-all", label: "Open For All" },
 ];
 
+// Add location pattern
+const locationPattern = /^([^/]+)\/([^/]+)\/([^/]+)$/;
+
 interface Location {
   country: string;
   state: string;
   city: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  }
 }
 
 export default function AudiencePage() {
+  const [locationInput, setLocationInput] = useState("");
   const [location, setLocation] = useState<Location>({
     country: "",
     state: "",
@@ -135,21 +135,26 @@ export default function AudiencePage() {
   const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
-  const handleLocationChange = async (field: keyof Location, value: string) => {
-    setLocation(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleLocationInput = async (value: string) => {
+    setLocationInput(value);
+    
+    // Parse location when input matches pattern (Country/State/City)
+    const match = value.match(locationPattern);
+    if (match) {
+      const [_, country, state, city] = match;
+      setLocation({
+        country: country.trim(),
+        state: state.trim(),
+        city: city.trim()
+      });
 
-    // Only search for coordinates when all fields are filled
-    if (field === 'city' && location.country && location.state) {
       try {
-        const query = `${value}, ${location.state}, ${location.country}`;
+        const query = `${city}, ${state}, ${country}`;
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
         );
         const data = await response.json();
-
+        
         if (data && data[0]) {
           setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
         }
@@ -162,42 +167,20 @@ export default function AudiencePage() {
   return (
     <div className="container px-10 mx-auto py-6">
       <div className="space-y-6">
-        {/* Location Inputs and Map */}
+        {/* Location Input */}
         <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Country</Label>
-              <Input
-                placeholder="Enter country"
-                value={location.country}
-                onChange={(e) => handleLocationChange('country', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>State</Label>
-              <Input
-                placeholder="Enter state"
-                value={location.state}
-                onChange={(e) => handleLocationChange('state', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>City</Label>
-              <Input
-                placeholder="Enter city"
-                value={location.city}
-                onChange={(e) => handleLocationChange('city', e.target.value)}
-              />
-            </div>
-          </div>
+          <Label>Pin Location</Label>
+          <Input
+            placeholder="Country/State/City"
+            value={locationInput}
+            onChange={(e) => handleLocationInput(e.target.value)}
+          />
 
           {/* Map */}
           <div className="w-full h-[400px] rounded-lg overflow-hidden border">
             <MapComponent coordinates={coordinates} />
           </div>
         </div>
-
-
 
         {/* Other inputs */}
         <div className="space-y-4">
@@ -208,6 +191,7 @@ export default function AudiencePage() {
             selected={selectedCommunities}
             onChange={(value: string) => setSelectedCommunities(prev => [...prev, value])}
           />
+
           {/* Age and Gender row */}
           <div className="flex gap-4">
             <div className="flex-1">
@@ -228,6 +212,7 @@ export default function AudiencePage() {
               />
             </div>
           </div>
+
           <Combobox
             label="Stage"
             value="Add"
