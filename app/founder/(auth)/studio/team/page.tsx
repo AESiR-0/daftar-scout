@@ -155,7 +155,7 @@ export default function TeamPage() {
     <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
-          <Avatar className="h-60 w-60 rounded-[0.35rem]">
+          <Avatar className="h-48 w-48 rounded-[0.35rem]">
             {member.imageUrl ? (
               <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
             ) : (
@@ -167,7 +167,7 @@ export default function TeamPage() {
               <h4 className="text-xl font-medium">{member.firstName} {member.lastName}</h4>
             </div>
 
-            <div className="space-y-2 mt-4">
+            <div className="space-y-2 mt-2">
               <div className="space-y-1 text-sm text-muted-foreground">
                 {isEditing && member.isCurrentUser ? (
                   <div className="flex items-center gap-2">
@@ -191,7 +191,6 @@ export default function TeamPage() {
                 )}
                 <div className="flex items-center gap-2">
                   <span>{member.age}</span>
-                  <span>•</span>
                   <span>{member.gender}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -207,10 +206,6 @@ export default function TeamPage() {
                   Preferred languages to connect with investors: {member.language.join(', ')}
                 </p>
               </div>
-
-              <p className="text-xs pt-2 text-muted-foreground">
-                On Daftar Since <br /> {formatDate(member.joinDate)}
-              </p>
             </div>
           </div>
         </div>
@@ -253,13 +248,6 @@ export default function TeamPage() {
     <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
-          <Avatar className="h-12 w-12">
-            {member.imageUrl ? (
-              <AvatarImage src={member.imageUrl} alt={member.firstName} />
-            ) : (
-              <AvatarFallback>{getInitials(member.firstName)}</AvatarFallback>
-            )}
-          </Avatar>
           <div>
             <div className="flex items-center gap-2">
               <h4 className="font-medium">{member.firstName} {member.lastName}</h4>

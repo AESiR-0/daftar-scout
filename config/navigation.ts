@@ -11,16 +11,16 @@ export const investorNavItems = [
     url: "/investor/scout",
     icon: Users,
   },
-  {
-    title: "Meetings",
-    url: "/investor/meetings",
-    icon: Calendar,
-  },
-  {
-    title: "Go Premium",
-    url: "/investor/premium",
-    icon: Crown,
-  }
+  // {
+  //   title: "Meetings",
+  //   url: "/investor/meetings",
+  //   icon: Calendar,
+  // },
+  // {
+  //   title: "Go Premium",
+  //   url: "/investor/premium",
+  //   icon: Crown,
+  // }
 ]
 
 
@@ -55,7 +55,10 @@ export const founderNavItems = [
 export const topNavConfig = {
   investor: [
     { text: 'Journal', action: 'journal' },
-    { text: 'Subscription', action: 'subscription' }
+    { text: 'Subscription', action: 'subscription' },
+    { icon: Play, action: 'play' },
+    { icon: Bell, action: 'notifications' },
+    { icon: Folder, action: 'daftar' },
   ],
   founder: [
     { text: 'Journal', action: 'journal' },

@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card } from "@/components/ui/card"
 import {
   UserCircle,
   Users,
@@ -16,8 +17,12 @@ import {
   X,
   Check,
   Clock,
-  MinusCircle
-} from "lucide-react" 
+  MinusCircle,
+  Shield,
+  Share2,
+  Lock,
+  Pencil
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
@@ -30,15 +35,24 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import formatDate from "@/lib/formatDate"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Checkbox } from "../ui/checkbox"
 
-interface Member {
+interface TeamMember {
   id: string
   firstName: string
   lastName: string
   email: string
   designation: string
-  status: 'pending' | 'active'
-  avatar?: string
+  age: string
+  gender: string
+  location: string
+  language: string[]
+  imageUrl?: string
+  status: 'active' | 'pending'
+  isCurrentUser?: boolean
+  joinDate: string
+  phone: string
 }
 
 interface DeletionApproval {
@@ -49,9 +63,30 @@ interface DeletionApproval {
   date?: string
 }
 
+type DaftarTab = "details" | "team" | "billing" | "delete" | "privacy"
+
+const privacySections = [
+  {
+    title: "Data Collection",
+    icon: Lock,
+    content: "We collect information you provide directly to us when you create your Daftar, including your name, contact information, and preferences."
+  },
+  {
+    title: "Data Usage",
+    icon: Share2,
+    content: "We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect our platform."
+  },
+  {
+    title: "Security",
+    icon: Shield,
+    content: "We take reasonable measures to help protect your personal information from loss, theft, misuse, and unauthorized access."
+  }
+]
+
 interface DaftarDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSuccess: () => void
 }
 
 const navItems = [
@@ -60,88 +95,269 @@ const navItems = [
   { title: "Billing", value: "billing", icon: CreditCard },
   { title: "Delete Daftar", value: "delete", icon: Trash2 }
 ]
+const getInitials = (name: string) => {
+  const [firstName, lastName] = name.split(' ')
+  return firstName?.[0] + (lastName?.[0] || '')
+}
 
-const dummyTeamMembers: Member[] = [
+const formatPhoneNumber = (phone: string) => {
+  // Match country code (anything from start until last 10 digits)
+  const match = phone.match(/^(.+?)(\d{10})$/)
+  if (match) {
+    return `${match[1]} ${match[2]}`
+  }
+  return phone
+}
+const dummyTeamMembers: TeamMember[] = [
   {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@company.com",
-    designation: "Chief Executive Officer",
+    id: '1',
+    firstName: 'Current',
+    lastName: 'User',
+    email: 'current@user.com',
+    designation: 'Founder',
+    age: '28',
+    gender: 'Male',
+    location: 'Dubai, UAE',
+    language: ['English', 'Arabic'],
     status: 'active',
-    avatar: "/avatars/john.png"
+    isCurrentUser: true,
+    joinDate: '2024-01-15',
+    phone: '+971526374859'
   },
   {
-    id: "2",
-    firstName: "Sarah",
-    lastName: "Smith",
-    email: "sarah.smith@company.com",
-    designation: "Chief Technology Officer",
+    id: '2',
+    firstName: 'Sarah',
+    lastName: 'Ahmed',
+    email: 'sarah.ahmed@example.com',
+    designation: 'CTO',
+    age: '32',
+    gender: 'Female',
+    location: 'Abu Dhabi, UAE',
+    language: ['English', 'Arabic', 'French'],
     status: 'active',
-    avatar: "/avatars/sarah.png"
+    joinDate: '2024-02-01',
+    phone: '+971526374859'
   },
   {
-    id: "3",
-    firstName: "Michael",
-    lastName: "Johnson",
-    email: "michael.j@company.com",
-    designation: "Head of Operations",
-    status: 'active',
-    avatar: "/avatars/michael.png"
-  },
-  {
-    id: "4",
-    firstName: "Emily",
-    lastName: "Brown",
-    email: "emily.brown@company.com",
-    designation: "Product Manager",
-    status: 'active',
-    avatar: "/avatars/emily.png"
+    id: '3',
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john.doe@example.com',
+    designation: 'Product Manager',
+    age: '30',
+    gender: 'Male',
+    location: 'Dubai, UAE',
+    language: ['English', 'Spanish'],
+    status: 'pending',
+    joinDate: '2024-03-10',
+    phone: '+971526374859'
   }
 ]
 
-export function DaftarDialog({ open, onOpenChange }: DaftarDialogProps) {
-  const { toast } = useToast()
-  const [activeTab, setActiveTab] = useState("profile")
+const tabs: { id: DaftarTab; label: string; icon: any }[] = [
+  { id: "details", label: "Details", icon: UserCircle },
+  { id: "team", label: "Team", icon: Users },
+  { id: "billing", label: "Billing", icon: CreditCard },
+  { id: "privacy", label: "Privacy Policy", icon: Shield },
+  { id: "delete", label: "Delete Daftar", icon: Trash2 }
+]
+
+interface MemberCardProps {
+  member: TeamMember
+  onRemove?: (id: string) => void
+}
+
+function MemberCard({ member, onRemove }: MemberCardProps) {
+  const [members, setMembers] = useState<TeamMember[]>(dummyTeamMembers)
   const [isEditing, setIsEditing] = useState(false)
-  const [members, setMembers] = useState<Member[]>(dummyTeamMembers)
-  const [pendingMembers, setPendingMembers] = useState<Member[]>([])
-  const [newMember, setNewMember] = useState<Partial<Member>>({})
+  const [editDesignation, setEditDesignation] = useState("")
+  const handleSaveDesignation = () => {
+    setIsEditing(false)
+  }
+  const handleWithdraw = () => {
+    // Handle withdraw logic
+    console.log('Withdrawing from team')
+  }
+
+  const handleRemoveMember = (id: string) => {
+    setMembers(members.filter(member => member.id !== id))
+  }
+
+  return (
+    <div className="bg-[#1a1a1a] py-6 rounded-[0.35rem]">
+      <div className="flex justify-between items-start">
+        <div className="flex gap-4">
+          <Avatar className="h-40 w-40 rounded-[0.35rem]">
+            {member.imageUrl ? (
+              <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
+            ) : (
+              <AvatarFallback className="rounded-[0.35rem] text-xl">{getInitials(member.firstName)}</AvatarFallback>
+            )}
+          </Avatar>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="text-md font-medium">{member.firstName} {member.lastName}</h4>
+            </div>
+
+            <div className="space-y-2 mt-2">
+              <div className="space-y-1 text-xs text-muted-foreground">
+                {isEditing && member.isCurrentUser ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editDesignation}
+                      onChange={(e) => setEditDesignation(e.target.value)}
+                      className="h-8"
+                      placeholder="Enter your designation"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleSaveDesignation}
+                      className="h-8 w-8"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">{member.designation}</p>
+                )}
+                <div className="flex items-center gap-2">
+                  <span>{member.age}</span>
+                  <span>{member.gender}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p>{member.email}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p>{formatPhoneNumber(member.phone)}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <p>{member.location}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Preferred languages to connect with founders: {member.language.join(', ')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          {member.isCurrentUser && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsEditing(!isEditing)}
+              className="h-8 w-8"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
+          {member.isCurrentUser ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleWithdraw}
+              className="h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleRemoveMember(member.id)}
+              className="h-8 w-8"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PendingCard({ member }: { member: TeamMember }) {
+  return (
+    <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
+      <div className="flex items-center gap-3">
+        <div>
+          <p className="text-sm font-medium">
+            {member.firstName} {member.lastName}
+          </p>
+          <p className="text-xs text-muted-foreground">{member.designation}</p>
+          <p className="text-xs text-muted-foreground">{member.email}</p>
+        </div>
+      </div>
+      <Button variant="outline" size="icon">
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+}
+
+const languages = [
+  "English",
+  "Hindi",
+  "Gujarati",
+  "Bengali",
+  "Tamil",
+  "Telugu",
+  "Marathi",
+  "Kannada",
+  "Malayalam"
+]
+
+export function DaftarDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: DaftarDialogProps) {
+  const { toast } = useToast()
+  const [activeTab, setActiveTab] = useState<DaftarTab>("details")
+  const [isEditing, setIsEditing] = useState(false)
+  const [members, setMembers] = useState<TeamMember[]>(dummyTeamMembers)
+  const [pendingMembers, setPendingMembers] = useState<TeamMember[]>([])
+  const [newMember, setNewMember] = useState<Partial<TeamMember>>({})
   const [showAddMember, setShowAddMember] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string>("/assets/daftar.png")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showDeletionApprovals, setShowDeletionApprovals] = useState(false)
   const [deletionApprovals, setDeletionApprovals] = useState<DeletionApproval[]>([])
-  
-  const handleSave = (tab: string) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    type: "",
+  })
+  const [daftarData, setDaftarData] = useState({
+    name: "My Daftar",
+    structure: "Government Incubator",
+    code: "A7B2X9",
+    website: "www.example.com",
+    location: "Mumbai, India",
+    vision: "Building the next generation of financial infrastructure",
+    joinedDate: new Date().toISOString()
+  })
+  const [userConsent, setUserConsent] = useState(false)
+
+  const handleCancelInvite = (id: string) => {
+    setMembers(members.filter(member => member.id !== id))
+  }
+
+
+
+  const handleSave = () => {
+    setIsEditing(false)
     toast({
       title: "Changes saved",
-      description: `Your ${tab} changes have been saved successfully.`
+      description: "Your daftar details have been updated successfully."
     })
-    if (tab === "profile") {
-      setIsEditing(false)
-    }
-    if (tab === "team" && showAddMember && newMember.firstName && newMember.lastName && newMember.email) {
-      setPendingMembers([...pendingMembers, {
-        id: Date.now().toString(),
-        firstName: newMember.firstName || '',
-        lastName: newMember.lastName || '',
-        email: newMember.email || '',
-        designation: newMember.designation || '',
-        status: 'pending'
-      }])
-      setNewMember({})
-      setShowAddMember(false)
-      toast({
-        title: "Invitation sent",
-        description: `An invitation has been sent to ${newMember.email}`
-      })
-    }
   }
 
   const handleAddMember = () => {
     setShowAddMember(true)
   }
+
 
   const handleRemoveMember = (id: string) => {
     setMembers(members.filter(member => member.id !== id))
@@ -159,7 +375,7 @@ export function DaftarDialog({ open, onOpenChange }: DaftarDialogProps) {
     }
   }
 
-  const handleApproveMember = (member: Member) => {
+  const handleApproveMember = (member: TeamMember) => {
     setMembers([...members, { ...member, status: 'active' }])
     setPendingMembers(pendingMembers.filter(m => m.id !== member.id))
     toast({
@@ -192,410 +408,362 @@ export function DaftarDialog({ open, onOpenChange }: DaftarDialogProps) {
     }
   }
 
+  const handleSubmit = () => {
+    if (!formData.name || !formData.description || !formData.type) {
+      toast({
+        title: "Please fill all fields",
+        variant: "destructive"
+      })
+      return
+    }
+
+    toast({
+      title: "Daftar created successfully",
+      description: "You can now start scouting startups"
+    })
+  }
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "details":
+        return (
+          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a]">
+            <div className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-20 w-20 rounded-[0.35rem]">
+                    <AvatarImage src={avatarUrl} />
+                    <AvatarFallback>D</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-lg font-medium">{daftarData.name}</h3>
+                    <p className="text-sm text-muted-foreground">{daftarData.structure}</p>
+                    <p className="text-xs text-muted-foreground mt-1">Daftar Code: {daftarData.code}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                </Button>
+              </div>
+
+              {isEditing ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Daftar Name</Label>
+                      <Input
+                        value={daftarData.name}
+                        onChange={(e) => setDaftarData(prev => ({ ...prev, name: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Structure</Label>
+                      <Select
+                        value={daftarData.structure}
+                        onValueChange={(value) => setDaftarData(prev => ({ ...prev, structure: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select structure" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Government Incubator">Government Incubator</SelectItem>
+                          <SelectItem value="Private Incubator">Private Incubator</SelectItem>
+                          <SelectItem value="Angel Network">Angel Network</SelectItem>
+                          <SelectItem value="Venture Capital">Venture Capital</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Website</Label>
+                      <Input
+                        value={daftarData.website}
+                        onChange={(e) => setDaftarData(prev => ({ ...prev, website: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Location</Label>
+                      <Input
+                        value={daftarData.location}
+                        onChange={(e) => setDaftarData(prev => ({ ...prev, location: e.target.value }))}
+                      />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                      <Label>What's the big picture you're working on?</Label>
+                      <Input
+                        value={daftarData.vision}
+                        onChange={(e) => setDaftarData(prev => ({ ...prev, vision: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleSave} className="w-full">
+                    Save Changes
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Website:</span> {daftarData.website}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Location:</span> {daftarData.location}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">The big picture we are working on:</span> <br/>{daftarData.vision}
+                  </p>
+                  <div className="text-xs pt-4">
+                    <span className="text-muted-foreground">On Daftar Since <br /> {formatDate(daftarData.joinedDate)}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        )
+
+      case "team":
+        return (
+          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+            {/* Invite Form */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  placeholder="First Name"
+                  value={newMember.firstName}
+                  onChange={(e) => setNewMember({ ...newMember, firstName: e.target.value })}
+                />
+                <Input
+                  placeholder="Last Name"
+                  value={newMember.lastName}
+                  onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
+                />
+                <Input
+                  placeholder="Designation"
+                  value={newMember.designation}
+                  onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
+                />
+                
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={newMember.email}
+                  onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  if (newMember.firstName && newMember.lastName && newMember.email && newMember.designation) {
+                    setPendingMembers([...pendingMembers, { 
+                      ...newMember as TeamMember, 
+                      id: Math.random().toString(),
+                      status: 'pending'
+                    }])
+                    setNewMember({})
+                    toast({
+                      title: "Invitation sent",
+                      description: "Team member will be added once they accept the invitation"
+                    })
+                  }
+                }}
+                className="w-full bg-muted hover:bg-muted/50"
+                disabled={!newMember.firstName || !newMember.lastName || !newMember.email || !newMember.designation}
+              >
+                Invite
+              </Button>
+            </div>
+
+            {/* Tabs and Members List */}
+            <Tabs defaultValue="team" className="mt-6">
+              <TabsList className="">
+                <TabsTrigger value="team" className="flex-1">
+                  Team ({members.length})
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="flex-1">
+                  Pending ({pendingMembers.length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="team" className="mt-4 space-y-3">
+                {members.map((member) => (
+                  <MemberCard 
+                    key={member.id} 
+                    member={member} 
+                    onRemove={handleRemoveMember}
+                  />
+                ))}
+                {members.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    No team members yet
+                  </p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="pending" className="mt-4 space-y-3">
+                {pendingMembers.map((member) => (
+                  <PendingCard key={member.id} member={member} />
+                ))}
+                {pendingMembers.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    No pending invitations
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
+          </Card>
+        )
+
+      case "billing":
+        return (
+          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+            <div className="border rounded-lg p-6 space-y-6">
+              <div className="space-y-2">
+                <h3 className="font-medium">Current Plan</h3>
+                <p className="text-sm text-muted-foreground">Free Plan</p>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-medium">Billing Information</h3>
+                <p className="text-sm text-muted-foreground">No billing information added</p>
+              </div>
+
+              <Button variant="outline">
+                Upgrade Plan
+              </Button>
+            </div>
+          </Card>
+        )
+
+      case "privacy":
+        return (
+          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+            <div className="space-y-6">
+              {privacySections.map((section) => (
+                <div key={section.title} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <section.icon className="h-4 w-4" />
+                    <h4 className="font-medium">{section.title}</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{section.content}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )
+
+      case "delete":
+        return (
+          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+            <div className="space-y-4 mb-4">
+              <p className="text-sm text-muted-foreground">All data related to the Daftar will be deleted, and the offer will be withdrawn. An email will be sent to all stakeholders to notify them of this change.</p>
+            </div>
+            <div className="flex items-start gap-2 mb-4">
+              <Checkbox
+                id="user-consent"
+                checked={userConsent}
+                onCheckedChange={(checked) => setUserConsent(checked as boolean)}
+                className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+              />
+              <label
+                htmlFor="user-consent"
+                className="text-sm text-muted-foreground"
+              >
+                I agree to delete the Daftar
+              </label>
+            </div>
+
+              <Button
+                variant="outline"
+                onClick={handleDeleteClick}
+              >
+                Delete
+              </Button>
+
+
+            <div className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
+                <div className="text-sm text-muted-foreground">
+                  {deletionApprovals.filter(a => a.status === 'approved').length} of {members.length}
+                </div>
+              </div>
+
+              <div>
+                {members.map((member) => {
+                  const approval = deletionApprovals.find(a => a.memberId === member.id) || {
+                    status: 'not_requested',
+                    date: undefined
+                  }
+
+                  return (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{member.firstName[0]}{member.lastName[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {member.firstName} {member.lastName}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        {getStatusIcon(approval.status)}
+                      </div>
+                    </div>
+                  )
+                })}
+                <div className="pt-4">
+                  <span className="text-xs text-muted-foreground"><strong> Deleted Daftar On </strong> <br /> {formatDate(new Date().toISOString())}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTitle></DialogTitle>
-      <DialogContent className="max-w-4xl h-[600px] p-0 gap-0">
-        {/* Top Navigation */}
-        <div className="border-b">
-          <nav className="flex items-center space-x-1 px-4 h-14">
-            {navItems.map((item) => (
-              <button
-                key={item.value}
-                onClick={() => setActiveTab(item.value)}
-                className={cn(
-                  "relative px-3 py-2 text-sm rounded-md transition-colors",
-                  "hover:bg-accent/50",
-                  activeTab === item.value
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <span className="flex items-center gap-2">
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </span>
-                {activeTab === item.value && (
-                  <span className="absolute inset-x-0 -bottom-[10px] h-[2px] bg-foreground" />
-                )}
-              </button>
-            ))}
-          </nav>
+      <DialogContent className="max-w-4xl p-2 bg-background">
+        <div className="flex">
+          {/* Sidebar */}
+          <div className="w-[200px] border-r">
+            <DialogHeader className="px-3 py-2">
+              <DialogTitle>Daftar</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-[450px]">
+              <div className="p-3 space-y-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "w-full p-2 text-left text-sm rounded-md transition-colors flex items-center gap-2",
+                      activeTab === tab.id
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    <tab.icon className="h-4 w-4" />
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 p-6">
+            <ScrollArea className="h-[450px]">
+              {renderContent()}
+            </ScrollArea>
+          </div>
         </div>
-
-        <ScrollArea className="h-[calc(600px-3.5rem)]">
-          {activeTab === "profile" && (
-            <div className="p-6">
-              <div className="grid grid-cols-3 gap-8">
-                {/* Daftar Logo/Image */}
-                <div className="space-y-4">
-                  <div className="p-6 rounded-lg space-y-4 bg-card">
-                    <div className="flex justify-center">
-                      <Avatar className="h-32 w-32">
-                        <AvatarImage src={avatarUrl} />
-                        <AvatarFallback>DF</AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="space-y-2 text-left">
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        className="hidden"
-                        accept="image/*"
-                        onChange={handlePhotoChange}
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        Change Photo
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          if (isEditing) {
-                            handleSave("profile")
-                          } else {
-                            setIsEditing(true)
-                          }
-                        }}
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                      >
-                        {isEditing ? "Save Changes" : "Edit Details"}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Daftar Details */}
-                <div className="col-span-2 space-y-6">
-                  <h2 className="text-lg font-semibold">Daftar Details</h2>
-
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Daftar Name</Label>
-                        <Input 
-                          disabled={!isEditing} 
-                          placeholder="Enter daftar name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Structure</Label>
-                        <Select disabled={!isEditing}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select structure" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="llc">LLC</SelectItem>
-                            <SelectItem value="corporation">Corporation</SelectItem>
-                            <SelectItem value="partnership">Partnership</SelectItem>
-                            <SelectItem value="startup">Startup</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Team Size</Label>
-                        <Select disabled={!isEditing}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select team size" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1-10">1-10 members</SelectItem>
-                            <SelectItem value="11-50">11-50 members</SelectItem>
-                            <SelectItem value="51-200">51-200 members</SelectItem>
-                            <SelectItem value="201-500">201-500 members</SelectItem>
-                            <SelectItem value="500+">500+ members</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Website</Label>
-                        <Input 
-                          disabled={!isEditing} 
-                          placeholder="Enter website URL"
-                          type="url"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Location</Label>
-                        <Input 
-                          disabled={!isEditing} 
-                          placeholder="Enter location"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>What&apos;s the big picture you&apos;re working for?</Label>
-                      <textarea
-                        className={cn(
-                          "flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-                          "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2",
-                          "focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        )}
-                        disabled={!isEditing}
-                        placeholder="Describe your mission and vision..."
-                      />
-                    </div>
-
-                    <div>
-                        <span className="text-xs text-muted-foreground"><strong> On Daftar Since </strong> <br /> {formatDate(new Date().toISOString())}</span>
-                      </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "team" && (
-            <div className="p-6 space-y-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-lg font-semibold">Team Members</h2>
-                  <p className="text-sm text-muted-foreground">Manage your team members and their roles</p>
-                </div>
-                <Button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={handleAddMember}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Member
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                {showAddMember && (
-                  <div className="border rounded-lg p-4 space-y-4">
-                    <h3 className="text-sm font-medium">Add New Member</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>First Name</Label>
-                        <Input
-                          value={newMember.firstName || ""}
-                          onChange={(e) => setNewMember({ ...newMember, firstName: e.target.value })}
-                          placeholder="Enter first name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Last Name</Label>
-                        <Input
-                          value={newMember.lastName || ""}
-                          onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
-                          placeholder="Enter last name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Designation</Label>
-                        <Input
-                          value={newMember.designation || ""}
-                          onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
-                          placeholder="Enter designation"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Email</Label>
-                        <Input
-                          value={newMember.email || ""}
-                          onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-                          placeholder="Enter email address"
-                          type="email"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-end mt-4">
-                      <Button
-                        onClick={() => handleSave("team")}
-                        className="bg-primary hover:bg-primary/90"
-                      >
-                        Send Invitation
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Pending Members Section */}
-                {pendingMembers.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-muted-foreground">Pending Invitations</h3>
-                    {pendingMembers.map((member) => (
-                      <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg bg-muted/50">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback>{member.firstName[0]}{member.lastName[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium">{member.firstName} {member.lastName}</p>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{member.designation}</p>
-                            <p className="text-sm text-muted-foreground">{member.email}</p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setPendingMembers(pendingMembers.filter(m => m.id !== member.id))}
-                          className="h-8 w-8 p-0"
-                        >
-                          <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Active Members Section */}
-                {members.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-muted-foreground">Team Members</h3>
-                    {members.map((member) => (
-                      <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback>{member.firstName[0]}{member.lastName[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{member.firstName} {member.lastName}</p>
-                            <p className="text-sm text-muted-foreground">{member.designation}</p>
-                            <p className="text-sm text-muted-foreground">{member.email}</p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveMember(member.id)}
-                          className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {members.length === 0 && pendingMembers.length === 0 && !showAddMember && (
-                  <div className="text-sm text-muted-foreground text-center py-8">
-                    No team members added yet
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => handleSave("team")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "billing" && (
-            <div className="p-6 space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold">Billing & Subscription</h2>
-                <p className="text-sm text-muted-foreground">Manage your billing information and subscription details</p>
-              </div>
-
-              <div className="border rounded-lg p-6 space-y-6">
-                <div className="space-y-2">
-                  <h3 className="font-medium">Current Plan</h3>
-                  <p className="text-sm text-muted-foreground">Free Plan</p>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="font-medium">Billing Information</h3>
-                  <p className="text-sm text-muted-foreground">No billing information added</p>
-                </div>
-
-                <Button variant="outline">
-                  Upgrade Plan
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "delete" && (
-            <div className="p-6 space-y-6">
-              <div>
-                <h2 className="text-lg font-semibold text-destructive">Delete Daftar</h2>
-                <p className="text-sm text-muted-foreground">Permanently delete your daftar and all associated data</p>
-              </div>
-
-              <div className="border border-destructive/20 rounded-lg p-6 space-y-6 bg-destructive/5">
-                <div className="space-y-2">
-                  <h3 className="font-medium text-destructive">Warning</h3>
-                  <p className="text-sm text-muted-foreground">
-                    This action cannot be undone. This will permanently delete your daftar account and remove all associated data from our servers.
-                  </p>
-                </div>
-
-                <Button 
-                  variant="destructive"
-                  className="bg-destructive hover:bg-destructive/90"
-                  onClick={handleDeleteClick}
-                >
-                  Delete Daftar
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium">Team Member Approvals Required</h3>
-                  <div className="text-sm text-muted-foreground">
-                    {deletionApprovals.filter(a => a.status === 'approved').length} of {members.length} approved
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {members.map((member) => {
-                    const approval = deletionApprovals.find(a => a.memberId === member.id) || {
-                      status: 'not_requested',
-                      date: undefined
-                    }
-                    
-                    return (
-                      <div 
-                        key={member.id}
-                        className="flex items-center justify-between p-4 border rounded-lg bg-background"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>{member.firstName[0]}{member.lastName[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">
-                              {member.firstName} {member.lastName}
-                            </p>
-                            <p className="text-xs text-muted-foreground">{member.designation}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {approval.status === 'not_requested' && 'Not requested yet'}
-                              {approval.status === 'pending' && 'Awaiting response'}
-                              {approval.status === 'approved' && approval.date && `Approved ${formatDate(approval.date)}`}
-                              {approval.status === 'rejected' && 'Declined deletion request'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          {getStatusIcon(approval.status)}
-                        </div>
-                      </div>
-                    )
-                  })}
-                  <div className="">
-                        <span className="text-xs text-muted-foreground"><strong> Deleted Daftar On </strong> <br /> {formatDate(new Date().toISOString())}</span>
-                      </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </ScrollArea>
       </DialogContent>
     </Dialog>
   )

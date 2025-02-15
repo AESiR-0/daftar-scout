@@ -6,12 +6,17 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { daftarsData } from "@/lib/dummy-data/daftars"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { FounderProfile } from "@/components/FounderProfile"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { formatDate } from "@/lib/format-date"
+import { Clock, MinusCircle, X } from "lucide-react"
+import { Check } from "lucide-react"
 
 interface TeamMember {
   name: string
   email: string
   role: string
   isApproved: boolean
+  status: string
   isUser?: boolean
   // Add required fields for FounderProfile
   age: string
@@ -21,6 +26,7 @@ interface TeamMember {
   designation: string
   language: string[]
   imageUrl?: string
+  date?: string
 }
 
 // Get the first daftar's team data
@@ -37,7 +43,9 @@ const teamMembers: TeamMember[] = [
     designation: "Founder",
     language: ["English", "Hindi"],
     isApproved: false,
-    isUser: true
+    status: "pending",
+    isUser: true,
+    date: new Date().toISOString()
   },
   {
     name: "Jane Smith",
@@ -49,11 +57,25 @@ const teamMembers: TeamMember[] = [
     location: "Mumbai, India",
     designation: "CTO",
     language: ["English", "Marathi"],
-    isApproved: false,
-    isUser: false
+    isApproved: false,  
+    status: "pending",
+    isUser: false,
+    date: new Date().toISOString()
   },
   // Add more team members as needed
 ]
+const getStatusIcon = (status: string) => {
+  switch (status) {
+    case 'approved':
+      return <Check className="h-5 w-5 text-green-500" />
+    case 'rejected':
+      return <X className="h-5 w-5 text-destructive" />
+    case 'pending':
+      return <Clock className="h-5 w-5 text-yellow-500" />
+    default:
+      return <MinusCircle className="h-5 w-5 text-muted-foreground" />
+  }
+}
 
 export default function DeletePage() {
   const router = useRouter()
@@ -81,7 +103,7 @@ export default function DeletePage() {
           <div className="flex flex-col p-4 border rounded-lg space-y-6">
             {/* Initial Warning */}
             <p className="text-sm text-muted-foreground">
-              All data related to the program will be deleted, and the offer will be withdrawn.
+              All data related to the pitch will be deleted, and the offer will be withdrawn.
               An email will be sent to all stakeholders to notify them of this change.
             </p>
 
@@ -114,44 +136,48 @@ export default function DeletePage() {
             {deleteClicked && (
               <>
                 {/* Team Approvals Section */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium">Team Approvals Required</h3>
-                    <span className="text-sm text-muted-foreground">
-                      {approvals.filter(m => m.isApproved).length} of {approvals.length}
-                    </span>
-                  </div>
-                  {approvals.map((member) => (
+                <div className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
+                <div className="text-sm text-muted-foreground">
+                  {approvals.filter(a => a.isApproved).length} of {approvals.length}
+                </div>
+              </div>
+
+              <div>
+                {approvals.map((member) => {
+                  const approval = approvals.find(a => a.isApproved === member.isApproved) || {
+                    status: 'not_requested',
+                    isApproved: false,
+                    date: undefined
+                  }
+
+                  return (
                     <div
-                      key={member.email}
-                      className="flex items-center justify-between"
+                      key={member.name}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
                     >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <FounderProfile founder={member} />
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{member.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {member.name}
+                          </p>
                         </div>
                       </div>
-                      <Checkbox
-                        id={`approval-${member.email}`}
-                        checked={member.isApproved}
-                        disabled
-                        className="h-5 w-5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                      />
+                      <div className="flex items-center">
+                        {getStatusIcon(approval.status)}
+                      </div>
                     </div>
-                  ))}
+                  )
+                })}
+                <div className="pt-4">
+                  <span className="text-xs text-muted-foreground"><strong> Deleted Daftar On </strong> <br /> {formatDate(new Date().toISOString())}</span>
                 </div>
-
-                {/* Deletion Date */}
-                <p className="text-xs text-muted-foreground">
-                  Deleted on<br/> {new Date(deletionDate).toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    hour12: true
-                  })}
-                </p>
+              </div>
+            </div>
               </>
             )}
           </div>

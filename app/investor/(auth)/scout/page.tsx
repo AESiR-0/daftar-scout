@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useState } from "react"
 import { InsightsDialog } from "@/components/dialogs/insights-dialog"
+import { Calendar } from "lucide-react"
+import MeetingsPage from "@/app/founder/(auth)/meetings/page"
 
 const scouttatus = {
   planning: [
@@ -47,11 +49,12 @@ const scouttatus = {
   ],
 }
 
-export default function scoutPage() {
+export default function ScoutPage() {
   const { searchQuery, filterValue } = useSearch()
   const [insightsOpen, setInsightsOpen] = useState(false)
+  const [showMeetings, setShowMeetings] = useState(false)
+  const [showContent, setShowContent] = useState(false)
 
-  // Filter scout based on search query and filter value
   const filteredscout = Object.entries(scouttatus).reduce((acc, [key, scout]) => {
     const filtered = scout.filter(program => {
       const matchesSearch = program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -62,58 +65,99 @@ export default function scoutPage() {
     return { ...acc, [key]: filtered }
   }, {} as typeof scouttatus)
 
+  if (!showContent) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="max-w-3xl w-full space-y-8 text-center">
+          {/* Video Container */}
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
+            <video
+              className="w-full h-full object-cover"
+              src="/videos/intro.mp4"
+              controls
+            >
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          {/* Button */}
+          <Button
+            variant="secondary"
+            size="lg"
+            className="px-8 py-6 text-md"
+            onClick={() => setShowContent(true)}
+          >
+            Create Scout
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 px-20 container mx-auto">
       <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={() => setShowMeetings(!showMeetings)}
+          className={showMeetings ? "bg-muted" : ""}
+        >
+          Meetings
+        </Button>
+        
         <Link href="/investor/studio">
           <Button
-            size="sm"
-            className="bg-muted-foreground hover:bg-muted-foreground/80 text-white h-9"
+            variant="outline"
+            className="h-9"
           >
             New Scout
           </Button>
         </Link>
-
-
       </div>
 
-      <div className="grid grid-cols-4 gap-6">
-        {Object.entries(filteredscout).map(([status, scout]) => (
-          <div
-            key={status}
-            className=" bg-muted/30  rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <h2 className="font-semibold capitalize text-foreground">{status}</h2>
-                <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
-                  {scout.length}
-                </Badge>
+      {showMeetings ? (
+        <MeetingsPage />
+      ) : (
+        <div className="grid grid-cols-4 gap-6">
+          {Object.entries(filteredscout).map(([status, scout]) => (
+            <div
+              key={status}
+              className="bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold capitalize text-foreground">{status}</h2>
+                  <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
+                    {scout.length}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                {scout.map((program) => (
+                  <Link
+                    key={program.title}
+                    href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}`}
+                  >
+                    <div className="p-4 m-2 rounded-[0.35rem] hover:border-muted-foreground hover:border bg-background transition-colors">
+                      <h3 className="font-medium text-sm text-foreground">{program.title}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Collaboration : <span className="font-medium">{program.postedby}</span>
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+
+                {scout.length === 0 && (
+                  <div className="text-center py-8 text-sm text-muted-foreground bg-background/5 rounded-[0.35rem] border border-border">
+                    No scout in {status}
+                  </div>
+                )}
               </div>
             </div>
-
-            <div className="space-y-5 ">
-              {scout.map((program) => (
-                <Link
-                  key={program.title}
-                  href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}`}
-                >
-                  <div className="p-4 m-2 rounded-[0.35rem]  hover:border-muted-foreground hover:border   bg-background transition-colors">
-                    <h3 className="font-medium text-sm text-foreground">{program.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-1"> Collaboration : <span className="font-medium">{program.postedby}</span></p>
-                  </div>
-                </Link>
-              ))}
-
-              {scout.length === 0 && (
-                <div className="text-center py-8 text-sm text-muted-foreground bg-background/5 rounded-[0.35rem]  border border-border">
-                  No scout in {status}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <InsightsDialog
         open={insightsOpen}

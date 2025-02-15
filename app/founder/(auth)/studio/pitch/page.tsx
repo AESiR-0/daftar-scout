@@ -5,12 +5,13 @@ import { usePathname } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckSquare2, XSquare } from "lucide-react";
+import { Check, CheckSquare2, X, Clock, MinusCircle, XSquare } from "lucide-react";
 import { FounderProfile } from "@/components/FounderProfile";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PaymentDialog } from "@/components/dialogs/payment-dialog";
 import  formatDate  from "@/lib/formatDate"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface ApprovalRequest {
     id: string;
@@ -30,6 +31,19 @@ interface ApprovalRequest {
     };
 }
 
+const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return <Check className="h-5 w-5 text-green-500" />
+      case 'rejected':
+        return <X className="h-5 w-5 text-destructive" />
+      case 'pending':
+        return <Clock className="h-5 w-5 text-yellow-500" />
+      default:
+        return <MinusCircle className="h-5 w-5 text-muted-foreground" />
+    }
+  }
+  
 // Sample approval data (Team Logs)
 const initialApprovalRequests: ApprovalRequest[] = [
     {
@@ -131,49 +145,44 @@ export default function PitchPage() {
                     </div>
 
                     {/* Team Approvals Section */}
-                    <div className="pt-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-medium">Team Approvals</h2>
-                            <span className="text-sm text-muted-foreground">
-                                {approvedCount} of {totalMembers}
-                            </span>
+                    <div className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
+                <div className="text-sm text-muted-foreground">
+                  {approvalRequests.filter(a => a.status === 'approved').length} of {approvalRequests.length}
+                </div>
+              </div>
+
+              <div>
+                {approvalRequests.map((member) => {
+                  const approval = approvalRequests.find(a => a.id === member.id) || {
+                    status: 'not_requested',
+                    date: undefined
+                  }
+
+                  return (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{member.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {member.username}
+                          </p>
                         </div>
-                        <div className="space-y-3">
-                            {approvalRequests.map((request: ApprovalRequest) => (
-                                <div
-                                    key={request.id}
-                                    className="flex items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-all"
-                                >
-                                    <div className="space-y-1">
-                                        <FounderProfile founder={request.profile} />
-                                        <p className="text-xs text-muted-foreground">
-                                            {request.date}
-                                        </p>
-                                    </div>
-                                    {request.id === currentUserId ? (
-                                        <button
-                                            onClick={() => handleApprovalToggle(request.id)}
-                                            className="hover:opacity-80 transition-opacity"
-                                        >
-                                            {request.status === "approved" ? (
-                                                <CheckSquare2 className="h-5 w-5" />
-                                            ) : (
-                                                <XSquare className="h-5 w-5 text-muted-foreground" />
-                                            )}
-                                        </button>
-                                    ) : (
-                                        <div>
-                                            {request.status === "approved" ? (
-                                                <CheckSquare2 className="h-5 w-5" />
-                                            ) : (
-                                                <XSquare className="h-5 w-5 text-muted-foreground" />
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        {getStatusIcon(approval.status)}
+                      </div>
                     </div>
+                  )
+                })}
+              </div>
+            </div>
                 </ScrollArea>
             </div>
 
