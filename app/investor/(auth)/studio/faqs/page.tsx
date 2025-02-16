@@ -79,7 +79,7 @@ function FaqsContent() {
   }
 
   return (
-    <div className="space-y-6 container mx-auto px-4">
+    <div className="space-y-6 container mx-auto px-10 mt-10">
       <ScrollArea className="gap-8 h-[calc(100vh-11rem)]">
 
 

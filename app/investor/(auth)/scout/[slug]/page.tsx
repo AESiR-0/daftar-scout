@@ -176,7 +176,7 @@ export default function ProgramDetailsPage() {
 
     if (scoutStatus === 'Planning' || scoutStatus === 'Scheduled') {
       return (
-        <div className="space-y-6 max-w-6xl container mx-auto">
+        <div className="space-y-6 max-w-6xl mt-4 container mx-auto">
           {/* Header Section */}
           <div className="flex items-end justify-between w-full gap-2">
             <div className="flex items-center justify-end w-full gap-3">
@@ -270,7 +270,7 @@ export default function ProgramDetailsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl container mx-auto">
+    <div className="space-y-6 max-w-[80rem] mt-4 container mx-auto">
       {/* Header Section */}
       <div className="flex items-end justify-end w-full gap-2">
         <div className="flex items-center justify-end gap-3">

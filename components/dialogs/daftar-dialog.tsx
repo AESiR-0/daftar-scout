@@ -427,7 +427,7 @@ export function DaftarDialog({
     switch (activeTab) {
       case "details":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a]">
+          <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a]">
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -616,7 +616,7 @@ export function DaftarDialog({
 
       case "billing":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+          <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
             <div className="border rounded-lg p-6 space-y-6">
               <div className="space-y-2">
                 <h3 className="font-medium">Current Plan</h3>
@@ -637,7 +637,7 @@ export function DaftarDialog({
 
       case "privacy":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+          <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
             <div className="space-y-6">
               {privacySections.map((section) => (
                 <div key={section.title} className="space-y-2">

@@ -24,15 +24,15 @@ export function DaftarProfile({ collaborator }: { collaborator: any }) {
                     </div>
                 </div>
                 <div className="mt-3 space-y-2 text-xs">
-                    <div className="flex justify-between">
+                    <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">Structure:</span>
                         <span>{collaborator.daftarDetails.structure}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">Location:</span>
                         <span>{collaborator.daftarDetails.location}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">Website:</span>
                         <Link
                             href={collaborator.daftarDetails.website}

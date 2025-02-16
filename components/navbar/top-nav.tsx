@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Play, FileText, Bell, ChevronRight, Folder, ChevronDown } from "lucide-react"
+import { Play, FileText, Bell, ChevronRight, Folder, ChevronDown, ArrowLeft } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { daftarsData } from "@/lib/dummy-data/daftars"
 import {
@@ -87,8 +87,10 @@ export function TopNav({ role }: { role: string }) {
 
   // Update the back button handler
   const handleBack = () => {
-    if (pathname.includes('/studio') && studioEntryPoint) {
-      router.push(studioEntryPoint)
+    if (pathname.includes('/founder/studio')) {
+      router.push('/founder/pitch')
+    } else if (pathname.includes('/investor/studio')) {
+      router.push('/investor/scout')
     } else {
       router.back()
     }
@@ -116,16 +118,24 @@ export function TopNav({ role }: { role: string }) {
 
         </div> */}
         <div className="flex items-center justify-start gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-[0.35rem]"
-            onClick={handleBack}
+          {(pathname.includes('/founder/studio') || 
+            pathname.includes('/investor/studio') || 
+            pathname.includes('/founder/pitch/') || 
+            pathname.includes('/investor/scout/')) && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className="mr-2 rounded-[0.35rem]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
+          <Link 
+            href={role === "founder" ? "/founder" : "/investor"}
+            className="text-sm font-medium"
           >
-            <ChevronRight className="h-4 w-4 rotate-180" />
-          </Button>
-          <Link href="/founder">
-            <p className="text-sm font-medium">Daftar OS</p>
+            Daftar OS
           </Link>
         </div>
 

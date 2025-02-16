@@ -24,7 +24,7 @@ export function StudioSidebar({ className, mode, programId }: StudioSidebarProps
 
   return (
     <div className={cn(" w-[15.5rem] border-r bg-[#0e0e0e]", className)}>
-      <div className="space-y-4 ">
+      <div className="space-y-4 mt-4 ">
         <div className="px-3">
           <div className="space-y-1">
             {navItems.map((item) => {

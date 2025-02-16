@@ -206,7 +206,7 @@ export function ProfileDialog({
     switch (activeTab) {
       case "account":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a]">
+          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a]">
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -346,7 +346,7 @@ export function ProfileDialog({
 
       case "support":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 We're in the process of setting up our ticket system, but for now, feel free to reach out to us at{" "}
@@ -364,8 +364,9 @@ export function ProfileDialog({
 
       case "feedback":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
-            <div className="space-y-6">
+          <div className="space-y-4">
+            {/* Input Card */}
+            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <div className="space-y-4">
                 <p className="text-sm">Are you happy with us?</p>
                 <div className="flex gap-3">
@@ -373,7 +374,6 @@ export function ProfileDialog({
                     variant="outline" 
                     size="lg"
                     className={cn(
-              
                       satisfied === true && "bg-muted"
                     )}
                     onClick={() => setSatisfied(true)}
@@ -384,7 +384,6 @@ export function ProfileDialog({
                     variant="outline" 
                     size="lg"
                     className={cn(
-                      
                       satisfied === false && "bg-muted"
                     )}
                     onClick={() => setSatisfied(false)}
@@ -392,46 +391,46 @@ export function ProfileDialog({
                     No
                   </Button>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Textarea
-                  placeholder="How can we make your experience better?"
-                  value={feedbackText}
-                  onChange={(e) => setFeedbackText(e.target.value)}
-                />
-              </div>
-
-              <Button 
-                disabled={satisfied === undefined || !feedbackText.trim()}
-                onClick={handleFeedbackSubmit}
-              >
-                Submit
-              </Button>
-
-              <div className="pt-6 border-t">
-                <h4 className="text-sm font-medium mb-4">History</h4>
-                <div className="space-y-4">
-                  {feedbackHistory.map((feedback) => (
-                    <div key={feedback.id} className="bg-muted/10 p-3 rounded-[0.35rem] space-y-2">
-                      <div className="flex justify-between items-center">
-                      <p className="text-sm">{feedback.message}</p>
-                      </div>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(feedback.createdAt)}
-                        </p>
-                    </div>
-                  ))}
+                <div className="space-y-2">
+                  <Textarea 
+                    placeholder="How can we make your experience better?"
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
+                  />
                 </div>
+                <Button 
+                  disabled={satisfied === undefined || !feedbackText.trim()}
+                  onClick={handleFeedbackSubmit}
+                >
+                  Submit
+                </Button>
               </div>
-            </div>
-          </Card>
+            </Card>
+
+            {/* History Card */}
+            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+              <h4 className="text-[14px] font-medium mb-4">History</h4>
+              <div className="space-y-4">
+                {feedbackHistory.map((feedback) => (
+                  <div key={feedback.id} className="py-3 rounded-[0.35rem] space-y-2">
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm">{feedback.message}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(feedback.createdAt)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
         )
 
       case "feature":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
-            <div className="space-y-6">
+          <div className="space-y-4">
+            {/* Input Card */}
+            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Input
@@ -441,44 +440,44 @@ export function ProfileDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Textarea
+                  <Textarea 
                     placeholder="What should we build next, and how will it help your journey?"
                     value={featureRequest}
                     onChange={(e) => setFeatureRequest(e.target.value)}
                   />
                 </div>
                 <Button 
-                  onClick={handleSubmitFeature} 
+                  onClick={handleSubmitFeature}
                   disabled={!featureRequest.trim() || !featureName.trim()}
                 >
                   Submit
                 </Button>
               </div>
+            </Card>
 
-              <div className="pt-6 border-t">
-                <h4 className="text-sm font-medium mb-4">History</h4>
-                <div className="space-y-4">
-                  {featureHistory.map((feature) => (
-                    <div key={feature.id} className="bg-muted/10 p-3 rounded-[0.35rem] space-y-2">
-                      <div className="flex justify-between items-center">
+            {/* History Card */}
+            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+              <h4 className="text-[14px] font-medium mb-4">History</h4>
+              <div className="space-y-4">
+                {featureHistory.map((feature) => (
+                  <div key={feature.id} className="py-3 rounded-[0.35rem] space-y-2">
+                    <div className="flex justify-between items-center">
                       <h5 className="text-sm font-medium">{feature.name}</h5>
-                      </div>
-
-                      <p className="text-sm text-muted-foreground">{feature.description}</p>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(feature.createdAt)}
-                        </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(feature.createdAt)}
+                    </span>
+                  </div>
+                ))}
               </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         )
 
       case "privacy":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-6">
               {privacySections.map((section) => (
                 <div key={section.title} className="space-y-2">
@@ -495,7 +494,7 @@ export function ProfileDialog({
 
       case "delete":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
               We're sad to say goodbye.This action can't be undone, and all your data will be permanently lost. 
@@ -512,7 +511,7 @@ export function ProfileDialog({
 
       case "logout":
         return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto  bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 Are you sure you want to logout?

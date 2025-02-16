@@ -41,7 +41,7 @@ export default function SchedulePage() {
   const isDateValid = !dateError && lastPitchDate && launchDate
 
   return (
-    <div className="container mx-auto px-10">
+    <div className="container mx-auto px-5 mt-4">
       <div className="grid grid-cols-3 gap-6">
         {/* Left Column - Date Inputs */}
         <div className="col-span-2">

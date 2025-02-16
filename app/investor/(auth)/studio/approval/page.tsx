@@ -126,7 +126,7 @@ export default function ApprovalPage() {
   const approvedCount = approvalRequests.filter(req => req.status === "approved").length
 
   return (
-    <div className="container mx-auto px-10">
+    <div className="container mx-auto px-5 mt-2">
       <div className="grid grid-cols-3 gap-6">
         {/* Left Column - Approval Section */}
         <div className="col-span-2">

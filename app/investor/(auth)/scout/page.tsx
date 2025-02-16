@@ -67,7 +67,7 @@ export default function ScoutPage() {
 
   if (!showContent) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen flex flex-col items-center  justify-center p-4">
         <div className="max-w-3xl w-full space-y-8 text-center">
           {/* Video Container */}
           <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
@@ -95,7 +95,7 @@ export default function ScoutPage() {
   }
 
   return (
-    <div className="space-y-6 px-20 container mx-auto">
+    <div className="space-y-6 px-20 mt-4 container mx-auto">
       <div className="flex items-center justify-end gap-2">
         <Button
           variant="outline"

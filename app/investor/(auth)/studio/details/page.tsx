@@ -48,7 +48,7 @@ export default function DetailsPage() {
   }
 
   return (
-    <Card className="border-none bg-[#0e0e0e]">
+    <Card className="border-none mt-4 container mx-auto px-3 bg-[#0e0e0e]">
       <CardContent className="">
         <div className="space-y-4">
           <div className="space-y-2">

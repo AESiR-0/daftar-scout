@@ -81,7 +81,7 @@ export default function CollaborationPage() {
   };
 
   return (
-    <div className="container px-10 mx-auto py-6">
+    <div className="container px-4 mt-4 mx-auto py-6">
       <div className="grid grid-cols-3 gap-6">
         {/* Left Column - Collaborators (2/3 width) */}
         <div className="col-span-2">

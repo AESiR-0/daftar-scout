@@ -238,7 +238,7 @@ export default function FounderPitchPage() {
   }
 
   return (
-    <Card className="border-none bg-[#0e0e0e]">
+    <Card className="border-none mt-4 container mx-auto px-4 bg-[#0e0e0e]">
       <CardContent className="pt-6">
 
         <div className="grid grid-cols-3 gap-8">
