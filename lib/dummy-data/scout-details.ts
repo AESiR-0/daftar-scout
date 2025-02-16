@@ -57,7 +57,7 @@ export const scoutDetailsData: ScoutDetails[] = [
                 location: "Dubai, UAE",
                 onDaftarSince: "2023-01-15",
                 bigPicture: "Building the future of startup ecosystem",
-                imageUrl: "/daftar-logo.png"
+                imageUrl: "https://github.com/shadcn.png"
             },
             {
                 name: "Nithin Kamath",
@@ -67,7 +67,7 @@ export const scoutDetailsData: ScoutDetails[] = [
                 location: "Bangalore, India",
                 onDaftarSince: "2023-03-20",
                 bigPicture: "Democratizing financial markets in India",
-                imageUrl: "/nithin-profile.png"
+                imageUrl: "https://github.com/shadcn.png"
             }
         ],
         description: "Early stage technology companies investment program focused on innovative solutions",
@@ -127,7 +127,7 @@ export const scoutDetailsData: ScoutDetails[] = [
                 location: "Malaysia",
                 onDaftarSince: "2023-02-15",
                 bigPicture: "Promoting Islamic finance through technology",
-                imageUrl: "/islamic-finance-initiative-logo.png"
+                imageUrl: "https://github.com/shadcn.png"
             },
             {
                 name: "GUSEC",
@@ -137,7 +137,7 @@ export const scoutDetailsData: ScoutDetails[] = [
                 location: "Malaysia",
                 onDaftarSince: "2023-03-01",
                 bigPicture: "Leading Islamic finance education",
-                imageUrl: "/guse-logo.png"
+                imageUrl: "https://github.com/shadcn.png"
             }
         ],
         description: "Supporting innovative financial technology solutions with Islamic finance principles",
@@ -193,7 +193,7 @@ export const scoutDetailsData: ScoutDetails[] = [
                 location: "Singapore",
                 onDaftarSince: "2023-01-01",
                 bigPicture: "Empowering women in tech entrepreneurship",
-                imageUrl: "/female-founders-alliance-logo.png"
+                imageUrl: "https://github.com/shadcn.png"
             },
             {
                 name: "IIMA",
@@ -203,7 +203,7 @@ export const scoutDetailsData: ScoutDetails[] = [
                 location: "Singapore",
                 onDaftarSince: "2023-02-15",
                 bigPicture: "Leading management education in Asia",
-                imageUrl: "/iima-logo.png"
+                imageUrl: "https://github.com/shadcn.png"
             }
         ],
         description: "Empowering women-led technology startups across Southeast Asia",

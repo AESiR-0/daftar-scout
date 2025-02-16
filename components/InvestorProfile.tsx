@@ -63,7 +63,7 @@ export function InvestorProfile({ investor }: InvestorProfileProps) {
                     <p className="text-xs mt-1">{investor.bigPicture}</p>
                 </div>
                 <br />
-                <div className="flex flex-col items-start ">
+                <div className="flex flex-col text-xs items-start ">
                     <p className="text-muted-foreground">On Daftar Since</p>
                     <p>{formatDate(investor.onDaftarSince)}</p>
                 </div>

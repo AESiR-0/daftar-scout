@@ -28,47 +28,47 @@ interface Meeting {
 const meetings: Meeting[] = [
   {
     id: "1",
-    title: "Q1 Investment Review",
+    title: "Startup Pitch Review",
     date: formatDate(new Date().toISOString()), // Today's date
     time: "10:00 AM",
     status: "Confirmed",
-    attendees: ["John Doe", "Sarah Smith"],
-    description: "Quarterly review of investment portfolio and strategy discussion",
+    attendees: ["John Doe", "Sarah Smith", "Tech Innovators Team"],
+    description: "Initial pitch review with the founding team",
     createdBy: "John Doe",
-    daftar: "Q1 Investment Review",
-    pitch: "Q1 Investment Review",
+    daftar: "Tech Innovators Scout",
+    pitch: "AI Healthcare Platform",
     location: "virtual",
-    agenda: "Quarterly review of investment portfolio and strategy discussion"
+    agenda: "1. Company Introduction\n2. Product Demo\n3. Market Analysis\n4. Q&A Session"
   },
   {
     id: "2",
-    title: "Program Strategy Discussion",
-    date: formatDate((new Date(Date.now() + 86400000).toISOString())),
+    title: "Due Diligence Meeting",
+    date: formatDate((new Date(Date.now() + 86400000).toISOString())), // Tomorrow
     time: "2:00 PM",
     status: "Pending",
-    attendees: ["Mike Johnson", "Emily Brown"],
-    description: "Strategic planning for upcoming investment programs",
+    attendees: ["Mike Johnson", "Emily Brown", "FinTech Solutions Team"],
+    description: "Detailed review of technical architecture and IP",
     createdBy: "Mike Johnson",
-    daftar: "Program Strategy Discussion",
-    pitch: "Program Strategy Discussion",
+    daftar: "FinTech Scout",
+    pitch: "Blockchain Payment Solution",
     location: "in-person",
-    locationAddress: "IIM Ahmedabad Incubation Center, Gate Building 5, Level 3",
-    agenda: "Strategic planning for upcoming investment programs"
+    locationAddress: "Innovation Hub, Dubai International Financial Centre, Level 3",
+    agenda: "1. Technical Architecture Review\n2. IP Portfolio Discussion\n3. Security Measures\n4. Compliance Framework"
   },
   {
     id: "3",
-    title: "Startup Pitch Meeting",
+    title: "Investment Committee Review",
     date: formatDate(new Date().toISOString()),
     time: "3:30 PM",
     status: "Confirmed",
-    attendees: ["Hassan Ahmed", "Fatima Al-Sayed", "Omar Khan"],
-    description: "Initial pitch presentation for tech startup",
+    attendees: ["Hassan Ahmed", "Fatima Al-Sayed", "Investment Committee"],
+    description: "Final investment committee review for funding decision",
     createdBy: "Hassan Ahmed",
-    daftar: "Tech Innovations",
-    pitch: "AI Healthcare Solution",
+    daftar: "Healthcare Scout",
+    pitch: "Digital Health Platform",
     location: "in-person",
-    locationAddress: "Innovation Hub, Vastrapur, Ahmedabad, Gujarat 380015",
-    agenda: "1. Company Introduction\n2. Product Demo\n3. Market Analysis\n4. Q&A Session"
+    locationAddress: "Investment Office, Downtown Dubai, Floor 15",
+    agenda: "1. Investment Thesis\n2. Market Opportunity\n3. Risk Assessment\n4. Terms Discussion"
   }
 ]
 

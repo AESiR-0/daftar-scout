@@ -107,7 +107,7 @@ const scouttatus = {
       title: "Green Energy Initiative",
       postedby: "John Doe",
       status: "Planning",
-      scheduledDate: "2024-04-15"
+      scheduledDate: "2024-04-15 10:00 AM"
     },
     {
       title: "Healthcare Tech Fund",
@@ -120,7 +120,7 @@ const scouttatus = {
       title: "AI Ventures",
       postedby: "John Doe",
       status: "Scheduled",
-      scheduledDate: "2024-04-20"
+      scheduledDate: "2024-04-20 10:00 AM"
     },
   ],
   open: [
@@ -232,14 +232,25 @@ export default function ProgramDetailsPage() {
           </div>
 
           {/* Updated message section */}
-          <div className="text-center flex-col text-xl text-muted-foreground flex items-start justify-start gap-3 h-96">
-            <div className="text-2xl font-bold">The Scout is not live</div>
-            {scheduledDate && (
-              <div className="text-sm text-muted-foreground">
-                <p>Scheduled Date: {formatDate(scheduledDate)}</p>
+          {scoutStatus === 'Planning' ? (
+            <div className="text-center flex-col text-xl text-muted-foreground flex items-start justify-start h-96">
+              <div className="text-lg font-bold">Click on the Studio to continue building your Scout.</div>
+            </div>
+          ) : scoutStatus === 'Scheduled' ? (
+            <div className="text-center flex-col text-xl text-muted-foreground flex items-start justify-start h-96">
+              <div className="text-lg font-bold">The Scout is not live</div>
+              <div className="text-xs text-muted-foreground">
+                <p>Scheduled Date: {scheduledDate ? new Date(scheduledDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                  hour12: true
+                }) : 'N/A'}</p>
               </div>
-            )}
-          </div>
+            </div>
+          ) : null}
         </div>
       )
     }

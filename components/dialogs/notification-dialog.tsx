@@ -150,7 +150,8 @@ export function NotificationDialog({
     updates: notifications.filter(n => n.type === "updates").length,
     alerts: notifications.filter(n => n.type === "alerts").length,
     news: notifications.filter(n => n.type === "news").length,
-    "scout-requests": scoutRequests.length
+    "scout-requests": scoutRequests.length,
+    "scout-links": links.length
   }
 
   const handleAction = (requestId: string, action: "accepted" | "declined") => {

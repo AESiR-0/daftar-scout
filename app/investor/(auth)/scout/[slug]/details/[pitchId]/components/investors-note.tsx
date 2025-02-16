@@ -35,7 +35,6 @@ export function InvestorsNote({ note }: InvestorsNoteProps) {
       </CardHeader>
       <CardContent>
         <div className="border rounded-md">
-          <MenuBar editor={editor} />
           <EditorContent editor={editor} className="w-full" />
         </div>
       </CardContent>

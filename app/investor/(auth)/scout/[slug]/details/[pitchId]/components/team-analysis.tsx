@@ -131,13 +131,20 @@ export function TeamAnalysisSection({
                                 <div className="space-y-2">
                                     <Label>Your Analysis</Label>
                                     <div className="border rounded-md">
-                                        <MenuBar editor={editor} />
                                         <EditorContent editor={editor} className="w-full" />
                                     </div>
                                 </div>
                             </div>
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={!belief || editor?.isEmpty || isSubmitting}
+                                className="w-full bg-blue-600 hover:bg-blue-700"
+                            >
+                                Submit Analysis
+                            </Button>
                         </CardContent>
                     </Card>
+
                 </div>
 
                 {/* Right side - Team's Analysis */}
@@ -147,7 +154,7 @@ export function TeamAnalysisSection({
                             <p className="text-sm text-blue-500 mb-4">
                                 Believers {believersCount} out of {totalAnalysts}
                             </p>
-                            
+
                             {!hasSubmitted ? (
                                 <div className="flex items-center justify-center h-[400px] text-sm text-muted-foreground">
                                     Submit your analysis to see team's feedback
@@ -164,18 +171,17 @@ export function TeamAnalysisSection({
                                                             role={analysis.analyst.role}
                                                             className="text-sm font-medium"
                                                         />
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs text-muted-foreground">
-                                                                {formatDate(analysis.date)}
-                                                            </span>
-                                                            <span className="text-xs text-muted-foreground">•</span>
-                                                            <span className="text-xs text-muted-foreground">
+                                                        <div className="">
+                                                            <p className="text-xs text-muted-foreground">
                                                                 {analysis.analyst.daftarName}
-                                                            </span>
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                {formatDate(analysis.date)}
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                    <Badge variant={analysis.belief === 'yes' ? 'default' : 'destructive'}>
-                                                        {analysis.belief === 'yes' ? 'Believer' : 'Not convinced'}
+                                                    <Badge variant={analysis.belief === 'yes' ? 'default' : 'default'}>
+                                                        {analysis.belief === 'yes' ? 'Believer' : 'Non Believer'}
                                                     </Badge>
                                                 </div>
                                                 <div
@@ -191,14 +197,6 @@ export function TeamAnalysisSection({
                     </Card>
                 </div>
             </div>
-            
-            <Button
-                onClick={handleSubmit}
-                disabled={!belief || editor?.isEmpty || isSubmitting}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-                Submit Analysis
-            </Button>
         </div>
     )
 } 

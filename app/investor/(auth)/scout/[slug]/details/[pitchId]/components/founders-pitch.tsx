@@ -58,17 +58,41 @@ interface FoundersPitchSectionProps {
     onScheduleMeeting: () => void
 }
 
-const defaultQuestions = [
-    { id: 1, question: "Introduce yourself" },
-    { id: 2, question: "How did you come up with the idea" },
-    { id: 3, question: "What is the problem are you solving, and why is it really important for you to solve it" },
-    { id: 4, question: "Who are your customers, and why would they pay for it" },
-    { id: 5, question: "How much have you worked on your startup, and where do you see it in 3 years" },
-    { id: 6, question: "What challenges are you facing, and what support do you need" },
+const questions = [
+  {
+    id: 1,
+    question: "Introduce yourself.",
+    answer: ""
+  },
+  {
+    id: 2,
+    question: "How did you come up with the idea?",
+    answer: ""
+  },
+  {
+    id: 3,
+    question: "What is the problem, and why is it so important for you to solve it?",
+    answer: ""
+  },
+  {
+    id: 4,
+    question: "Who are your customers, and why would they pay for it?",
+    answer: ""
+  },
+  {
+    id: 5,
+    question: "What is the progress so far, and where do you see it in 3 years?",
+    answer: ""
+  },
+  {
+    id: 6,
+    question: "What are the challenges today and what support do you want?",
+    answer: ""
+  }
 ]
 
 export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitchSectionProps) {
-    const [selectedQuestion, setSelectedQuestion] = useState(defaultQuestions[0])
+    const [selectedQuestion, setSelectedQuestion] = useState(questions[0])
     const [showReportDialog, setShowReportDialog] = useState(false)
     const [selectedReasons, setSelectedReasons] = useState<string[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -81,7 +105,6 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                 : [...prev, reasonId]
         )
     }
-    const [language, setLanguage] = useState("English")
 
     const handleReport = async () => {
         if (selectedReasons.length === 0) return
@@ -150,24 +173,14 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                     <p className="text-sm text-muted-foreground">No video available</p>
                                 </div>
                             )}
-                            <Combobox
-                                placeholder="Select video's language"
-                                value={language}
-                                options={[
-                                    "English",
-                                    "Spanish",
-                                    "French",
-                                    "German",
-                                    "Italian",
-                                    "Portuguese",
-                                ]}
-                                onSelect={(value) => setLanguage(value)}
-                            />
+                            <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground">Language: English</p>
+                            </div>
                         </div>
                         <div className="w-1/2">
                             <ScrollArea className="h-[calc(100vh-16rem)]">
                                 <div className="space-y-4 pr-4">
-                                    {defaultQuestions.map((item) => (
+                                    {questions.map((item) => (
                                         <div
                                             key={item.id}
                                             className={cn(

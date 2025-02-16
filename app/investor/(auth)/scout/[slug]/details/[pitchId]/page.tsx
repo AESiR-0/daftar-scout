@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { ReportDialog } from "@/components/dialogs/report-dialog";
 import { ScheduleMeetingDialog } from "@/components/dialogs/schedule-meeting-dialog";
 import { InvestorsNote } from "./components/investors-note";
-import { DocumentsSection } from "./components/documents-section";
+import DocumentsSection from "./components/documents-section";
 import { FoundersPitchSection } from "./components/founders-pitch";
 import { TeamAnalysisSection } from "./components/team-analysis";
 import MeetingsPage from "@/app/founder/(auth)/studio/meetings/page";
@@ -74,7 +74,8 @@ interface Profile {
 }
 
 interface TeamMemberDetails {
-  name: string;
+  firstName: string;
+  lastName: string;
   age: string;
   email: string;
   phone: string;
@@ -83,6 +84,20 @@ interface TeamMemberDetails {
   language: string[];
   imageUrl?: string;
   designation: string;
+}
+
+interface TeamMember {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  location: string
+  imageUrl?: string
+  designation: string
+  language: string[]
+  age: string
+  gender: string
 }
 
 interface PitchDetails {
@@ -134,13 +149,67 @@ interface PitchDetails {
 
 const sections = [
   { id: "founders-pitch", label: "Founder's Pitch" },
-  { id: "team-size", label: "Team Size" },
-  { id: "team-analysis", label: "Team's Analysis" },
-  { id: "investors-note", label: "Investor's Note" },
+  { id: "founders-team", label: "Founder's Team" },
+  { id: "investors-analysis", label: "Investor's Analysis" },
+  // { id: "investors-note", label: "Investor's Note" },
   { id: "documents", label: "Documents" },
-  { id: "meetings", label: "Meetings" },
   { id: "make-offer", label: "Make an Offer" },
 ] as const;
+
+const formatPhoneNumber = (phone: string) => {
+  // Match country code (anything from start until last 10 digits)
+  const match = phone.match(/^(.+?)(\d{10})$/)
+  if (match) {
+    return `${match[1]} ${match[2]}`
+  }
+  return phone
+}
+const getInitials = (name: string) => {
+  const [firstName, lastName] = name.split(' ')
+  return firstName?.[0] + (lastName?.[0] || '')
+}
+const MemberCard = ({ member }: { member: TeamMember }) => (
+  <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
+    <div className="flex justify-between items-start">
+      <div className="flex gap-4">
+        <Avatar className="h-48 w-48 rounded-[0.35rem]">
+          {member.imageUrl ? (
+            <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
+          ) : (
+            <AvatarFallback className="rounded-[0.35rem] text-xl">{getInitials(member.firstName)}</AvatarFallback>
+          )}
+        </Avatar>
+        <div>
+          <div className="flex items-center gap-2">
+            <h4 className="text-xl font-medium">{member.firstName} {member.lastName}</h4>
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">{member.designation}</p>
+
+          <div className="space-y-2 mt-2">
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span>{member.age}</span>
+                <span>{member.gender}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <p>{member.email}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <p>{formatPhoneNumber(member.phone)}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <p>{member.location}</p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Preferred languages to connect with investors: {member.language.join(', ')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)
 
 /** ------------- Main Component -------------- **/
 export default function PitchDetailsPage() {
@@ -155,25 +224,27 @@ export default function PitchDetailsPage() {
     status: "In Review",
     teamMembers: [
       {
-        name: "Alex Johnson",
+        firstName: "Alex",
+        lastName: "Johnson",
         age: "25",
         email: "alex@example.com",
         phone: "1234567890",
         gender: "Male",
         location: "New York, NY",
         language: ["English", "Hindi"],
-        imageUrl: "https://example.com/alex.jpg",
+        imageUrl: "https://github.com/shadcn.png",
         designation: "Chief Technology Officer"
       },
       {
-        name: "Emily Smith",
+        firstName: "Emily",
+        lastName: "Smith",
         age: "28",
         email: "emily@example.com",
         phone: "9876543210",
         gender: "Female",
         location: "San Francisco, CA",
         language: ["English", "Spanish"],
-        imageUrl: "https://example.com/emily.jpg",
+        imageUrl: "https://github.com/shadcn.png",
         designation: "Product Manager"
       }
     ],
@@ -480,7 +551,7 @@ export default function PitchDetailsPage() {
             <DocumentsSection
             />
           )}
-          {activeSection === "team-size" && (
+          {activeSection === "founders-team" && (
             <div className="space-y-6">
               <Card className="border-none bg-[#0e0e0e]">
                 <CardHeader>
@@ -488,48 +559,22 @@ export default function PitchDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {pitchDetails.teamMembers.map((member) => (
-                      <div key={member.email} className="p-4 border rounded-lg space-y-4">
-                        <div className="flex items-start gap-4">
-                          <Avatar className="h-12 w-12 text-xl">
-                            {member.imageUrl ? (
-                              <AvatarImage src={member.imageUrl} alt={member.name} />
-                            ) : (
-                              <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-                            )}
-                          </Avatar>
-                          <div className="flex-1 space-y-1">
-                            <h4 className="text-lg font-medium">{member.name}</h4>
-                            <p className="text-sm text-blue-500">{member.designation}</p>
-                            <div className="flex gap-4 text-sm text-muted-foreground">
-                              <span>{member.age} years</span>
-                              <span>{member.gender}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <p className="text-muted-foreground">Contact</p>
-                            <p>{member.email}</p>
-                            <p>{member.phone}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Location</p>
-                            <p>{member.location}</p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Preferred Languages
-                          </p>
-                          <p className="text-sm">
-                            {formatLanguages(member.language)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                    {pitchDetails.teamMembers.map((member) => {
+                      const transformedMember: TeamMember = {
+                        id: member.firstName,
+                        firstName: member.firstName,
+                        lastName: member.lastName,
+                        email: member.email,
+                        phone: member.phone,
+                        location: member.location,
+                        imageUrl: member.imageUrl,
+                        designation: member.designation,
+                        language: member.language,
+                        age: member.age,
+                        gender: member.gender
+                      }
+                      return <MemberCard key={member.firstName} member={transformedMember} />
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -544,7 +589,7 @@ export default function PitchDetailsPage() {
               onScheduleMeeting={() => setScheduleMeetingOpen(true)}
             />
           )}
-          {activeSection === "team-analysis" && (
+          {activeSection === "investors-analysis" && (
             <TeamAnalysisSection
               teamAnalysis={pitchDetails.sections.teamAnalysis}
               currentProfile={currentProfile}

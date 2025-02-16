@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-
+import { InvestorProfile } from "@/components/InvestorProfile";
 type CollaborationStatus = "Pending" | "Accepted" | "Declined";
 
 interface Collaborator {
@@ -129,11 +129,15 @@ export default function CollaborationPage() {
                     className="flex items-center justify-between p-4 border rounded-lg bg-background"
                   >
                     <div>
-                      <DaftarProfile
-                        collaborator={{
+                      <InvestorProfile
+                        investor={{
                           daftarName: collaborator.daftarName,
-                          daftarDetails: collaborator.daftarDetails,
-                          addedAt: collaborator.addedAt
+                          structure: collaborator.daftarDetails.structure,
+                          website: collaborator.daftarDetails.website,
+                          location: collaborator.daftarDetails.location,
+                          bigPicture: collaborator.daftarDetails.bigPicture,
+                          onDaftarSince: collaborator.addedAt,
+                          imageUrl: "https://github.com/shadcn.png"
                         }}
                       />
                       <p className="text-xs text-muted-foreground">

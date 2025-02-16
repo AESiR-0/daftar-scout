@@ -28,47 +28,47 @@ interface Meeting {
 const meetings: Meeting[] = [
   {
     id: "1",
-    title: "Q1 Investment Review",
+    title: "Investor Pitch Meeting",
     date: formatDate(new Date().toISOString()), // Today's date
     time: "10:00 AM",
     status: "Confirmed",
-    attendees: ["John Doe", "Sarah Smith"],
-    description: "Quarterly review of investment portfolio and strategy discussion",
+    attendees: ["John Doe (Investor)", "Sarah Smith (Investment Analyst)", "Your Team"],
+    description: "Initial pitch presentation to potential investors",
     createdBy: "John Doe",
-    daftar: "Q1 Investment Review",
-    pitch: "Q1 Investment Review",
+    daftar: "Tech Innovators",
+    pitch: "AI Healthcare Platform",
     location: "virtual",
-    agenda: "Quarterly review of investment portfolio and strategy discussion"
+    agenda: "1. Company Overview\n2. Product Demo\n3. Business Model\n4. Funding Requirements\n5. Q&A Session"
   },
   {
     id: "2",
-    title: "Program Strategy Discussion",
-    date: formatDate((new Date(Date.now() + 86400000).toISOString())),
+    title: "Due Diligence Discussion",
+    date: formatDate((new Date(Date.now() + 86400000).toISOString())), // Tomorrow
     time: "2:00 PM",
     status: "Pending",
-    attendees: ["Mike Johnson", "Emily Brown"],
-    description: "Strategic planning for upcoming investment programs",
+    attendees: ["Mike Johnson (VC Partner)", "Emily Brown (Technical Advisor)", "Your Team"],
+    description: "Technical and business due diligence meeting",
     createdBy: "Mike Johnson",
-    daftar: "Program Strategy Discussion",
-    pitch: "Program Strategy Discussion",
+    daftar: "FinTech Solutions",
+    pitch: "Digital Payment Platform",
     location: "in-person",
-    locationAddress: "IIM Ahmedabad Incubation Center, Gate Building 5, Level 3",
-    agenda: "Strategic planning for upcoming investment programs"
+    locationAddress: "Dubai Technology Entrepreneur Campus, Silicon Oasis",
+    agenda: "1. Technology Stack Review\n2. Market Strategy\n3. Financial Projections\n4. Team Structure"
   },
   {
     id: "3",
-    title: "Startup Pitch Meeting",
+    title: "Follow-up Investment Meeting",
     date: formatDate(new Date().toISOString()),
     time: "3:30 PM",
     status: "Confirmed",
-    attendees: ["Hassan Ahmed", "Fatima Al-Sayed", "Omar Khan"],
-    description: "Initial pitch presentation for tech startup",
+    attendees: ["Hassan Ahmed (Lead Investor)", "Fatima Al-Sayed (Partner)", "Investment Team"],
+    description: "Follow-up discussion on investment terms",
     createdBy: "Hassan Ahmed",
-    daftar: "Tech Innovations",
-    pitch: "AI Healthcare Solution",
+    daftar: "Healthcare Innovation",
+    pitch: "Digital Health Platform",
     location: "in-person",
-    locationAddress: "Innovation Hub, Vastrapur, Ahmedabad, Gujarat 380015",
-    agenda: "1. Company Introduction\n2. Product Demo\n3. Market Analysis\n4. Q&A Session"
+    locationAddress: "DIFC Innovation Hub, Gate Avenue, Level 1",
+    agenda: "1. Valuation Discussion\n2. Term Sheet Review\n3. Growth Strategy\n4. Next Steps"
   }
 ]
 
