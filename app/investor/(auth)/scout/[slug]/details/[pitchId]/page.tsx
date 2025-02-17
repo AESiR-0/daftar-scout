@@ -151,7 +151,7 @@ const sections = [
   { id: "founders-pitch", label: "Founder's Pitch" },
   { id: "founders-team", label: "Founder's Team" },
   { id: "investors-analysis", label: "Investor's Analysis" },
-  // { id: "investors-note", label: "Investor's Note" },
+  { id: "investors-note", label: "Investor's Note" },
   { id: "documents", label: "Documents" },
   { id: "make-offer", label: "Make an Offer" },
 ] as const;
@@ -508,39 +508,48 @@ export default function PitchDetailsPage() {
 
   return (
     <ScrollArea className="h-[calc(100vh-6rem)]">
-      <div className="max-w-6xl mx-auto px-6">
-        {/* Navigation */}
-        <div className="flex justify-between items-center border-b border-border py-5">
-          <div className="flex gap-2">
-            {sections.map((section) => (
-              <Button
-                key={section.id}
-                variant="ghost"
-                className={cn(
-                  "text-sm font-medium",
-                  activeSection === section.id && "bg-[#1f1f1f]"
-                )}
-                onClick={() => setActiveSection(section.id)}
-              >
-                {section.label}
-              </Button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setReportDialogOpen(true)}
+      {/* Navigation */}
+      <div className="flex justify-between items-center border-b border-border py-2 px-4">
+        <div className="flex gap-1">
+          {sections.map((section) => (
+            <button
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
+              className={cn(
+                "relative px-3 py-2 text-sm transition-colors",
+                activeSection === section.id
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+                "group"
+              )}
             >
-              <Flag className="h-4 w-4 " />
-            </Button>
-
-          </div>
-          <ReportDialog
-            open={reportDialogOpen}
-            onOpenChange={setReportDialogOpen}
-          />
+              {section.label}
+              <span 
+                className={cn(
+                  "absolute inset-x-0 -bottom-[10px] h-[2px] transition-opacity",
+                  activeSection === section.id 
+                    ? "bg-foreground opacity-100"
+                    : "bg-foreground opacity-0 group-hover:opacity-100"
+                )} 
+              />
+            </button>
+          ))}
         </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setReportDialogOpen(true)}
+          >
+            Report
+          </Button>
+        </div>
+        <ReportDialog
+          open={reportDialogOpen}
+          onOpenChange={setReportDialogOpen}
+        />
+      </div>
+      <div className="max-w-6xl mx-auto px-6">
 
         {/* Content */}
         <div className="space-y-6">

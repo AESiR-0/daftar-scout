@@ -64,7 +64,6 @@ export function StudioNav({ className, mode, programId }: StudioNavProps) {
                   href={href}
                   className={cn(
                     "relative px-3 py-2 text-sm rounded-md transition-colors",
-                    "hover:bg-accent/50",
                     pathname === item.url
                       ? "text-foreground"
                       : "text-muted-foreground hover:text-foreground",

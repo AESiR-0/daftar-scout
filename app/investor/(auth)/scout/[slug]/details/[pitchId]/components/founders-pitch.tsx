@@ -158,7 +158,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
         <Card className="w-full border-none my-5 p-0 bg-[#0e0e0e]">
             <CardContent className="border-none">
                 <div className="flex flex-col justify-center">
-                    <div className="flex  gap-10">
+                    <div className="flex h-fit gap-10">
                         <div className="w-1/2">
                             {selectedVideo ? (
                                 <div className="space-y-4">
@@ -173,21 +173,21 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                     <p className="text-sm text-muted-foreground">No video available</p>
                                 </div>
                             )}
-                            <div className="space-y-2">
+                            <div className="mt-2">
                                 <p className="text-sm text-muted-foreground">Language: English</p>
                             </div>
                         </div>
                         <div className="w-1/2">
-                            <ScrollArea className="h-[calc(100vh-16rem)]">
+                            <ScrollArea className="h-[calc(100vh-24rem)]">
                                 <div className="space-y-4 pr-4">
                                     {questions.map((item) => (
                                         <div
                                             key={item.id}
                                             className={cn(
-                                                "p-4 rounded-[0.35rem] cursor-pointer transition-colors",
+                                                "px-4 rounded-[0.35rem] cursor-pointer transition-colors",
                                                 selectedQuestion.id === item.id
-                                                    ? "bg-muted/50"
-                                                    : "bg-muted/50 hover:bg-muted/70"
+                                                    ? "underline"
+                                                    : "hover:underline"
                                             )}
                                             onClick={() => setSelectedQuestion(item)}
                                         >
@@ -198,7 +198,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                             </ScrollArea>
                         </div>
                     </div>
-                    <div className="space-y-8">
+                    <div className="">
                         {/* Founder Details Grid */}
                         <div className="grid grid-cols-1 bg-[#1f1f1f] gap-3 py-3 px-5">
                             <div className=" flex  items-center gap-2 rounded-[0.35rem]">
@@ -229,7 +229,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                         </div>
 
                         {/* Founder's Ask */}
-                        <div className="flex flex-col">
+                        <div className="flex flex-col mt-4">
                             <h3 className="text-md pl-4  text-foreground">Founder's Ask</h3>
                             <div className="  rounded-[0.35rem] p-4">
                                 <p className="text-sm text-muted-foreground">

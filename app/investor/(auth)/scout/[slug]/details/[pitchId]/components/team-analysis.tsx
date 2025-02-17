@@ -109,7 +109,7 @@ export function TeamAnalysisSection({
                         <CardContent className="space-y-6 pt-6">
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label>Do you believe in this startup?</Label>
+                                    <Label>Should we meet the startup?</Label>
                                     <div className="flex gap-2">
                                         <Button
                                             variant={belief === 'yes' ? 'default' : 'outline'}
