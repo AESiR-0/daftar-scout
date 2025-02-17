@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { useState } from "react"
 import { InsightsDialog } from "@/components/dialogs/insights-dialog"
-import { Calendar } from "lucide-react"
 import MeetingsPage from "@/app/founder/(auth)/meetings/page"
+import { CreateScoutDialog } from "@/components/dialogs/create-scout-dialog"
+import { useToast } from "@/hooks/use-toast"
 
 const scouttatus = {
   planning: [
@@ -54,8 +55,11 @@ export default function ScoutPage() {
   const [insightsOpen, setInsightsOpen] = useState(false)
   const [showMeetings, setShowMeetings] = useState(false)
   const [showContent, setShowContent] = useState(false)
+  const [createScoutOpen, setCreateScoutOpen] = useState(false)
+  const [scoutStatus, setScoutStatus] = useState(scouttatus)
+  const { toast } = useToast()
 
-  const filteredscout = Object.entries(scouttatus).reduce((acc, [key, scout]) => {
+  const filteredscout = Object.entries(scoutStatus).reduce((acc, [key, scout]) => {
     const filtered = scout.filter(program => {
       const matchesSearch = program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         program.postedby.toLowerCase().includes(searchQuery.toLowerCase())
@@ -64,6 +68,25 @@ export default function ScoutPage() {
     })
     return { ...acc, [key]: filtered }
   }, {} as typeof scouttatus)
+
+  const handleScoutCreate = (scoutName: string) => {
+    setScoutStatus(prev => ({
+      ...prev,
+      planning: [
+        {
+          title: scoutName,
+          postedby: "You",
+          status: "Planning",
+        },
+        ...prev.planning,
+      ]
+    }))
+
+    toast({
+      title: "Scout Created",
+      description: "New scout has been added to planning",
+    })
+  }
 
   if (!showContent) {
     return (
@@ -105,14 +128,13 @@ export default function ScoutPage() {
           Meetings
         </Button>
         
-        <Link href="/investor/studio">
-          <Button
-            variant="outline"
-            className="h-9"
-          >
-            New Scout
-          </Button>
-        </Link>
+        <Button
+          variant="outline"
+          className="h-9"
+          onClick={() => setCreateScoutOpen(true)}
+        >
+          New Scout
+        </Button>
       </div>
 
       {showMeetings ? (
@@ -162,6 +184,12 @@ export default function ScoutPage() {
       <InsightsDialog
         open={insightsOpen}
         onOpenChange={setInsightsOpen}
+      />
+
+      <CreateScoutDialog 
+        open={createScoutOpen}
+        onOpenChange={setCreateScoutOpen}
+        onScoutCreate={handleScoutCreate}
       />
     </div>
   )
