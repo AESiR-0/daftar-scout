@@ -11,10 +11,52 @@ import { uploadVideo } from "@/lib/actions/video";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
 
+// Add this type definition at the top of the file
+type Question = {
+    id: number;
+    question: string;
+    videoUrl: string;
+};
+
+// Update the dummy data to use the questions from founders-pitch.tsx
+const questionsWithVideos: Question[] = [
+    {
+        id: 1,
+        question: "Introduce yourself.",
+        videoUrl: ""
+    },
+    {
+        id: 2,
+        question: "How did you come up with the idea?",
+        videoUrl: ""
+    },
+    {
+        id: 3,
+        question: "What is the problem, and why is it so important for you to solve it?",
+        videoUrl: ""
+    },
+    {
+        id: 4,
+        question: "Who are your customers, and why would they pay for it?",
+        videoUrl: ""
+    },
+    {
+        id: 5,
+        question: "What is the progress so far, and where do you see it in 3 years?",
+        videoUrl: ""
+    },
+    {
+        id: 6,
+        question: "What are the challenges today and what support do you want?",
+        videoUrl: ""
+    }
+];
+
 export default function InvestorQuestionsPage() {
-    const [questionId, setQuestionId] = useState(questions[0]?.id);
+    // Update the state to use the first question's data
+    const [selectedQuestion, setSelectedQuestion] = useState<Question>(questionsWithVideos[0]);
     const [language, setLanguage] = useState("English");
-    const [previewUrl, setPreviewUrl] = useState<string>("");
+    const [previewUrl, setPreviewUrl] = useState<string>(questionsWithVideos[0].videoUrl);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const path = usePathname();
     const mode = path.includes('edit') ? 'edit' : 'create';
@@ -57,6 +99,12 @@ export default function InvestorQuestionsPage() {
         }
     };
 
+    // Add this function to handle question selection
+    const handleQuestionSelect = (question: Question) => {
+        setSelectedQuestion(question);
+        setPreviewUrl(question.videoUrl);
+    };
+
     return (
         <Card className="w-full border-none mt-10 px-4 bg-[#0e0e0e] container mx-auto">
             <CardContent className="border-none">
@@ -82,7 +130,7 @@ export default function InvestorQuestionsPage() {
                                             </Button>
                                             <Button
                                                 variant="outline"
-                                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleUploadVideo(e, questionId)}
+                                                onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleUploadVideo(e, selectedQuestion.id)}
                                                 className="w-full"
                                             >
                                                 <Upload className="h-4 w-4 mr-2" />
@@ -114,7 +162,7 @@ export default function InvestorQuestionsPage() {
                                     accept="video/*"
                                     className="hidden"
                                     ref={fileInputRef}
-                                    onChange={(e) => handleFileChange(e, questionId)}
+                                    onChange={(e) => handleFileChange(e, selectedQuestion.id)}
                                 />
                                 <div className="mt-5">
                                     <Combobox
@@ -140,12 +188,19 @@ export default function InvestorQuestionsPage() {
                     <div className="w-1/2">
                         <ScrollArea className="h-[calc(100vh-16rem)]">
                             <div className="space-y-4 pr-4">
-                                {questions.map((item) => (
+                                {questionsWithVideos.map((item) => (
                                     <div
                                         key={item.id}
-                                        className=""
+                                        onClick={() => handleQuestionSelect(item)}
+                                        className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                                            selectedQuestion.id === item.id 
+                                                ? 'bg-blue-500/10 border border-blue-500/20' 
+                                                : 'hover:bg-gray-800/50'
+                                        }`}
                                     >
-                                        <h3 className="text-sm font-medium">{item.id}. {item.question}</h3>
+                                        <h3 className="text-sm font-medium">
+                                            {item.id}. {item.question}
+                                        </h3>
                                     </div>
                                 ))}
                             </div>
