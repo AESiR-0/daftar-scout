@@ -93,7 +93,7 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
 
 
   // Format scout name for display
-  const scoutName = scoutSlug?.split('-').map(word =>
+  const scoutName = scoutSlug === undefined ? "Test" : scoutSlug.split('-').map(word =>
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 
@@ -118,7 +118,7 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
               </Link>
             </div>
           </div>
-          
+
           {/* Empty flex space */}
           <div className="flex-1" />
         </div>

@@ -170,12 +170,12 @@ export default function ScoutPage() {
               <div className="space-y-5">
                 {scouts.map((scout: any) => (
                   <Link
-                    key={program.title}
-                    href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}${program.status === "Planning"
-                        ? "/planning"
-                        : program.status === "Scheduled"
-                          ? "/scheduled"
-                          : ""
+                    key={scout.title}
+                    href={`/investor/scout/${scout.title.toLowerCase().replace(/ /g, '-')}${scout.status === "Planning"
+                      ? "/planning"
+                      : scout.status === "Scheduled"
+                        ? "/scheduled"
+                        : ""
                       }`}
                   >
                     <div className="p-4 m-2 rounded-[0.35rem] hover:border-muted-foreground hover:border bg-background transition-colors">
