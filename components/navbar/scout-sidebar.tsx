@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronDown, ChevronRight, Share2 } from "lucide-react"
@@ -10,6 +10,7 @@ import { EndScoutingDialog } from "../dialogs/end-scouting-dialog"
 import { UpdatesDialog } from "../dialogs/updates-dialog"
 import { LaunchProgramDialog } from "../dialogs/launch-program-dialog"
 import { InsightsDialog } from "../dialogs/insights-dialog"
+import { usePathname } from "next/navigation"
 
 interface Pitch {
   id: string
@@ -74,7 +75,13 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
   const [updatesOpen, setUpdatesOpen] = useState(false)
   const [launchProgramOpen, setLaunchProgramOpen] = useState(false)
   const [insightsOpen, setInsightsOpen] = useState(false)
-
+  const [isShowScroll, setIsShowScroll] = useState(true)
+  const pathname = usePathname()
+  useEffect(() => {
+    if (pathname.includes("planning") || pathname.includes("scheduled")) {
+      setIsShowScroll(false)
+    }
+  }, [pathname])
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev =>
       prev.includes(sectionId)
@@ -82,6 +89,8 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
         : [...prev, sectionId]
     )
   }
+
+
 
   // Format scout name for display
   const scoutName = scoutSlug?.split('-').map(word =>
@@ -118,7 +127,7 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
         </div>
 
         {/* Scrollable Sections */}
-        <ScrollArea className="flex-1">
+        {isShowScroll && <ScrollArea className="flex-1">
           <div className="space-y-2">
             {sections.map((section) => (
               <div key={section.id}>
@@ -160,7 +169,7 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
               </div>
             ))}
           </div>
-        </ScrollArea>
+        </ScrollArea>}
 
         {/* Action Buttons */}
         <div className="px-4 py-2 border-t">

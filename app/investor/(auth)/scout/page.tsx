@@ -75,7 +75,7 @@ export default function ScoutPage() {
       planning: [
         {
           title: scoutName,
-          postedby: "NA", 
+          postedby: "NA",
           status: "Planning",
         },
         ...prev.planning,
@@ -87,6 +87,7 @@ export default function ScoutPage() {
       description: "New scout has been added to planning",
     })
   }
+
 
   if (!showContent) {
     return (
@@ -127,7 +128,7 @@ export default function ScoutPage() {
         >
           Meetings
         </Button>
-        
+
         <Button
           variant="outline"
           className="h-9"
@@ -159,7 +160,12 @@ export default function ScoutPage() {
                 {scout.map((program) => (
                   <Link
                     key={program.title}
-                    href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}`}
+                    href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}${program.status === "Planning"
+                        ? "/planning"
+                        : program.status === "Scheduled"
+                          ? "/scheduled"
+                          : ""
+                      }`}
                   >
                     <div className="p-4 m-2 rounded-[0.35rem] hover:border-muted-foreground hover:border bg-background transition-colors">
                       <h3 className="font-medium text-sm text-foreground">{program.title}</h3>
@@ -186,7 +192,7 @@ export default function ScoutPage() {
         onOpenChange={setInsightsOpen}
       />
 
-      <CreateScoutDialog 
+      <CreateScoutDialog
         open={createScoutOpen}
         onOpenChange={setCreateScoutOpen}
         onScoutCreate={handleScoutCreate}
