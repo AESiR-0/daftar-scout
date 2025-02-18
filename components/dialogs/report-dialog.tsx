@@ -3,6 +3,8 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
+import { PlusCircle } from "lucide-react"
 
 const reportReasons = [
   { id: "false-claim", label: "False Claims" },
@@ -28,6 +30,8 @@ interface ReportDialogProps {
 export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
   const [selectedReasons, setSelectedReasons] = useState<string[]>([])
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [customReason, setCustomReason] = useState("")
+  const [customReasons, setCustomReasons] = useState<string[]>([])
 
   const handleSubmit = () => {
     console.log("Reported reasons:", selectedReasons)
@@ -38,6 +42,14 @@ export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
     setIsSubmitted(false)
     setSelectedReasons([])
     onOpenChange(false)
+  }
+
+  const handleAddCustomReason = () => {
+    if (customReason.trim()) {
+      setCustomReasons([...customReasons, customReason.trim()])
+      setSelectedReasons([...selectedReasons, customReason.trim()])
+      setCustomReason("")
+    }
   }
 
   return (
@@ -54,11 +66,12 @@ export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
                 Red flag this startup and help Daftar build a better startup ecosystem
               </p>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="gap-3">
                 {reportReasons.map((reason) => (
-                  <div key={reason.id} className="flex items-center space-x-2">
+                  <div key={reason.id} className="flex items-center py-1 space-x-2">
                     <Checkbox 
                       id={reason.id}
+                      className="border-gray-500"
                       checked={selectedReasons.includes(reason.id)}
                       onCheckedChange={(checked) => {
                         if (checked) {
@@ -76,9 +89,52 @@ export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
                     </label>
                   </div>
                 ))}
+
+                {customReasons.map((reason) => (
+                  <div key={reason} className="flex items-center py-1 space-x-2">
+                    <Checkbox 
+                      id={reason}
+                      className="border-gray-500"
+                      checked={selectedReasons.includes(reason)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedReasons([...selectedReasons, reason])
+                        } else {
+                          setSelectedReasons(selectedReasons.filter(id => id !== reason))
+                        }
+                      }}
+                    />
+                    <label className="text-sm font-medium leading-none">
+                      {reason}
+                    </label>
+                  </div>
+                ))}
+
+                <div className="flex items-center gap-2 mt-2">
+                  <Input
+                    placeholder="Add another reason..."
+                    value={customReason}
+                    onChange={(e) => setCustomReason(e.target.value)}
+                    className="text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleAddCustomReason()
+                      }
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleAddCustomReason}
+                    disabled={!customReason.trim()}
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-center">
                 <Button 
                   onClick={handleSubmit}
                   className="bg-red-600 hover:bg-red-700 text-white"
@@ -91,13 +147,7 @@ export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
         ) : (
           <div className="space-y-6 py-4">
             <p className="text-sm leading-relaxed">
-              We are carefully studying the data patterns that influenced the decision to red flag this startup.
-            </p>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              P.S. We are building our intelligence that will soon help you connect with better founders in the future.
-            </p>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Until then, we hope you enjoy our software. If not, please share your feedback – we're happy to listen to you.
+            We are carefully analyzing the data patterns that led to this startup being red-flagged. As we continue enhancing our intelligence to help you connect with better founders in the future, we hope you find our software valuable.<br/><br/>If not, we'd love to hear your feedback, we're always listening
             </p>
           </div>
         )}

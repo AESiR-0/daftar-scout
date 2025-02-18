@@ -17,9 +17,12 @@ import Link from '@tiptap/extension-link'
 import { MenuBar } from "./menu-bar"
 import { formatDate } from "@/lib/format-date"
 import { InvestorProfile } from "@/components/investor-profile"
+import { cn } from "@/lib/utils"
+import Placeholder from '@tiptap/extension-placeholder'
 
 interface TeamAnalysis {
     id: string
+    nps: number
     analyst: {
         name: string
         role: string
@@ -45,6 +48,7 @@ interface TeamAnalysisSectionProps {
     currentProfile: Profile
     onSubmitAnalysis: (data: {
         belief: 'yes' | 'no'
+        nps: number | null
         note: string | undefined
         analyst: Profile
     }) => Promise<void>
@@ -56,6 +60,7 @@ export function TeamAnalysisSection({
     onSubmitAnalysis
 }: TeamAnalysisSectionProps) {
     const [belief, setBelief] = useState<'yes' | 'no'>()
+    const [nps, setNps] = useState<number | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [hasSubmitted, setHasSubmitted] = useState(false)
 
@@ -68,6 +73,10 @@ export function TeamAnalysisSection({
                     class: 'text-blue-500 hover:underline',
                 },
             }),
+            Placeholder.configure({
+                placeholder: 'Why do you want to meet... or not meet... in the startup?',
+                emptyEditorClass: 'is-editor-empty',
+            }),
         ],
         content: '',
         editorProps: {
@@ -78,11 +87,12 @@ export function TeamAnalysisSection({
     })
 
     const handleSubmit = async () => {
-        if (!belief || editor?.isEmpty) return
+        if (!belief || editor?.isEmpty || nps === null) return
         setIsSubmitting(true)
         try {
             await onSubmitAnalysis({
                 belief,
+                nps,
                 note: editor?.getHTML(),
                 analyst: currentProfile
             })
@@ -97,8 +107,12 @@ export function TeamAnalysisSection({
         }
     }
 
-    const believersCount = teamAnalysis.filter(a => a.belief === 'yes').length
-    const totalAnalysts = teamAnalysis.length
+    const teamSize = teamAnalysis.length
+    const votersCount = teamAnalysis.length
+    const interestedCount = teamAnalysis.filter(a => a.belief === 'yes').length
+    const averageNPS = teamAnalysis.length > 0
+        ? Math.round(teamAnalysis.reduce((sum, a) => sum + a.nps, 0) / teamAnalysis.length)
+        : 0
 
     return (
         <div className="space-y-6">
@@ -109,6 +123,24 @@ export function TeamAnalysisSection({
                         <CardContent className="space-y-6 pt-6">
                             <div className="space-y-4">
                                 <div className="space-y-2">
+                                    <Label>How strongly do you believe in the startup?</Label>
+                                    <div className="flex gap-2 flex-wrap">
+                                        {Array.from({ length: 11 }, (_, i) => (
+                                            <Button
+                                                key={i}
+                                                variant={nps === i ? 'default' : 'outline'}
+                                                onClick={() => setNps(i)}
+                                                className={cn(
+                                                    "w-8 h-8 p-0",
+                                                    nps === i && "bg-blue-600 hover:bg-blue-700"
+                                                )}
+                                            >
+                                                {i}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-2 py-2 ">
                                     <Label>Should we meet the startup?</Label>
                                     <div className="flex gap-2">
                                         <Button
@@ -128,6 +160,7 @@ export function TeamAnalysisSection({
                                     </div>
                                 </div>
 
+
                                 <div className="space-y-2">
                                     <Label>Your Analysis</Label>
                                     <div className="border rounded-md">
@@ -135,9 +168,14 @@ export function TeamAnalysisSection({
                                     </div>
                                 </div>
                             </div>
+
+                            <p className="text-xs text-muted-foreground text-center">
+                                Once you have submitted your analysis, you won't be able to withdraw or delete it.
+                            </p>
+
                             <Button
                                 onClick={handleSubmit}
-                                disabled={!belief || editor?.isEmpty || isSubmitting}
+                                disabled={!belief || editor?.isEmpty || nps === null || isSubmitting}
                                 className="w-full bg-blue-600 hover:bg-blue-700"
                             >
                                 Submit Analysis
@@ -151,48 +189,78 @@ export function TeamAnalysisSection({
                 <div className="w-1/2">
                     <Card className="border-none bg-[#0e0e0e]">
                         <CardContent className="pt-6">
-                            <p className="text-sm text-blue-500 mb-4">
-                                Believers {believersCount} out of {totalAnalysts}
-                            </p>
-
-                            {!hasSubmitted ? (
-                                <div className="flex items-center justify-center h-[400px] text-sm text-muted-foreground">
-                                    Submit your analysis to see team's feedback
-                                </div>
-                            ) : (
-                                <ScrollArea className="h-[500px] pr-4">
-                                    <div className="space-y-6">
-                                        {teamAnalysis.map((analysis) => (
-                                            <div key={analysis.id} className="space-y-3 pb-4 border-b last:border-0">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="space-y-1">
-                                                        <InvestorProfile
-                                                            name={analysis.analyst.name}
-                                                            role={analysis.analyst.role}
-                                                            className="text-sm font-medium"
-                                                        />
-                                                        <div className="">
-                                                            <p className="text-xs text-muted-foreground">
-                                                                {analysis.analyst.daftarName}
-                                                            </p>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                {formatDate(analysis.date)}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <Badge variant={analysis.belief === 'yes' ? 'default' : 'default'}>
-                                                        {analysis.belief === 'yes' ? 'Believer' : 'Non Believer'}
-                                                    </Badge>
-                                                </div>
-                                                <div
-                                                    className="text-sm prose prose-sm dark:prose-invert max-w-none"
-                                                    dangerouslySetInnerHTML={{ __html: analysis.note }}
-                                                />
-                                            </div>
-                                        ))}
+                            <div className="space-y-6">
+                                {!hasSubmitted ? (
+                                    <div className="flex items-center justify-center h-[400px] text-sm text-muted-foreground">
+                                        <div className="space-y-2">
+                                            <p className="text-sm">
+                                                You can't view your team's analysis until you've shared your own experience.
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Note: Once you submit your analysis, it can't be withdrawn or deleted.
+                                            </p>
+                                        </div>
                                     </div>
-                                </ScrollArea>
-                            )}
+                                ) : (
+                                    <ScrollArea className="h-[500px] pr-4">
+                                        <div className="space-y-6">
+                                            <div>
+                                                <h3 className="text-lg font-medium mb-4">Team's Analysis</h3>
+
+                                                {/* Stats Grid */}
+                                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                                    <div className="bg-[#1a1a1a] p-4 rounded-md">
+                                                        <p className="text-sm text-muted-foreground">Scout Team Size</p>
+                                                        <p className="text-2xl font-medium">{teamSize}</p>
+                                                    </div>
+                                                    <div className="bg-[#1a1a1a] p-4 rounded-md">
+                                                        <p className="text-sm text-muted-foreground">Voters</p>
+                                                        <p className="text-2xl font-medium">{votersCount}</p>
+                                                    </div>
+                                                    <div className="bg-[#1a1a1a] p-4 rounded-md">
+                                                        <p className="text-sm text-muted-foreground">Interested in Meeting</p>
+                                                        <p className="text-2xl font-medium">{interestedCount}</p>
+                                                    </div>
+                                                    <div className="bg-[#1a1a1a] p-4 rounded-md">
+                                                        <p className="text-sm text-muted-foreground">Average NPS</p>
+                                                        <p className="text-2xl font-medium">{averageNPS}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {teamAnalysis.map((analysis) => (
+                                                <div key={analysis.id} className="space-y-4 pb-6 border-b last:border-0">
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
+                                                                <p className="text-sm font-medium">
+                                                                    {analysis.analyst.name}
+                                                                </p>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    {analysis.analyst.daftarName}
+                                                                </p>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    Interested in Meeting: {analysis.belief === 'yes' ? 'Yes' : 'No'}
+                                                                </p>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    NPS: {analysis.nps}
+                                                                </p>
+                                                            </div>
+
+                                                        </div>
+                                                        <div
+                                                            className="text-xs py-1 text-muted-foreground prose prose-sm dark:prose-invert  max-w-none"
+                                                            dangerouslySetInnerHTML={{ __html: analysis.note }}
+                                                        />
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {formatDate(analysis.date)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

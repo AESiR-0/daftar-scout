@@ -372,7 +372,7 @@ function OfferCard({ offer, onView, onAccept, onDecline, onWithdraw }: { offer: 
   return (
     <div className="flex flex-col gap-4">
       {/* Scout Message */}
-      <div className="bg-muted/5 rounded-[0.35rem] p-4">
+      <div className="bg-muted/50 rounded-[0.35rem] p-4">
         <p className="text-sm text-muted-foreground">
           Thank you for applying to {offer.scoutName}. We are excited to have you on board. 
           {offer.collaboration} takes a step forward to make this happen.

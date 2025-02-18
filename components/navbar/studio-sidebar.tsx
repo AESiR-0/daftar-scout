@@ -23,9 +23,9 @@ export function StudioSidebar({ className, mode, programId }: StudioSidebarProps
   }
 
   return (
-    <div className={cn(" w-[15.5rem] border-r bg-[#0e0e0e]", className)}>
-      <div className="space-y-4 mt-4 ">
-        <div className="px-3">
+    <div className={cn(" w-[15.5rem] h-full", className)}>
+      <div className="space-y-4 mx-4 my-8">
+        <div className="px-3 py-2 bg-[#1a1a1a] rounded-[0.35rem]">
           <div className="space-y-1">
             {navItems.map((item) => {
               const href = createTabUrl(item.url)

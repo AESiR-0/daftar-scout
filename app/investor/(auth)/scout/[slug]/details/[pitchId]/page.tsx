@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MakeOfferSection } from "./components/make-offer-section";
 import { DeclinePitchDialog } from "./components/decline-pitch-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LineChart, PieChart } from "@/components/ui/charts"
 
 // Import ApexCharts with NoSSR
 const Chart = dynamic(() => import("react-apexcharts"), {
@@ -62,6 +63,7 @@ interface TeamAnalysis {
   }
   belief: 'yes' | 'no'
   note: string
+  nps: number
   date: string
 }
 
@@ -153,7 +155,7 @@ const sections = [
   { id: "investors-analysis", label: "Investor's Analysis" },
   { id: "investors-note", label: "Investor's Note" },
   { id: "documents", label: "Documents" },
-  { id: "make-offer", label: "Make an Offer" },
+  { id: "make-offer", label: "Offer" },
 ] as const;
 
 const formatPhoneNumber = (phone: string) => {
@@ -171,22 +173,22 @@ const getInitials = (name: string) => {
 const MemberCard = ({ member }: { member: TeamMember }) => (
   <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
     <div className="flex justify-between items-start">
-      <div className="flex gap-4">
-        <Avatar className="h-48 w-48 rounded-[0.35rem]">
+      <div className="gap-4">
+        <Avatar className="h-56 w-56 rounded-[0.35rem]">
           {member.imageUrl ? (
             <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
           ) : (
             <AvatarFallback className="rounded-[0.35rem] text-xl">{getInitials(member.firstName)}</AvatarFallback>
           )}
         </Avatar>
-        <div>
+        <div className="mt-2">
           <div className="flex items-center gap-2">
             <h4 className="text-xl font-medium">{member.firstName} {member.lastName}</h4>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">{member.designation}</p>
+          <p className="text-sm mt-1 text-muted-foreground">{member.designation}</p>
 
-          <div className="space-y-2 mt-2">
-            <div className="space-y-1 text-sm text-muted-foreground">
+          <div className="">
+            <div className="space-y-1 mt-1 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <span>{member.age}</span>
                 <span>{member.gender}</span>
@@ -214,7 +216,7 @@ const MemberCard = ({ member }: { member: TeamMember }) => (
 /** ------------- Main Component -------------- **/
 export default function PitchDetailsPage() {
   const { toast } = useToast()
-  const [activeSection, setActiveSection] = useState("investors-note");
+  const [activeSection, setActiveSection] = useState("founders-pitch");
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
@@ -307,7 +309,8 @@ export default function PitchDetailsPage() {
           },
           belief: 'yes',
           note: '<p>The team has shown exceptional capability...</p>',
-          date: '2024-03-20T10:00:00Z'
+          date: '2024-03-20T10:00:00Z',
+          nps: 5
         },
         {
           id: '2',
@@ -319,7 +322,8 @@ export default function PitchDetailsPage() {
           },
           belief: 'no',
           note: '<p>While the idea is promising, I have concerns about...</p>',
-          date: '2024-03-19T15:30:00Z'
+          date: '2024-03-19T15:30:00Z',
+          nps: 3
         }
       ]
     }
@@ -340,6 +344,7 @@ export default function PitchDetailsPage() {
     belief: 'yes' | 'no'
     note: string | undefined
     analyst: Profile
+    nps: number | null
   }) => {
     try {
       // Add your API call here
@@ -360,7 +365,8 @@ export default function PitchDetailsPage() {
         belief: data.belief,
         note: data.note || '',
         analyst: data.analyst,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        nps: data.nps || 0
       }
 
       setPitchDetails(prev => ({
@@ -506,8 +512,39 @@ export default function PitchDetailsPage() {
     return `${otherLanguages} and ${lastLanguage}`;
   };
 
+  // Add this helper function to process data for charts
+  const processTeamData = () => {
+    const ageData = pitchDetails.teamMembers.map(member => ({
+      x: member.firstName,
+      y: parseInt(member.age)
+    }))
+
+    const genderCount = pitchDetails.teamMembers.reduce((acc, member) => {
+      acc[member.gender] = (acc[member.gender] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    const languageCount = pitchDetails.teamMembers.reduce((acc, member) => {
+      member.language.forEach(lang => {
+        acc[lang] = (acc[lang] || 0) + 1
+      })
+      return acc
+    }, {} as Record<string, number>)
+
+    const averageAge = pitchDetails.teamMembers.reduce((sum, member) => sum + parseInt(member.age), 0) / pitchDetails.teamMembers.length
+
+    return {
+      ageData,
+      genderData: Object.entries(genderCount).map(([name, value]) => ({ name, value })),
+      languageData: Object.entries(languageCount),
+      averageAge
+    }
+  }
+
+  const { ageData, genderData, languageData, averageAge } = processTeamData()
+
   return (
-    <ScrollArea className="h-[calc(100vh-6rem)]">
+    <ScrollArea className="h-[calc(100vh-6rem)] container">
       {/* Navigation */}
       <div className="flex justify-between items-center border-b border-border py-2 px-4">
         <div className="flex gap-1">
@@ -535,7 +572,7 @@ export default function PitchDetailsPage() {
             </button>
           ))}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mr-10">
           <Button
             variant="outline"
             size="sm"
@@ -549,10 +586,10 @@ export default function PitchDetailsPage() {
           onOpenChange={setReportDialogOpen}
         />
       </div>
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-6xl">
 
         {/* Content */}
-        <div className="space-y-6">
+        <div className="mt-10">
           {activeSection === "investors-note" && (
             <InvestorsNote note={pitchDetails.sections.investorsNote} />
           )}
@@ -563,27 +600,75 @@ export default function PitchDetailsPage() {
           {activeSection === "founders-team" && (
             <div className="space-y-6">
               <Card className="border-none bg-[#0e0e0e]">
-                <CardHeader>
-                  <CardTitle>Team Members ({pitchDetails.teamMembers.length})</CardTitle>
-                </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    {pitchDetails.teamMembers.map((member) => {
-                      const transformedMember: TeamMember = {
-                        id: member.firstName,
-                        firstName: member.firstName,
-                        lastName: member.lastName,
-                        email: member.email,
-                        phone: member.phone,
-                        location: member.location,
-                        imageUrl: member.imageUrl,
-                        designation: member.designation,
-                        language: member.language,
-                        age: member.age,
-                        gender: member.gender
-                      }
-                      return <MemberCard key={member.firstName} member={transformedMember} />
-                    })}
+                  <div className="flex gap-8">
+                    {/* Left column - Member Cards */}
+                    <div className="w-[25%] space-y-2">
+                      {pitchDetails.teamMembers.map((member) => {
+                        const transformedMember: TeamMember = {
+                          id: member.firstName,
+                          firstName: member.firstName,
+                          lastName: member.lastName,
+                          email: member.email,
+                          phone: member.phone,
+                          location: member.location,
+                          imageUrl: member.imageUrl,
+                          designation: member.designation,
+                          language: member.language,
+                          age: member.age,
+                          gender: member.gender
+                        }
+                        return <MemberCard key={member.firstName} member={transformedMember} />
+                      })}
+                    </div>
+
+                    {/* Middle column - Charts */}
+                    <div className="w-[45%] space-y-6">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Team Members ({pitchDetails.teamMembers.length}) | <span className="text-muted-foreground">Average Age: {averageAge}</span></h3>
+                        
+                        <div className="space-y-6 ">
+                          {/* Age Line Chart */}
+                          {/* <Card className="border-none bg-[#1a1a1a] p-4">
+                            <h4 className="text-sm font-medium mb-2">Age Distribution</h4>
+                            <div className="h-[200px]">
+                              <LineChart 
+                                data={ageData}
+                                categories={['Age']}
+                              />
+                            </div>
+                          </Card> */}
+
+                          {/* Gender Pie Chart */}
+                          <Card className="border-none bg-[#1a1a1a] p-4">
+                            <h4 className="text-sm font-medium mb-2">Gender Ratio</h4>
+                            <div className="h-[200px]">
+                              <PieChart 
+                                data={genderData}
+                              />
+                            </div>
+                          </Card>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right column - Languages */}
+                    <div className="w-[30%] mt-11">
+                      <Card className="border-none bg-[#1a1a1a] p-4">
+                        <h4 className="text-sm font-medium mb-4">Preferred Languages to Connect with Investors</h4>
+                        <div className="space-y-2">
+                          {languageData.map(([language, count]) => (
+                            <div 
+                              key={language}
+                              className="flex items-center justify-between p-2 rounded-md bg-background"
+                            >
+                              <span className="text-sm">{language}</span>
+                              <Badge variant="secondary">{count}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

@@ -89,10 +89,11 @@
   animation: fadeIn 0.5s ease-out forwards;
 }
 
-.perspective-1000 {
-  perspective: 1000px;
-}
-
-.transform-style-3d {
-  transform-style: preserve-3d;
+.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #64748b;
+  pointer-events: none;
+  font-size: 12px;
+  height: 0;
 }

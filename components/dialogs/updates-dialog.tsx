@@ -7,6 +7,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { formatDate } from "@/lib/format-date"
 
 interface Update {
     id: string
@@ -23,51 +24,51 @@ interface UpdatesDialogProps {
 }
 
 const MenuBar = ({ editor }: { editor: any }) => {
-  if (!editor) {
-    return null
-  }
+    if (!editor) {
+        return null
+    }
 
-  return (
-    <div className="border-b p-2 flex gap-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'bg-accent' : ''}
-      >
-        <Bold className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive('italic') ? 'bg-accent' : ''}
-      >
-        <Italic className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={editor.isActive('bulletList') ? 'bg-accent' : ''}
-      >
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => {
-          const url = window.prompt('Enter URL')
-          if (url) {
-            editor.chain().focus().setLink({ href: url }).run()
-          }
-        }}
-        className={editor.isActive('link') ? 'bg-accent' : ''}
-      >
-        <LinkIcon className="h-4 w-4" />
-      </Button>
-    </div>
-  )
+    return (
+        <div className="border-b p-2 flex gap-1">
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().toggleBold().run()}
+                className={editor.isActive('bold') ? 'bg-accent' : ''}
+            >
+                <Bold className="h-4 w-4" />
+            </Button>
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().toggleItalic().run()}
+                className={editor.isActive('italic') ? 'bg-accent' : ''}
+            >
+                <Italic className="h-4 w-4" />
+            </Button>
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                className={editor.isActive('bulletList') ? 'bg-accent' : ''}
+            >
+                <List className="h-4 w-4" />
+            </Button>
+            <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                    const url = window.prompt('Enter URL')
+                    if (url) {
+                        editor.chain().focus().setLink({ href: url }).run()
+                    }
+                }}
+                className={editor.isActive('link') ? 'bg-accent' : ''}
+            >
+                <LinkIcon className="h-4 w-4" />
+            </Button>
+        </div>
+    )
 }
 
 export function UpdatesDialog({
@@ -105,22 +106,22 @@ export function UpdatesDialog({
 
     const handleSubmit = () => {
         if (editor?.isEmpty) return
-        
+
         const content = editor?.getHTML() || ""
         if (content.trim()) {
             // Create new update
             const newUpdate: Update = {
                 id: Date.now().toString(),
                 content: content,
-                date: new Date().toISOString()
+                date: formatDate(new Date().toISOString())
             }
-            
+
             // Update local state immediately
             setUpdates(prev => [newUpdate, ...prev])
-            
+
             // Notify parent
             onAddUpdate(content)
-            
+
             // Clear editor
             editor?.commands.setContent('')
         }
@@ -129,24 +130,24 @@ export function UpdatesDialog({
     const handleDelete = (id: string) => {
         // Update local state immediately
         setUpdates(prev => prev.filter(update => update.id !== id))
-        
+
         // Notify parent
         onDeleteUpdate(id)
     }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[80vh]">
                 <DialogHeader>
-                    <DialogTitle>Program Updates</DialogTitle>
+                    <DialogTitle>Updates</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     {/* New Update Form - Moved to top */}
-                    <div className="space-y-2 flex flex-col items-center gap-2 border rounded-md">
-                        <MenuBar editor={editor} />
-                        <EditorContent editor={editor} className="w-full" />
-                        <div className="p-2 w-full flex justify-end border-t">
+                    <div className="space-y-2 flex flex-col items-center gap-2 rounded-md">
+                        {/* <MenuBar editor={editor} /> */}
+                        <EditorContent editor={editor} className="w-full border" />
+                        <div className="p-2 w-full flex justify-start">
                             <Button
                                 onClick={handleSubmit}
                                 size="sm"
@@ -159,21 +160,24 @@ export function UpdatesDialog({
                     </div>
 
                     {/* Updates List with ScrollArea */}
-                    <ScrollArea className="h-[400px] rounded-md border">
+                    <ScrollArea className="h-[300px] rounded-md">
                         <div className="space-y-3 p-4">
                             {updates.map((update) => (
                                 <div
                                     key={update.id}
                                     className="p-4 rounded-[0.35rem]  border group bg-background"
                                 >
-                                    <div className="flex items-start justify-between">
-                                        <p className="text-sm text-muted-foreground">
-                                            {new Date(update.date).toLocaleDateString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric',
-                                                year: 'numeric'
-                                            })}
-                                        </p>
+                                    <div className="flex items-start justify-between ">
+
+                                        <div className="flex flex-col gap-2">
+                                            <div
+                                                className="text-sm prose prose-sm dark:prose-invert max-w-none"
+                                                dangerouslySetInnerHTML={{ __html: update.content }}
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                {formatDate(update.date)}
+                                            </p>
+                                        </div>
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -183,10 +187,6 @@ export function UpdatesDialog({
                                             <Trash2 className="h-4 w-4 text-destructive" />
                                         </Button>
                                     </div>
-                                    <div 
-                                        className="text-sm prose prose-sm dark:prose-invert max-w-none"
-                                        dangerouslySetInnerHTML={{ __html: update.content }}
-                                    />
                                 </div>
                             ))}
                         </div>
