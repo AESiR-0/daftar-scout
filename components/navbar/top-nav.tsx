@@ -87,13 +87,7 @@ export function TopNav({ role }: { role: string }) {
 
   // Update the back button handler
   const handleBack = () => {
-    if (pathname.includes('/founder/studio')) {
-      router.push('/founder/pitch')
-    } else if (pathname.includes('/investor/studio')) {
-      router.push('/investor/scout')
-    } else {
       router.back()
-    }
   }
 
   return (
@@ -131,12 +125,12 @@ export function TopNav({ role }: { role: string }) {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
-          <Link 
+          {/* <Link 
             href={role === "founder" ? "/founder" : "/investor"}
             className="text-sm font-medium"
           >
             Daftar OS
-          </Link>
+          </Link> */}
         </div>
 
         <div className="ml-auto flex items-center space-x-4">

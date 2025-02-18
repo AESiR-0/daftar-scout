@@ -142,7 +142,7 @@ export default function PitchPage() {
                         <Textarea
                             value={specificAsks}
                             onChange={(e) => setSpecificAsks(e.target.value)}
-                            className="min-h-[100px] resize-none rounded-md"
+                            className="min-h-[100px] bg-muted/50 resize-none rounded-xl"
                         />
                     </div>
 

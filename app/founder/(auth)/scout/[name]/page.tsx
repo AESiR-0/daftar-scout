@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { ShareButton } from "@/components/share-button"
 import { useState } from "react"
-import { SelectDaftarDialog } from "@/components/dialogs/select-daftar-dialog"
+import { SelectDaftarDialog } from "@/components/dialogs/create-pitch-dialog"
 import { InvestorProfile } from "@/components/InvestorProfile"
 
 

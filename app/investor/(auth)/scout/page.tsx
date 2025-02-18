@@ -9,40 +9,50 @@ import MeetingsPage from "@/app/founder/(auth)/meetings/page"
 import { CreateScoutDialog } from "@/components/dialogs/create-scout-dialog"
 import { useToast } from "@/hooks/use-toast"
 
-const scouttatus = {
+interface Scout {
+  id: string
+  title: string
+  postedby: string
+  status: 'Planning' | 'Scheduled' | 'Active' | 'Closed'
+  scheduledDate?: string
+}
+
+interface ScoutStatus {
+  planning: Scout[]
+  scheduled: Scout[]
+  active: Scout[]
+  closed: Scout[]
+}
+
+const initialScoutStatus: ScoutStatus = {
   planning: [
     {
+      id: 'green-energy',
       title: "Green Energy Initiative",
       postedby: "Nithin Kamath",
-      status: "Planning",
-    },
-    {
-      title: "Healthcare Tech Fund",
-      postedby: "Anupam Mittal",
       status: "Planning",
     },
   ],
   scheduled: [
     {
+      id: 'ai-ventures',
       title: "AI Ventures",
       postedby: "Aman Gupta",
       status: "Scheduled",
+      scheduledDate: "Feb 20th, 2025, 10:00 AM"
     },
   ],
-  open: [
+  active: [
     {
+      id: 'tech-startup',
       title: "Tech Startup Fund",
       postedby: "GUSEC",
-      status: "Open",
-    },
-    {
-      title: "Real Estate Growth",
-      postedby: "Y Combinator",
-      status: "Open",
+      status: "Active",
     },
   ],
   closed: [
     {
+      id: 'fintech',
       title: "Fintech Innovation",
       postedby: "Narayan Murthy",
       status: "Closed",
@@ -56,24 +66,25 @@ export default function ScoutPage() {
   const [showMeetings, setShowMeetings] = useState(false)
   const [showContent, setShowContent] = useState(false)
   const [createScoutOpen, setCreateScoutOpen] = useState(false)
-  const [scoutStatus, setScoutStatus] = useState(scouttatus)
+  const [scoutStatus, setScoutStatus] = useState<ScoutStatus>(initialScoutStatus)
   const { toast } = useToast()
 
-  const filteredscout = Object.entries(scoutStatus).reduce((acc, [key, scout]) => {
-    const filtered = scout.filter(program => {
-      const matchesSearch = program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        program.postedby.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesFilter = filterValue === 'all' || program.status.toLowerCase() === filterValue.toLowerCase()
+  const filteredScouts = Object.entries(scoutStatus).reduce((acc, [key, scouts]) => {
+    const filtered = scouts.filter((scout: any) => {
+      const matchesSearch = scout.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        scout.postedby.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesFilter = filterValue === 'all' || scout.status.toLowerCase() === filterValue.toLowerCase()
       return matchesSearch && matchesFilter
     })
     return { ...acc, [key]: filtered }
-  }, {} as typeof scouttatus)
+  }, {} as ScoutStatus)
 
   const handleScoutCreate = (scoutName: string) => {
     setScoutStatus(prev => ({
       ...prev,
       planning: [
         {
+          id: 'new-scout',
           title: scoutName,
           postedby: "NA", 
           status: "Planning",
@@ -141,7 +152,7 @@ export default function ScoutPage() {
         <MeetingsPage />
       ) : (
         <div className="grid grid-cols-4 gap-6">
-          {Object.entries(filteredscout).map(([status, scout]) => (
+          {Object.entries(filteredScouts).map(([status, scouts]) => (
             <div
               key={status}
               className="bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
@@ -150,27 +161,27 @@ export default function ScoutPage() {
                 <div className="flex items-center gap-2">
                   <h2 className="font-semibold capitalize text-foreground">{status}</h2>
                   <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
-                    {scout.length}
+                    {scouts.length}
                   </Badge>
                 </div>
               </div>
 
               <div className="space-y-5">
-                {scout.map((program) => (
+                {scouts.map((scout: any) => (
                   <Link
-                    key={program.title}
-                    href={`/investor/scout/${program.title.toLowerCase().replace(/ /g, '-')}`}
+                    key={scout.title}
+                    href={`/investor/scout/${scout.title.toLowerCase().replace(/ /g, '-')}`}
                   >
                     <div className="p-4 m-2 rounded-[0.35rem] hover:border-muted-foreground hover:border bg-background transition-colors">
-                      <h3 className="font-medium text-sm text-foreground">{program.title}</h3>
+                      <h3 className="font-medium text-sm text-foreground">{scout.title}</h3>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Collaboration : <span className="font-medium">{program.postedby}</span>
+                        Collaboration : <span className="font-medium">{scout.postedby}</span>
                       </p>
                     </div>
                   </Link>
                 ))}
 
-                {scout.length === 0 && (
+                {scouts.length === 0 && (
                   <div className="text-center py-8 text-sm text-muted-foreground bg-background/5 rounded-[0.35rem] border border-border">
                     No scout in {status}
                   </div>
