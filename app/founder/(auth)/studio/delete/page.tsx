@@ -100,7 +100,7 @@ export default function DeletePage() {
     <div className="flex px-5 mt-14 gap-6">
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
-          <div className="flex flex-col p-4 border rounded-lg space-y-6">
+          <div className="flex flex-col p-4 rounded-lg space-y-6">
             {/* Initial Warning */}
             <p className="text-sm text-muted-foreground">
               All data related to the pitch will be deleted, and the offer will be withdrawn.

@@ -143,14 +143,9 @@ export default function InvestorQuestionsPage() {
                                 {questions.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="p-4 rounded-[0.35rem]  bg-muted/50 cursor-pointer hover:bg-muted/70 transition-colors"
-                                        onClick={() => {
-                                            setQuestionId(item.id);
-                                            const question = questions.find(q => q.id === item.id);
-                                            setPreviewUrl(question?.videoUrl || '');
-                                        }}
+                                        className=""
                                     >
-                                        <h3 className="text-sm font-medium">{item.question}</h3>
+                                        <h3 className="text-sm font-medium">{item.id}. {item.question}</h3>
                                     </div>
                                 ))}
                             </div>

@@ -173,7 +173,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                     <p className="text-sm text-muted-foreground">No video available</p>
                                 </div>
                             )}
-                            <div className="mt-2">
+                            <div className="mt-2 ml-4">
                                 <p className="text-sm text-muted-foreground">Language: English</p>
                             </div>
                         </div>
@@ -185,11 +185,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                             key={item.id}
                                             className={cn(
                                                 "px-4 rounded-[0.35rem] cursor-pointer transition-colors",
-                                                selectedQuestion.id === item.id
-                                                    ? "underline"
-                                                    : "hover:underline"
                                             )}
-                                            onClick={() => setSelectedQuestion(item)}
                                         >
                                             <h3 className="text-sm font-medium">{item.question}</h3>
                                         </div>
@@ -199,17 +195,28 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                         </div>
                     </div>
                     <div className="">
-                        {/* Founder Details Grid */}
-                        <div className="grid grid-cols-1 bg-[#1f1f1f] gap-3 py-3 px-5">
-                            <div className=" flex  items-center gap-2 rounded-[0.35rem]">
+                        {/* Founder's Ask */}
+                        <div className="flex flex-col">
+                            <h3 className="text-md pl-4  text-foreground">Founder's Ask</h3>
+                            <div className="  rounded-[0.35rem] p-4">
+                                <p className="text-sm text-muted-foreground">
+                                    We are seeking $500,000 in funding to accelerate our product development and expand our marketing efforts. Additionally, we are looking for strategic partnerships in the AI/ML sector to enhance our technological capabilities and market reach. Any introductions to potential partners or advisors with experience in scaling SaaS businesses would be highly appreciated.
+                                </p>
+                            </div>
+                        </div>
+
+                         {/* Founder Details Grid */}
+                         <div className="w-1/2 px-5">
+                         <h3 className="text-md mb-2 text-foreground">Details</h3>
+                            <div className=" flex  items-center gap-2">
                                 <p className="text-sm text-muted-foreground ">Stage</p>
                                 {pitch.stage}
                             </div>
-                            <div className=" flex  items-center gap-2 rounded-[0.35rem]">
-                                <p className="text-sm text-muted-foreground">Location</p>
+                            <div className=" flex  items-center gap-2">
+                                <p className="text-sm text-muted-foreground">Pitching From</p>
                                 <p className="text-sm">{pitch.location}</p>
                             </div>
-                            <div className="  flex gap-2  rounded-[0.35rem]">
+                            <div className="  flex gap-2 ">
                                 <p className="text-sm text-muted-foreground">Demo Link</p>
                                 {pitch.demoLink ? (
                                     <Link
@@ -222,19 +229,9 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                     <span className="text-sm">No Demo Link</span>
                                 )}
                             </div>
-                            <div className="flex gap-2  rounded-[0.35rem]">
+                            <div className="flex gap-2 ">
                                 <p className="text-sm text-muted-foreground">Sectors</p>
                                 <p className="text-sm">{formatSectors(pitch.sectors)}</p>
-                            </div>
-                        </div>
-
-                        {/* Founder's Ask */}
-                        <div className="flex flex-col mt-4">
-                            <h3 className="text-md pl-4  text-foreground">Founder's Ask</h3>
-                            <div className="  rounded-[0.35rem] p-4">
-                                <p className="text-sm text-muted-foreground">
-                                    We are seeking $500,000 in funding to accelerate our product development and expand our marketing efforts. Additionally, we are looking for strategic partnerships in the AI/ML sector to enhance our technological capabilities and market reach. Any introductions to potential partners or advisors with experience in scaling SaaS businesses would be highly appreciated.
-                                </p>
                             </div>
                         </div>
 

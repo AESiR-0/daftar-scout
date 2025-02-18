@@ -75,7 +75,7 @@ export default function ScoutPage() {
       planning: [
         {
           title: scoutName,
-          postedby: "You",
+          postedby: "NA", 
           status: "Planning",
         },
         ...prev.planning,

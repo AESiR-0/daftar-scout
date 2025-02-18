@@ -34,7 +34,7 @@ export function CreateScoutDialog({ open, onOpenChange, onScoutCreate }: CreateS
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Scout</DialogTitle>
+          <DialogTitle>New Scout</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
@@ -44,7 +44,7 @@ export function CreateScoutDialog({ open, onOpenChange, onScoutCreate }: CreateS
               onChange={(e) => setScoutName(e.target.value)}
             />
           </div>
-          <Button onClick={handleSubmit}>Create Scout</Button>
+          <Button onClick={handleSubmit}>Create</Button>
         </div>
       </DialogContent>
     </Dialog>

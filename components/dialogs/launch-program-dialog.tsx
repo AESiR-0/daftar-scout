@@ -8,33 +8,17 @@ import { CalendarClock } from "lucide-react"
 interface LaunchProgramDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmitFeedback: (feedback: string) => void
 }
 
-export function LaunchProgramDialog({ 
-  open, 
-  onOpenChange,
-  onSubmitFeedback 
-}: LaunchProgramDialogProps) {
-  const [feedback, setFeedback] = useState("")
-
-  const handleSubmit = () => {
-    if (feedback.trim()) {
-      onSubmitFeedback(feedback)
-      setFeedback("")
-    }
-  }
+export function LaunchProgramDialog({ open, onOpenChange }: LaunchProgramDialogProps) {
+  const [response, setResponse] = useState<"accept" | "decline" | null>(null)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CalendarClock className="h-5 w-5" />
             Daftar OS Technology Update
-            <span className="text-muted-foreground font-normal">
-              December 20, 2024
-            </span>
           </DialogTitle>
         </DialogHeader>
 
@@ -42,39 +26,38 @@ export function LaunchProgramDialog({
           {/* Update Message */}
           <div className="space-y-4">
             <p className="text-sm leading-relaxed">
-              We hope you're enjoying scouting startups with Daftar OS Technology. Currently, you're on Beta 1.1, where we're hyper-focused on enhancing the scouting experience.
+              Program feature is rolling out soon, and your scouted startups will be added to the program list.
             </p>
-            
+            <p className="text-sm">
+              By the way, we'd love your experience to help build and test the program feature. If you're interested and have some time, we'd love your insights into building or testing the feature.
+            </p>
+          </div>
+
+          {!response ? (
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => setResponse("accept")}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Sure, count me in… anything for the community
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setResponse("decline")}
+              >
+                No, keep me out
+              </Button>
+            </div>
+          ) : (
+            <div className="bg-muted/50 rounded-lg p-4">
               <p className="text-sm">
-                The incubation program will roll out its first update by February 6, 2025. All your selected startups will be seamlessly added to the Program Dashboard.
+                {response === "accept" 
+                  ? "Hey, thanks. We'll get back to you as soon as possible to learn from your experience and build a product that will help every investor and startup on Daftar."
+                  : "That's okay. We understand and appreciate your time. If anything changes, feel free to reach out via support."
+                }
               </p>
-              
-            <p className="text-sm text-muted-foreground">
-              For any feature requests or updates, feel free to share your feedback in the comment box below.
-            </p>
-            <p className="text-sm text-muted-foreground">
-            Thank you for being part of our journey
-          </p>
-          </div>
-
-          {/* Feedback Form */}
-          <div className="space-y-2 flex flex-col items-center gap-2">
-            <Textarea
-              placeholder="Share your feedback..."
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              className="min-h-[100px]"
-            />
-            <Button 
-              onClick={handleSubmit}
-              size="sm"
-              className="bg-blue-600 w-fit hover:bg-blue-700 text-white"
-            >
-              Submit Feedback
-            </Button>
-          </div>
-
-          
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

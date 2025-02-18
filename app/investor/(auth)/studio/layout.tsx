@@ -9,7 +9,7 @@ export default function StudioLayout({
 }) {
     return (
         <div className="flex min-h-screen">
-            <StudioNav />
+            <StudioSidebar />
             <main className="flex-1 overflow-y-auto">
                 {children}
             </main>
