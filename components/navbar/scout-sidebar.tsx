@@ -69,7 +69,7 @@ const sections: Section[] = [
   }
 ]
 
-export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
+export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = false }: { scoutSlug?: string, isPlanning?: boolean, isScheduling?: boolean }) {
   const [expandedSections, setExpandedSections] = useState<string[]>(["inbox"])
   const [endScoutingOpen, setEndScoutingOpen] = useState(false)
   const [updatesOpen, setUpdatesOpen] = useState(false)
@@ -96,6 +96,51 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
   const scoutName = scoutSlug?.split('-').map(word =>
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
+
+  if (isPlanning) {
+    return (
+      <div className="w-[16rem] p-4 h-full">
+        <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
+          {/* Scout Name Header */}
+          <div className="border-b shrink-0">
+            <div className="border-b px-4 py-4">
+              <h2 className="text-[14px] font-semibold">{scoutName}</h2>
+            </div>
+            <div className="px-4 py-2">
+              <Link href={`/investor/studio/details?mode=edit&programId=${scoutSlug}`}>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="w-full text-white px-0 justify-start"
+                >
+                  Studio
+                </Button>
+              </Link>
+            </div>
+          </div>
+          
+          {/* Empty flex space */}
+          <div className="flex-1" />
+        </div>
+      </div>
+    )
+  }
+
+  else if (isScheduling) {
+    return (
+      <div className="w-[16rem]  p-4  h-full">
+        <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
+          <div className="border-b shrink-0">
+            <div className="border-b px-4 py-4">
+              <h2 className="text-[14px] font-semibold">{scoutName}</h2>
+            </div>
+          </div>
+          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-[16rem]  p-4  h-full">

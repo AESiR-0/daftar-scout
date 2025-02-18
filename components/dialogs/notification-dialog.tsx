@@ -217,7 +217,7 @@ export function NotificationDialog({
                           Daftar: {request.daftarName}
                         </p>
                         <time className="text-xs text-muted-foreground block">
-                          Requested on {request.requestedAt}
+                          Requested on {formatDate(request.requestedAt)}
                         </time>
                       </div>
 
@@ -227,7 +227,7 @@ export function NotificationDialog({
                             {request.status.action === "accepted" ? "Accepted" : "Declined"} by{" "}
                             {request.status.by}
                           </p>
-                          <p>{request.status.timestamp}</p>
+                          <p>{formatDate(request.status.timestamp)}</p>
                         </div>
                       ) : (
                         <div className="flex gap-2">

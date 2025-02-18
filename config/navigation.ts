@@ -125,6 +125,11 @@ export const investorStudioNavItems = [
     icon: Calendar,
   },
   {
+    title: "Logs",
+    url: "/investor/studio/logs",
+    icon: FileSpreadsheet,
+  },
+  {
     title: "Delete",
     url: "/investor/studio/delete",
     icon: Trash2,
@@ -246,11 +251,11 @@ export const founderStudioNavItems = [
     url: "/founder/studio/offer",
     icon: FileSpreadsheet,
   },
-  {
-    title: "Insights",
-    url: "/founder/studio/insights",
-    icon: FileSpreadsheet,
-  },
+  // {
+  //   title: "Insights",
+  //   url: "/founder/studio/insights",
+  //   icon: FileSpreadsheet,
+  // },
   {
     title: "Bill",
     url: "/founder/studio/bill",
