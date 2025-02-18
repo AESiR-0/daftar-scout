@@ -145,7 +145,7 @@ export function MakeOfferSection() {
   const [offers, setOffers] = useState<Offer[]>(dummyOffers);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const { toast } = useToast();
-  const [historyFilter, setHistoryFilter] = useState<"all" | "completed" | "declined" | "withdrawn">("all");
+  const [historyFilter, setHistoryFilter] = useState<"all" | "pending" | "completed" | "declined" | "withdrawn">("all");
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newOffer, setNewOffer] = useState({
@@ -300,7 +300,8 @@ export function MakeOfferSection() {
 
   const pendingOffers = offers.filter(o => o.status === "pending");
   const logOffers = offers.filter(o => {
-    if (historyFilter === "all") return o.status !== "pending";
+    if (historyFilter === "all") return true;
+    if (historyFilter === "pending") return o.status === "pending";
     if (historyFilter === "withdrawn") return o.type === "withdrawn";
     return o.status === historyFilter;
   });
@@ -388,18 +389,19 @@ export function MakeOfferSection() {
                 <h2 className="text-lg font-semibold">History</h2>
                 <Select
                   value={historyFilter}
-                onValueChange={(value: "all" | "completed" | "declined" | "withdrawn") => setHistoryFilter(value)}
-              >
-                <SelectTrigger className="w-[180px] bg-muted/50">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Categories</SelectItem>
-                  <SelectItem value="completed">Accepted</SelectItem>
-                  <SelectItem value="declined">Declined</SelectItem>
-                  <SelectItem value="withdrawn">Withdrawn</SelectItem>
-                </SelectContent>
-              </Select>
+                  onValueChange={(value: "all" | "pending" | "completed" | "declined" | "withdrawn") => setHistoryFilter(value)}
+                >
+                  <SelectTrigger className="w-[180px] bg-muted/50">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="completed">Accepted</SelectItem>
+                    <SelectItem value="declined">Declined</SelectItem>
+                    <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
 
             <Card className="border rounded-[0.35rem] bg-[#1a1a1a]">
@@ -445,11 +447,25 @@ export function MakeOfferSection() {
                     )}
 
                     {/* Action Buttons */}
-                    {offer.status === "completed" && (
+                    {offer.status === "pending" ? (
+                      <div className="flex gap-2 mt-4">
+                        <Button 
+                          variant="outline"
+                          onClick={() => handleStatusUpdate(offer.id, "accepted", "completed")}
+                        >
+                          Accept
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => handleStatusUpdate(offer.id, "withdrawn", "declined")}
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    ) : (
                       <div className="flex justify-start mt-4">
                         <Button 
-                          className="bg-muted hover:bg-muted/50" 
-                          variant="ghost" 
+                          variant="outline"
                           onClick={() => handleWithdraw(offer.id)}
                         >
                           Withdraw

@@ -308,9 +308,10 @@ export default function FounderPitchPage() {
                   {questionsData.defaultQuestions.map((question) => (
                     <div
                       key={question.id}
-                      className="py-1 font-medium"
+                      className="py-1 font-medium cursor-pointer hover:bg-muted/50 rounded-md px-2 transition-colors"
+                      onClick={() => setSelectedQuestion(question)}
                     >
-                      <p className="text-sm">
+                      <p className={`text-sm ${selectedQuestion.id === question.id ? '' : ''}`}>
                         {question.id}. {question.question}
                       </p>
                     </div>

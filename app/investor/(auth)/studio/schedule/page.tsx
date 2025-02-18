@@ -18,7 +18,8 @@ import {
 export default function SchedulePage() {
   const [lastPitchDate, setLastPitchDate] = useState<Date>()
   const [launchDate, setLaunchDate] = useState<Date>()
-  const [dateError, setDateError] = useState<string>("")
+  const [dateError, setDateError] = useState<string>()
+  const [isScheduled, setIsScheduled] = useState(false)
 
   const handleLaunchDateSelect = (date: Date | undefined) => {
     setLaunchDate(date)
@@ -35,6 +36,13 @@ export default function SchedulePage() {
       setDateError("Launch date cannot be after the last pitch date")
     } else {
       setDateError("")
+    }
+  }
+
+  const handleGoLive = () => {
+    if (isDateValid) {
+      setIsScheduled(true)
+      // TODO: Add API call to save schedule
     }
   }
 
@@ -84,6 +92,7 @@ export default function SchedulePage() {
                           "w-full justify-start text-left font-normal",
                           !launchDate && "text-muted-foreground"
                         )}
+                        disabled={isScheduled}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {launchDate ? format(launchDate, "PPP") : "Pick a date"}
@@ -95,6 +104,7 @@ export default function SchedulePage() {
                         selected={launchDate}
                         onSelect={handleLaunchDateSelect}
                         initialFocus
+                        disabled={isScheduled}
                       />
                     </PopoverContent>
                   </Popover>
@@ -103,13 +113,18 @@ export default function SchedulePage() {
               {dateError && (
                 <p className="text-sm text-destructive">{dateError}</p>
               )}
+              {isScheduled && (
+                <p className="text-sm text-muted-foreground">
+                  Once scheduled, only the last pitch date can be modified. The rest of the Scout is locked.
+                </p>
+              )}
               <Button 
-            variant="outline"
-            
-            disabled={!isDateValid}
-          >
-            Go Live
-          </Button>
+                variant="outline"
+                onClick={handleGoLive}
+                disabled={!isDateValid || isScheduled}
+              >
+                {isScheduled ? 'Scheduled' : 'Go Live'}
+              </Button>
             </CardContent>
           </Card>
         </div>
