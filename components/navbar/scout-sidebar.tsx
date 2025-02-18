@@ -68,7 +68,7 @@ const sections: Section[] = [
   }
 ]
 
-export function ScoutSidebar({ scoutSlug }: { scoutSlug: string }) {
+export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
   const [expandedSections, setExpandedSections] = useState<string[]>(["inbox"])
   const [endScoutingOpen, setEndScoutingOpen] = useState(false)
   const [updatesOpen, setUpdatesOpen] = useState(false)
@@ -76,15 +76,15 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug: string }) {
   const [insightsOpen, setInsightsOpen] = useState(false)
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionId) 
+    setExpandedSections(prev =>
+      prev.includes(sectionId)
         ? prev.filter(id => id !== sectionId)
         : [...prev, sectionId]
     )
   }
 
   // Format scout name for display
-  const scoutName = scoutSlug.split('-').map(word => 
+  const scoutName = scoutSlug?.split('-').map(word =>
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 
@@ -93,17 +93,17 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug: string }) {
       {/* Scout Name Header */}
       <div className="p-4 shrink-0">
         <div>
-        <h2 className="text-md font-semibold">{scoutName}</h2>
-        <p className="text-xs text-muted-foreground mb-2">
-          {sections.reduce((total, section) => total + section.pitches.length, 0)} Total Pitches
-        </p>
+          <h2 className="text-md font-semibold">{scoutName}</h2>
+          <p className="text-xs text-muted-foreground mb-2">
+            {sections.reduce((total, section) => total + section.pitches.length, 0)} Total Pitches
+          </p>
         </div>
         <div className="flex">
-          <Link href={`/investor/studio/details?mode=edit&programId=${scoutSlug}`}>
-            <Button 
-            variant="link"
-            size="sm"
-            className="w-full text-white px-0 justify-start" >
+          <Link href={`/investor/scout/${scoutSlug}/details/studio`}>
+            <Button
+              variant="link"
+              size="sm"
+              className="w-full text-white px-0 justify-start" >
               Studio
             </Button>
           </Link>
@@ -138,7 +138,7 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug: string }) {
                   {section.title} <Badge variant="secondary">{section.pitches.length}</Badge>
                 </div>
               </Button>
-              
+
               {expandedSections.includes(section.id) && (
                 <div className="mx-4 space-y-2 mt-2">
                   {section.pitches.map((pitch) => (
@@ -183,7 +183,7 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug: string }) {
         >
           End Scouting
         </Button>
-        
+
         {/* <Button
           variant="outline"
           size="sm"

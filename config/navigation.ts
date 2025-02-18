@@ -132,6 +132,70 @@ export const investorStudioNavItems = [
   },
 ]
 
+export const scoutStudioNavItems = [
+  {
+    title: "Scout Details",
+    url: "/investor/scout/random/details/studio",
+    icon: FileSpreadsheet,
+  },
+  {
+    title: "Audience",
+    url: "/investor/scout/random/details/studio/audience",
+    icon: Users,
+  },
+  {
+    title: "Collaboration",
+    url: "/investor/scout/random/details/studio/collaboration",
+    icon: Users2,
+  },
+  {
+    title: "Scout Document",
+    url: "/investor/scout/random/details/studio/documents",
+    icon: FileText,
+  },
+  {
+    title: "Founder's Pitch",
+    url: "/investor/scout/random/details/studio/founder-pitch",
+    icon: Video,
+  },
+  {
+    title: "Investor's Pitch",
+    url: "/investor/scout/random/details/studio/investor-pitch",
+    icon: MessageCircle,
+  },
+  {
+    title: "FAQs",
+    url: "/investor/scout/random/details/studio/faqs",
+    icon: HelpCircle,
+  },
+  // {
+  //   title: "Invite from Database",
+  //   url: "/investor/studio/invite",
+  //   icon: UserPlus,
+  // },
+  {
+    title: "Approval",
+    url: "/investor/scout/random/details/studio/approval",
+    icon: CheckCircle,
+  },
+  // {
+  //   title: "Meetings",
+  //   url: "/investor/studio/meetings",
+  //   icon: Calendar,
+  // },
+  {
+    title: "Schedule",
+    url: "/investor/scout/random/details/studio/schedule",
+    icon: Calendar,
+  },
+  {
+    title: "Delete",
+    url: "/investor/scout/random/details/studio/delete",
+    icon: Trash2,
+    className: "text-red-500 hover:text-red-600",
+  },
+]
+
 export const founderStudioNavItems = [
   {
     title: "Scout Details",

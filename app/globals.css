@@ -88,3 +88,11 @@
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}

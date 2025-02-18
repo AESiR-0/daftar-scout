@@ -2,22 +2,23 @@
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { investorStudioNavItems, founderStudioNavItems } from "@/config/navigation"
+import { investorStudioNavItems, scoutStudioNavItems, founderStudioNavItems } from "@/config/navigation"
 import Link from "next/link"
 
 interface StudioNavProps {
   className?: string;
   mode?: string | null;
   programId?: string | null;
+  details?: boolean;
 }
 
-export function StudioNav({ className, mode, programId }: StudioNavProps) {
+export function StudioNav({ className, mode, programId, details }: StudioNavProps) {
   const pathname = usePathname()
   const role = pathname.includes('founder/') ? 'founder' : 'investor'
   const [isScrolled, setIsScrolled] = useState(false)
 
   // Get nav items based on role
-  const navItems = role === 'investor' ? investorStudioNavItems : founderStudioNavItems
+  const navItems = role === 'investor' ? details ? scoutStudioNavItems : investorStudioNavItems : founderStudioNavItems
 
   useEffect(() => {
     const handleScroll = () => {
