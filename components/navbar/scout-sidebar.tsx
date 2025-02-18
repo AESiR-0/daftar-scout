@@ -63,7 +63,7 @@ const sections: Section[] = [
     id: "deleted",
     title: "Pitch Deleted",
     pitches: [
-      { id: "6", pitchName: "Old Startup Idea", daftarName: "Tech Startup", Believer: "3", averageNPS: "5/10" , interestedCount: 0 },
+      { id: "6", pitchName: "Old Startup Idea", daftarName: "Tech Startup", Believer: "3", averageNPS: "5/10", interestedCount: 0 },
     ]
   }
 ]
@@ -84,7 +84,7 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
   }
 
   // Format scout name for display
-  const scoutName = scoutSlug.split('-').map(word =>
+  const scoutName = scoutSlug?.split('-').map(word =>
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ')
 
@@ -97,7 +97,7 @@ export function ScoutSidebar({ scoutSlug }: { scoutSlug?: string }) {
             <h2 className="text-[14px] font-semibold">{scoutName}</h2>
           </div>
           <div className="px-4 py-2">
-            <Link href={`/investor/studio/details?mode=edit&programId=${scoutSlug}`}>
+            <Link href={`/investor/scout/${scoutSlug}/studio`}>
               <Button
                 variant="link"
                 size="sm"

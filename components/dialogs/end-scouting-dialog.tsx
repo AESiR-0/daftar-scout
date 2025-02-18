@@ -39,10 +39,11 @@ const getStatusIcon = (status: string) => {
 interface EndScoutingDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onConfirm: () => void
 }
 
 
-export function EndScoutingDialog({ open, onOpenChange }: EndScoutingDialogProps) {
+export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScoutingDialogProps) {
   const [approvals, setApprovals] = useState<TeamMember[]>(dummyMembers)
   const [isRequested, setIsRequested] = useState(false)
   const [confirmEndScouting, setConfirmEndScouting] = useState(false)

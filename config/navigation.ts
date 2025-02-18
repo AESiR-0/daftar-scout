@@ -135,7 +135,7 @@ export const investorStudioNavItems = [
 export const scoutStudioNavItems = [
   {
     title: "Scout Details",
-    url: "/investor/scout/random/details/studio",
+    url: "/investor/scout/random/details/studio/details",
     icon: FileSpreadsheet,
   },
   {
