@@ -129,7 +129,6 @@ export default function ApprovalPage() {
 
   return (
     <div className="flex ">
-      <StudioNav />
       <div className="container mx-auto
      px-5 mt-2">
         <div className="grid grid-cols-3 gap-6">

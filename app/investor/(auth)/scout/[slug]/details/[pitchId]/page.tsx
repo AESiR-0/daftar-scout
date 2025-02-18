@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Eye, Upload, Trash2, Router, Flag } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ReportDialog } from "@/components/dialogs/report-dialog";
@@ -20,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MakeOfferSection } from "./components/make-offer-section";
 import { DeclinePitchDialog } from "./components/decline-pitch-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LineChart, PieChart } from "@/components/ui/charts"
+import { PieChart } from "@/components/ui/charts"
 
 // Import ApexCharts with NoSSR
 const Chart = dynamic(() => import("react-apexcharts"), {
