@@ -51,9 +51,9 @@ export function StudioNav({ className, mode, programId, details }: StudioNavProp
         className
       )}
     >
-      <div className="flex h-14 items-center justify-center px-4 border-b">
+      <div className="flex h-14 px-4">
         <div className="flex items-center space-x-2">
-          <nav className="flex items-center space-x-1">
+          <nav className="flex items-center justify-center space-x-1">
             {navItems.map((item) => {
               const href = createTabUrl(item.url)
               // Debug log
