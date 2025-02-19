@@ -143,7 +143,7 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
   }
 
   return (
-    <div className="w-[16rem]  p-4  h-full">
+    <div className="w-[16rem]  py-4 pl-4 h-full">
       <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
         {/* Scout Name Header */}
         <div className="border-b shrink-0">

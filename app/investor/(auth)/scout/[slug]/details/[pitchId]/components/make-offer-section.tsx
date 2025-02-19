@@ -311,6 +311,11 @@ export function MakeOfferSection() {
     setShowDetailsModal(true);
   };
 
+  const handleDeclineOffer = (message: string) => {
+    setShowActionDialog(true);
+    setOfferMessage(message);
+  };
+
   const handleSendOffer = (message: string) => {
     const newOffer: Offer = {
       id: Date.now().toString(),
@@ -360,13 +365,20 @@ export function MakeOfferSection() {
               onChange={(e) => setOfferMessage(e.target.value)}
               className="min-h-[100px] bg-background"
             />
-            <div className="mt-4 flex justify-start">
+            <div className="mt-4 flex gap-2 justify-start">
               <Button
                 onClick={() => handleSendOffer(offerMessage)}
                 disabled={!offerMessage.trim()}
-                className="bg-blue-600 hover:bg-blue-700"
+                variant="outline"
               >
                 Send
+              </Button>
+
+              <Button variant="outline" 
+                onClick={() => handleDeclineOffer(offerMessage)}
+                disabled={!offerMessage.trim()}
+              >
+                Decline
               </Button>
             </div>
           </div>

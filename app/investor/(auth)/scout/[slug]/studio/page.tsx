@@ -38,7 +38,7 @@ function StudioNav({ currentTab, setCurrentTab }: { currentTab: string, setCurre
                 isScrolled ? "border-b backdrop-blur-sm" : ""
             )}
         >
-            <div className="flex h-14 items-center justify-center px-4 border-b">
+            <div className="flex h-14 items-center px-4 border-b">
                 <div className="flex items-center space-x-2">
                     <nav className="flex items-center space-x-1">
                         {scoutStudioNavItems.map((item) => {

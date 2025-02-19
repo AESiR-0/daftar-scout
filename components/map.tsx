@@ -25,10 +25,12 @@ function ChangeView({ coordinates }: { coordinates: [number, number] }) {
 
 export default function MapComponent({ 
   coordinates,
-  height = "400px"
+  height = "400px",
+  zIndex = 10
 }: { 
   coordinates: [number, number] | null,
-  height?: string
+  height?: string,
+  zIndex?: number
 }) {
   const defaultPosition: [number, number] = [20.5937, 78.9629]; // Center of India
 
@@ -36,7 +38,7 @@ export default function MapComponent({
     <MapContainer
       center={coordinates || defaultPosition}
       zoom={coordinates ? 13 : 4}
-      style={{ height, width: '100%' }}
+      style={{ height, width: '100%', zIndex }}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

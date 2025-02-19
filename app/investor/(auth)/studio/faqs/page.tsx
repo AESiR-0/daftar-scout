@@ -122,7 +122,7 @@ function FaqsContent() {
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{faq.question}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground pl-6">
+                        <p className="text-sm text-muted-foreground">
                           {faq.answer}
                         </p>
                       </div>
