@@ -48,17 +48,20 @@ export function Combobox({ options, value, onSelect, placeholder = "Select optio
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
-                <Command>
-                    <CommandInput placeholder="Search..." disabled={disabled} />
-                    <CommandEmpty>No option found.</CommandEmpty>
-                    <ScrollArea className="max-h-full">
+                <Command className="w-full" key={value || "default"}>
+                    <CommandInput />
+                    <CommandEmpty >
+                        <span className="text-muted-foreground">No option found.</span>
+                    </CommandEmpty>
+                    <ScrollArea className="max-h-[200px]">
                         <CommandGroup className="bg-[#0e0e0e]">
                             <CommandList>
                                 {options.map((option) => (
                                     <CommandItem
                                         key={option}
                                         value={option}
-                                        onSelect={(currentValue) => {
+                                        className="flex items-center"
+                                        onSelect={(currentValue: string) => {
                                             onSelect(currentValue)
                                             setOpen(false)
                                         }}
@@ -77,6 +80,6 @@ export function Combobox({ options, value, onSelect, placeholder = "Select optio
                     </ScrollArea>
                 </Command>
             </PopoverContent>
-        </Popover >
+        </Popover>
     )
 } 
