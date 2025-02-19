@@ -2,8 +2,8 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import founderImage from "@/public/static/landing/indian street.png";
-import investorImage from "@/public/static/landing/steve jobs placeholder 2.png";
+import founderImage from "@/public/static/landing/founder.webp";
+import investorImage from "@/public/static/landing/investor.webp";
 import bg from '@/public/static/landing/home.webp'
 
 export default function HomePage() {
@@ -57,7 +57,6 @@ export default function HomePage() {
         onMouseLeave={handleMouseLeave}
         style={{
           rotateX,
-          rotateY,
           transformStyle: "preserve-3d",
         }}
         className="relative group cursor-pointer perspective-1000"
@@ -105,14 +104,32 @@ export default function HomePage() {
 
           <motion.div
             variants={{
-              initial: { opacity: 0, y: 20 },
+              initial: { opacity: 0.4, y: 10 },
               hover: { opacity: 1, y: 0 }
             }}
             transition={{ duration: 0.3 }}
             className="absolute bottom-4 left-5 pr-5"
           >
             <h2 className="text-2xl font-semibold text-white">{title}</h2>
-            <p className="text-muted-foreground">{description}</p>
+          <div className="flex border w-full justify-between">  <p className="text-muted-foreground">{description}</p> 
+          <motion.svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6 text-white"
+            initial={{ x: 0 }}
+            whileHover={{ x: 5 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8.25 4.5l7.5 7.5-7.5 7.5"
+            />
+          </motion.svg>
+          </div>
           </motion.div>
         </motion.div>
       </motion.div>

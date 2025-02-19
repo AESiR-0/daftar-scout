@@ -20,10 +20,13 @@ export function LoginClient({ role }: { role: string }) {
     }
   };
 
+  const videoSrc =
+    role === "investor" ? "/videos/investor.mp4" : "/videos/founder.mp4";
+
   return (
-    <div className="min-h-screen bg-[#0e0e0e] flex flex-col items-center justify-center p-4">
-      <div className="text-center space-y-8 max-w-md w-full">
-        <h1 className="text-2xl font-bold tracking-tight">
+    <div className="min-h-[90vh] bg-[#0e0e0e] flex flex-col items-center justify-center p-4">
+      <div className="text-center space-y-4 max-w-md w-full">
+        <h1 className="text-3xl font-bold tracking-tight">
           Welcome to Daftar OS
         </h1>
 
@@ -31,10 +34,15 @@ export function LoginClient({ role }: { role: string }) {
           Sign in to access your {role} Scout
         </p>
 
-        <div className="bg-card p-8 rounded-lg border shadow-sm">
+        <video className="w-full rounded-lg border shadow-sm" controls>
+          <source src={videoSrc} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        <div className="p-8 rounded-lg  shadow-sm">
           <Button
             size="lg"
-            className="w-full"
+            className="w-full bg-muted hover:bg-muted/80 hover:scale-95"
             onClick={handleSignIn}
             disabled={isLoading}
           >
