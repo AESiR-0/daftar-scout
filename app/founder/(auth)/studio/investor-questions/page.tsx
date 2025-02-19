@@ -187,19 +187,19 @@ export default function InvestorQuestionsPage() {
                     </div>
                     <div className="w-1/2">
                         <ScrollArea className="h-[calc(100vh-16rem)]">
-                            <div className="space-y-4 pr-4">
+                            <div className="space-y-2 pr-4">
                                 {questionsWithVideos.map((item) => (
                                     <div
                                         key={item.id}
                                         onClick={() => handleQuestionSelect(item)}
-                                        className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                                        className={`px-1 rounded-[0.35rem] py-1 cursor-pointer hover:underline transition-colors ${
                                             selectedQuestion.id === item.id 
-                                                ? 'bg-blue-500/10 border border-blue-500/20' 
-                                                : 'hover:bg-gray-800/50'
+                                                ? '' 
+                                                : ''
                                         }`}
                                     >
                                         <h3 className="text-sm font-medium">
-                                            {item.id}. {item.question}
+                                            {item.question}
                                         </h3>
                                     </div>
                                 ))}

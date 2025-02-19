@@ -241,78 +241,87 @@ export default function FounderPitchPage() {
   }
 
   return (
-    <Card className="border-none mt-4 container mx-auto px-4 bg-[#0e0e0e]">
+    <Card className="border-none my-4 container mx-auto px-4 bg-[#0e0e0e]">
       <CardContent className="pt-6">
         <div className="space-y-6">
-          {/* Header with Info Icon */}
-          <div className="flex items-center">
-            <h2 className="text-lg font-medium">Create Custom Questions for Founder's Pitch</h2>
-            <HoverCard>
-              <HoverCardTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Info className="h-5 w-5" />
-                </Button>
-              </HoverCardTrigger>
-              <HoverCardContent className="w-[800px] p-4">
-                <div className="space-y-4 flex gap-4">
-                  <div className="w-1/2">
-                <video
-                  src={selectedQuestion.videoUrl}
-                  poster={selectedQuestion.previewImage}
-                  className="w-full h-full object-cover"
-                  controls
-                  />
+          {/* Header with Info Icon and Sample Questions */}
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center">
+              <h2 className="text-lg font-medium">Create Custom Questions for Founder's Pitch</h2>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Info className="h-5 w-5" />
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-[800px] p-4">
+                  <div className="space-y-4 flex gap-4">
+                    <div className="w-1/2">
+                      <video
+                        src={selectedQuestion.videoUrl}
+                        poster={selectedQuestion.previewImage}
+                        className="w-full h-full object-cover"
+                        controls
+                      />
+                    </div>
+                    <div className="w-1/2">
+                      <h3 className="text-sm font-medium">Why Video Pitching?</h3>
+                      <p className="text-sm mt-2 text-muted-foreground">
+                        Pitch OS helps founders connect through video pitches in the language they're most comfortable with. By understanding the "why" and "what" of a founder's journey, it becomes easier to decide whether to meet them in person and offer support.
+                      </p><br/>
+                      <p className="text-sm text-muted-foreground">
+                        We've reviewed thousands of startups and investors to create a set of simple questions that help your screening team quickly understand the founder's journey before deciding to meet.
+                      </p><br/>
+                      <p className="text-sm text-muted-foreground">
+                        As a Daftar OS Elite member, you can fully customize these questions to match your investment or startup support program.
+                      </p>
+                    </div>
                   </div>
-                <div className="w-1/2">
-                  <h3 className="text-sm font-medium">Why Video Pitching?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Pitch OS helps founders connect through video pitches in the language they're most comfortable with. By understanding the "why" and "what" of a founder's journey, it becomes easier to decide whether to meet them in person and offer support.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    We've reviewed thousands of startups and investors to create a set of simple questions that help your screening team quickly understand the founder's journey before deciding to meet.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    As a Daftar OS Elite member, you can fully customize these questions to match your investment or startup support program.
-                  </p>
-                  </div>
-                </div>
-              </HoverCardContent>
-            </HoverCard>
+                </HoverCardContent>
+              </HoverCard>
+            </div>
           </div>
-
           {/* Video and Sample Questions side by side */}
-          <div className="grid grid-cols-2 gap-6">
-            {/* Video Preview */}
-            <div className="aspect-video bg-muted rounded-lg relative group overflow-hidden h-[300px]">
+          <div className="flex gap-6">
+            {/* Left Column - Video Preview */}
+            <div className="w-[1/3] aspect-video bg-muted rounded-lg relative group overflow-hidden h-fit">
               {selectedQuestion.videoUrl ? (
-                <video
-                  src={selectedQuestion.videoUrl}
-                  poster={selectedQuestion.previewImage}
-                  className="w-full h-full object-cover"
-                  controls
-                />
+                <>
+                  <video
+                    src={selectedQuestion.videoUrl}
+                    poster={selectedQuestion.previewImage}
+                    className="w-full h-[250px] object-cover"
+                    controls
+                  />
+                  <p className="text-sm text-muted-foreground mt-2 ml-2">
+                    Language: English
+                  </p>
+                </>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-sm text-muted-foreground">
                     Select a question to view sample response
                   </div>
+                  <p className="text-sm text-muted-foreground mt-2 ml-2">
+                    Language: English
+                  </p>
                 </div>
               )}
             </div>
 
-            {/* Sample Questions */}
+            {/* Right Column - Sample Questions */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium">Sample Questions</h3>
+
               <ScrollArea className="h-[250px]">
                 <div className="space-y-2 pr-4">
                   {questionsData.defaultQuestions.map((question) => (
                     <div
                       key={question.id}
-                      className="py-1 font-medium cursor-pointer hover:bg-muted/50 rounded-md px-2 transition-colors"
+                      className="px-1 rounded-[0.35rem] py-1 cursor-pointer hover:underline transition-colors"
                       onClick={() => setSelectedQuestion(question)}
                     >
-                      <p className={`text-sm ${selectedQuestion.id === question.id ? '' : ''}`}>
-                        {question.id}. {question.question}
+                      <p className={`text-sm font-medium  ${selectedQuestion.id === question.id ? '' : ''}`}>
+                        {question.question}
                       </p>
                     </div>
                   ))}
@@ -324,8 +333,7 @@ export default function FounderPitchPage() {
           {/* Buttons and Custom Questions side by side */}
           <div className="grid grid-cols-4 gap-6">
             {/* Action Buttons */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium">Actions</h3>
+            <div className="space-y-1">
               <div className="space-y-3">
                 <Button 
                   variant="outline" 
@@ -352,7 +360,6 @@ export default function FounderPitchPage() {
 
             {/* Custom Questions Card */}
             <div className="space-y-4 col-span-3">
-              <h3 className="text-sm font-medium">Custom Questions</h3>
               <div className="border rounded-lg p-4 bg-muted/50 h-[250px]">
                 <ScrollArea className="h-full">
                   <div className="space-y-3">

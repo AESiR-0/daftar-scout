@@ -371,7 +371,7 @@ export function MakeOfferSection() {
                 disabled={!offerMessage.trim()}
                 variant="outline"
               >
-                Send
+                Accept
               </Button>
 
               <Button variant="outline" 
@@ -451,16 +451,11 @@ export function MakeOfferSection() {
                       <div className="flex gap-2 mt-4">
                         <Button 
                           variant="outline"
-                          onClick={() => handleStatusUpdate(offer.id, "accepted", "completed")}
+                          onClick={() => handleWithdraw(offer.id)}
                         >
-                          Accept
+                          Withdraw
                         </Button>
-                        <Button 
-                          variant="outline"
-                          onClick={() => handleStatusUpdate(offer.id, "withdrawn", "declined")}
-                        >
-                          Reject
-                        </Button>
+                        
                       </div>
                     ) : (
                       <div className="flex justify-start mt-4">

@@ -184,7 +184,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
                                         <div
                                             key={item.id}
                                             className={cn(
-                                                "px-4 rounded-[0.35rem] cursor-pointer transition-colors",
+                                                "px-4 rounded-[0.35rem] hover:underline cursor-pointer transition-colors",
                                             )}
                                         >
                                             <h3 className="text-sm font-medium">{item.question}</h3>
