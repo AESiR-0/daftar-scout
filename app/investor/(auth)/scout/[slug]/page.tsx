@@ -1,6 +1,6 @@
 "use client"
 
-export default function ScoutPage({ params }: { params: { slug: string } }) {
+export default function ScoutPage() {
   const isPlanning = true // This would come from your data source
   const isScheduling = false // This would come from your data source
 
