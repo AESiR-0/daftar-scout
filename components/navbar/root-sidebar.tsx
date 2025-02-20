@@ -3,35 +3,32 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { Building2, Users, Cloud } from "lucide-react"
-
-type TabType = "cloud" | "founder" | "investor"
-
-interface RootSidebarProps {
-  activeTab: TabType
-  onTabChange: (tab: TabType) => void
-}
+import { useRouter, usePathname } from "next/navigation"
 
 const navItems = [
   {
     title: "Daftar's Cloud",
-    id: "cloud" as const,
+    path: "/landing",
     icon: Cloud,
   },
   {
     title: "Founder",
-    id: "founder" as const,
+    path: "/landing/founder",
     icon: Building2,
   },
   {
     title: "Investor",
-    id: "investor" as const,
+    path: "/landing/investor",
     icon: Users,
   }
 ]
 
-export function RootSidebar({ activeTab, onTabChange }: RootSidebarProps) {
+export function RootSidebar() {
+  const router = useRouter()
+  const pathname = usePathname()
+
   return (
-    <div className="border-r bg-[#0e0e0e] w-[60px] min-h-screen">
+    <div className="w-[60px] min-h-screen h-full">
       <div className="flex h-full justify-between pb-10 flex-col">
         {/* Top Section */}
         <div>
@@ -49,10 +46,10 @@ export function RootSidebar({ activeTab, onTabChange }: RootSidebarProps) {
               {navItems.map((item) => (
                 <button
                   key={item.title}
-                  onClick={() => onTabChange(item.id)}
+                  onClick={() => router.push(item.path)}
                   className={cn(
                     "flex flex-col items-center justify-center rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground w-full",
-                    activeTab === item.id ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                    pathname === item.path ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                     "my-4"
                   )}
                 >

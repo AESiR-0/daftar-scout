@@ -43,7 +43,7 @@ If Induben Khakrawala had scaled nationally, improved its operations, and entere
   },
 }
 
-export function InvestorSection() {
+export default function InvestorPage() {
   const [activeStory, setActiveStory] = useState<StoryTab>("economy")
 
   const renderContent = () => {
@@ -97,75 +97,84 @@ export function InvestorSection() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-16">
-      {/* Hero Section */}
-      <div className="space-y-4 flex flex-col items-center text-center">
-        <div className="space-y-2">
-          <h1 className="text-6xl font-light">Simplifying</h1>
-          <h1 className="text-6xl font-light">Startup Scouting</h1>
-        <p className="text-muted-foreground text-lg py-4">
-          Feel the 'why' behind a founder's problem statement in the language they are comfortable to speak, coz a pitch deck isn't enough
-        </p>
-        </div>
-      </div>
-
-      {/* Image Frame */}
-      <div className="bg-muted rounded-lg overflow-hidden max-w-4xl mx-auto">
-        <Image
-          src="/assets/investor_layout.png"
-          alt="Startup Scouting"
-          width={1920}
-          height={1080}
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Missed Opportunities Section */}
-      <div className="text-center space-y-2">
-        <h2 className="text-4xl font-light">
-          You've <span className="text-blue-500">Missed</span> Billion-Dollar Opportunities
-        </h2>
-      </div>
-
-      {/* Newspaper Style Card */}
-      <Card className="bg-[#f4f1ea] text-black p-8 max-w-5xl min-h-[100vh] mx-auto shadow-md">
-        <div className="border-b-2 border-black pb-4 mb-8">
-          <h3 className="text-4xl font-serif text-center tracking-tight">
-            THE STARTUP HERALD
-          </h3>
-          <div className="flex justify-between text-xs mt-2 font-serif">
-            <span>Est. 2024</span>
-            <span>Vol. 1 No. 1</span>
-          </div>
+    <div className="flex flex-col items-center min-h-[calc(100vh-3.5rem)] px-4 py-12">
+      {/* Main Content */}
+      <div className="max-w-6xl w-full space-y-24">
+        {/* Hero Section */}
+        <div className="space-y-6 text-center">
+          <h1 className="text-7xl font-light tracking-tight">
+            Simplifying
+          </h1>
+          <h1 className="text-7xl font-light tracking-tight">
+            Startup Scouting
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Feel the 'why' behind a founder's problem statement in the language they are comfortable to speak, 
+            coz a pitch deck isn't enough
+          </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-8">
-          {/* Left Column - Navigation */}
-          <div className="space-y-6">
-            <div className="space-y-3 font-serif">
-              {Object.entries(stories).map(([key, story]) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveStory(key as StoryTab)}
-                  className={cn(
-                    "text-left w-full py-1 transition-colors font-serif border-b border-black/20",
-                    activeStory === key 
-                      ? "text-black font-bold" 
-                      : "text-black/70 hover:text-black"
-                  )}
-                >
-                  {story.title}
-                </button>
-              ))}
+        {/* Image Frame */}
+        <div className="relative">
+          <Card className="overflow-hidden border-0 bg-muted/50 max-w-4xl mx-auto">
+            <Image
+              src="/assets/investor_layout.png"
+              alt="Startup Scouting"
+              width={1920}
+              height={1080}
+              className="w-full h-full object-cover"
+            />
+          </Card>
+          <div className="absolute z-[-10] -top-10 right-20 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl" />
+          <div className="absolute z-[-10] -bottom-10 left-20 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl" />
+        </div>
+
+        {/* Bottom Section */}
+        <div className="space-y-6 text-center">
+          <h2 className="text-5xl font-light">
+            You've <span className="text-blue-500">Missed</span> Billion-Dollar Opportunities
+          </h2>
+        </div>
+
+        {/* Newspaper Section */}
+        <Card className="bg-[#f4f1ea] text-black p-8 max-w-5xl mx-auto">
+          <div className="border-b-2 border-black pb-4 mb-8">
+            <h3 className="text-4xl font-serif text-center tracking-tight">
+              THE STARTUP HERALD
+            </h3>
+            <div className="flex justify-between text-xs mt-2 font-serif">
+              <span>Est. 2024</span>
+              <span>Vol. 1 No. 1</span>
             </div>
           </div>
+          <div className="grid grid-cols-3 gap-8">
+            {/* Left Column - Navigation */}
+            <div className="space-y-6">
+              <div className="space-y-3 font-serif">
+                {Object.entries(stories).map(([key, story]) => (
+                  <button
+                    key={key}
+                    onClick={() => setActiveStory(key as StoryTab)}
+                    className={cn(
+                      "text-left w-full py-1 transition-colors font-serif border-b border-black/20",
+                      activeStory === key 
+                        ? "text-black font-bold" 
+                        : "text-black/70 hover:text-black"
+                    )}
+                  >
+                    {story.title}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          {/* Right Column - Content */}
-          <div className="col-span-2 border-l border-black pl-8">
-            {renderContent()}
+            {/* Right Column - Content */}
+            <div className="col-span-2 border-l border-black pl-8">
+              {renderContent()}
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 } 
