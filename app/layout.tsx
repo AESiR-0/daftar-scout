@@ -21,7 +21,7 @@ export default function RootLayout({
         className={`subpixel-antialiased font-poppins`}
       >
         <ToastProvider>
-          <div className="relative flex min-h-screen flex-col">
+          <div className="relative flex min-h-screen h-full flex-col">
             {children}
             <Footer />
           </div>
