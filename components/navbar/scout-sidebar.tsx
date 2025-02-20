@@ -18,7 +18,7 @@ interface Pitch {
   daftarName: string
   Believer: string
   averageNPS: string
-  interestedCount: number
+  interestedCount: string
 }
 
 interface Section {
@@ -32,39 +32,39 @@ const sections: Section[] = [
     id: "inbox",
     title: "Inbox",
     pitches: [
-      { id: "1", pitchName: "AI Chatbot", daftarName: "Tech Startup", Believer: "3", averageNPS: "8.5/10", interestedCount: 5 },
-      { id: "2", pitchName: "Blockchain Solution", daftarName: "Tech Startup", Believer: "3", averageNPS: "9/10", interestedCount: 3 },
-      { id: "7", pitchName: "IoT Platform", daftarName: "Tech Startup", Believer: "4", averageNPS: "8.8/10", interestedCount: 6 },
-      { id: "8", pitchName: "Cloud Service", daftarName: "Tech Startup", Believer: "5", averageNPS: "9.5/10", interestedCount: 8 },
-      { id: "9", pitchName: "ML Solution", daftarName: "Tech Startup", Believer: "4", averageNPS: "8.7/10", interestedCount: 4 },
+      { id: "1", pitchName: "AI Chatbot", daftarName: "Tech Startup", Believer: "3", averageNPS: "NA", interestedCount: "NA" },
+      { id: "2", pitchName: "Blockchain Solution", daftarName: "Tech Startup", Believer: "3", averageNPS: "NA", interestedCount: "NA" },
+      { id: "7", pitchName: "IoT Platform", daftarName: "Tech Startup", Believer: "4", averageNPS: "NA", interestedCount: "NA" },
+      { id: "8", pitchName: "Cloud Service", daftarName: "Tech Startup", Believer: "5", averageNPS: "NA", interestedCount: "NA" },
+      { id: "9", pitchName: "ML Solution", daftarName: "Tech Startup", Believer: "4", averageNPS: "NA", interestedCount: "NA" },
     ]
   },
   {
     id: "inDiscussion",
     title: "In Discussion",
     pitches: [
-      { id: "3", pitchName: "E-commerce Platform", daftarName: "FinTech Pro", Believer: "3", averageNPS: "7.8/10", interestedCount: 2 },
+      { id: "3", pitchName: "E-commerce Platform", daftarName: "FinTech Pro", Believer: "3", averageNPS: "7.8/10", interestedCount: "2" },
     ]
   },
   {
     id: "dealAccepted",
     title: "Deal Accepted",
     pitches: [
-      { id: "4", pitchName: "HealthTech App", daftarName: "EduTech", Believer: "5", averageNPS: "9.2/10", interestedCount: 4 },
+      { id: "4", pitchName: "HealthTech App", daftarName: "EduTech", Believer: "5", averageNPS: "9.2/10", interestedCount: "4" },
     ]
   },
   {
     id: "dealCancelled",
     title: "Deal Cancelled",
     pitches: [
-      { id: "5", pitchName: "Green Energy", daftarName: "HealthTech", Believer: "3", averageNPS: "7/10", interestedCount: 1 },
+      { id: "5", pitchName: "Green Energy", daftarName: "HealthTech", Believer: "3", averageNPS: "7/10", interestedCount: "1" },
     ]
   },
   {
     id: "deleted",
     title: "Pitch Deleted",
     pitches: [
-      { id: "6", pitchName: "Old Startup Idea", daftarName: "Tech Startup", Believer: "3", averageNPS: "5/10", interestedCount: 0 },
+      { id: "6", pitchName: "Old Startup Idea", daftarName: "Tech Startup", Believer: "3", averageNPS: "5/10", interestedCount: "0" },
     ]
   }
 ]

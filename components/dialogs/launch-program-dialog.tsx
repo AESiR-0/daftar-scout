@@ -26,10 +26,10 @@ export function LaunchProgramDialog({ open, onOpenChange, onSubmitFeedback }: La
         <div className="space-y-6">
           {/* Update Message */}
           <div className="space-y-4">
-            <p className="text-sm leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Program feature is rolling out soon, and your scouted startups will be added to the program list.
             </p>
-            <p className="text-sm">
+            <p className="text-sm text-muted-foreground ">
               By the way, we'd love your experience to help build and test the program feature. If you're interested and have some time, we'd love your insights into building or testing the feature.
             </p>
           </div>

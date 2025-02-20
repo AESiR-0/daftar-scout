@@ -137,8 +137,8 @@ export default function PitchPage() {
             <div className="w-2/3 space-y-6">
                 <ScrollArea className="space-y-6">
                     {/* Specific Asks Section */}
-                    <div className="space-y-2">
-                        <Label>Got any specific asks for Investor?</Label>
+                    <div className="space-y-2 px-1">
+                        <Label>Do you have any specific ask from the Investor?</Label>
                         <Textarea
                             value={specificAsks}
                             onChange={(e) => setSpecificAsks(e.target.value)}
@@ -147,7 +147,7 @@ export default function PitchPage() {
                     </div>
 
                     {/* Team Approvals Section */}
-                    <div className="flex items-center mt-4 space-x-2 mb-4">
+                    <div className="flex items-center mt-4 px-1 space-x-2 mb-4">
                         <Checkbox 
                             id="terms" 
                             checked={termsAccepted}

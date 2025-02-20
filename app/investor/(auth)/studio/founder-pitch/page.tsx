@@ -19,6 +19,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface Question {
   id: number
@@ -62,7 +63,7 @@ const questionsData = {
       id: 1,
       question: "Introduce yourself",
       videoUrl: "/videos/problem.mp4",
-      previewImage: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4"
+      previewImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f"
     },
     {
       id: 2,
@@ -73,22 +74,26 @@ const questionsData = {
     {
       id: 3,
       question: "What is the problem are you solving, and why is it really important for you to solve it",
-      videoUrl: "/videos/solution.mp4"
+      videoUrl: "/videos/solution.mp4",
+      previewImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f"
     },
     {
       id: 4,
       question: "Who are your customers, and why would they pay for it",
-      videoUrl: "/videos/customer.mp4"
+      videoUrl: "/videos/customer.mp4",
+      previewImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f"
     },
     {
       id: 5,
       question: "How much have you worked on your startup, and where do you see it in 3 years",
-      videoUrl: "/videos/business.mp4"
+      videoUrl: "/videos/business.mp4",
+      previewImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f"
     },
     {
       id: 6,
       question: "What challenges are you facing, and what support do you need",
-      videoUrl: "/videos/team.mp4"
+      videoUrl: "/videos/team.mp4",
+      previewImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f"
     }
   ],
   templates: {
@@ -110,7 +115,14 @@ export default function FounderPitchPage() {
   const router = useRouter()
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [currentQuestions, setCurrentQuestions] = useState<Question[]>(questionsData.defaultQuestions)
+  const [selectedOption, setSelectedOption] = useState<"sample" | "custom" | null>(null)
+  const [customQuestions, setCustomQuestions] = useState<Question[]>(
+    Array(6).fill(null).map((_, i) => ({
+      id: i + 1,
+      question: "",
+    }))
+  )
+  const [currentQuestions, setCurrentQuestions] = useState<Question[]>([])
   const [selectedQuestion, setSelectedQuestion] = useState<Question>(questionsData.defaultQuestions[0])
   const [templates, setTemplates] = useState<Record<string, Question[]>>(questionsData.templates)
   const [questionsOpen, setQuestionsOpen] = useState(false)
@@ -120,6 +132,14 @@ export default function FounderPitchPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const [selectedLanguage, setSelectedLanguage] = useState("english")
+
+  const handleOptionChange = (option: "sample" | "custom") => {
+    if (selectedOption === option) {
+      setSelectedOption(null)
+    } else {
+      setSelectedOption(option)
+    }
+  }
 
   const handleUpload = () => {
     fileInputRef.current?.click()
@@ -254,17 +274,17 @@ export default function FounderPitchPage() {
                     <Info className="h-5 w-5" />
                   </Button>
                 </HoverCardTrigger>
-                <HoverCardContent className="w-[800px] p-4">
-                  <div className="space-y-4 flex gap-4">
-                    <div className="w-1/2">
+                <HoverCardContent className="w-[700px] p-4">
+                  <div className=" flex gap-4">
+                    <div className="w-1/3 flex mt-8 justify-center items-center">
                       <video
                         src={selectedQuestion.videoUrl}
                         poster={selectedQuestion.previewImage}
-                        className="w-full h-full object-cover"
+                        className="w-[250px] h-[225px] object-cover"
                         controls
                       />
                     </div>
-                    <div className="w-1/2">
+                    <div className="w-2/3">
                       <h3 className="text-sm font-medium">Why Video Pitching?</h3>
                       <p className="text-sm mt-2 text-muted-foreground">
                         Pitch OS helps founders connect through video pitches in the language they're most comfortable with. By understanding the "why" and "what" of a founder's journey, it becomes easier to decide whether to meet them in person and offer support.
@@ -281,37 +301,33 @@ export default function FounderPitchPage() {
               </HoverCard>
             </div>
           </div>
-          {/* Video and Sample Questions side by side */}
+          {/* Video and Questions side by side */}
           <div className="flex gap-6">
             {/* Left Column - Video Preview */}
-            <div className="w-[1/3] aspect-video bg-muted rounded-lg relative group overflow-hidden h-fit">
-              {selectedQuestion.videoUrl ? (
-                <>
+            <div className="flex flex-col">
+              <div className="w-[1/3] aspect-video bg-muted rounded-lg relative group overflow-hidden h-[250px]">
+                {selectedQuestion.videoUrl ? (
                   <video
                     src={selectedQuestion.videoUrl}
                     poster={selectedQuestion.previewImage}
-                    className="w-full h-[250px] object-cover"
+                    className="w-full h-full object-cover"
                     controls
                   />
-                  <p className="text-sm text-muted-foreground mt-2 ml-2">
-                    Language: English
-                  </p>
-                </>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-sm text-muted-foreground">
-                    Select a question to view sample response
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-sm text-muted-foreground">
+                      Select a question to view sample response
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2 ml-2">
-                    Language: English
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Language: English
+              </p>
             </div>
 
-            {/* Right Column - Sample Questions */}
+            {/* Right Column - Sample Questions Preview */}
             <div className="space-y-2">
-
               <ScrollArea className="h-[250px]">
                 <div className="space-y-2 pr-4">
                   {questionsData.defaultQuestions.map((question) => (
@@ -320,7 +336,7 @@ export default function FounderPitchPage() {
                       className="px-1 rounded-[0.35rem] py-1 cursor-pointer hover:underline transition-colors"
                       onClick={() => setSelectedQuestion(question)}
                     >
-                      <p className={`text-sm font-medium  ${selectedQuestion.id === question.id ? '' : ''}`}>
+                      <p className={`text-sm font-medium ${selectedQuestion.id === question.id ? '' : ''}`}>
                         {question.question}
                       </p>
                     </div>
@@ -330,73 +346,76 @@ export default function FounderPitchPage() {
             </div>
           </div>
 
-          {/* Buttons and Custom Questions side by side */}
+          {/* Checkboxes and Questions Card */}
           <div className="grid grid-cols-4 gap-6">
-            {/* Action Buttons */}
-            <div className="space-y-1">
-              <div className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  onClick={handleSamplePitch}
-                  className=""
-                >
+            {/* Checkboxes */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="sample"
+                  className="border-gray-500"
+                  checked={selectedOption === "sample"}
+                  onCheckedChange={() => handleOptionChange("sample")}
+                />
+                <label htmlFor="sample" className="text-sm font-medium">
                   Use Sample Questions
-                </Button><br/>
-                <Button
-                  variant="outline"
-                  className=""
-                  onClick={() => {
-                    const newQuestion = {
-                      id: Date.now(),
-                      question: "",
-                    }
-                    setCurrentQuestions([...currentQuestions, newQuestion])
-                  }}
-                >
-                  Add Custom Question
-                </Button>
+                </label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="custom"
+                  className="border-gray-500"
+                  checked={selectedOption === "custom"}
+                  onCheckedChange={() => handleOptionChange("custom")}
+                />
+                <label htmlFor="custom" className="text-sm font-medium">
+                  Add Custom Questions
+                </label>
               </div>
             </div>
 
-            {/* Custom Questions Card */}
+            {/* Questions Card */}
             <div className="space-y-4 col-span-3">
               <div className="border rounded-lg p-4 bg-muted/50 h-[250px]">
                 <ScrollArea className="h-full">
-                  <div className="space-y-3">
-                    {currentQuestions.map((question, index) => (
-                      <div key={question.id} className="flex gap-3 items-start">
-                        <span className="text-xs font-medium mt-2">
-                          {String(index + 1)}.
-                        </span>
-                        <input
-                          type="text"
-                          value={question.question}
-                          onChange={(e) => {
-                            const updatedQuestions = [...currentQuestions]
-                            updatedQuestions[index].question = e.target.value
-                            setCurrentQuestions(updatedQuestions)
-                          }}
-                          placeholder="Enter your question..."
-                          className="flex-1 bg-background rounded-md p-2 text-sm"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const updatedQuestions = currentQuestions.filter((_, i) => i !== index)
-                            setCurrentQuestions(updatedQuestions)
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    {currentQuestions.length === 0 && (
-                      <div className="text-sm text-muted-foreground text-center py-4">
-                        Add custom questions using the button above
-                      </div>
-                    )}
-                  </div>
+                  {selectedOption === null ? (
+                    <div className="text-sm text-muted-foreground text-center py-4">
+                      Select an option to view or create questions
+                    </div>
+                  ) : selectedOption === "sample" ? (
+                    <div className="space-y-3">
+                      {questionsData.defaultQuestions.map((question, index) => (
+                        <div key={question.id} className="flex gap-3 items-start">
+                          <span className="text-xs font-medium mt-2">
+                            {String(index + 1)}.
+                          </span>
+                          <p className="text-sm mt-1">{question.question}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {customQuestions.map((question, index) => (
+                        <div key={question.id} className="flex gap-3 items-start">
+                          <span className="text-xs font-medium mt-2">
+                            {String(index + 1)}.
+                          </span>
+                          <input
+                            type="text"
+                            value={question.question}
+                            onChange={(e) => {
+                              const updatedQuestions = [...customQuestions]
+                              updatedQuestions[index].question = e.target.value
+                              setCustomQuestions(updatedQuestions)
+                            }}
+                            placeholder={`Enter question ${index + 1}...`}
+                            className="flex-1 bg-background rounded-md p-2 text-sm"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </div>
             </div>

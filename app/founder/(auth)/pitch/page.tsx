@@ -9,7 +9,7 @@ import ScoutPage from "@/app/founder/(auth)/scout/scoutPage"
 import DealBoardPage from "../deal-board/dealBoardPage"
 import MeetingsPage from "../meetings/page"
 export default function PitchPage() {
-  const [selectedTab, setSelectedTab] = useState("pitches")
+  const [selectedTab, setSelectedTab] = useState("dealBoard")
   
   const counts = {
     meetings: 5,

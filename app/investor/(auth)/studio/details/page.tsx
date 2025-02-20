@@ -63,7 +63,7 @@ export default function DetailsPage() {
           <div className="space-y-2">
             <Label>Scout&apos;s Vision</Label>
             <div className="  rounded-lg">
-              <textarea name="" id="" className="w-full h-[250px] bg-transparent text-white border p-4 rounded-lg"></textarea>
+              <textarea name="" id="" className="w-full h-[250px] bg-background text-white border p-4 rounded-lg"></textarea>
             </div>
           </div>
         </div>

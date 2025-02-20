@@ -187,7 +187,7 @@ export default function InvestorQuestionsPage() {
                     </div>
                     <div className="w-1/2">
                         <ScrollArea className="h-[calc(100vh-16rem)]">
-                            <div className="space-y-2 pr-4">
+                            <div className="space-y-2 mt-4 pr-4">
                                 {questionsWithVideos.map((item) => (
                                     <div
                                         key={item.id}

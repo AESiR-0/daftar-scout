@@ -209,7 +209,7 @@ export default function ApprovalPage() {
           </div>
 
           {/* Right Column - Error Summary */}
-          <div className="space-y-6">
+          <div className="mt-2">
             <Card className="border-none bg-[#0e0e0e]">
               <CardContent className="p-6">
                 <div className="space-y-4">

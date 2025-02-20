@@ -64,16 +64,17 @@ export function AppSidebar({ role }: { role: string }) {
           </div>
         </div>
       </div>
-
-      <div className="fixed bottom-8 left-4">
-        <Button 
-          size="icon" 
+      {role === 'investor' && (
+        <div className="fixed bottom-8 left-4">
+          <Button 
+            size="icon" 
           className="rounded-full bg-[#1a1a1a] border-2 border-[#2a2a2a] h-8 w-8"
           onClick={() => setSelectDaftarOpen(true)}
         >
         
         </Button>
       </div>
+      )}
 
       <SelectDaftarDialog 
         open={selectDaftarOpen}

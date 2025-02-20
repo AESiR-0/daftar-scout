@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Plus } from "lucide-react"
 
 interface Daftar {
   id: string
@@ -37,7 +36,10 @@ interface SelectDaftarDialogProps {
 }
 
 export function SelectDaftarDialog({ open, onOpenChange, onCreateNew }: SelectDaftarDialogProps) {
-  const [selectedDaftar, setSelectedDaftar] = useState<string | null>(null)
+  const handleDaftarSelect = (daftarId: string) => {
+    // Handle daftar selection
+    onOpenChange(false)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -51,12 +53,8 @@ export function SelectDaftarDialog({ open, onOpenChange, onCreateNew }: SelectDa
             {dummyDaftars.map((daftar) => (
               <div
                 key={daftar.id}
-                className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                  selectedDaftar === daftar.id 
-                    ? 'bg-accent border-accent' 
-                    : 'hover:bg-muted/50'
-                }`}
-                onClick={() => setSelectedDaftar(daftar.id)}
+                className="p-4 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50"
+                onClick={() => handleDaftarSelect(daftar.id)}
               >
                 <h3 className="font-medium">{daftar.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -67,23 +65,13 @@ export function SelectDaftarDialog({ open, onOpenChange, onCreateNew }: SelectDa
           </div>
         </ScrollArea>
 
-        <div className="flex justify-between mt-4">
+        <div className="mt-4">
           <Button
             variant="outline"
             onClick={onCreateNew}
             className="gap-2"
           >
             Create
-          </Button>
-          
-          <Button
-            onClick={() => {
-              // Handle daftar selection
-              onOpenChange(false)
-            }}
-            disabled={!selectedDaftar}
-          >
-            Select
           </Button>
         </div>
       </DialogContent>
