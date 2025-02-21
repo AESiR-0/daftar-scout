@@ -34,7 +34,7 @@ export function TopNavRoot() {
                     </Link>
                 </div>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4 mt-4 mr-8">
                     <nav className="flex items-center space-x-4">
                         <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-white">
                             Daftar's Den

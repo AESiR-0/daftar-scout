@@ -51,9 +51,9 @@ export default function InvestorPage() {
     
     if (activeStory === "economy") {
       return (
-        <div className="aspect-[9/16] max-h-[70vh] bg-muted rounded-sm overflow-hidden max-w-sm mx-auto">
+        <div className="aspect-video max-h-[65vh] bg-muted rounded-sm overflow-hidden mx-auto">
           <video
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-sm"
             controls
             poster="/assets/torricke-barton.jpg"
           >
@@ -99,7 +99,7 @@ export default function InvestorPage() {
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-3.5rem)] px-4 py-12">
       {/* Main Content */}
-      <div className="max-w-6xl w-full space-y-24">
+      <div className="max-w-6xl w-full space-y-16">
         {/* Hero Section */}
         <div className="space-y-6 text-center">
           <h1 className="text-7xl font-light tracking-tight">
@@ -138,16 +138,7 @@ export default function InvestorPage() {
 
         {/* Newspaper Section */}
         <Card className="bg-[#f4f1ea] text-black p-8 max-w-5xl mx-auto">
-          <div className="border-b-2 border-black pb-4 mb-8">
-            <h3 className="text-4xl font-serif text-center tracking-tight">
-              THE STARTUP HERALD
-            </h3>
-            <div className="flex justify-between text-xs mt-2 font-serif">
-              <span>Est. 2024</span>
-              <span>Vol. 1 No. 1</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-4 gap-8">
             {/* Left Column - Navigation */}
             <div className="space-y-6">
               <div className="space-y-3 font-serif">
@@ -169,7 +160,7 @@ export default function InvestorPage() {
             </div>
 
             {/* Right Column - Content */}
-            <div className="col-span-2 border-l border-black pl-8">
+            <div className="col-span-3 border-l border-black pl-8">
               {renderContent()}
             </div>
           </div>

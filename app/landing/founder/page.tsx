@@ -18,111 +18,86 @@ export default function FounderPage() {
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Video pitch your startup idea to investors and the government in 120 seconds, 
-            in any language you speak
+            <br />in any language you speak
           </p>
         </div>
 
         {/* Frame and Video Section */}
-        <div className="flex gap-12 items-start mb-20 justify-center">
-          {/* Left: Image Frame */}
-          <div className="relative flex-1 max-w-2xl">
-            <Card className="overflow-hidden border-0 bg-muted/50">
-              <Image
-                src="/assets/founder_layout.png"
-                alt="Pitch Frame"
-                width={800}
-                height={600}
-                className="w-full h-full object-cover"
-              />
-            </Card>
-            <div className="absolute z-[-10] -top-4 -right-4 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl" />
-          </div>
-
-          {/* Right: Vertical Video */}
-          <div className="w-[300px] space-y-6">
-            <div className="relative">
-              <Card className="aspect-[4/3] overflow-hidden border-0 bg-muted/50">
-                <video
-                  className="w-full h-full object-cover"
-                  controls
-                  poster="/assets/torricke-barton.jpg"
-                >
-                  <source src="/assets/torricke-barton.mp4" type="video/mp4" />
-                </video>
-              </Card>
-              <div className="absolute z-[-10] -bottom-4 -left-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
-            </div>
-            <div className="text-left space-y-1">
-              <p className="font-medium">built by founders</p>
-              <p className="font-medium">for founders</p>
-            </div>
-          </div>
+        <div className="relative">
+          <Card className="overflow-hidden border-0 bg-muted/50 max-w-4xl mx-auto">
+            <Image
+              src="/assets/founder_layout.png"
+              alt="Startup Scouting"
+              width={1920}
+              height={1080}
+              className="w-full h-full object-cover"
+            />
+          </Card>
+          <div className="absolute z-[-10] -top-10 right-20 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl" />
+          <div className="absolute z-[-10] -bottom-10 left-20 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl" />
         </div>
 
-        {/* Bottom Section */}
-        <div className="space-y-8  text-center">
-          <div className="space-y-6">
-            <h2 className="text-5xl font-light">
-              Pick Up Your Phone and <span className="text-blue-500">Pitch</span>
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              The World Will Believe in You If You Believe in Yourself.
-            </p>
-          </div>
+        {/* New Bottom Section */}
+        <div className="space-y-14">
+          <h2 className="text-5xl font-light text-center">
+            Built by Founders for Founders
+          </h2>
 
-          {/* Video Grid */}
-          <div className="max-w-5xl mx-auto grid grid-cols-3 gap-6 mt-12">
-            {/* First Row */}
-            <Card className="col-span-2 aspect-video overflow-hidden border-0 bg-muted/50 relative group">
-              <video 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105" 
-                poster="/assets/torricke-barton.jpg" 
-                controls 
-              />
-              <div className="absolute z-[-10] -bottom-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl" />
-            </Card>
-            <Card className="row-span-2 aspect-[9/16] overflow-hidden border-0 bg-muted/50 relative group">
-              <video 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105" 
-                poster="/assets/torricke-barton.jpg" 
-                controls 
-              />
-              <div className="absolute z-[-10] -top-4 -left-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
-            </Card>
+          <div className="flex gap-2">
+            {/* Left: Main Video */}
+            <div className="flex-1 space-y-4 justify-end">
+              <Card className="aspect-[3/4] max-h-[70vh] overflow-hidden border-0 bg-muted/50 relative group">
+                <video 
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                  poster="/assets/torricke-barton.jpg" 
+                  controls 
+                />
+                <div className="absolute z-[-10] -bottom-4 -left-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl" />
+              </Card>
+              <p className="text-2xl text-blue-500 font-light">
+                It Starts with a Dream.
+              </p>
+            </div>
 
-            {/* Second Row */}
-            <Card className="aspect-video overflow-hidden border-0 bg-muted/50 relative group">
-              <video 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105" 
-                poster="/assets/torricke-barton.jpg" 
-                controls 
-              />
-            </Card>
-            <Card className="aspect-video overflow-hidden border-0 bg-muted/50 relative group">
-              <video 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105" 
-                poster="/assets/torricke-barton.jpg" 
-                controls 
-              />
-            </Card>
+            {/* Right: Video Grid */}
+            <div className="flex-1 space-y-4 ">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Top Row - Smaller Videos */}
+                <Card className="aspect-video overflow-hidden border-0 bg-muted/50 relative group">
+                  <video 
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                    poster="/assets/torricke-barton.jpg" 
+                    controls 
+                  />
+                </Card>
+                <Card className="aspect-video overflow-hidden border-0 bg-muted/50 relative group">
+                  <video 
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                    poster="/assets/torricke-barton.jpg" 
+                    controls 
+                  />
+                </Card>
 
-            {/* Third Row */}
-            <Card className="overflow-hidden border-0 bg-muted/50 relative group">
-              <video 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105" 
-                poster="/assets/torricke-barton.jpg" 
-                controls 
-              />
-              <div className="absolute z-[-10] -bottom-4 -left-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl" />
-            </Card>
-            <Card className="col-span-2 aspect-video overflow-hidden border-0 bg-muted/50 relative group">
-              <video 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105" 
-                poster="/assets/torricke-barton.jpg" 
-                controls 
-              />
-              <div className="absolute z-[-10] -top-4 -right-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
-            </Card>
+                {/* Bottom Row - Larger Videos */}
+                <Card className="aspect-[4/3] overflow-hidden border-0 bg-muted/50 relative group col-span-1">
+                  <video 
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                    poster="/assets/torricke-barton.jpg" 
+                    controls 
+                  />
+                </Card>
+                <Card className="aspect-[4/3] overflow-hidden border-0 bg-muted/50 relative group col-span-1">
+                  <video 
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105" 
+                    poster="/assets/torricke-barton.jpg" 
+                    controls 
+                  />
+                </Card>
+              </div>
+              <p className="text-xl text-muted-foreground text-center">
+                Founders who believed in themselves
+              </p>
+            </div>
           </div>
         </div>
       </div>

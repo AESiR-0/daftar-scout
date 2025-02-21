@@ -146,7 +146,7 @@ export function UpdatesDialog({
                     {/* New Update Form - Moved to top */}
                     <div className="space-y-2 flex flex-col items-center gap-2 rounded-md">
                         {/* <MenuBar editor={editor} /> */}
-                        <EditorContent editor={editor} className="w-full border" />
+                        <EditorContent editor={editor} className="w-full border rounded-lg bg-background" />
                         <div className="p-2 w-full flex justify-start">
                             <Button
                                 onClick={handleSubmit}

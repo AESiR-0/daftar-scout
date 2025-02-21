@@ -55,7 +55,7 @@ export default function Page() {
                         {/* Video Section */}
                         <div className="">
                             <div className="flex justify-center">
-                                <div className="relative aspect-video h-[30rem]">
+                                <div className="relative aspect-video h-[24rem]">
                                     <video
                                         src={Scout.videoUrl}
                                         controls
@@ -95,9 +95,9 @@ export default function Page() {
                         </div>
                         <div className=" ml-6 pl-3 h-full">
                             {/* Tabs Section */}
-                            <Tabs defaultValue="about" className="space-y-4">
+                            <Tabs defaultValue="details" className="space-y-4">
                                 <TabsList>
-                                    <TabsTrigger value="about">About</TabsTrigger>
+                                    {/* <TabsTrigger value="about">About</TabsTrigger> */}
                                     <TabsTrigger value="details">Details</TabsTrigger>
                                     <TabsTrigger value="faqs" className="flex items-center gap-1">
                                         FAQs
@@ -113,11 +113,11 @@ export default function Page() {
                                     </TabsTrigger>
                                 </TabsList>
 
-                                <TabsContent value="about" className="space-y-4 ">
+                                {/* <TabsContent value="about" className="space-y-4 ">
                                     <div className="prose max-w-none border-l-4  px-5 py-5">
                                         <p className="text-sm text-muted-foreground">{Scout.about}</p>
                                     </div>
-                                </TabsContent>
+                                </TabsContent> */}
 
                                 <TabsContent value="details" className="border-l-4 px-5 py-5">
                                     <div className="p-2 pt-0  space-y-3">
