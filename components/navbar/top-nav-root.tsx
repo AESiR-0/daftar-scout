@@ -39,7 +39,7 @@ export function TopNavRoot() {
                         <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-white">
                             Daftar's Den
                         </Link>
-                        <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-white">
+                        <Link href={isFounder? "/founder/pricing" : '/investor/pricing'} className="text-sm font-medium text-muted-foreground hover:text-white">
                             Pricing
                         </Link>
                     </nav>
