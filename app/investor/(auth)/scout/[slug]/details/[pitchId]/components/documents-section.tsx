@@ -268,7 +268,7 @@ export default function DocumentsSection() {
 
   return (
     <>
-      <div className="flex px-5 mt-10 gap-6">
+      <div className="flex p-0 mt-10 gap-6">
         <Card className="border-none bg-[#0e0e0e] flex-1">
           <CardContent className="space-y-6">
             <Tabs defaultValue="private" onValueChange={(value) => setActiveTab(value as typeof activeTab)}>

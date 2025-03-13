@@ -65,7 +65,7 @@ export function AppSidebar({ role }: { role: string }) {
         </div>
       </div>
       {role === 'investor' && (
-        <div className="absolute bottom-10 left-4">
+        <div className="absolute bottom-[90px] left-4">
           <Button 
             size="icon" 
           className="rounded-full bg-[#1a1a1a] border-2 border-[#2a2a2a] h-8 w-8"
