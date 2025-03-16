@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Dynamically import map component to avoid SSR issues
 const MapComponent = dynamic(() => import("@/components/map"), {
@@ -166,6 +167,7 @@ export default function AudiencePage() {
 
   return (
     <div className="container px-10 mx-auto py-6">
+      <ScrollArea className="h-[80vh]">
       <div className="space-y-6">
         {/* Location Input */}
         <div className="space-y-4">
@@ -230,6 +232,7 @@ export default function AudiencePage() {
           />
         </div>
       </div>
+      </ScrollArea>
     </div>
   );
 }
