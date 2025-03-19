@@ -2,6 +2,7 @@
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import Cookies from "js-cookie";
 
 export function LoginClient({ role }: { role: string }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,9 +10,10 @@ export function LoginClient({ role }: { role: string }) {
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
+      localStorage.setItem("user_role", role)
       await signIn("google", {
         callbackUrl: `/${role}/`,
-        state: `${window.location.origin}${role}`,
+        state: role,
       });
     } catch (error) {
       console.error("Sign in error:", error);
@@ -39,7 +41,7 @@ export function LoginClient({ role }: { role: string }) {
           Your browser does not support the video tag.
         </video>
 
-        <div className="p-8 rounded-lg  shadow-sm">
+        <div className="p-8 rounded-lg shadow-sm">
           <Button
             size="lg"
             className="w-full bg-muted hover:bg-muted/80 hover:scale-95"
