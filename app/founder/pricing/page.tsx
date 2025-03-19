@@ -7,32 +7,32 @@ export default function PricingPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-background to-muted p-4">
       <div className="text-center space-y-8 max-w-3xl">
         {/* Header */}
-        <h1 className="text-4xl font-bold tracking-tight">
-          Pricing Coming Soon
+        <h1 className="text-4xl  tracking-tight">
+          Pricing for Founders
         </h1>
 
         {/* Description */}
         <p className="text-xl text-muted-foreground">
-          We're working on flexible pricing plans to help startups of all sizes.
-          Stay tuned for updates!
+          Pitch your startup to top investor scouts for just ₹49 per pitch.
+          Get discovered and take your venture to the next level.
         </p>
 
-        {/* Beta Access */}
-        <div className="bg-card p-6 rounded-lg border shadow-sm">
+        {/* Pricing Plan */}
+        <div className="bg-card p-6 rounded-lg border shadow-sm transition duration-300 hover:shadow-md hover:border-primary">
           <h2 className="text-2xl font-semibold mb-4">
-            Get Early Access
+            ₹49 per Pitch
           </h2>
           <p className="text-muted-foreground mb-6">
-            Join our beta program and be the first to experience our platform.
+            Submit your pitch to investor's scouting programs and gain visibility among leading investors.
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/founder/login">
-              <Button size="lg">
-                Try Beta for Free
+              <Button size="lg" className="transition hover:scale-105">
+                Start Pitching
               </Button>
             </Link>
             <Link href="/">
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" className="transition hover:bg-muted hover:text-white">
                 Learn More
               </Button>
             </Link>
@@ -41,10 +41,10 @@ export default function PricingPage() {
 
         {/* Contact */}
         <p className="text-sm text-muted-foreground">
-          Questions about pricing? Email us at
-          <a href="mailto:contact@daftar.com" className="text-primary hover:underline">
-            contact@daftar.com
-          </a>
+          Have questions? Email us at {" "} 
+          <Link href="mailto:contact@daftar.com" className="text-white hover:underline hover:text-white/80 transition">
+          contact@daftar.com
+          </Link>
         </p>
       </div>
     </div>

@@ -354,11 +354,11 @@ export function MakeOfferSection() {
   };
 
   return (
-    <div className="flex px-5 mt-10 gap-6">
+    <div className="flex p-0 mt-10 gap-6">
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
           {/* New Offer Input */}
-          <div className="p-4">
+          <div className="">
             <Textarea
               placeholder="Write your offer message here..."
               value={offerMessage}

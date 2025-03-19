@@ -261,7 +261,7 @@ export default function FounderPitchPage() {
   }
 
   return (
-    <Card className="border-none my-4 container mx-auto px-4 bg-[#0e0e0e]">
+    <Card className="border-none my-4 container mx-auto px-4 h-[80vh] bg-[#0e0e0e]">
       <CardContent className="pt-6">
         <div className="space-y-6">
           {/* Header with Info Icon and Sample Questions */}
@@ -377,7 +377,7 @@ export default function FounderPitchPage() {
 
             {/* Questions Card */}
             <div className="space-y-4 col-span-3">
-              <div className="border rounded-lg p-4 bg-muted/50 h-[250px]">
+              <div className="border rounded-lg p-4 bg-muted/50 lg:h-[200px] h-fit">
                 <ScrollArea className="h-full">
                   {selectedOption === null ? (
                     <div className="text-sm text-muted-foreground text-center py-4">

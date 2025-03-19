@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster"
-import Link from "next/link";
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
@@ -17,26 +16,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`subpixel-antialiased font-poppins`}
-      >
+      <body className={`subpixel-antialiased font-poppins`}>
         <ToastProvider>
-          <div className="relative flex min-h-screen h-full flex-col">
+          <div className="relative flex min-h-screen flex-col">
             {children}
             <Footer />
           </div>
         </ToastProvider>
         <Toaster />
-        {/* <div className="w-full bg-[#0e0e0e] py-2 z-50 ">
-          <h1 className="text-md text-center font-bold">Beta Version 0.0.1</h1>
-          <p className="text-center space-x-2 text-xs text-muted-foreground">
-            This is a beta version of the platform. Please report any issues to the development team.
-
-            <Link href="https://t.me/daftaros" className="text-blue-500">
-              Contact Us
-            </Link>
-          </p>
-        </div> */}
       </body>
     </html>
   );

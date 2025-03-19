@@ -131,13 +131,28 @@ export default function ScoutPage() {
 
   return (
     <div className="space-y-6 px-20 mt-4 container mx-auto">
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex items-center justify-end gap-4">
         <Button
           variant="outline"
-          onClick={() => setShowMeetings(!showMeetings)}
+          onClick={() => setShowMeetings(true)}
           className={showMeetings ? "bg-muted" : ""}
         >
           Meetings
+          <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
+            {scoutStatus.active.length}
+          </Badge>
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={() => setShowMeetings(false)}
+          className={showMeetings ? "" : "bg-muted"}
+
+        >
+          ScoutBoard
+          <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
+            {scoutStatus.active.length}
+          </Badge>
         </Button>
 
         <Button
