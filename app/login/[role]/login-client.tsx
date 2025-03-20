@@ -1,5 +1,5 @@
 "use client";
-import { signIn } from "next-auth/react";
+import { signIn} from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Cookies from "js-cookie";
@@ -11,10 +11,7 @@ export function LoginClient({ role }: { role: string }) {
     setIsLoading(true);
     try {
       localStorage.setItem("user_role", role)
-      await signIn("google", {
-        callbackUrl: `/${role}/`,
-        state: role,
-      });
+      await signIn("google", );
     } catch (error) {
       console.error("Sign in error:", error);
     } finally {

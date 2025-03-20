@@ -1,10 +1,57 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function FounderIntroPage() {
-  const router = useRouter()
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function getUserId() {
+
+      console.log("ID Token:", session?.idToken);
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: session?.idToken,
+            user_type: "founder",
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          if (session) {
+            session.accessToken = data.accessToken as string; // Update session with access token
+            setIsLoading(false);
+          }
+        } else {
+          console.error("Failed to fetch access token");
+        }
+      } catch (error) {
+        console.error("Error fetching access token:", error);
+      }
+
+    }
+    getUserId();
+  }, [session]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -30,11 +77,11 @@ export default function FounderIntroPage() {
           variant="secondary"
           size="lg"
           className="px-8 py-6 text-md"
-          onClick={() => router.push('/founder/loading')}
+          onClick={() => router.push("/founder/loading")}
         >
           Let&apos;s Go
         </Button>
       </div>
     </div>
-  )
+  );
 }
