@@ -13,6 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 // import { FounderDaftarData } from "@/lib/api-types"
 // import { apiClient, api } from "@/lib/api-client"
 
@@ -61,13 +62,14 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
         structure: "",
         country: ""
     })
-    // const { founderDaftar } = api;
+    const [joinCode, setJoinCode] = useState("")
     const [isCreating, setIsCreating] = useState(false)
+    const [isJoining, setIsJoining] = useState(false)
 
     const { toast } = useToast(); // Initialize toaster
 
-    const handleSubmit = async () => {
-        setIsCreating(true);
+    const handleCreate = async () => {
+        setIsCreating(true)
         try {
             // const response = await founderDaftar.create({
             //     daftar_name: formData.name,
@@ -75,19 +77,46 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
             //     status: "active",
             //     city: "",
             // });
-            console.log("Daftar created successfully:", formData);
+            console.log("Daftar created successfully:", formData)
             onSuccess(formData.name)
             toast({
                 title: "Daftar created successfully!",
                 description: "Your Daftar has been created successfully!",
                 variant: "success",
-            });
-            onOpenChange(false);
+            })
+            onOpenChange(false)
         } catch (error) {
-            console.error("Error creating Daftar:", error);
-            toast({ title: "Error creating Daftar ", description: (error as Error).message, variant: "error" }); // Use toaster for error message
+            console.error("Error creating Daftar:", error)
+            toast({ 
+                title: "Error creating Daftar", 
+                description: (error as Error).message, 
+                variant: "error" 
+            })
         } finally {
-            setIsCreating(false);
+            setIsCreating(false)
+        }
+    }
+
+    const handleJoin = async () => {
+        setIsJoining(true)
+        try {
+            console.log("Joining Daftar with code:", joinCode)
+            onSuccess(joinCode)
+            toast({
+                title: "Joined Daftar successfully!",
+                description: "You have successfully joined the Daftar!",
+                variant: "success",
+            })
+            onOpenChange(false)
+        } catch (error) {
+            console.error("Error joining Daftar:", error)
+            toast({ 
+                title: "Error joining Daftar", 
+                description: (error as Error).message, 
+                variant: "error" 
+            })
+        } finally {
+            setIsJoining(false)
         }
     }
 
@@ -95,79 +124,111 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Create New Daftar</DialogTitle>
+                    <DialogTitle>Create or Join Daftar</DialogTitle>
                 </DialogHeader>
 
-                {!isCreating ? (
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Daftar Name</Label>
-                            <Input
-                                placeholder="Enter Daftar name"
-                                value={formData.name}
-                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                            />
-                        </div>
+                {!isCreating && !isJoining ? (
+                    <Tabs defaultValue="create" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="create">Create New</TabsTrigger>
+                            <TabsTrigger value="join">Join Existing</TabsTrigger>
+                        </TabsList>
 
-                        {typeof window !== 'undefined' && window.location.pathname.includes('investor') && (
+                        <TabsContent value="create" className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Daftar Structure</Label>
+                                <Label>Daftar Name</Label>
+                                <Input
+                                    placeholder="Enter Daftar name"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                />
+                            </div>
+
+                            {typeof window !== 'undefined' && window.location.pathname.includes('investor') && (
+                                <div className="space-y-2">
+                                    <Label>Daftar Structure</Label>
+                                    <Select
+                                        value={formData.structure}
+                                        onValueChange={(value) => setFormData(prev => ({ ...prev, structure: value }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select structure" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {daftarStructures.map((structure) => (
+                                                <SelectItem key={structure} value={structure.toLowerCase()}>
+                                                    {structure}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <Label>Country</Label>
                                 <Select
-                                    value={formData.structure}
-                                    onValueChange={(value) => setFormData(prev => ({ ...prev, structure: value }))}
+                                    value={formData.country}
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select structure" />
+                                        <SelectValue placeholder="Select country" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {daftarStructures.map((structure) => (
-                                            <SelectItem key={structure} value={structure.toLowerCase()}>
-                                                {structure}
+                                        {countries.map((country) => (
+                                            <SelectItem key={country} value={country.toLowerCase()}>
+                                                {country}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
-                        )}
 
-                        <div className="space-y-2">
-                            <Label>Country</Label>
-                            <Select
-                                value={formData.country}
-                                onValueChange={(value) => setFormData(prev => ({ ...prev, country: value }))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select country" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {countries.map((country) => (
-                                        <SelectItem key={country} value={country.toLowerCase()}>
-                                            {country}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                            <div className="flex justify-center pt-4">
+                                <Button
+                                    onClick={handleCreate}
+                                    className="bg-muted hover:bg-muted/50 text-white"
+                                    disabled={!formData.name || !formData.country}
+                                >
+                                    Create Daftar
+                                </Button>
+                            </div>
+                        </TabsContent>
 
-                        <div className="flex justify-center pt-4">
-                            <Button
-                                onClick={handleSubmit}
-                                className="bg-muted hover:bg-muted/50 text-white"
-                                disabled={!formData.name || !formData.country}
-                            >
-                                Publish
-                            </Button>
-                        </div>
-                    </div>
+                        <TabsContent value="join" className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Daftar Code</Label>
+                                <Input
+                                    placeholder="Enter Daftar code"
+                                    value={joinCode}
+                                    onChange={(e) => setJoinCode(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="flex justify-center pt-4">
+                                <Button
+                                    onClick={handleJoin}
+                                    className="bg-muted hover:bg-muted/50 text-white"
+                                    disabled={!joinCode}
+                                >
+                                    Join Daftar
+                                </Button>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
                 ) : (
                     <div className="py-12 text-center space-y-4">
                         <div className="flex justify-center">
                             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                         </div>
                         <div className="space-y-2">
-                            <p className="text-lg font-medium">Creating your Daftar</p>
+                            <p className="text-lg font-medium">
+                                {isCreating ? "Creating your Daftar" : "Joining Daftar"}
+                            </p>
                             <p className="text-sm text-muted-foreground">
-                                Please wait while we set up your Daftar environment.
+                                {isCreating 
+                                    ? "Please wait while we set up your Daftar environment."
+                                    : "Please wait while we process your request."}
                                 This may take a few moments.
                             </p>
                         </div>
