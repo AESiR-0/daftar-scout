@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { VideoDialog } from "@/components/dialogs/demo-dialog"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -24,6 +25,7 @@ import { topNavConfig } from "@/config/navigation"
 import { DaftarDialog } from "@/components/dialogs/daftar-dialog"
 import { SearchAndFilter } from "./search-and-filter"
 import { BookmarkFilter } from "@/components/navbar/bookmark-filter"
+import { set } from "date-fns"
 
 type NavAction = 
   | { icon: any; action: string }
@@ -68,11 +70,14 @@ export function TopNav({ role }: { role: string }) {
       setStudioEntryPoint("")
     }
   }, [pathname])
-
+  const [demoOpen, setDemoOpen] = useState(false)
   const handleActionClick = (action: string) => {
     switch (action) {
       case 'journal':
         setJournalOpen(true)
+        break
+      case 'play':
+        setDemoOpen(true)
         break
       case 'notifications':
         setNotificationOpen(true)
@@ -184,6 +189,10 @@ export function TopNav({ role }: { role: string }) {
         <JournalDialog
           open={journalOpen}
           onOpenChange={setJournalOpen}
+        />
+        <VideoDialog
+          open={demoOpen}
+          onOpenChange={setDemoOpen}
         />
         <NotificationDialog
           open={notificationOpen}

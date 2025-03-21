@@ -1,49 +1,164 @@
 "use client"
-import { Card } from "@/components/ui/card"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+const formSchema = z.object({
+  firstName: z.string().min(2, "First name is required"),
+  lastName: z.string().min(2, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  country: z.string().min(1, "Country is required"),
+})
 
 export default function LandingPage() {
-    return (
-        <div className="flex flex-col items-center justify-center overflow-hidden min-h-[calc(100vh-3.5rem)] px-4">
-            {/* Main Content */}
-            <div className="max-w-5xl w-full space-y-16">
-                {/* Hero Section */}
-                <div className="space-y-6 text-center">
-                    <h1 className="text-6xl font-light tracking-tight">
-                        <span className="text-blue-500">Daftar</span> Operating System
-                    </h1>
-                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                        For founders pitching their startup ideas to the world and investors scouting the next big opportunity,
-                        Daftar OS is the software you can trust.
-                    </p>
-                </div>
+  const [showForm, setShowForm] = useState(false)
+  const [registered, setRegistered] = useState(false)
 
-                {/* Video Section with Sarvodaya */}
-                <div className="space-y-4">
-                    <div className="relative flex justify-center">
-                        <Card className="aspect-video w-[80%] overflow-hidden border-0 bg-muted/50">
-                            <video
-                                className="w-full h-full object-cover"
-                                controls
-                                poster="/assets/torricke-barton.jpg"
-                            >
-                                <source src="/path-to-video.mp4" type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
-                        </Card>
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      country: "",
+    },
+  })
 
-                        {/* Decorative Elements */}
-                        <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl" />
-                        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl" />
-                    </div>
-                    
-                    {/* Sarvodaya text below video */}
-                    <div className="text-left ml-[6.5rem]">
-                        <p className="text-2xl font-light" style={{ color: "#DD00B4" }}>
-                            Sarvodaya
-                        </p>
-                    </div>
-                </div>
-            </div>
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    // Here you would typically send the data to your backend
+    console.log(values)
+    setRegistered(true)
+  }
+
+  return (
+    <div className="flex flex-col items-start justify-center h-[60%] px-4">
+      <div className="w-full">
+        {/* Header */}
+        <div>
+          <h2 className="text-2xl font-medium text-muted-foreground mt-[4rem] mb-[16rem]">
+            Daftar OS Technology
+          </h2>
+          <h1 className="text-4xl font-bold tracking-tight mb-8">
+          Helping investors to scout the next meaningful startup. 
+          </h1>
+          <Button 
+            size="lg" 
+            className="text-lg px-8"
+            onClick={() => setShowForm(true)}
+          >
+            Register Me for Early Access
+          </Button>
         </div>
-    )
+
+        {/* Registration Form Dialog */}
+        <Dialog open={showForm} onOpenChange={setShowForm}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>
+                {registered ? "Registration Successful!" : "Pre-registration Form"}
+              </DialogTitle>
+            </DialogHeader>
+
+            {registered ? (
+              <div className="text-center py-6 space-y-4">
+                <p className="text-green-600 font-medium">You're in!</p>
+                <p className="text-muted-foreground">
+                  Thanks for signing up for early access. You'll receive an email invite as soon as the software is live.
+                </p>
+              </div>
+            ) : (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Doe" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="john@example.com" type="email" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="us">United States</SelectItem>
+                            <SelectItem value="uk">United Kingdom</SelectItem>
+                            <SelectItem value="ca">Canada</SelectItem>
+                            <SelectItem value="in">India</SelectItem>
+                            <SelectItem value="au">Australia</SelectItem>
+                            {/* Add more countries as needed */}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" className="w-full">
+                    Register
+                  </Button>
+                </form>
+              </Form>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  )
 }
