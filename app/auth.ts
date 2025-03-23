@@ -4,8 +4,9 @@ import type { DefaultSession } from "next-auth"
 
 declare module "next-auth" {
   interface Session {
-    idToken?: string
-    accessToken?: string
+    idToken?: string;
+    accessToken?: string;
+    status?: 'authenticated' | 'unauthenticated' | 'loading'
   }
 }
 
@@ -33,24 +34,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return '/' + roleMatch;
     },
 
-    async jwt({ token, account }) {
+    async jwt({ token, account, session }) {
       if (account?.id_token) {
         token.idToken = account.id_token;
+        session.id_token = account.id_token
+        console.log(account.id_token);
+
       }
       return token;
     },
 
-    async session({ session, token }) {
-      if (token.idToken) {
-        session.idToken = token.idToken as string;
-      }
-      if (token.accessToken) {
-        session.accessToken = token.accessToken as string;
-      }
+    async session({ session }) {
       return session;
     },
 
-    async signIn({ user, account }) {
+    async signIn() {
       return true
     },
   },

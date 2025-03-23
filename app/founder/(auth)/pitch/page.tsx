@@ -2,35 +2,49 @@
 
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import  DaftarPage from "@/app/founder/(auth)/daftar/daftarPage"
+import PitchesList from "@/app/founder/(auth)/pitchesList/pitchesList"
 import ScoutPage from "@/app/founder/(auth)/scout/scoutPage"
 import DealBoardPage from "../deal-board/dealBoardPage"
 import MeetingsPage from "../meetings/page"
+import { getCount } from '@/lib/apiActions'
+
+interface counts {
+  meetings: number,
+  scouts: number,
+  pitches: number
+}
 export default function PitchPage() {
   const [selectedTab, setSelectedTab] = useState("dealBoard")
-  
-  const counts = {
-    meetings: 5,
-    scout: 3,
-    pitches: 8,
-    dealBoard: 2
-  }
-
+  const [counts, setCounts] = useState({
+    meetings: 0,
+    scouts: 0,
+    pitches: 0
+  })
   const navItems = [
     { id: "meetings", label: "Meetings", count: counts.meetings },
-    { id: "scout", label: "Scout", count: counts.scout },
+    { id: "scout", label: "Scout", count: counts.scouts },
     { id: "pitches", label: "Pitches", count: counts.pitches },
-    { id: "dealBoard", label: "Deal Board", count: counts.dealBoard },
+    { id: "dealBoard", label: "Deal Board", count: counts.pitches },
   ]
+
+  useEffect(() => {
+    async function fetchCount() {
+      const res: counts = await getCount();
+      console.log(res);
+
+      setCounts(res)
+    }
+    fetchCount()
+  }, [])
 
   return (
     <div className="space-y-6 container mx-auto px-10">
       <div className="flex flex-col h-full p-6">
         <div className="flex items-center justify-end gap-4">
           {navItems.map((item) => (
-            <Button 
+            <Button
               key={item.id}
               variant="outline"
               className={cn(
@@ -50,7 +64,7 @@ export default function PitchPage() {
 
       {/* Content Section */}
       <div className="mt-6">
-        {selectedTab === "pitches" && <DaftarPage />}
+        {selectedTab === "pitches" && <PitchesList />}
         {selectedTab === "meetings" && <MeetingsPage />}
         {selectedTab === "scout" && <ScoutPage />}
         {selectedTab === "dealBoard" && <DealBoardPage />}

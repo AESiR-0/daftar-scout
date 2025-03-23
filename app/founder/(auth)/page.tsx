@@ -7,43 +7,48 @@ import { useSession } from "next-auth/react";
 
 export default function FounderIntroPage() {
   const router = useRouter();
-  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
+  const { data: session, update } = useSession();
 
   useEffect(() => {
-    async function getUserId() {
-
-      console.log("ID Token:", session?.idToken);
-
-      try {
-        const response = await fetch(`http://127.0.0.1:8000/auth/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            token: session?.idToken,
-            user_type: "founder",
-          }),
-        });
-
-        if (response.ok) {
+    if (session?.status !== 'authenticated') {
+      console.log(session?.idToken);
+      async function getUserId() {
+        try {
+          const response = await fetch(`http://127.0.0.1:8000/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              token: session?.idToken,
+              user_type: "founder",
+            }),
+          });
           const data = await response.json();
-          console.log(data);
-          if (session) {
-            session.accessToken = data.accessToken as string; // Update session with access token
+          if (data.email) {
+            update({ status: 'authenticated' });
+            console.log(data);
+            if (session) {
+              session.accessToken = data.accessToken as string;
+              setIsLoading(false);
+            }
+          } else {
+            update({ ...session, status: 'unauthenticated' });
+            console.error("Failed to fetch access token");
             setIsLoading(false);
+            // router.push('/login/founder')
           }
-        } else {
-          console.error("Failed to fetch access token");
+        } catch (error) {
+          console.error("Error fetching access token:", error);
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching access token:", error);
       }
-
+      getUserId();
+    } else {
+      setIsLoading(false);
     }
-    getUserId();
-  }, [session]);
+  }, [session, update]);
 
   if (isLoading) {
     return (
