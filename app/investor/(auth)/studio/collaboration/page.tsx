@@ -105,8 +105,16 @@ export default function CollaborationPage() {
                         <Info className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                      <div className="space-y-4">
+                    <HoverCardContent className="w-[48rem] flex m-auto">
+                      <div className="w-2/3 flex justify-center items-center">
+                        <video
+                          src="example.mp4"
+                          poster=""
+                          className="w-[80%] h-full object-cover"
+                          controls
+                        />
+                      </div>
+                      <div className="w-1/3 space-y-4">
                         <h4 className="text-sm font-semibold">About Collaboration</h4>
                         <p className="text-sm text-muted-foreground">
                           A collaborator helps your Scout connect with the right partners in a specific location and reach a larger audience.
@@ -124,7 +132,7 @@ export default function CollaborationPage() {
               {/* Collaborators List */}
               <div className="space-y-4">
                 {collaborators.map((collaborator) => (
-                  <div 
+                  <div
                     key={collaborator.id}
                     className="flex items-center justify-between p-4 border rounded-lg bg-background"
                   >
@@ -165,7 +173,7 @@ export default function CollaborationPage() {
         <div>
           <Card className="border-none bg-[#0e0e0e]">
             <CardContent className="space-y-6">
-            <h3 className="text-lg font-semibold">Support</h3>
+              <h3 className="text-lg font-semibold">Support</h3>
               <p className="text-sm text-muted-foreground">
                 Looking for the right collaborator? Whether you have someone in mind or need help finding the perfect match, Daftar's got you covered.
                 <br /><br />
@@ -174,14 +182,14 @@ export default function CollaborationPage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Textarea 
+                  <Textarea
                     placeholder="How can we help you?"
                     className="h-24"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Input 
+                  <Input
                     placeholder="When should we call you? e.g. 2:00 PM IST"
                   />
                 </div>

@@ -8,9 +8,9 @@ export default function LandingLayout({
 }) {
   return (
     <div className="flex min-h-screen h-full">
-      <RootSidebar />
+      {/* <RootSidebar /> */}
       <div className="flex-1 flex flex-col">
-        <TopNavRoot />
+        {/* <TopNavRoot /> */}
         <main className="flex-1 overflow-auto">
           {children}
         </main>
