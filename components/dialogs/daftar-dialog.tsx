@@ -22,7 +22,7 @@ import {
   Share2,
   Lock,
   Pencil
-} from "lucide-react"
+} from "lucide-react" 
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
@@ -426,7 +426,7 @@ export function DaftarDialog({
   const renderContent = () => {
     switch (activeTab) {
       case "details":
-        return (
+  return (
           <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a]">
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -434,21 +434,21 @@ export function DaftarDialog({
                   <Avatar className="h-20 w-20 rounded-[0.35rem]">
                     <AvatarImage src={avatarUrl} />
                     <AvatarFallback>D</AvatarFallback>
-                  </Avatar>
+                      </Avatar>
                   <div>
                     <h3 className="text-lg font-medium">{daftarData.name}</h3>
                     <p className="text-sm text-muted-foreground">{daftarData.structure}</p>
                     <p className="text-xs text-muted-foreground mt-1">Daftar Code: {daftarData.code}</p>
                   </div>
                 </div>
-                <Button
+                    <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
+                      onClick={() => setIsEditing(!isEditing)}
+                    >
                   {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-                </Button>
-              </div>
+                    </Button>
+                  </div>
 
               {isEditing ? (
                 <div className="space-y-4">
@@ -500,9 +500,9 @@ export function DaftarDialog({
                     </div>
                   </div>
                   <Button onClick={handleSave} className="w-full">
-                    Save Changes
-                  </Button>
-                </div>
+                  Save Changes
+                </Button>
+              </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-sm">
@@ -516,10 +516,10 @@ export function DaftarDialog({
                   </p>
                   <div className="text-xs pt-4">
                     <span className="text-muted-foreground">On Daftar Since <br /> {formatDate(daftarData.joinedDate)}</span>
-                  </div>
+            </div>
                 </div>
               )}
-            </div>
+              </div>
           </Card>
         )
 
@@ -527,8 +527,8 @@ export function DaftarDialog({
         return (
           <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
             {/* Invite Form */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                 <Input
                   placeholder="First Name"
                   value={newMember.firstName}
@@ -539,19 +539,19 @@ export function DaftarDialog({
                   value={newMember.lastName}
                   onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
                 />
-                <Input
+                        <Input
                   placeholder="Designation"
                   value={newMember.designation}
                   onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
                 />
                 
-                <Input
+                        <Input
                   placeholder="Email"
                   type="email"
                   value={newMember.email}
-                  onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-                />
-              </div>
+                          onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+                        />
+                      </div>
               <Button
                 onClick={() => {
                   if (newMember.firstName && newMember.lastName && newMember.email && newMember.designation) {
@@ -572,7 +572,7 @@ export function DaftarDialog({
               >
                 Invite
               </Button>
-            </div>
+                      </div>
 
             {/* Tabs and Members List */}
             <Tabs defaultValue="team" className="mt-6">
@@ -644,7 +644,7 @@ export function DaftarDialog({
                   <div className="flex items-center gap-2">
                     <section.icon className="h-4 w-4" />
                     <h4 className="font-medium">{section.title}</h4>
-                  </div>
+              </div>
                   <p className="text-sm text-muted-foreground">{section.content}</p>
                 </div>
               ))}
@@ -761,7 +761,7 @@ export function DaftarDialog({
           <div className="flex-1 p-6">
             <ScrollArea className="h-[450px]">
               {renderContent()}
-            </ScrollArea>
+        </ScrollArea>
           </div>
         </div>
       </DialogContent>
