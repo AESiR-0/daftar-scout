@@ -334,7 +334,14 @@ export function DaftarDialog({
     structure: "Government Incubator",
     code: "A7B2X9",
     website: "www.example.com",
-    location: "Mumbai, India",
+    address: {
+      street: "Street Address",
+      city: "City",
+      state: "State",
+      country: "Country",
+      postalCode: "Postal Code"
+    },
+
     vision: "Building the next generation of financial infrastructure",
     joinedDate: new Date().toISOString()
   })
@@ -484,12 +491,52 @@ export function DaftarDialog({
                         onChange={(e) => setDaftarData(prev => ({ ...prev, website: e.target.value }))}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Location</Label>
-                      <Input
-                        value={daftarData.location}
-                        onChange={(e) => setDaftarData(prev => ({ ...prev, location: e.target.value }))}
-                      />
+                    <div className="col-span-2 space-y-2">
+                      <Label>Address</Label>
+                      <div className="space-y-2">
+                        <Input
+                          placeholder="Street Address"
+                          value={daftarData.address?.street}
+                          onChange={(e) => setDaftarData(prev => ({ 
+                            ...prev, 
+                            address: { ...prev.address, street: e.target.value }
+                          }))}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <Input
+                            placeholder="City"
+                            value={daftarData.address?.city}
+                            onChange={(e) => setDaftarData(prev => ({ 
+                              ...prev, 
+                              address: { ...prev.address, city: e.target.value }
+                            }))}
+                          />
+                          <Input
+                            placeholder="State/Province"
+                            value={daftarData.address?.state}
+                            onChange={(e) => setDaftarData(prev => ({ 
+                              ...prev, 
+                              address: { ...prev.address, state: e.target.value }
+                            }))}
+                          />
+                          <Input
+                            placeholder="Country"
+                            value={daftarData.address?.country}
+                            onChange={(e) => setDaftarData(prev => ({ 
+                              ...prev, 
+                              address: { ...prev.address, country: e.target.value }
+                            }))}
+                          />
+                          <Input
+                            placeholder="Postal Code"
+                            value={daftarData.address?.postalCode}
+                            onChange={(e) => setDaftarData(prev => ({ 
+                              ...prev, 
+                              address: { ...prev.address, postalCode: e.target.value }
+                            }))}
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div className="col-span-2 space-y-2">
                       <Label>What's the big picture you're working on?</Label>
@@ -509,10 +556,14 @@ export function DaftarDialog({
                     <span className="text-muted-foreground">Website:</span> {daftarData.website}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Location:</span> {daftarData.location}
-                  </p>
-                  <p className="text-sm">
-                    <span className="text-muted-foreground">The big picture we are working on:</span> <br/>{daftarData.vision}
+                    <span className="text-muted-foreground">Address:</span>{" "}
+                    {daftarData.address && (
+                      <>
+                        {daftarData.address.street},<br />
+                        {daftarData.address.city}, {daftarData.address.state} {daftarData.address.postalCode},<br />
+                        {daftarData.address.country}
+                      </>
+                    )}
                   </p>
                   <div className="text-xs pt-4">
                     <span className="text-muted-foreground">On Daftar Since <br /> {formatDate(daftarData.joinedDate)}</span>
