@@ -1,11 +1,9 @@
 import { TopNav } from "@/components/navbar/top-nav";
 import ClientSessionProvider from "./client-session"
-import { getServerSession } from "next-auth"
 import { AppSidebar } from "@/components/navbar/side-nav";
 import { DaftarProvider } from "@/lib/context/daftar-context";
 import { BookmarkProvider } from "@/lib/context/bookmark-context";
 import { SearchProvider } from "@/lib/context/search-context";
-import Link from "next/link";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
 

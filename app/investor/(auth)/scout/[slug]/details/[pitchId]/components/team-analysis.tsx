@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/hover-card"
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import Link from '@tiptap/extension-link'
 import { MenuBar } from "./menu-bar"
 import { formatDate } from "@/lib/format-date"
 import { InvestorProfile } from "@/components/investor-profile"

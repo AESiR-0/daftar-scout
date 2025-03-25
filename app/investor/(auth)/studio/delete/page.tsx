@@ -104,7 +104,7 @@ export default function DeletePage() {
               <Checkbox
                 id="user-consent"
                 checked={userConsent}
-                onCheckedChange={(checked) => setUserConsent(checked as boolean)}
+                onCheckedChange={(checked:boolean) => setUserConsent(checked as boolean)}
                 className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
               />
               <label
