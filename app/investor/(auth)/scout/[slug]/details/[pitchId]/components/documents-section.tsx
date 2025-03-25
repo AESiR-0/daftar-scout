@@ -271,7 +271,7 @@ export default function DocumentsSection() {
       <div className="flex p-0 mt-10 gap-6">
         <Card className="border-none bg-[#0e0e0e] flex-1">
           <CardContent className="space-y-6">
-            <Tabs defaultValue="private" onValueChange={(value: typeof activeTab) => setActiveTab(value as typeof activeTab)}>
+            <Tabs defaultValue="private" onValueChange={(value: string) => setActiveTab(value as typeof activeTab)}>
               <div className="flex items-center justify-between mb-6">
                 <TabsList>
                   <TabsTrigger value="private" className="flex items-center gap-2">
