@@ -33,10 +33,10 @@ export function LoginClient({ role }: { role: string }) {
           Sign in to access your {role} Scout
         </p>
 
-        <video className="w-full rounded-lg border shadow-sm" controls>
+        {/* <video className="w-full rounded-lg border shadow-sm" controls>
           <source src={videoSrc} type="video/mp4" />
           Your browser does not support the video tag.
-        </video>
+        </video> */}
 
         <div className="p-8 rounded-lg shadow-sm">
           <Button

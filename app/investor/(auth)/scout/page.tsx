@@ -100,34 +100,34 @@ export default function ScoutPage() {
   }
 
 
-  if (!showContent) {
-    return (
-      <div className="min-h-screen flex flex-col items-center  justify-center p-4">
-        <div className="max-w-3xl w-full space-y-8 text-center">
-          {/* Video Container */}
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-            <video
-              className="w-full h-full object-cover"
-              src="/videos/intro.mp4"
-              controls
-            >
-              Your browser does not support the video tag.
-            </video>
-          </div>
+  // if (!showContent) {
+  //   return (
+  //     <div className="min-h-screen flex flex-col items-center  justify-center p-4">
+  //       <div className="max-w-3xl w-full space-y-8 text-center">
+  //         {/* Video Container */}
+  //         <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
+  //           <video
+  //             className="w-full h-full object-cover"
+  //             src="/videos/intro.mp4"
+  //             controls
+  //           >
+  //             Your browser does not support the video tag.
+  //           </video>
+  //         </div>
 
-          {/* Button */}
-          <Button
-            variant="secondary"
-            size="lg"
-            className="px-8 py-6 text-md"
-            onClick={() => setShowContent(true)}
-          >
-            Create Scout
-          </Button>
-        </div>
-      </div>
-    )
-  }
+  //         {/* Button */}
+  //         <Button
+  //           variant="secondary"
+  //           size="lg"
+  //           className="px-8 py-6 text-md"
+  //           onClick={() => setShowContent(true)}
+  //         >
+  //           Create Scout
+  //         </Button>
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="space-y-6 px-20 mt-4 container mx-auto">
