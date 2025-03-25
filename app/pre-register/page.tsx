@@ -140,7 +140,8 @@ export default function LandingPage() {
           </h1>
           <Button 
             size="lg" 
-            className="text-lg px-8"
+            variant="outline"
+            className="text-lg rounded-[0.3rem] px-8"
             onClick={() => setShowForm(true)}
           >
             Register Me for Early Access
@@ -150,11 +151,11 @@ export default function LandingPage() {
         {/* Registration Form Dialog */}
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
+            {/* <DialogHeader>
               <DialogTitle>
                 {registered ? "Registration Successful!" : "Pre-registration Form"}
               </DialogTitle>
-            </DialogHeader>
+            </DialogHeader> */}
 
             {registered ? (
               <div className="text-center py-6 space-y-4">
