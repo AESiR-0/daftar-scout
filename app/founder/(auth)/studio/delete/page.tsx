@@ -57,7 +57,7 @@ const teamMembers: TeamMember[] = [
     location: "Mumbai, India",
     designation: "CTO",
     language: ["English", "Marathi"],
-    isApproved: false,  
+    isApproved: false,
     status: "pending",
     isUser: false,
     date: new Date().toISOString()
@@ -87,7 +87,7 @@ export default function DeletePage() {
   const handleDelete = () => {
     if (userConsent) {
       // Update current user's approval
-      setApprovals(prev => prev.map(member => 
+      setApprovals(prev => prev.map(member =>
         member.isUser ? { ...member, isApproved: true } : member
       ))
       setDeleteClicked(true)
@@ -112,7 +112,7 @@ export default function DeletePage() {
               <Checkbox
                 id="user-consent"
                 checked={userConsent}
-                onCheckedChange={(checked) => setUserConsent(checked as boolean)}
+                onCheckedChange={(checked: boolean) => setUserConsent(checked as boolean)}
                 className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
               />
               <label
@@ -137,47 +137,47 @@ export default function DeletePage() {
               <>
                 {/* Team Approvals Section */}
                 <div className="space-y-4 mt-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
-                <div className="text-sm text-muted-foreground">
-                  {approvals.filter(a => a.isApproved).length} of {approvals.length}
-                </div>
-              </div>
-
-              <div>
-                {approvals.map((member) => {
-                  const approval = approvals.find(a => a.isApproved === member.isApproved) || {
-                    status: 'not_requested',
-                    isApproved: false,
-                    date: undefined
-                  }
-
-                  return (
-                    <div
-                      key={member.name}
-                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>{member.name[0]}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {member.name}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        {getStatusIcon(approval.status)}
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
+                    <div className="text-sm text-muted-foreground">
+                      {approvals.filter(a => a.isApproved).length} of {approvals.length}
                     </div>
-                  )
-                })}
-                <div className="pt-4">
-                  <span className="text-xs text-muted-foreground"><strong> Deleted Daftar On </strong> <br /> {formatDate(new Date().toISOString())}</span>
+                  </div>
+
+                  <div>
+                    {approvals.map((member) => {
+                      const approval = approvals.find(a => a.isApproved === member.isApproved) || {
+                        status: 'not_requested',
+                        isApproved: false,
+                        date: undefined
+                      }
+
+                      return (
+                        <div
+                          key={member.name}
+                          className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>{member.name[0]}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium">
+                                {member.name}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            {getStatusIcon(approval.status)}
+                          </div>
+                        </div>
+                      )
+                    })}
+                    <div className="pt-4">
+                      <span className="text-xs text-muted-foreground"><strong> Deleted Daftar On </strong> <br /> {formatDate(new Date().toISOString())}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
               </>
             )}
           </div>
