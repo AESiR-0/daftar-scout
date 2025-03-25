@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Camera, Trash2, UserCircle, MessageSquarePlus, Shield, LogOut, Share2, Settings, Database, Pencil, X } from "lucide-react"
+import { Camera, Trash2, UserCircle, MessageSquarePlus, Shield, LogOut, Share2, Settings, Database, Pencil, X, Calendar as CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -26,8 +26,16 @@ import { signOut } from "next-auth/react"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { Combobox } from "@/components/ui/combobox"
-import formatDate from "@/lib/formatDate"
+import format_Date from "@/lib/formatDate"
+import {formatDate} from "@/lib/format-date"
 import { Card } from "@/components/ui/card"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { format } from "date-fns"
 
 interface ProfileData {
   firstName: string
@@ -35,6 +43,7 @@ interface ProfileData {
   email: string
   phone: string
   gender: string
+  dateOfBirth: string
   primaryLanguage: string
   secondaryLanguage: string
   languageProficiency: {
@@ -120,6 +129,7 @@ export function ProfileDialog({
     email: "john@example.com",
     phone: "+1 234 567 890",
     gender: "Male",
+    dateOfBirth: "1990-01-01",
     languages: ["English", "Hindi"],
     joinedDate: "Feb 14, 2024"
   })
@@ -268,6 +278,42 @@ export function ProfileDialog({
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className="space-y-2">
+                      <Label>Date of Birth</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal bg-[#1a1a1a]",
+                              !profileData.dateOfBirth && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {profileData.dateOfBirth ? (
+                              formatDate(new Date(profileData.dateOfBirth))
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={new Date(profileData.dateOfBirth)}
+                            onSelect={(date) => {
+                              if (date) {
+                                setProfileData(prev => ({
+                                  ...prev,
+                                  dateOfBirth: date.toISOString().split('T')[0]
+                                }))
+                              }
+                            }}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                     <div className="col-span-2 space-y-2">
                       <Label>Preferred Languages (up to 3)</Label>
                       <div className="flex flex-wrap gap-2">
@@ -330,6 +376,10 @@ export function ProfileDialog({
                   </p>
                   <p className="text-sm">
                     <span className="text-muted-foreground">Gender:</span> {profileData.gender}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Date of Birth:</span>{" "}
+                    {new Date(profileData.dateOfBirth).toLocaleDateString()}
                   </p>
                   <p className="text-sm">
                     <span className="text-muted-foreground">Preferred Languages:</span>{" "}
@@ -417,7 +467,7 @@ export function ProfileDialog({
                       <p className="text-sm">{feedback.message}</p>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {formatDate(feedback.createdAt)}
+                      {format_Date(feedback.createdAt)}
                     </p>
                   </div>
                 ))}
@@ -466,7 +516,7 @@ export function ProfileDialog({
                     </div>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
                     <span className="text-xs text-muted-foreground">
-                      {formatDate(feature.createdAt)}
+                      {format_Date(feature.createdAt)}
                     </span>
                   </div>
                 ))}
