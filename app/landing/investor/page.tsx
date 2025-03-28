@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { Scroll } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 type StoryTab = "economy" | "case-studies"
 
@@ -132,20 +134,20 @@ export default function InvestorPage() {
     return (
       <div className="space-y-12">
         {caseStudiesStory.studies.map((study: CaseStudy, index: number) => (
-          <article key={index} className="space-y-4">
+          <article key={index} className="space-y-2 border-b border-black/20 pb-8">
             <h2 className="text-2xl font-serif font-bold leading-tight">
               {study.title}
             </h2>
             <div className="flex items-center space-x-2 text-sm font-serif text-black/70">
               <span>{study.subtitle}</span>
             </div>
-            <div className="border-t border-b border-black/20 my-4 py-4">
+            <div className="my-4">
               <p className="text-lg font-serif leading-relaxed">
                 {study.content}
               </p>
             </div>
             <div className="flex justify-between items-center">
-              <p className="text-lg font-serif font-bold text-green-700">
+              <p className="text-lg font-serif text-black/70">
                 {study.investment}
               </p>
               <span className="text-sm text-black/70 italic">
@@ -223,7 +225,9 @@ export default function InvestorPage() {
 
             {/* Right Column - Content */}
             <div className="col-span-3 border-l border-black pl-8">
+              <ScrollArea className="h-[calc(100vh-12rem)] overflow-hidden">
               {renderContent()}
+              </ScrollArea>
             </div>
           </div>
         </Card>
