@@ -14,17 +14,27 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
-// Add this constant for countries
 const COUNTRIES = [
   { value: 'af', label: 'Afghanistan' },
   { value: 'al', label: 'Albania' },
@@ -239,7 +249,6 @@ const DAFTAR_OPTIONS = [
   { value: "micro-vc", label: "Micro VC"},
 ] as const
 
-// Update the form schema to include investorsDaftar
 const formSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
@@ -264,7 +273,6 @@ export default function LandingPage() {
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Here you would typically send the data to your backend
     console.log(values)
     setRegistered(true)
   }
@@ -272,30 +280,20 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col items-start justify-center h-[60%] mt-[6rem] px-10">
       <div className="w-full">
-        {/* Header */}
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight mb-8">
+        <h1 className="text-4xl font-bold tracking-tight mb-8">
           Simplifying startup scouting
-          </h1>
-          <Button 
-            size="lg" 
-            variant="outline"
-            className="text-lg bg-blue-600 rounded-[0.3rem] px-8"
-            onClick={() => setShowForm(true)}
-          >
-            Register as an Early User
-          </Button>
-        </div>
+        </h1>
+        <Button 
+          size="lg" 
+          variant="outline"
+          className="text-lg bg-blue-600 rounded-[0.3rem] px-8"
+          onClick={() => setShowForm(true)}
+        >
+          Register as an Early User
+        </Button>
 
-        {/* Registration Form Dialog */}
         <Dialog open={showForm} onOpenChange={setShowForm}>
           <DialogContent className="sm:max-w-[425px]">
-            {/* <DialogHeader>
-              <DialogTitle>
-                {registered ? "Registration Successful!" : "Pre-registration Form"}
-              </DialogTitle>
-            </DialogHeader> */}
-
             {registered ? (
               <div className="text-center py-6 space-y-4">
                 <p className="text-green-600 font-medium">You're in!</p>
@@ -305,7 +303,7 @@ export default function LandingPage() {
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
                     control={form.control}
                     name="firstName"
@@ -315,6 +313,7 @@ export default function LandingPage() {
                         <FormControl>
                           <Input placeholder="John" {...field} />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -328,6 +327,7 @@ export default function LandingPage() {
                         <FormControl>
                           <Input placeholder="Doe" {...field} />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -341,6 +341,7 @@ export default function LandingPage() {
                         <FormControl>
                           <Input placeholder="john@example.com" type="email" {...field} />
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -349,22 +350,57 @@ export default function LandingPage() {
                     control={form.control}
                     name="country"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>Country</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select your country" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="max-h-[300px]">
-                            {COUNTRIES.map((country) => (
-                              <SelectItem key={country.value} value={country.value}>
-                                {country.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? COUNTRIES.find((country) => country.value === field.value)?.label
+                                  : "Select country"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput placeholder="Search country..." />
+                              <CommandList>
+                                <CommandEmpty>No country found.</CommandEmpty>
+                                <CommandGroup>
+                                  {COUNTRIES.map((country) => (
+                                    <CommandItem
+                                      value={country.value}
+                                      key={country.value}
+                                      onSelect={(value) => {
+                                        form.setValue("country", value)
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          country.value === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {country.label}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -388,42 +424,50 @@ export default function LandingPage() {
                               >
                                 {field.value
                                   ? DAFTAR_OPTIONS.find((daftar) => daftar.value === field.value)?.label
-                                  : "Select your Daftar"}
+                                  : "Select daftar"}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
                           <PopoverContent className="w-full p-0">
                             <Command>
-                              <CommandInput placeholder="Search Daftar..." />
-                              <CommandEmpty>No Daftar found.</CommandEmpty>
-                              <CommandGroup>
-                                {DAFTAR_OPTIONS.map((daftar) => (
-                                  <CommandItem
-                                    key={daftar.value}
-                                    value={daftar.value}
-                                    onSelect={() => {
-                                      form.setValue("investorsDaftar", daftar.value)
-                                    }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4",
-                                        daftar.value === field.value ? "opacity-100" : "opacity-0"
-                                      )}
-                                    />
-                                    {daftar.label}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
+                              <CommandInput placeholder="Search daftar..." />
+                              <CommandList>
+                                <CommandEmpty>No daftar found.</CommandEmpty>
+                                <CommandGroup>
+                                  {DAFTAR_OPTIONS.map((daftar) => (
+                                    <CommandItem
+                                      value={daftar.value}
+                                      key={daftar.value}
+                                      onSelect={(value) => {
+                                        form.setValue("investorsDaftar", value)
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          daftar.value === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                      {daftar.label}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
                             </Command>
                           </PopoverContent>
                         </Popover>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <Button type="submit" variant="outline" className="w-full bg-blue-600 rounded-[0.3rem]">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-blue-600 rounded-[0.3rem]"
+                  >
                     Register
                   </Button>
                 </form>
