@@ -48,7 +48,7 @@ export default function PitchPage() {
               key={item.id}
               variant="outline"
               className={cn(
-                "flex items-center gap-1",
+                "flex items-center rounded-[0.35rem] gap-1",
                 selectedTab === item.id && "bg-accent"
               )}
               onClick={() => setSelectedTab(item.id)}

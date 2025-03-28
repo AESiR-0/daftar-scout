@@ -9,6 +9,7 @@ export default function FounderIntroPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const { data: session, update } = useSession();
+  
 
   useEffect(() => {
     if (session?.status !== 'authenticated') {
@@ -57,7 +58,7 @@ export default function FounderIntroPage() {
       </div>
     );
   }
-
+  router.push("/founder/loading");
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="max-w-3xl w-full space-y-8 text-center">
@@ -71,21 +72,20 @@ export default function FounderIntroPage() {
             Your browser does not support the video tag.
           </video>
         </div> */}
-
         {/* Text Content */}
-        <h1 className="text-2xl font-bold tracking-tight text-white">
+        {/* <h1 className="text-2xl font-bold tracking-tight text-white">
           Pitch your startup story in 120 seconds
-        </h1>
+        </h1> */}
 
         {/* Button */}
-        <Button
+        {/* <Button
           variant="secondary"
           size="lg"
           className="px-8 py-6 text-md"
           onClick={() => router.push("/founder/loading")}
         >
           Let&apos;s Go
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
