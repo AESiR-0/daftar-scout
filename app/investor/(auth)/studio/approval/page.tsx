@@ -154,7 +154,7 @@ export default function ApprovalPage() {
 
                   <Button
                     variant="outline"
-                    className="w-fit"
+                    className="w-fit rounded-[0.3rem]"
                     disabled={!termsAccepted}
                     onClick={() => {
                       toast({

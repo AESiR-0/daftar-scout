@@ -121,6 +121,7 @@ export default function SchedulePage() {
               <Button 
                 variant="outline"
                 onClick={handleGoLive}
+                className="rounded-[0.35rem]"  
                 disabled={!isDateValid || isScheduled}
               >
                 {isScheduled ? 'Scheduled' : 'Go Live'}

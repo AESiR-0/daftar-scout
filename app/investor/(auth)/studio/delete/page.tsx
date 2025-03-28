@@ -89,7 +89,7 @@ export default function DeletePage() {
   const pendingApprovals = approvals.filter(member => !member.isApproved).length
 
   return (
-    <div className="flex px-5 mt-14 gap-6">
+    <div className="flex px-5  mt-10 container mx-auto gap-6">
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
           <div className="flex flex-col p-4 rounded-lg space-y-6">
@@ -120,7 +120,7 @@ export default function DeletePage() {
               variant="destructive"
               onClick={handleDelete}
               disabled={!userConsent || deleteClicked}
-              className="w-[12%] bg-muted hover:bg-muted/50"
+              className="w-[12%] bg-muted rounded-[0.35rem] hover:bg-muted/50"
             >
               Delete
             </Button>

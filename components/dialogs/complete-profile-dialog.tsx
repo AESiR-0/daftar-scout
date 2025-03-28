@@ -203,7 +203,7 @@ export function CompleteProfileDialog({
             </div>
           </div>
 
-          <Button onClick={handleSubmit}>Complete Profile</Button>
+          <Button className="rounded-[0.35rem]" onClick={handleSubmit}>Complete Profile</Button>
         </div>
       </DialogContent>
     </Dialog>

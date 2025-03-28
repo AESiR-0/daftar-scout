@@ -151,7 +151,7 @@ export function UpdatesDialog({
                             <Button
                                 onClick={handleSubmit}
                                 size="sm"
-                                className="w-fit bg-blue-600 hover:bg-blue-700 text-white"
+                                className="w-fit bg-blue-600 rounded-[0.35rem] hover:bg-blue-700 text-white"
                                 disabled={editor?.isEmpty}
                             >
                                 Post Update

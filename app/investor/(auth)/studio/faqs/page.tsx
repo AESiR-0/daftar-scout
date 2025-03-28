@@ -143,7 +143,8 @@ function FaqsContent() {
             <div className="flex justify-center gap-2 pt-4">
               <Button
                 onClick={handleAddFAQ}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                variant="secondary"
+                className="rounded-[0.3rem] text-white"
               >
                 Add FAQ
               </Button>

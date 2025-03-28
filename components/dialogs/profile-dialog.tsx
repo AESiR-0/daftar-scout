@@ -232,6 +232,7 @@ export function ProfileDialog({
                 <Button 
                   variant="ghost" 
                   size="icon"
+                  className="rounded-[0.35rem]"
                   onClick={() => setIsEditing(!isEditing)}
                 >
                   {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
@@ -285,7 +286,7 @@ export function ProfileDialog({
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full justify-start text-left font-normal bg-[#1a1a1a]",
+                              "w-full justify-start text-left font-normal rounded-[0.35rem] bg-[#1a1a1a]",
                               !profileData.dateOfBirth && "text-muted-foreground"
                             )}
                           >
@@ -344,7 +345,7 @@ export function ProfileDialog({
                           </Select>
                         )}
                         {profileData.languages.map((lang) => (
-                          <Badge key={lang} className="bg-muted">
+                          <Badge key={lang} className="bg-muted rounded-[0.35rem]">
                             {lang}
                             <Button
                               variant="ghost"
@@ -355,14 +356,14 @@ export function ProfileDialog({
                                 languages: prev.languages.filter(l => l !== lang)
                               }))}
                             >
-                              <X className="h-3 w-3" />
+                              <X className="h-3 w-3 rounded-[0.35rem]" />
                             </Button>
                           </Badge>
                         ))}
                       </div>
                     </div>
                   </div>
-                  <Button onClick={() => setIsEditing(false)} className="w-full">
+                  <Button onClick={() => setIsEditing(false)} className="w-full rounded-[0.35rem]">
                     Save Changes
                   </Button>
                 </div>
@@ -424,7 +425,7 @@ export function ProfileDialog({
                     variant="outline" 
                     size="lg"
                     className={cn(
-                      satisfied === true && "bg-muted"
+                      satisfied === true && "bg-muted rounded-[0.35rem]"
                     )}
                     onClick={() => setSatisfied(true)}
                   >
@@ -434,7 +435,7 @@ export function ProfileDialog({
                     variant="outline" 
                     size="lg"
                     className={cn(
-                      satisfied === false && "bg-muted"
+                      satisfied === false && "bg-muted rounded-[0.35rem]"
                     )}
                     onClick={() => setSatisfied(false)}
                   >
@@ -450,6 +451,7 @@ export function ProfileDialog({
                 </div>
                 <Button 
                   disabled={satisfied === undefined || !feedbackText.trim()}
+                  className=" rounded-[0.35rem]"
                   onClick={handleFeedbackSubmit}
                 >
                   Submit
@@ -498,6 +500,7 @@ export function ProfileDialog({
                 </div>
                 <Button 
                   onClick={handleSubmitFeature}
+                  className="rounded-[0.35rem]"
                   disabled={!featureRequest.trim() || !featureName.trim()}
                 >
                   Submit
@@ -551,6 +554,7 @@ export function ProfileDialog({
               </p>
               <Button 
                 variant="outline" 
+                className="rounded-[0.35rem]"
                 onClick={handleDeleteAccount}
               >
                 Delete
@@ -568,6 +572,7 @@ export function ProfileDialog({
               </p>
               <Button 
                 variant="outline" 
+                className="rounded-[0.35rem]"
                 onClick={handleLogout}
               >
                 Logout

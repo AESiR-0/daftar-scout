@@ -273,13 +273,14 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
             <div className="flex justify-center gap-2">
               <Button
                 variant="outline"
+                className="rounded-[0.35rem]"
                 onClick={() => onOpenChange(false)}
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSubmit}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 rounded-[0.35rem] hover:bg-blue-700 text-white"
               >
                 Schedule Meeting
               </Button>

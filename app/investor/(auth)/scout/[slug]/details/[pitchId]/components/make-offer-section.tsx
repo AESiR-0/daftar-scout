@@ -363,13 +363,14 @@ export function MakeOfferSection() {
               placeholder="Write your offer message here..."
               value={offerMessage}
               onChange={(e) => setOfferMessage(e.target.value)}
-              className="min-h-[100px] bg-background"
+              className="min-h-[100px] bg-[#1a1a1a] rounded-[0.35rem]"
             />
             <div className="mt-4 flex gap-2 justify-start">
               <Button
                 onClick={() => handleSendOffer(offerMessage)}
                 disabled={!offerMessage.trim()}
                 variant="outline"
+                className="rounded-[0.35rem]"
               >
                 Accept
               </Button>
@@ -377,6 +378,7 @@ export function MakeOfferSection() {
               <Button variant="outline" 
                 onClick={() => handleDeclineOffer(offerMessage)}
                 disabled={!offerMessage.trim()}
+                className="rounded-[0.35rem]"
               >
                 Decline
               </Button>
@@ -451,6 +453,7 @@ export function MakeOfferSection() {
                       <div className="flex gap-2 mt-4">
                         <Button 
                           variant="outline"
+                          className="rounded-[0.35rem]"
                           onClick={() => handleWithdraw(offer.id)}
                         >
                           Withdraw
@@ -461,6 +464,7 @@ export function MakeOfferSection() {
                       <div className="flex justify-start mt-4">
                         <Button 
                           variant="outline"
+                          className="rounded-[0.35rem]"
                           onClick={() => handleWithdraw(offer.id)}
                         >
                           Withdraw

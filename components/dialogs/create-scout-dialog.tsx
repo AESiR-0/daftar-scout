@@ -44,7 +44,7 @@ export function CreateScoutDialog({ open, onOpenChange, onScoutCreate }: CreateS
               onChange={(e) => setScoutName(e.target.value)}
             />
           </div>
-          <Button onClick={handleSubmit}>Create</Button>
+          <Button className="rounded-[0.35rem]" onClick={handleSubmit}>Create</Button>
         </div>
       </DialogContent>
     </Dialog>

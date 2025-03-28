@@ -169,7 +169,7 @@ export default function InvestorPitchPage() {
                 )}
                 <Button 
                   variant="outline" 
-                  className="w-full" 
+                  className="w-full rounded-[0.3rem]" 
                   onClick={() => setShowSample(!showSample)}
                 >
                   {showSample ? "Upload Your Pitch" : "Back to Sample"}

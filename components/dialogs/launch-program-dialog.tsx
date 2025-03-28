@@ -38,12 +38,13 @@ export function LaunchProgramDialog({ open, onOpenChange, onSubmitFeedback }: La
             <div className="flex gap-3">
               <Button 
                 onClick={() => setResponse("accept")}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 rounded-[0.35rem] hover:bg-blue-700"
               >
                 Sure, count me in… anything for the community
               </Button>
               <Button 
                 variant="outline"
+                className="rounded-[0.35rem] hover:bg-muted/50"
                 onClick={() => setResponse("decline")}
               >
                 No, keep me out

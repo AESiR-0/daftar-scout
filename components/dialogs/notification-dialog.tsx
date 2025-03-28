@@ -234,6 +234,7 @@ export function NotificationDialog({
                           <Button 
                             size="sm" 
                             variant="outline"
+                            className="rounded-[0.35rem]"
                             onClick={() => handleAction(request.id, "accepted")}
                           >
                             Accept
@@ -241,6 +242,7 @@ export function NotificationDialog({
                           <Button 
                             size="sm" 
                             variant="outline"
+                            className="rounded-[0.35rem]"
                             onClick={() => handleAction(request.id, "declined")}
                           >
                             Decline
@@ -273,7 +275,7 @@ export function NotificationDialog({
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="text-xs"
+                          className="text-xs rounded-[0.35rem]"
                           onClick={() => {
                             // Handle copy link
                             navigator.clipboard.writeText(`https://daftar.com/scout/${link.id}`)
@@ -288,7 +290,7 @@ export function NotificationDialog({
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="text-xs"
+                          className="text-xs rounded-[0.35rem]"
                           onClick={() => router.push(`/investor/studio/${link.id}`)}
                         >
                           View Scout

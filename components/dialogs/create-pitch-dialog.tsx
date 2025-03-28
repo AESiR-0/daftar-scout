@@ -36,7 +36,7 @@ export function SelectDaftarDialog({ open, onOpenChange, scoutSlug }: SelectDaft
             onChange={(e) => setPitchName(e.target.value)}
           />
           <Button 
-            className="w-full" 
+            className="w-full rounded-[0.35rem]" 
             onClick={handleSubmit}
             disabled={!pitchName.trim()}
           >

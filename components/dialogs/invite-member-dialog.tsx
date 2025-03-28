@@ -48,7 +48,7 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
                     </div>
                     <Button 
                         onClick={handleInvite} 
-                        className="w-full"
+                        className="w-full rounded-[0.35rem]"
                         disabled={!email || !designation}
                     >
                         Send Invitation

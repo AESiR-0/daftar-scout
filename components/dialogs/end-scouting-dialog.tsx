@@ -79,7 +79,7 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
           <div className="flex justify-start">
             <Button
               onClick={handleRequest}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive rounded-[0.35rem] hover:bg-destructive/90"
               disabled={!confirmEndScouting}
             >
               End Scouting

@@ -294,7 +294,7 @@ export default function DocumentsSection() {
                   </TabsTrigger>
                 </TabsList>
 
-                <Button variant="outline" onClick={handleUpload}>
+                <Button variant="outline" className="rounded-[0.35rem]" onClick={handleUpload}>
                   Upload
                 </Button>
               </div>

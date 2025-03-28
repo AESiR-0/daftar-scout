@@ -307,7 +307,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                     <Button
                       onClick={handleSendInvite}
                       disabled={!formData.firstName || !formData.lastName || !formData.email || !formData.designation}
-                      className="bg-primary hover:bg-primary/90"
+                      className="bg-primary hover:bg-primary/90 rounded-[0.35rem]"
                     >
                       {isInviting ? (
                         <>
@@ -370,7 +370,7 @@ export function TeamDialog({ open, daftarData, onOpenChange, daftarId }: TeamDia
                     </ul>
                   </div>
                   <Button
-                    className="w-[15%]"
+                    className="w-[15%] rounded-[0.35rem]"
                     onClick={() => setShowLeaveConfirmDialog(true)}
                   >
                     Leave Team

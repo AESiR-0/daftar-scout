@@ -16,8 +16,8 @@ export function Footer() {
   }
 
   return (
-    <footer className="border-t w-full py-6 md:px-8 md:py-0 bg-[#0e0e0e] h-[8vh]">
-      <div className="container flex flex-col items-center justify-center gap-4 md:h-14 md:flex-row">
+    <footer className="border-t w-full py-4 bg-[#0e0e0e] h-[10%]">
+      <div className="flex items-center justify-center">
         <p className="text-center text-sm leading-loose text-muted-foreground">
         Designed and Built by Daftar OS Technology
         </p>

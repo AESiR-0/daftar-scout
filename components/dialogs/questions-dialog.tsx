@@ -178,7 +178,7 @@ export function QuestionsDialog({
                     <Button
                       variant="outline"
                       onClick={addQuestion}
-                      className="w-full h-9"
+                      className="w-full h-9 rounded-[0.35rem]"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Question
@@ -193,6 +193,7 @@ export function QuestionsDialog({
             <div className="flex gap-2">
               <Button
                 variant="outline"
+                className="rounded-[0.35rem]"
                 onClick={() => onOpenChange(false)}
               >
                 Cancel
@@ -200,7 +201,7 @@ export function QuestionsDialog({
               <Button
                 onClick={() => onQuestionsUpdate?.(questions, templateName)}
                 disabled={!isValid}
-                className="s"
+                className="rounded-[0.35rem]"
               >
                 Save as Template
               </Button>
@@ -209,7 +210,7 @@ export function QuestionsDialog({
               <Button
                 onClick={() => onApplyTemplate(questions)}
                 disabled={!isValid}
-                className=""
+                className="rounded-[0.35rem]"
               >
                 Add to Pitch
               </Button>

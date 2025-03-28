@@ -543,7 +543,7 @@ export default function PitchDetailsPage() {
   const { ageData, genderData, languageData, averageAge } = processTeamData()
 
   return (
-    <ScrollArea className="h-[calc(100vh-6rem)] container">
+    <ScrollArea className="h-[calc(100vh-6rem)]">
       {/* Navigation */}
       <div className="flex justify-between items-center border-b border-border py-2 px-4">
         <div className="flex gap-1">
@@ -562,7 +562,7 @@ export default function PitchDetailsPage() {
               {section.label}
               <span 
                 className={cn(
-                  "absolute inset-x-0 -bottom-[10px] h-[2px] transition-opacity",
+                  "absolute inset-x-0 -bottom-[10px] h-[2px] transition-opacity rounded-[035rem]",
                   activeSection === section.id 
                     ? "bg-foreground opacity-100"
                     : "bg-foreground opacity-0 group-hover:opacity-100"
@@ -585,7 +585,7 @@ export default function PitchDetailsPage() {
           onOpenChange={setReportDialogOpen}
         />
       </div>
-      <div className="max-w-6xl">
+      <div className="container mx-auto">
 
         {/* Content */}
         <div className="mt-10">

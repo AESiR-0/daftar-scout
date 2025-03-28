@@ -187,7 +187,7 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                             <div className="flex justify-center pt-4">
                                 <Button
                                     onClick={handleCreate}
-                                    className="bg-muted hover:bg-muted/50 text-white"
+                                    className="bg-muted hover:bg-muted/50 rounded-[0.35rem] text-white"
                                     disabled={!formData.name || !formData.country}
                                 >
                                     Create Daftar
@@ -207,8 +207,8 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
 
                             <div className="flex justify-center pt-4">
                                 <Button
-                                    onClick={handleJoin}
-                                    className="bg-muted hover:bg-muted/50 text-white"
+                                    onClick={handleJoin}  
+                                    className="bg-muted hover:bg-muted/50 rounded-[0.35rem] text-white"
                                     disabled={!joinCode}
                                 >
                                     Join Daftar

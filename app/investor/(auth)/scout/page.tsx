@@ -135,7 +135,7 @@ export default function ScoutPage() {
         <Button
           variant="outline"
           onClick={() => setShowMeetings(true)}
-          className={showMeetings ? "bg-muted" : ""}
+          className={showMeetings ? "bg-muted rounded-[0.3rem]" : "rounded-[0.3rem]"}
         >
           Meetings
           <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
@@ -146,7 +146,7 @@ export default function ScoutPage() {
         <Button
           variant="outline"
           onClick={() => setShowMeetings(false)}
-          className={showMeetings ? "" : "bg-muted"}
+          className={showMeetings ? "rounded-[0.3rem]" : "bg-muted rounded-[0.3rem]"}
 
         >
           ScoutBoard
@@ -157,7 +157,7 @@ export default function ScoutPage() {
 
         <Button
           variant="outline"
-          className="h-9"
+          className="h-9 rounded-[0.3rem]"
           onClick={() => setCreateScoutOpen(true)}
         >
           New Scout

@@ -69,7 +69,7 @@ export function SelectDaftarDialog({ open, onOpenChange, onCreateNew }: SelectDa
           <Button
             variant="outline"
             onClick={onCreateNew}
-            className="gap-2"
+            className="gap-2 rounded-[0.35rem]"
           >
             Create
           </Button>

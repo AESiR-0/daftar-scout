@@ -546,7 +546,7 @@ export function DaftarDialog({
                       />
                     </div>
                   </div>
-                  <Button onClick={handleSave} className="w-full">
+                  <Button onClick={handleSave} className="w-full rounded-[0.35rem]">
                   Save Changes
                 </Button>
               </div>
@@ -618,7 +618,7 @@ export function DaftarDialog({
                     })
                   }
                 }}
-                className="w-full bg-muted hover:bg-muted/50"
+                className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
                 disabled={!newMember.firstName || !newMember.lastName || !newMember.email || !newMember.designation}
               >
                 Invite
@@ -679,7 +679,7 @@ export function DaftarDialog({
                 <p className="text-sm text-muted-foreground">No billing information added</p>
               </div>
 
-              <Button variant="outline">
+              <Button className="rounded-[0.35rem]" variant="outline">
                 Upgrade Plan
               </Button>
             </div>
@@ -726,6 +726,7 @@ export function DaftarDialog({
 
               <Button
                 variant="outline"
+                className="rounded-[0.35rem]"
                 onClick={handleDeleteClick}
               >
                 Delete
