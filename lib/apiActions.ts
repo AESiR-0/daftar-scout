@@ -14,6 +14,11 @@ export const getCount = async () => {
   return response.data
 }
 
+export const getAllPitches = async () => {
+  const response = await axios.get('/api/endpoints/pitch')
+  return response
+}
+
 export const getFounderProfile = async (founderId: number) => {
   const response = await axios.get(`${BASE_URL}/founder/profile/${founderId}`);
   return response.data;

@@ -15,6 +15,20 @@
       "when": 1743167628302,
       "tag": "0001_flowery_gauntlet",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1743287887179,
+      "tag": "0002_wild_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1743288125908,
+      "tag": "0003_certain_colossus",
+      "breakpoints": true
     }
   ]
 }

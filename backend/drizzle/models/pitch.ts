@@ -106,6 +106,7 @@ export const pitchTeam = pgTable('pitch_team',
     {
         id: serial("id").primaryKey(),
         userId: text("user_id").references(() => users.id),
+        designation: text("designation").notNull(),
         pitchId: text("pitchId").references(() => pitch.id)
     }
 )
