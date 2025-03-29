@@ -199,12 +199,12 @@ CREATE TABLE "user_languages" (
 CREATE TABLE "users" (
 	"id" varchar(255) PRIMARY KEY NOT NULL,
 	"first_name" text NOT NULL,
-	"DOB" date NOT NULL,
 	"last_name" text NOT NULL,
 	"email" text NOT NULL,
 	"role" text NOT NULL,
 	"location" text,
 	"gender" text,
+	"dob" date,
 	"number" varchar(20),
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,

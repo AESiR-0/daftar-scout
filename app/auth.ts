@@ -1,6 +1,7 @@
 import NextAuth from "next-auth"
 import Google from 'next-auth/providers/google'
-import type { DefaultSession } from "next-auth"
+import { checkIfNewUser } from "@/lib/helper/checkNewUser";
+import { insertCriticalPath } from "@/lib/helper/criticalPath";
 
 declare module "next-auth" {
   interface Session {
@@ -26,18 +27,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   pages: {
     signIn: `/login`,
-  },
+  }, session: { strategy: "jwt" },
+
   callbacks: {
     async redirect({ url, baseUrl }) {
       // Extract role from URL
       const roleMatch = baseUrl.includes('investor') ? "investor" : 'founder'
-      return '/' + roleMatch;
+      return url;
     },
 
     async jwt({ token, account, session }) {
       if (account?.id_token) {
         token.idToken = account.id_token;
-        session.id_token = account.id_token
+        session.id_token = account.id_token;
         console.log(account.id_token);
 
       }
@@ -45,13 +47,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     async session({ session }) {
+
       return session;
     },
+    async signIn({ profile }) {
 
-    async signIn() {
-      return true
+      if (!profile?.email)
+        return false
+
+      const { isNew, id } = await checkIfNewUser(profile.email);
+
+      // Example: Redirect based on whether it's a new user
+      if (isNew) {
+        return "/sign-up"; // Redirect new users to a welcome page
+      }
+      try {
+        await insertCriticalPath(id);
+        return true; // Proceed with default behavior
+      }
+      catch (e) {
+        console.error(e);
+        return false;
+      }
     },
   },
 });
+
 
 

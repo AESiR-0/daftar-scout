@@ -102,6 +102,14 @@ export const investorPitch = pgTable("investor_pitch", {
     deal: boolean("deal").default(false),
 });
 
+export const pitchTeam = pgTable('pitch_team',
+    {
+        id: serial("id").primaryKey(),
+        userId: text("user_id").references(() => users.id),
+        pitchId: text("pitchId").references(() => pitch.id)
+    }
+)
+
 // 🔗 Relationships
 export const pitchRelations = relations(pitch, ({ many, one }) => ({
     documents: many(pitchDocs),
