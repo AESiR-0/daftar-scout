@@ -102,6 +102,7 @@ export const investorPitch = pgTable("investor_pitch", {
     deal: boolean("deal").default(false),
 });
 
+// Founders Team
 export const pitchTeam = pgTable('pitch_team',
     {
         id: serial("id").primaryKey(),
