@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 
-export const PATCH = auth(async (req) => {
+export async function GET(req: Request) {
   try {
     const {
       firstName,
@@ -49,4 +49,4 @@ export const PATCH = auth(async (req) => {
       status: 500,
     });
   }
-});
+}

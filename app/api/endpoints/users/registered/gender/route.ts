@@ -3,7 +3,31 @@ import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq, sql } from "drizzle-orm";
 
-export const GET = auth(async function GET(req) {
+export async function GET(req: Request) {
+  try {
+    const session = await auth();
+    if (!session) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+    const { user } = session;
+    if (!user) {
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+      });
+    }
+    if (!user?.email) {
+      return new Response(JSON.stringify({ error: "Invalid user email" }), {
+        status: 400,
+      });
+    }
+  } catch (error) {
+    console.error("Error during authentication:", error);
+    return new Response(JSON.stringify({ error: "Authentication failed" }), {
+      status: 500,
+    });
+  }
   const genderCounts = await db
     .select({
       gender: users.gender,
@@ -22,4 +46,4 @@ export const GET = auth(async function GET(req) {
   );
 
   return new Response(JSON.stringify(result), { status: 200 });
-});
+}
