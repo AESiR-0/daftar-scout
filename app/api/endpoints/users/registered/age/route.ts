@@ -3,7 +3,8 @@ import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { sql } from "drizzle-orm";
 
-export const GET = auth(async (req) => {
+export const GET = auth(async () => {
+  // Explicitly type the request
   // Get age counts
   const ageCounts = await db
     .select({

@@ -15,6 +15,7 @@ export default async function UserProfileForm({
     .where(eq(users.email, userMail))
     .limit(1);
 
+
   if (!user.length) {
     return <p className="text-red-600">User not found.</p>;
   }

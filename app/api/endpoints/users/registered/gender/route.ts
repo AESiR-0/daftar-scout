@@ -3,7 +3,7 @@ import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq, sql } from "drizzle-orm";
 
-export const GET = auth(async (req) => {
+export const GET = auth(async () => {
   const genderCounts = await db
     .select({
       gender: users.gender,
@@ -14,7 +14,8 @@ export const GET = auth(async (req) => {
 
   const result = genderCounts.reduce(
     (acc, item) => {
-      acc[item?.gender] = item.count;
+      const genderKey = (item?.gender as keyof typeof acc) || "male";
+      acc[genderKey] = item.count;
       return acc;
     },
     { male: 0, female: 0, trans: 0, others: 0 }
