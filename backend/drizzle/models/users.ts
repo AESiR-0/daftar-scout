@@ -1,3 +1,4 @@
+import { count } from "console";
 import {
   pgTable,
   varchar,
@@ -25,6 +26,7 @@ export const users = pgTable("users", {
   gender: text("gender"), // Nullable
   dob: date("dob"),
   image: text("image"), // Nullable
+  countryCode: varchar("country_code", { length: 5 }), // Nullable
   number: varchar("number", { length: 20 }), // Nullable
   createdAt: timestamp("created_at").defaultNow().notNull(),
   isActive: boolean("is_active").default(true).notNull(),
