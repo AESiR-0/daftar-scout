@@ -11,3 +11,4 @@ export async function checkIfNewUser(userMail: string) {
 
     return { isNew: existingAccounts.length === 0, id: existingAccounts[0].id };
 }
+

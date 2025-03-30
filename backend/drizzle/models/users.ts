@@ -1,32 +1,140 @@
-import { pgTable, varchar, primaryKey, text, integer, boolean, date, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  varchar,
+  primaryKey,
+  text,
+  integer,
+  boolean,
+  date,
+  timestamp,
+} from "drizzle-orm/pg-core";
+import type { AdapterAccountType } from "next-auth/adapters";
 
 export const users = pgTable("users", {
-  id: varchar("id", { length: 255 }).primaryKey(), // ID with role-based prefix
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => {
+      return crypto.randomUUID();
+    }), // ID with role-based prefix
+  name: text("first_name").notNull(),
+  lastName: text("last_name"),
   email: text("email").unique().notNull(),
-  role: text("role").notNull(), // Founder, Investor, etc.
+  emailVerified: timestamp("email_verified"), // Nullable
+  role: text("role").notNull().default("temp"), // Founder, Investor, etc.
   location: text("location"), // Nullable (IP-based)
   gender: text("gender"), // Nullable
   dob: date("dob"),
+  image: text("image"), // Nullable
   number: varchar("number", { length: 20 }), // Nullable
   createdAt: timestamp("created_at").defaultNow().notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   deletedOn: timestamp("deleted_on"), // Nullable
 });
 
+export const accounts = pgTable(
+  "account",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").$type<AdapterAccountType>().notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (account) => [
+    {
+      compoundKey: primaryKey({
+        columns: [account.provider, account.providerAccountId],
+      }),
+    },
+  ]
+);
+
+export const sessions = pgTable("session", {
+  sessionToken: text("sessionToken").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+});
+
+export const verificationTokens = pgTable(
+  "verificationToken",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
+  },
+  (verificationToken) => [
+    {
+      compositePk: primaryKey({
+        columns: [verificationToken.identifier, verificationToken.token],
+      }),
+    },
+  ]
+);
+
+export const authenticators = pgTable(
+  "authenticator",
+  {
+    credentialID: text("credentialID").notNull().unique(),
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    providerAccountId: text("providerAccountId").notNull(),
+    credentialPublicKey: text("credentialPublicKey").notNull(),
+    counter: integer("counter").notNull(),
+    credentialDeviceType: text("credentialDeviceType").notNull(),
+    credentialBackedUp: boolean("credentialBackedUp").notNull(),
+    transports: text("transports"),
+  },
+  (authenticator) => [
+    {
+      compositePK: primaryKey({
+        columns: [authenticator.userId, authenticator.credentialID],
+      }),
+    },
+  ]
+);
+
 export const languages = pgTable("languages", {
   id: integer("id").primaryKey(),
-  language_name: text("language_name").notNull()
-})
+  language_name: text("language_name").notNull(),
+});
 
 export const userLanguages = pgTable(
   "user_languages",
   {
-    userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id, { onDelete: "cascade" }),
-    languageId: integer("language_id").notNull().references(() => languages.id, { onDelete: "cascade" }),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    languageId: integer("language_id")
+      .notNull()
+      .references(() => languages.id, { onDelete: "cascade" }),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.languageId] }), // Composite Primary Key
   })
 );
+
+export const unregisteredUsers = pgTable("unregistered_users", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => {
+      return crypto.randomUUID();
+    }),
+  ip: text("ip").notNull(),
+  browser: text("browser").notNull(),
+  os: text("os").notNull(),
+  device: text("device").notNull(),
+  userAgent: text("user_agent").notNull(),
+  locationData: text("location_data").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

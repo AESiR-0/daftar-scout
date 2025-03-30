@@ -1,73 +1,86 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Camera, Trash2, UserCircle, MessageSquarePlus, Shield, LogOut, Share2, Settings, Database, Pencil, X, Calendar as CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Camera,
+  Trash2,
+  UserCircle,
+  MessageSquarePlus,
+  Shield,
+  LogOut,
+  Share2,
+  Settings,
+  Database,
+  Pencil,
+  X,
+  Calendar as CalendarIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { signOut } from "next-auth/react"
-import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
-import { Combobox } from "@/components/ui/combobox"
-import format_Date from "@/lib/formatDate"
-import {formatDate} from "@/lib/format-date"
-import { Card } from "@/components/ui/card"
-import { Calendar } from "@/components/ui/calendar"
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { signOut } from "next-auth/react";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Combobox } from "@/components/ui/combobox";
+import format_Date from "@/lib/formatDate";
+import { formatDate } from "@/lib/format-date";
+import { Card } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { format } from "date-fns"
+} from "@/components/ui/popover";
+import { format } from "date-fns";
 
 interface ProfileData {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  gender: string
-  dateOfBirth: string
-  primaryLanguage: string
-  secondaryLanguage: string
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  gender: string;
+  dateOfBirth: string;
+  primaryLanguage: string;
+  secondaryLanguage: string;
   languageProficiency: {
-    primary: 'beginner' | 'intermediate' | 'advanced'
-    secondary: 'beginner' | 'intermediate' | 'advanced'
-  }
-  country: string
-  city: string
-  company: string
-  position: string
-  industry: string
-  experience: string
+    primary: "beginner" | "intermediate" | "advanced";
+    secondary: "beginner" | "intermediate" | "advanced";
+  };
+  country: string;
+  city: string;
+  company: string;
+  position: string;
+  industry: string;
+  experience: string;
 }
 
 interface ProfileDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 interface FeedbackEntry {
-  id: string
-  message: string
-  status: 'pending' | 'in-progress' | 'completed'
-  createdAt: string
+  id: string;
+  message: string;
+  status: "pending" | "in-progress" | "completed";
+  createdAt: string;
 }
 
 interface DaftarOption {
@@ -90,39 +103,43 @@ const navItems = [
   { title: "Feature Request", value: "feature", icon: MessageSquarePlus },
   { title: "Privacy Policy", value: "privacy", icon: Shield },
   { title: "Delete Account", value: "delete", icon: Trash2 },
-]
+];
 
-type ProfileTab = "account" | "support" | "feedback" | "feature" | "privacy" | "delete" | "logout"
+type ProfileTab =
+  | "account"
+  | "support"
+  | "feedback"
+  | "feature"
+  | "privacy"
+  | "delete"
+  | "logout";
 
-export function ProfileDialog({
-  open,
-  onOpenChange,
-}: ProfileDialogProps) {
-  const { toast } = useToast()
-  const [activeTab, setActiveTab] = useState<ProfileTab>("account")
-  const [isEditing, setIsEditing] = useState(false)
-  const [featureRequest, setFeatureRequest] = useState("")
-  const [featureName, setFeatureName] = useState("")
+export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<ProfileTab>("account");
+  const [isEditing, setIsEditing] = useState(false);
+  const [featureRequest, setFeatureRequest] = useState("");
+  const [featureName, setFeatureName] = useState("");
   const [feedbackHistory] = useState<FeedbackEntry[]>([
     {
-      id: '1',
+      id: "1",
       message: "Add dark mode support across the platform",
-      status: 'completed',
-      createdAt: '2024-03-15T10:30:00'
+      status: "completed",
+      createdAt: "2024-03-15T10:30:00",
     },
     {
-      id: '2',
+      id: "2",
       message: "Implement bulk document upload feature",
-      status: 'in-progress',
-      createdAt: '2024-03-10T14:20:00'
+      status: "in-progress",
+      createdAt: "2024-03-10T14:20:00",
     },
     {
-      id: '3',
+      id: "3",
       message: "Add calendar integration for meetings",
-      status: 'pending',
-      createdAt: '2024-03-05T09:15:00'
-    }
-  ])
+      status: "pending",
+      createdAt: "2024-03-05T09:15:00",
+    },
+  ]);
   const [profileData, setProfileData] = useState({
     firstName: "John",
     lastName: "Doe",
@@ -131,33 +148,33 @@ export function ProfileDialog({
     gender: "Male",
     dateOfBirth: "1990-01-01",
     languages: ["English", "Hindi"],
-    joinedDate: "Feb 14, 2024"
-  })
-  const [satisfied, setSatisfied] = useState<boolean | undefined>()
-  const [feedbackText, setFeedbackText] = useState("")
+    joinedDate: "Feb 14, 2024",
+  });
+  const [satisfied, setSatisfied] = useState<boolean | undefined>();
+  const [feedbackText, setFeedbackText] = useState("");
   const [featureHistory] = useState([
     {
-      id: '1',
-      name: 'Dark Mode',
-      description: 'Add dark mode support across the platform',
-      status: 'completed',
-      createdAt: '2024-03-15T10:30:00'
+      id: "1",
+      name: "Dark Mode",
+      description: "Add dark mode support across the platform",
+      status: "completed",
+      createdAt: "2024-03-15T10:30:00",
     },
     {
-      id: '2',
-      name: 'Bulk Upload',
-      description: 'Implement bulk document upload feature',
-      status: 'in-progress',
-      createdAt: '2024-03-10T14:20:00'
+      id: "2",
+      name: "Bulk Upload",
+      description: "Implement bulk document upload feature",
+      status: "in-progress",
+      createdAt: "2024-03-10T14:20:00",
     },
     {
-      id: '3',
-      name: 'Calendar Integration',
-      description: 'Add calendar integration for meetings',
-      status: 'pending',
-      createdAt: '2024-03-05T09:15:00'
-    }
-  ])
+      id: "3",
+      name: "Calendar Integration",
+      description: "Add calendar integration for meetings",
+      status: "pending",
+      createdAt: "2024-03-05T09:15:00",
+    },
+  ]);
 
   const tabs: { id: ProfileTab; label: string }[] = [
     { id: "account", label: "My Account" },
@@ -166,51 +183,52 @@ export function ProfileDialog({
     { id: "feature", label: "Feature Request" },
     { id: "privacy", label: "Privacy Policy" },
     { id: "delete", label: "Delete Account" },
-    { id: "logout", label: "Logout" }
-  ]
+    { id: "logout", label: "Logout" },
+  ];
 
-  const getStatusColor = (status: FeedbackEntry['status']) => {
+  const getStatusColor = (status: FeedbackEntry["status"]) => {
     switch (status) {
-      case 'completed':
-        return 'bg-green-500/10 text-green-500 border-green-500/20'
-      case 'in-progress':
-        return 'bg-muted text-muted-foreground border-muted-foreground/20'
-      case 'pending':
-        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+      case "completed":
+        return "bg-green-500/10 text-green-500 border-green-500/20";
+      case "in-progress":
+        return "bg-muted text-muted-foreground border-muted-foreground/20";
+      case "pending":
+        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
     }
-  }
+  };
 
   const handleLogout = () => {
-    signOut()
-    onOpenChange(false)
-  }
+    signOut();
+    onOpenChange(false);
+  };
 
   const handleSubmitFeature = () => {
     toast({
       title: "Feature request submitted",
-      description: "Thank you for your feedback. We'll review your request shortly.",
-    })
-    setFeatureName("")
-    setFeatureRequest("")
-  }
+      description:
+        "Thank you for your feedback. We'll review your request shortly.",
+    });
+    setFeatureName("");
+    setFeatureRequest("");
+  };
 
   const handleDeleteAccount = () => {
     toast({
       title: "Account deleted",
       description: "Your account has been permanently deleted.",
-      variant: "destructive"
-    })
-    onOpenChange(false)
-  }
+      variant: "destructive",
+    });
+    onOpenChange(false);
+  };
 
   const handleFeedbackSubmit = () => {
     toast({
       title: "Feedback submitted",
       description: "Thank you for your feedback!",
-    })
-    setSatisfied(undefined)
-    setFeedbackText("")
-  }
+    });
+    setSatisfied(undefined);
+    setFeedbackText("");
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -226,16 +244,22 @@ export function ProfileDialog({
                   </Avatar>
                   <div>
                     <h3 className="text-lg font-medium">{`${profileData.firstName} ${profileData.lastName}`}</h3>
-                    <p className="text-sm text-muted-foreground">{profileData.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {profileData.email}
+                    </p>
                   </div>
                 </div>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
                   className="rounded-[0.35rem]"
                   onClick={() => setIsEditing(!isEditing)}
                 >
-                  {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                  {isEditing ? (
+                    <X className="h-4 w-4" />
+                  ) : (
+                    <Pencil className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
 
@@ -244,30 +268,47 @@ export function ProfileDialog({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>First Name</Label>
-                      <Input 
+                      <Input
                         value={profileData.firstName}
-                        onChange={(e) => setProfileData(prev => ({...prev, firstName: e.target.value}))}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            firstName: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Last Name</Label>
-                      <Input 
+                      <Input
                         value={profileData.lastName}
-                        onChange={(e) => setProfileData(prev => ({...prev, lastName: e.target.value}))}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            lastName: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Phone</Label>
-                      <Input 
+                      <Input
                         value={profileData.phone}
-                        onChange={(e) => setProfileData(prev => ({...prev, phone: e.target.value}))}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            phone: e.target.value,
+                          }))
+                        }
                       />
                     </div>
                     <div className="space-y-2">
                       <Label>Gender</Label>
-                      <Select 
+                      <Select
                         value={profileData.gender}
-                        onValueChange={(value) => setProfileData(prev => ({...prev, gender: value}))}
+                        onValueChange={(value) =>
+                          setProfileData((prev) => ({ ...prev, gender: value }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select gender" />
@@ -287,7 +328,8 @@ export function ProfileDialog({
                             variant="outline"
                             className={cn(
                               "w-full justify-start text-left font-normal rounded-[0.35rem] bg-[#1a1a1a]",
-                              !profileData.dateOfBirth && "text-muted-foreground"
+                              !profileData.dateOfBirth &&
+                                "text-muted-foreground"
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -304,10 +346,10 @@ export function ProfileDialog({
                             selected={new Date(profileData.dateOfBirth)}
                             onSelect={(date) => {
                               if (date) {
-                                setProfileData(prev => ({
+                                setProfileData((prev) => ({
                                   ...prev,
-                                  dateOfBirth: date.toISOString().split('T')[0]
-                                }))
+                                  dateOfBirth: date.toISOString().split("T")[0],
+                                }));
                               }
                             }}
                             initialFocus
@@ -318,15 +360,14 @@ export function ProfileDialog({
                     <div className="col-span-2 space-y-2">
                       <Label>Preferred Languages (up to 3)</Label>
                       <div className="flex flex-wrap gap-2">
-                        
                         {profileData.languages.length < 3 && (
                           <Select
                             onValueChange={(value) => {
                               if (!profileData.languages.includes(value)) {
-                                setProfileData(prev => ({
+                                setProfileData((prev) => ({
                                   ...prev,
-                                  languages: [...prev.languages, value]
-                                }))
+                                  languages: [...prev.languages, value],
+                                }));
                               }
                             }}
                           >
@@ -334,9 +375,18 @@ export function ProfileDialog({
                               <SelectValue placeholder="Add language" />
                             </SelectTrigger>
                             <SelectContent>
-                              {["English", "Hindi", "Spanish", "French", "German"]
-                                .filter(lang => !profileData.languages.includes(lang))
-                                .map(lang => (
+                              {[
+                                "English",
+                                "Hindi",
+                                "Spanish",
+                                "French",
+                                "German",
+                              ]
+                                .filter(
+                                  (lang) =>
+                                    !profileData.languages.includes(lang)
+                                )
+                                .map((lang) => (
                                   <SelectItem key={lang} value={lang}>
                                     {lang}
                                   </SelectItem>
@@ -345,16 +395,23 @@ export function ProfileDialog({
                           </Select>
                         )}
                         {profileData.languages.map((lang) => (
-                          <Badge key={lang} className="bg-muted rounded-[0.35rem]">
+                          <Badge
+                            key={lang}
+                            className="bg-muted rounded-[0.35rem]"
+                          >
                             {lang}
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-4 w-4 ml-1 hover:bg-transparent"
-                              onClick={() => setProfileData(prev => ({
-                                ...prev,
-                                languages: prev.languages.filter(l => l !== lang)
-                              }))}
+                              onClick={() =>
+                                setProfileData((prev) => ({
+                                  ...prev,
+                                  languages: prev.languages.filter(
+                                    (l) => l !== lang
+                                  ),
+                                }))
+                              }
                             >
                               <X className="h-3 w-3 rounded-[0.35rem]" />
                             </Button>
@@ -363,46 +420,59 @@ export function ProfileDialog({
                       </div>
                     </div>
                   </div>
-                  <Button onClick={() => setIsEditing(false)} className="w-full rounded-[0.35rem]">
+                  <Button
+                    onClick={() => setIsEditing(false)}
+                    className="w-full rounded-[0.35rem]"
+                  >
                     Save Changes
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Email:</span> {profileData.email}
+                    <span className="text-muted-foreground">Email:</span>{" "}
+                    {profileData.email}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Phone:</span> {profileData.phone}
+                    <span className="text-muted-foreground">Phone:</span>{" "}
+                    {profileData.phone}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Gender:</span> {profileData.gender}
+                    <span className="text-muted-foreground">Gender:</span>{" "}
+                    {profileData.gender}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Date of Birth:</span>{" "}
+                    <span className="text-muted-foreground">
+                      Date of Birth:
+                    </span>{" "}
                     {new Date(profileData.dateOfBirth).toLocaleDateString()}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Preferred Languages:</span>{" "}
+                    <span className="text-muted-foreground">
+                      Preferred Languages:
+                    </span>{" "}
                     {profileData.languages.join(", ")}
                   </p>
                   <div className="text-xs pt-4">
-                    <span className="text-muted-foreground">On Daftar Since <br/> {profileData.joinedDate}</span>
+                    <span className="text-muted-foreground">
+                      On Daftar Since <br /> {profileData.joinedDate}
+                    </span>
                   </div>
                 </div>
               )}
             </div>
           </Card>
-        )
+        );
 
       case "support":
         return (
           <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                We're in the process of setting up our ticket system, but for now, feel free to reach out to us at{" "}
-                <a 
-                  href="mailto:support@daftaros.com" 
+                We're in the process of setting up our ticket system, but for
+                now, feel free to reach out to us at{" "}
+                <a
+                  href="mailto:support@daftaros.com"
                   className="text-blue-500 hover:text-blue-400 underline"
                 >
                   support@daftaros.com
@@ -411,7 +481,7 @@ export function ProfileDialog({
               </p>
             </div>
           </Card>
-        )
+        );
 
       case "feedback":
         return (
@@ -421,8 +491,8 @@ export function ProfileDialog({
               <div className="space-y-4">
                 <p className="text-sm">Are you happy with us?</p>
                 <div className="flex gap-3">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="lg"
                     className={cn(
                       satisfied === true && "bg-muted rounded-[0.35rem]"
@@ -431,8 +501,8 @@ export function ProfileDialog({
                   >
                     Yes
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="lg"
                     className={cn(
                       satisfied === false && "bg-muted rounded-[0.35rem]"
@@ -443,13 +513,13 @@ export function ProfileDialog({
                   </Button>
                 </div>
                 <div className="space-y-2">
-                  <Textarea 
+                  <Textarea
                     placeholder="How can we make your experience better?"
                     value={feedbackText}
                     onChange={(e) => setFeedbackText(e.target.value)}
                   />
                 </div>
-                <Button 
+                <Button
                   disabled={satisfied === undefined || !feedbackText.trim()}
                   className=" rounded-[0.35rem]"
                   onClick={handleFeedbackSubmit}
@@ -464,7 +534,10 @@ export function ProfileDialog({
               <h4 className="text-[14px] font-medium mb-4">History</h4>
               <div className="space-y-4">
                 {feedbackHistory.map((feedback) => (
-                  <div key={feedback.id} className="py-3 rounded-[0.35rem] space-y-2">
+                  <div
+                    key={feedback.id}
+                    className="py-3 rounded-[0.35rem] space-y-2"
+                  >
                     <div className="flex justify-between items-center">
                       <p className="text-sm">{feedback.message}</p>
                     </div>
@@ -476,7 +549,7 @@ export function ProfileDialog({
               </div>
             </Card>
           </div>
-        )
+        );
 
       case "feature":
         return (
@@ -492,13 +565,13 @@ export function ProfileDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Textarea 
+                  <Textarea
                     placeholder="What should we build next, and how will it help your journey?"
                     value={featureRequest}
                     onChange={(e) => setFeatureRequest(e.target.value)}
                   />
                 </div>
-                <Button 
+                <Button
                   onClick={handleSubmitFeature}
                   className="rounded-[0.35rem]"
                   disabled={!featureRequest.trim() || !featureName.trim()}
@@ -513,11 +586,16 @@ export function ProfileDialog({
               <h4 className="text-[14px] font-medium mb-4">History</h4>
               <div className="space-y-4">
                 {featureHistory.map((feature) => (
-                  <div key={feature.id} className="py-3 rounded-[0.35rem] space-y-2">
+                  <div
+                    key={feature.id}
+                    className="py-3 rounded-[0.35rem] space-y-2"
+                  >
                     <div className="flex justify-between items-center">
                       <h5 className="text-sm font-medium">{feature.name}</h5>
                     </div>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {feature.description}
+                    </p>
                     <span className="text-xs text-muted-foreground">
                       {format_Date(feature.createdAt)}
                     </span>
@@ -526,7 +604,7 @@ export function ProfileDialog({
               </div>
             </Card>
           </div>
-        )
+        );
 
       case "privacy":
         return (
@@ -538,22 +616,25 @@ export function ProfileDialog({
                     <section.icon className="h-4 w-4" />
                     <h4 className="font-medium">{section.title}</h4>
                   </div>
-                  <p className="text-sm text-muted-foreground">{section.content}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {section.content}
+                  </p>
                 </div>
               ))}
             </div>
           </Card>
-        )
+        );
 
       case "delete":
         return (
           <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-              We're sad to say goodbye.This action can't be undone, and all your data will be permanently lost. 
+                We're sad to say goodbye.This action can't be undone, and all
+                your data will be permanently lost.
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="rounded-[0.35rem]"
                 onClick={handleDeleteAccount}
               >
@@ -561,7 +642,7 @@ export function ProfileDialog({
               </Button>
             </div>
           </Card>
-        )
+        );
 
       case "logout":
         return (
@@ -570,8 +651,8 @@ export function ProfileDialog({
               <p className="text-sm text-muted-foreground">
                 Are you sure you want to logout?
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="rounded-[0.35rem]"
                 onClick={handleLogout}
               >
@@ -579,9 +660,9 @@ export function ProfileDialog({
               </Button>
             </div>
           </Card>
-        )
+        );
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -609,35 +690,37 @@ export function ProfileDialog({
 
         <div className="flex-1 p-6 bg-[#0e0e0e] pt-10">
           <ScrollArea className="h-[500px]">
-            <div className="space-y-4">
-              {renderContent()}
-            </div>
+            <div className="space-y-4">{renderContent()}</div>
           </ScrollArea>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 const privacySections = [
   {
     title: "Data Collection",
     icon: Database,
-    content: "We collect information that you provide directly to us, including your name, email address, and any other information you choose to provide."
+    content:
+      "We collect information that you provide directly to us, including your name, email address, and any other information you choose to provide.",
   },
   {
     title: "Use of Information",
     icon: Settings,
-    content: "We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect our platform."
+    content:
+      "We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect our platform.",
   },
   {
     title: "Data Sharing",
     icon: Share2,
-    content: "We do not share your personal information with third parties except as described in this policy."
+    content:
+      "We do not share your personal information with third parties except as described in this policy.",
   },
   {
     title: "Security",
     icon: Shield,
-    content: "We take reasonable measures to help protect your personal information from loss, theft, misuse, and unauthorized access."
-  }
-] 
+    content:
+      "We take reasonable measures to help protect your personal information from loss, theft, misuse, and unauthorized access.",
+  },
+];

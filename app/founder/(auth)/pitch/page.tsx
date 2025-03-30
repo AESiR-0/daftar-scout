@@ -8,7 +8,7 @@ import PitchesList from "@/app/founder/(auth)/pitchesList/pitchesList"
 import ScoutPage from "@/app/founder/(auth)/scout/scoutPage"
 import DealBoardPage from "../deal-board/dealBoardPage"
 import MeetingsPage from "../meetings/page"
-import { getCount } from '@/lib/apiActions'
+import { getAllPitches } from '@/lib/apiActions'
 
 interface counts {
   meetings: number,
@@ -31,10 +31,8 @@ export default function PitchPage() {
 
   useEffect(() => {
     async function fetchCount() {
-      const res: counts = await getCount();
+      const res = await getAllPitches();
       console.log(res);
-
-      setCounts(res)
     }
     fetchCount()
   }, [])
