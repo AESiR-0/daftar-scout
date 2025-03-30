@@ -2,7 +2,7 @@ import { TopNav } from "@/components/navbar/top-nav";
 import ClientSessionProvider from "./client-session";
 import { AppSidebar } from "@/components/navbar/side-nav";
 import { DaftarProvider } from "@/lib/context/daftar-context";
-import { auth } from "@/app/auth";
+import { auth } from "@/auth";
 import { BookmarkProvider } from "@/lib/context/bookmark-context";
 import { redirect } from "next/navigation";
 import { SearchProvider } from "@/lib/context/search-context";

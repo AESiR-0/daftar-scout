@@ -1,9 +1,9 @@
-import { auth } from "@/app/auth";
+import { auth } from "@/auth";
 import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq, sql } from "drizzle-orm";
 
-export const GET = auth(async () => {
+export const GET = auth(async function GET(req) {
   const genderCounts = await db
     .select({
       gender: users.gender,

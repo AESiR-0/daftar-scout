@@ -1,5 +1,5 @@
 import ClientSessionProvider from "./client-session";
-import { auth } from "@/app/auth";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/navbar/side-nav";
 import { TopNav } from "@/components/navbar/top-nav";

@@ -1,4 +1,4 @@
-import { auth } from "@/app/auth";
+import { auth } from "@/auth";
 import UserProfileForm from "./userProfileForm";
 
 export default async function page() {

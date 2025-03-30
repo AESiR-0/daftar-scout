@@ -1,10 +1,10 @@
 // app/api/signout/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { signOut } from "@/app/auth";
+import { signOut } from "@/auth";
 import { db } from "@/backend/database";
 import { criticalPaths } from "@/backend/drizzle/models/url";
 import { eq, and } from "drizzle-orm";
-import { auth } from "@/app/auth";
+import { auth } from "@/auth";
 
 export async function POST(request: NextRequest) {
     const session = await auth();

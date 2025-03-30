@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
 import { pitch } from "@/backend/drizzle/models/pitch"; // Adjust path if needed
-import { auth } from "@/app/auth";
+import { auth } from "@/auth";
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
 
