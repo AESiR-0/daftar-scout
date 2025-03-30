@@ -123,3 +123,18 @@ export const userLanguages = pgTable(
     pk: primaryKey({ columns: [table.userId, table.languageId] }), // Composite Primary Key
   })
 );
+
+export const unregisteredUsers = pgTable("unregistered_users", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => {
+      return crypto.randomUUID();
+    }),
+  ip: text("ip").notNull(),
+  browser: text("browser").notNull(),
+  os: text("os").notNull(),
+  device: text("device").notNull(),
+  userAgent: text("user_agent").notNull(),
+  locationData: text("location_data").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

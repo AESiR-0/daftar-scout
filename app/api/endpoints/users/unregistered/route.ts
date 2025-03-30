@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLocationViaIp } from "@/lib/helper/getLocation"; // Your custom location function
+import { db } from "@/backend/database";
+import { unregisteredUsers } from "@/backend/drizzle/models/users";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,8 +17,19 @@ export async function GET(req: NextRequest) {
     // ✅ Extract Browser, OS, and Device Information
     const { browser, os, device } = parseUserAgent(userAgent);
 
+    const locationString = locationData.error
+      ? "Location not found"
+      : `${locationData.city}, ${locationData.region}, ${locationData.country}, ${locationData.latitude}, ${locationData.longitude}`;
+    await db.insert(unregisteredUsers).values({
+      ip,
+      browser,
+      os,
+      device,
+      userAgent,
+      locationData: JSON.stringify(locationData),
+    });
     return NextResponse.json(
-      { ip, browser, os, device, userAgent, locationData },
+      { ip, browser, os, device, userAgent, locationString },
       { status: 200 }
     );
   } catch (error) {
