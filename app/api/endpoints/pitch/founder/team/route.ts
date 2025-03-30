@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
       .values({
         userId,
         pitchId,
+        designation: "Team Member", // Provide a default or appropriate value for designation
       })
       .returning();
 

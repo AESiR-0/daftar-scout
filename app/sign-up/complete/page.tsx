@@ -7,12 +7,8 @@ export default async function page() {
     return <div>Unauthorized</div>;
   }
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-3xl font-bold">
-        Welcome to the Sign-Up Completion Page
-      </h1>
-      <p className="mt-4 text-lg">Your sign-up is almost complete!</p>
-      <p className="mt-2 text-lg">Please fill out your profile information.</p>
+    <div className="flex flex-col items-center p-4 justify-center min-h-screen">
+      <h2 className="mt-4 text-2xl font-semibold">You are almost there!</h2>
       <UserProfileForm userMail={session?.user?.email || ""} />
     </div>
   );
