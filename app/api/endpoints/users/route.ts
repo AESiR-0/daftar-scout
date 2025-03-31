@@ -3,30 +3,33 @@ import { eq } from "drizzle-orm";
 import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 
-export async function GET(req: Request) {
+export async function PATCH(req: Request) {
   try {
-    const {
-      firstName,
-      lastName,
-      phoneNumber,
-      gender,
-      dob,
-      location,
-      email,
-      role,
-    } = await req.json();
-
+    const { formData, email } = await req.json();
+    console.log("Form state", formData, email);
+    
+    const { name, lastName, phoneNumber, gender, dob, location, role } =
+    formData;
     if (!email) {
       return new Response(JSON.stringify({ error: "Email is required" }), {
         status: 400,
       });
     }
     const formattedDob = dob ? new Date(dob).toISOString().split("T")[0] : null; // Converts to "YYYY-MM-DD"
+    console.log(
+      "Body data",
+      name,
+      lastName,
+      formattedDob,
+      phoneNumber,
+      location,
+      email
+    );
 
     const updatedUser = await db
       .update(users)
       .set({
-        name: firstName,
+        name: name,
         lastName: lastName,
         number: phoneNumber,
         gender: gender,

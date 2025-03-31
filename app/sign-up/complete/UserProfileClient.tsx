@@ -4,64 +4,20 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { z } from "zod";
 
-// Country codes (simplified list)
-const countryCodes = [
-  { code: "+1", label: "US (+1)" },
-  { code: "+44", label: "UK (+44)" },
-  { code: "+91", label: "India (+91)" },
-  { code: "+33", label: "France (+33)" },
-];
-
-// Language options
-const languages = [
-  "English",
-  "Spanish",
-  "French",
-  "German",
-  "Mandarin",
-  "Hindi",
-  "Arabic",
-];
-
-// Zod schema for form validation
 const profileSchema: any = z.object({
   name: z.string().min(1, "First name cannot be empty"),
   lastName: z.string().min(1, "Last name cannot be empty"),
-  gender: z.string().min(1, "Gender cannot be empty"),
+  gender: z.enum(["Male", "Female", "Other"]).optional(),
   number: z.string().min(1, "Phone number cannot be empty"),
-  countryCode: z.string().min(1, "Country code cannot be empty"),
   dob: z.string().min(1, "Date of birth cannot be empty"),
   location: z.string().min(1, "Location cannot be empty"),
-  role: z.enum(["founder", "investor"], { message: "Please select a role" }),
-  languages: z
-    .array(z.string())
-    .min(1, "Please select at least one language")
-    .refine(
-      (langs) => (formData.role === "founder" ? langs.length <= 3 : true),
-      { message: "Founders can select up to 3 languages only" }
-    ),
+  role: z.enum(["founder", "investor"]),
+  languages: z.array(z.string()).min(1, "Please select at least one language"),
 });
 
 interface UserProfileProps {
@@ -70,63 +26,84 @@ interface UserProfileProps {
     lastName: string | null;
     gender: string | null;
     number: string | null;
-    countryCode: string | null;
     dob: string | null;
     location: string | null;
     role: string | null;
-    languages: string[];
+    countryCode: string | null;
+    languages: string[] | [];
   };
   userMail: string;
+  languageData: {
+    id: number;
+    language_name: string;
+  }[];
 }
 
-// Keep formData in scope for the refine function
-let formData: z.infer<typeof profileSchema>;
-
-export default function UserProfileClient({ initialData, userMail }: UserProfileProps) {
-  // Convert null values to empty strings for Zod compatibility
-  formData = {
+export default function UserProfileClient({
+  initialData,
+  languageData,
+  userMail,
+}: UserProfileProps) {
+  const [formState, setFormState] = useState<{
+    name: string;
+    lastName: string;
+    gender: string;
+    number: string;
+    dob: string;
+    location: string;
+    countryCode: string;
+    role: string;
+    languages: string[];
+  }>({
     name: initialData.name ?? "",
     lastName: initialData.lastName ?? "",
     gender: initialData.gender ?? "",
     number: initialData.number ?? "",
-    countryCode: initialData.countryCode ?? "+1",
     dob: initialData.dob ?? "",
+    countryCode: initialData.countryCode ?? "",
     location: initialData.location ?? "",
     role: initialData.role ?? "",
     languages: initialData.languages ?? [],
-  };
-
-  const [formState, setFormState] = useState(formData);
+  });
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [open, setOpen] = useState(false); // For Combobox popover
-  const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof typeof formState, string>>
+  >({});
   const { toast } = useToast();
 
   const handleChange = (field: string, value: string) => {
-    setFormState((prev: any) => ({ ...prev, [field]: value }));
+    setFormState((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
+
+    if (field === "role") {
+      setFormState((prev) => ({ ...prev, languages: [] }));
+    }
   };
 
   const handleLanguageToggle = (language: string) => {
-    setFormState((prev: any) => {
-      const currentLanguages = prev.languages || [];
-      if (currentLanguages.includes(language)) {
-        return { ...prev, languages: currentLanguages.filter((lang: any) => lang !== language) };
-      } else {
-        if (prev.role === "founder" && currentLanguages.length >= 3) {
-          return prev; // Error will be caught by Zod
-        }
-        return { ...prev, languages: [...currentLanguages, language] };
-      }
+    setFormState((prev) => {
+      const selectedLanguages = prev.languages.includes(language)
+        ? prev.languages.filter((lang) => lang !== language)
+        : [...prev.languages, language];
+
+      return { ...prev, languages: selectedLanguages };
     });
     setErrors((prev) => ({ ...prev, languages: undefined }));
   };
 
   const handleSubmit = async () => {
+    console.log("initialData", initialData);
+
     const result = profileSchema.safeParse(formState);
     if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      setErrors(fieldErrors);
+      setErrors(result.error.flatten().fieldErrors);
+      console.log("Errors", result.error.flatten().fieldErrors);
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields correctly.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -138,19 +115,13 @@ export default function UserProfileClient({ initialData, userMail }: UserProfile
         body: JSON.stringify({ formData: formState, email: userMail }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update profile");
-      }
+      if (!res.ok) throw new Error("Failed to update profile");
 
-      toast({
-        title: "Success",
-        description: "Profile updated successfully!",
-      });
-    } catch (error: any) {
+      toast({ title: "Success", description: "Profile updated successfully!" });
+    } catch {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Something went wrong",
         variant: "destructive",
       });
     } finally {
@@ -162,178 +133,176 @@ export default function UserProfileClient({ initialData, userMail }: UserProfile
     <div className="bg-[#0e0e0e] h-fit p-4">
       <Card className="border-none my-4 container mx-auto px-4 bg-[#1a1a1a] text-white">
         <CardHeader>
-          <CardTitle className="text-2xl font-medium text-center">Complete Profile</CardTitle>
+          <CardTitle className="text-2xl font-medium text-center">
+            Complete Profile
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 sm:grid-cols-2">
-            {/* Input Fields */}
-            {[
-              { field: "name", label: "First Name" },
-              { field: "lastName", label: "Last Name" },
-              { field: "gender", label: "Gender" },
-              { field: "dob", label: "Date of Birth", type: "date" },
-              { field: "location", label: "Location" },
-            ].map(({ field, label, type }) => (
-              <div key={field} className="space-y-2">
-                <Label htmlFor={field} className="text-sm font-medium text-gray-300">
-                  {label}
-                </Label>
-                <Input
-                  id={field}
-                  type={type || "text"}
-                  value={formState[field] || ""}
-                  onChange={(e) => handleChange(field, e.target.value)}
-                  disabled={isSubmitting}
-                  className={cn(
-                    "bg-[#2a2a2a] border-[#3a3a3a] text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 rounded-[0.35rem] py-2 px-3",
-                    errors[field] && "border-red-500 focus:ring-red-500"
-                  )}
-                />
-                {errors[field] && (
-                  <p className="text-sm text-red-500">{errors[field]}</p>
-                )}
-              </div>
-            ))}
-
-            {/* Phone Number with Country Code */}
+            {/* First Name */}
             <div className="space-y-2">
-              <Label htmlFor="number" className="text-sm font-medium text-gray-300">
-                Phone Number
-              </Label>
-              <div className="flex gap-2">
-                <Select
-                  value={formState.countryCode || "+1"}
-                  onValueChange={(value) => handleChange("countryCode", value)}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger className="w-24 bg-[#2a2a2a] border-[#3a3a3a] text-white rounded-[0.35rem]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#2a2a2a] text-white border-[#3a3a3a]">
-                    {countryCodes.map(({ code, label }) => (
-                      <SelectItem key={code} value={code}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  id="number"
-                  type="text"
-                  value={formState.number || ""}
-                  onChange={(e) => handleChange("number", e.target.value)}
-                  disabled={isSubmitting}
-                  className={cn(
-                    "flex-1 bg-[#2a2a2a] border-[#3a3a3a] text-white placeholder:text-gray-500 focus:ring-1 focus:ring-blue-500 rounded-[0.35rem] py-2 px-3",
-                    errors.number && "border-red-500 focus:ring-red-500"
-                  )}
-                />
-              </div>
-              {(errors.countryCode || errors.number) && (
-                <p className="text-sm text-red-500">
-                  {errors.countryCode || errors.number}
-                </p>
-              )}
-            </div>
-
-            {/* Role Selection */}
-            <div className="space-y-2 col-span-full">
-              <Label htmlFor="role" className="text-sm font-medium text-gray-300">
-                Role
-              </Label>
-              <Select
-                value={formState.role || ""}
-                onValueChange={(value) => handleChange("role", value)}
+              <Label htmlFor="name">First Name</Label>
+              <Input
+                id="name"
+                value={formState.name}
+                onChange={(e) => handleChange("name", e.target.value)}
                 disabled={isSubmitting}
-              >
-                <SelectTrigger className={cn(
-                  "bg-[#2a2a2a] border-[#3a3a3a] text-white rounded-[0.35rem]",
-                  errors.role && "border-red-500"
-                )}>
-                  <SelectValue placeholder="Select Role" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#2a2a2a] text-white border-[#3a3a3a]">
-                  <SelectItem value="founder">Founder</SelectItem>
-                  <SelectItem value="investor">Investor</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white"
+              />
             </div>
 
-            {/* Language Selection (Role-Based Combobox) */}
-            {formState.role && (
-              <div className="space-y-2 col-span-full">
-                <Label className="text-sm font-medium text-gray-300">
-                  {formState.role === "founder"
-                    ? "Preferred Languages to Connect with Investors (Max 3)"
-                    : "Preferred Languages to Connect with Founders"}
-                </Label>
-                <Popover open={open} onOpenChange={setOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={open}
-                      className={cn(
-                        "w-full justify-between bg-[#2a2a2a] border-[#3a3a3a] text-white rounded-[0.35rem] hover:bg-[#3a3a3a]",
-                        errors.languages && "border-red-500"
-                      )}
-                      disabled={isSubmitting}
-                    >
-                      {formState.languages.length > 0
-                        ? formState.languages.join(", ")
-                        : "Select languages..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0 bg-[#2a2a2a] border-[#3a3a3a] text-white">
-                    <Command>
-                      <CommandInput
-                        placeholder="Search languages..."
-                        className="bg-[#2a2a2a] border-none text-white placeholder:text-gray-500"
-                      />
-                      <CommandList>
-                        <CommandEmpty>No languages found.</CommandEmpty>
-                        <CommandGroup>
-                          {languages.map((language) => (
-                            <CommandItem
-                              key={language}
-                              value={language}
-                              onSelect={() => {
-                                handleLanguageToggle(language);
-                              }}
-                              className="hover:bg-[#3a3a3a] text-white"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  formState.languages.includes(language) ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              {language}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                {errors.languages && (
-                  <p className="text-sm text-red-500">{errors.languages}</p>
+            {/* Last Name */}
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                value={formState.lastName}
+                onChange={(e) => handleChange("lastName", e.target.value)}
+                disabled={isSubmitting}
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white"
+              />
+            </div>
+
+            {/* Date of Birth */}
+            <div className="space-y-2">
+              <Label htmlFor="dob">Date of Birth</Label>
+              <Input
+                id="dob"
+                type="date"
+                value={formState.dob}
+                onChange={(e) => handleChange("dob", e.target.value)}
+                disabled={isSubmitting}
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white"
+              />
+            </div>
+
+            {/* Country Code */}
+            <div className="space-y-2">
+              <Label htmlFor="countryCode">Country Code</Label>
+              <Input
+                id="countryCode"
+                value={formState.countryCode}
+                onChange={(e) => handleChange("countryCode", e.target.value)}
+                disabled={isSubmitting}
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white"
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div className="space-y-2">
+              <Label htmlFor="number">Phone Number</Label>
+              <Input
+                id="number"
+                value={formState.number}
+                onChange={(e) => handleChange("number", e.target.value)}
+                disabled={isSubmitting}
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white"
+              />
+            </div>
+
+            {/* Gender */}
+            <div className="space-y-2">
+              <Label htmlFor="gender">Gender</Label>
+              <select
+                id="gender"
+                value={formState.gender}
+                onChange={(e) => handleChange("gender", e.target.value)}
+                disabled={isSubmitting}
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white p-2 w-full"
+              >
+                <option value="" disabled>
+                  Select Gender
+                </option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={formState.location}
+                onChange={(e) => handleChange("location", e.target.value)}
+                disabled={isSubmitting}
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white"
+              />
+            </div>
+            {/* Role Selection & Custom Language Dropdown remain unchanged */}
+            {/* Role Selection */}
+            <div className="space-y-2 colspan-full">
+              <Label>Role</Label>
+              <select
+                value={formState.role}
+                onChange={(e) => handleChange("role", e.target.value)}
+                className="bg-[#2a2a2a] border-[#3a3a3a] text-white p-2 w-full"
+              >
+                <option value="" disabled>
+                  Select Role
+                </option>
+                <option value="founder">Founder</option>
+                <option value="investor">Investor</option>
+              </select>
+            </div>
+
+            {/* Custom Language Dropdown */}
+            <div className="relative space-y-2 col-span-full">
+              <Label>Languages</Label>
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="bg-[#2a2a2a] border-[#3a3a3a] text-white w-full flex justify-between p-2 rounded-md"
+                >
+                  {formState.languages.length
+                    ? formState.languages.join(", ")
+                    : "Select languages..."}
+                  <ChevronsUpDown className="h-5 w-5" />
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute w-full bg-[#2a2a2a] border-[#3a3a3a] text-white rounded-md mt-1 max-h-40 overflow-y-auto z-10">
+                    {languageData.length ? (
+                      languageData.map((language) => (
+                        <div
+                          key={language.id}
+                          onClick={() =>
+                            handleLanguageToggle(language.language_name)
+                          }
+                          className={`flex items-center p-2 cursor-pointer hover:bg-[#3a3a3a] ${
+                            formState.languages.includes(language.language_name)
+                              ? "bg-[#444]"
+                              : ""
+                          }`}
+                        >
+                          <Check
+                            className={`h-4 w-4 mr-2 ${
+                              formState.languages.includes(
+                                language.language_name
+                              )
+                                ? "opacity-100"
+                                : "opacity-0"
+                            }`}
+                          />
+                          {language.language_name}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-2 text-gray-400">
+                        No languages available
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-
-            {/* Submit Button */}
-            <div className="col-span-full">
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="w-full bg-green-600 hover:bg-green-700 rounded-[0.35rem] py-3 text-lg font-semibold"
-              >
-                {isSubmitting ? "Saving..." : "Save Changes"}
-              </Button>
             </div>
+
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full bg-[#333]"
+            >
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -4,6 +4,7 @@ import {
   varchar,
   primaryKey,
   text,
+  serial,
   integer,
   boolean,
   date,
@@ -140,4 +141,16 @@ export const unregisteredUsers = pgTable("unregistered_users", {
   userAgent: text("user_agent").notNull(),
   locationData: text("location_data").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(), // Who started the session
+  ip: text("ip").notNull(), // User's IP address
+  postalCode: text("postal_code"),
+  city: text("city"),
+  state: text("state"),
+  country: text("country"),
+  continent: text("continent"),
+  createdAt: timestamp("created_at").defaultNow(), // When the session was created
 });
