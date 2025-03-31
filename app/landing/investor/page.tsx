@@ -4,10 +4,35 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { Scroll } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-type StoryTab = "economy" | "induben" | "signal" | "dabba" | "lijjat"
+type StoryTab = "economy" | "case-studies"
 
-const stories = {
+interface CaseStudy {
+  title: string
+  subtitle: string
+  content: string
+  investment: string
+  source: string
+}
+
+interface EconomyStory {
+  title: string
+  content: string
+  hasVideo: boolean
+  video: string
+  image: string
+}
+
+interface CaseStudiesStory {
+  title: string
+  studies: CaseStudy[]
+}
+
+type Story = EconomyStory | CaseStudiesStory
+
+const stories: Record<StoryTab, Story> = {
   economy: {
     title: "New Startup Economy",
     content: "",
@@ -15,32 +40,74 @@ const stories = {
     video: "/assets/economy.mp4",
     image: "/assets/economy.png",
   },
-  induben: {
-    title: "Induben Khakhrawala",
-    content: `If Induben Khakrawala had received investment similar to GoMechanic, the potential for returns would have been substantial. For context, GoMechanic raised funding in multiple rounds, including a Series C funding of $42 million in 2021, which helped them scale their operations across cities and build a brand in the automotive repair industry.
-
-Assuming Induben Khakrawala had received an investment of similar magnitude—say, $10 million in the early stages—and leveraged that capital for expansion and marketing, we could estimate a similar growth trajectory. 
-
-GoMechanic, for instance, saw significant growth in revenue, reaching over ₹100 crores in annual revenue in just a few years post-investment. 
-
-If Induben Khakrawala had scaled nationally, improved its operations, and entered new markets, it could have easily seen a 5-10x return on investment in the same time frame.`,
-    image: "/assets/induben.png",
-  },
-  signal: {
-    title: "Signal Vadapav",
-    content: "How a small vadapav stall outside Mithibai College turned into Mumbai's iconic food chain.",
-    image: "/assets/signal.png",
-  },
-  dabba: {
-    title: "Mumbai Dabbawalas",
-    content: "A Six Sigma certified organization that delivers 200,000 lunch boxes daily with 99.99% accuracy.",
-    image: "/assets/dabba.png",
-  },
-  lijjat: {
-    title: "Lijjat Papad",
-    content: "Seven women with ₹80 built a ₹1600 Cr organization, empowering thousands of women entrepreneurs.",
-    image: "/assets/lijjat_papad.png",
-  },
+  "case-studies": {
+    title: "Case Studies",
+    studies: [
+      {
+        title: "Pitambari",
+        subtitle: "India. FMCG.",
+        content: `Sudhir Joshi started Pitambari in Thane, Maharashtra, with a single product: a metal polish for brass and copper utensils. Over time, Pitambari expanded into household care, Ayurveda, and FMCG products, competing with giants like Unilever and P&G. As of FY 2022, Pitambari reported revenues of approximately $40 million.`,
+        investment: "A $50K investment for 5% could be worth $10–$20 million today.",
+        source: "Source"
+      },
+      {
+        title: "Cycle Agarbatti",
+        subtitle: "India. Consumer Goods.",
+        content: `N. Ranga Rao started Cycle Agarbatti in Mysuru, Karnataka, focusing on quality and strategic marketing. Today, Cycle Agarbatti is India's leading agarbatti brand, selling in over 75 countries and valued at $251 million.`,
+        investment: "A $50K investment for 5% could be worth $20–$50 million today.",
+        source: "Source"
+      },
+      {
+        title: "Pet Saffa",
+        subtitle: "India. Healthcare.",
+        content: `Aimil Pharmaceuticals launched Pet Saffa in Delhi as a small Ayurvedic digestive brand. With the right product and product availability, i.e., distribution, today, Pet Saffa is a market leader, valued at $50 million–$100 million.`,
+        investment: "A $50K investment for 5% could be worth $5–$10 million today.",
+        source: "Source"
+      },
+      {
+        title: "Tally Solutions",
+        subtitle: "India. Technology.",
+        content: `Bharat Goenka started Tally Solutions in Bengaluru, Karnataka, with a simple idea: to help small businesses manage accounts easily. Today, Tally Solutions is India's top accounting software, used by over 7 million businesses and valued between $500 million and $1 billion.`,
+        investment: "A $50K investment for 5% could be worth $50–$100 million today.",
+        source: "Source"
+      },
+      {
+        title: "Nirma",
+        subtitle: "India. FMCG.",
+        content: `Karsanbhai Patel started Nirma in Ahmedabad, Gujarat, literally selling detergent door-to-door. Today, Nirma is valued between $1 billion and $2 billion.`,
+        investment: "A $50K investment for 5% could be worth $100–$200 million today.",
+        source: "Source"
+      },
+      {
+        title: "Amrutanjan Healthcare",
+        subtitle: "India. Healthcare.",
+        content: `Kasinathuni Nageswara Rao created Amrutanjan Healthcare in Chennai, Tamil Nadu, selling a pain balm that worked. Today, Amrutanjan Healthcare is a major player in healthcare, with a market capitalization of $270 million.`,
+        investment: "A $50K investment for 5% could be worth $27 million today.",
+        source: "Source"
+      },
+      {
+        title: "Rajdhani Besan",
+        subtitle: "India. Food & Beverages.",
+        content: `Raj Kumar Gupta started Rajdhani Besan in Delhi, selling flour and pulses locally in an unstructured market. Today, Rajdhani Besan is a major brand valued between $100 million and $200 million.`,
+        investment: "A $50K investment for 5% could be worth $10–$20 million today.",
+        source: "Source"
+      },
+      {
+        title: "Jaipur Rugs",
+        subtitle: "India. Textiles & Handicrafts.",
+        content: `Nand Kishore Chaudhary started Jaipur Rugs in Rajasthan with a handful of small-town weavers. Today, Jaipur Rugs connects 40,000 artisans to global markets and is valued at approximately $200 million.`,
+        investment: "A $50K investment for 5% could be worth $10–$20 million today.",
+        source: "Source"
+      },
+      {
+        title: "Arvind Mills",
+        subtitle: "India. Fashion & Textiles.",
+        content: `Narottam Lalbhai started Arvind Mills in Ahmedabad, Gujarat, built the world's biggest denim factory, and supplied brands like Levi's, Gap, and Tommy Hilfiger. Today, Arvind Mills is valued at $1 billion.`,
+        investment: "A $50K investment for 5% could be worth $100 million today.",
+        source: "Source"
+      }
+    ]
+  }
 }
 
 export default function InvestorPage() {
@@ -63,36 +130,33 @@ export default function InvestorPage() {
       )
     }
 
+    const caseStudiesStory = story as CaseStudiesStory
     return (
-      <article className="space-y-4">
-        <h1 className="text-3xl font-serif font-bold leading-tight">
-          {story.title}
-        </h1>
-        <div className="flex items-center space-x-2 text-xs font-serif text-black/70">
-          <span>By Special Correspondent</span>
-          <span>•</span>
-          <span>Mumbai, India</span>
-        </div>
-        {story.image && (
-          <div className="my-4">
-            <Image
-              src={story.image}
-              alt={story.title}
-              width={600}
-              height={400}
-              className="w-full rounded-sm"
-            />
-            <p className="text-xs text-black/70 mt-2 font-serif italic">
-              {story.title} - A story of missed opportunity
-            </p>
-          </div>
-        )}
-        <div className="border-t border-b border-black/20 my-4 py-4">
-          <p className="text-lg font-serif leading-relaxed first-letter:text-5xl first-letter:font-bold first-letter:mr-3 first-letter:float-left">
-            {story.content}
-          </p>
-        </div>
-      </article>
+      <div className="space-y-12">
+        {caseStudiesStory.studies.map((study: CaseStudy, index: number) => (
+          <article key={index} className="space-y-2 border-b border-black/20 pb-8">
+            <h2 className="text-2xl font-serif font-bold leading-tight">
+              {study.title}
+            </h2>
+            <div className="flex items-center space-x-2 text-sm font-serif text-black/70">
+              <span>{study.subtitle}</span>
+            </div>
+            <div className="my-4">
+              <p className="text-lg font-serif leading-relaxed">
+                {study.content}
+              </p>
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-lg font-serif text-black/70">
+                {study.investment}
+              </p>
+              <span className="text-sm text-black/70 italic">
+                {study.source}
+              </span>
+            </div>
+          </article>
+        ))}
+      </div>
     )
   }
 
@@ -131,8 +195,8 @@ export default function InvestorPage() {
 
         {/* Bottom Section */}
         <div className="space-y-6 text-center">
-          <h2 className="text-5xl font-light">
-            You've <span className="text-blue-500">Missed</span> Billion-Dollar Opportunities
+          <h2 className="text-4xl font-light">
+            Scout The Next Big Startup At An Early Stage Or Miss Out Again.
           </h2>
         </div>
 
@@ -161,7 +225,9 @@ export default function InvestorPage() {
 
             {/* Right Column - Content */}
             <div className="col-span-3 border-l border-black pl-8">
+              <ScrollArea className="h-[calc(100vh-12rem)] overflow-hidden">
               {renderContent()}
+              </ScrollArea>
             </div>
           </div>
         </Card>

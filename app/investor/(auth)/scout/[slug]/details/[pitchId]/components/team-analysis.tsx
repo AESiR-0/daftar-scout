@@ -11,13 +11,10 @@ import {
     HoverCardContent,
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import { MenuBar } from "./menu-bar"
+import { Textarea } from "@/components/ui/textarea"
 import { formatDate } from "@/lib/format-date"
 import { InvestorProfile } from "@/components/investor-profile"
 import { cn } from "@/lib/utils"
-import Placeholder from '@tiptap/extension-placeholder'
 
 interface TeamAnalysis {
     id: string
@@ -62,44 +59,21 @@ export function TeamAnalysisSection({
     const [nps, setNps] = useState<number | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [hasSubmitted, setHasSubmitted] = useState(false)
-
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            Link.configure({
-                openOnClick: false,
-                HTMLAttributes: {
-                    class: 'text-blue-500 hover:underline',
-                },
-            }),
-            Placeholder.configure({
-                placeholder: 'Why do you want to meet... or not meet... in the startup?',
-                emptyEditorClass: 'is-editor-empty',
-            }),
-        ],
-        content: '',
-        editorProps: {
-            attributes: {
-                class: 'prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[100px] px-3 py-2',
-            },
-        },
-    })
+    const [note, setNote] = useState("")
 
     const handleSubmit = async () => {
-        if (!belief || editor?.isEmpty || nps === null) return
+        if (!belief || !note.trim() || nps === null) return
         setIsSubmitting(true)
         try {
             await onSubmitAnalysis({
                 belief,
                 nps,
-                note: editor?.getHTML(),
+                note,
                 analyst: currentProfile
             })
             setHasSubmitted(true)
-            editor?.commands.clearContent()
-            // Show success message
+            setNote("")
         } catch (error) {
-            // Show error message
             console.error(error)
         } finally {
             setIsSubmitting(false)
@@ -162,9 +136,12 @@ export function TeamAnalysisSection({
 
                                 <div className="space-y-2">
                                     <Label>Your Analysis</Label>
-                                    <div className="border rounded-md">
-                                        <EditorContent editor={editor} className="w-full" />
-                                    </div>
+                                    <Textarea 
+                                        placeholder="Why do you want to meet... or not meet... in the startup?"
+                                        value={note}
+                                        onChange={(e) => setNote(e.target.value)}
+                                        className="min-h-[100px]"
+                                    />
                                 </div>
                             </div>
 
@@ -174,7 +151,7 @@ export function TeamAnalysisSection({
 
                             <Button
                                 onClick={handleSubmit}
-                                disabled={!belief || editor?.isEmpty || nps === null || isSubmitting}
+                                disabled={!belief || !note.trim() || nps === null || isSubmitting}
                                 className="w-full bg-blue-600 hover:bg-blue-700"
                             >
                                 Submit Analysis
