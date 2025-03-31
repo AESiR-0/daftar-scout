@@ -25,6 +25,8 @@ export const pitch = pgTable("pitch", {
 export const focusSectors = pgTable("focus_sectors", {
     id: serial("id").primaryKey(),
     sectorName: text("sector_name").notNull(),
+    addedAt: timestamp("added_at").defaultNow(),
+    addedBy: varchar("added_by", { length: 255 }).references(() => users.id).default("system"),
 });
 
 // 🔄 Focus Sector Relations (Many-to-Many with Pitch)
