@@ -25,12 +25,15 @@ export function LoginClient({ role }: { role: string }) {
   return (
     <div className="min-h-screen bg-[#0e0e0e] flex flex-col items-center justify-center p-4">
       <div className="text-center space-y-4 max-w-md w-full">
+        
         <h1 className="text-3xl font-bold tracking-tight">
           Welcome to Daftar OS
         </h1>
 
         <p className="text-xl text-muted-foreground">
-          Sign in to access your {role} Scout
+          {role === "investor"
+            ? "Connecting you to the new startup economy by simplifying startup scouting"
+            : "Pitch your startup story in 120 seconds"}
         </p>
 
         {/* <video className="w-full rounded-lg border shadow-sm" controls>
