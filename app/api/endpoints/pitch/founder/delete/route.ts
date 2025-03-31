@@ -4,11 +4,11 @@ import { pitchDelete } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { pitch_id: string } }
+  req: NextRequest
 ) {
   try {
-    const pitchId = params.pitch_id;
+    const body = await req.json();
+    const { pitchId } = await body;
 
     // Validate path parameter
     if (!pitchId) {
@@ -40,11 +40,11 @@ export async function GET(
 }
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { pitch_id: string } }
+  req: NextRequest
 ) {
   try {
-    const pitchId = params.pitch_id;
+    const postBody = await req.json();
+    const { pitchId } = await postBody;
 
     // Validate path parameter
     if (!pitchId) {

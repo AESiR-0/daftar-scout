@@ -4,11 +4,11 @@ import { scoutQuestions } from "@/backend/drizzle/models/scouts";
 import { eq } from "drizzle-orm";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { scoutId: string } }
+  req: NextRequest
 ) {
   try {
-    const scoutId = params.scoutId;
+    const body = await req.json();
+    const { scoutId } = await body;
 
     // Validate path parameter
     if (!scoutId) {

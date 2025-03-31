@@ -5,13 +5,11 @@ import { pitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { scoutId: string; pitchId: string } }
+  req: NextRequest
 ) {
   try {
-    const { scoutId, pitchId } = params;
     const body = await req.json();
-    const { investorId, offerId, action, notes } = body;
+    const { scoutId, pitchId, investorId, offerId, action, notes } = body;
 
     // Validate parameters
     if (!scoutId || !pitchId || !investorId) {

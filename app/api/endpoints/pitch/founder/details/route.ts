@@ -6,8 +6,8 @@ import { eq, inArray } from "drizzle-orm";
 // GET: Fetch pitch details by pitchId, including focus sectors
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const pitchId = searchParams.get("pitchId");
+    const body = await req.json();
+    const { pitchId } = await body;
 
     if (!pitchId) {
       return NextResponse.json(
@@ -66,8 +66,8 @@ export async function GET(req: NextRequest) {
 // POST: Create a new pitch with details and focus sectors
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { pitchId, pitchName, location, demoLink, stage, focusSectors: sectorNames } = body;
+    const postBody = await req.json();
+    const { pitchId, pitchName, location, demoLink, stage, focusSectors: sectorNames } = postBody;
 
     // Validate required fields
     if (!pitchId || !pitchName) {

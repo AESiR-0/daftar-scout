@@ -4,7 +4,7 @@ import {
   featureRequests,
   featureTracking,
   postDevAnalysis,
-} from "@/backend/drizzle/models/featureRequest";
+} from "@/backend/drizzle/models/reportAndRequests";
 import { sql, count, avg } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {

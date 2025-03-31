@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { featureRequests } from "@/backend/drizzle/models/featureRequest";
+import { featureRequests } from "@/backend/drizzle/models/reportAndRequests";
 
 export async function GET(req: NextRequest) {
   try {

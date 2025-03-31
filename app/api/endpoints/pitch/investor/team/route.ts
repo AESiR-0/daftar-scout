@@ -5,11 +5,11 @@ import { pitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { scoutId: string; pitchId: string } }
+  req: NextRequest
 ) {
   try {
-    const { scoutId, pitchId } = params;
+    const body = await req.json();
+    const { scoutId, pitchId } = await body;
 
     // Validate path parameters
     if (!scoutId || !pitchId) {

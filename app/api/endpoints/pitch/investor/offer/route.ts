@@ -4,16 +4,14 @@ import { offers, pitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { scoutId: string; pitchId: string } }
+  req: NextRequest
 ) {
   try {
-    const { scoutId, pitchId } = params;
-    const { searchParams } = new URL(req.url);
-    const investorId = searchParams.get("investorId");
+    const body = await req.json();
+    const { scoutId, pitchId } = await body;
 
     // Validate parameters
-    if (!scoutId || !pitchId || !investorId) {
+    if (!scoutId || !pitchId ) {
       return NextResponse.json(
         { error: "scoutId, pitchId, and investorId are required" },
         { status: 400 }
@@ -47,8 +45,7 @@ export async function GET(
       .from(offers)
       .where(
         and(
-          eq(offers.pitchId, pitchId),
-          eq(offers.offerBy, investorId)
+          eq(offers.pitchId, pitchId)
         )
       );
 
@@ -60,13 +57,11 @@ export async function GET(
 }
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { scoutId: string; pitchId: string } }
+  req: NextRequest
 ) {
   try {
-    const { scoutId, pitchId } = params;
     const body = await req.json();
-    const { investorId, offerDescription, offerStatus } = body;
+    const { scoutId, pitchId, investorId, offerDescription, offerStatus } = await body;
 
     // Validate parameters
     if (!scoutId || !pitchId || !investorId) {
