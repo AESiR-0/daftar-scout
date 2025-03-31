@@ -24,6 +24,7 @@ export const users = pgTable("users", {
   role: text("role").notNull().default("temp"), // Founder, Investor, etc.
   location: text("location"), // Nullable (IP-based)
   gender: text("gender"), // Nullable
+  lastChangeOfPitcture: timestamp("last_change_of_picture"), // Nullable
   dob: date("dob"),
   image: text("image"), // Nullable
   countryCode: varchar("country_code", { length: 5 }), // Nullable

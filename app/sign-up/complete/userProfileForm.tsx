@@ -31,6 +31,7 @@ export default async function UserProfileForm({
     .from(userLanguages)
     .innerJoin(languages, eq(userLanguages.languageId, languages.id))
     .where(eq(userLanguages.userId, user[0].id));
+  console.log(userLanguagesList);
 
   return (
     <UserProfileClient
