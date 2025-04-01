@@ -4,7 +4,7 @@ import { featureRequests } from "@/backend/drizzle/models/reportAndRequests";
 
 export async function GET(req: NextRequest) {
   try {
-    const features = await db.select().from(featureRequests).execute();
+    const features = await db.select().from(featureRequests);
     return NextResponse.json(features);
   } catch (error) {
     console.error("Error fetching features:", error);

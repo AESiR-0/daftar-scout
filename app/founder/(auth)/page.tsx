@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { auth } from "@/auth";
 
 export default function FounderIntroPage() {
   const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(true);
-  const { data: session, update } = useSession();
 
   if (isLoading) {
     return (
