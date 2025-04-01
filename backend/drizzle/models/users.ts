@@ -116,7 +116,7 @@ export const languages = pgTable("languages", {
 export const userLanguages = pgTable(
   "user_languages",
   {
-    userId: varchar("user_id", { length: 255 })
+    userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     languageId: integer("language_id")

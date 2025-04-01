@@ -1,31 +1,70 @@
 import { auth } from "@/auth";
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/database";
-import { users } from "@/backend/drizzle/models/users";
+import {
+  users,
+  languages,
+  userLanguages,
+} from "@/backend/drizzle/models/users";
 
 export async function PATCH(req: Request) {
   try {
     const { formData, email } = await req.json();
     console.log("Form state", formData, email);
-    
+
     const { name, lastName, phoneNumber, gender, dob, location, role } =
-    formData;
+      formData;
+
     if (!email) {
       return new Response(JSON.stringify({ error: "Email is required" }), {
         status: 400,
       });
     }
-    const formattedDob = dob ? new Date(dob).toISOString().split("T")[0] : null; // Converts to "YYYY-MM-DD"
-    console.log(
-      "Body data",
-      name,
-      lastName,
-      formattedDob,
-      phoneNumber,
-      location,
-      email
+
+    const formattedDob = dob ? new Date(dob).toISOString().split("T")[0] : null;
+
+    // Fetch the userId based on the provided email
+    const user = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (!user.length) {
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+      });
+    }
+
+    const userId = user[0].id;
+
+    // Fetch language IDs based on the provided language names in formData
+    const languageIds = await Promise.all(
+      (formData.languages || []).map(async (languageName: string) => {
+        const language = await db
+          .select({ id: languages.id })
+          .from(languages)
+          .where(eq(languages.language_name, languageName))
+          .limit(1);
+
+        return language.length ? language[0].id : null;
+      })
     );
 
+    // Filter out null values
+    const validLanguageIds = languageIds.filter((id) => id !== null);
+
+    // Insert new user-language mappings
+    const userLanguageMappings = validLanguageIds.map((languageId) => ({
+      userId: userId,
+      languageId, // Fix: Directly assign languageId
+    }));
+
+    if (userLanguageMappings.length > 0) {
+      await db.insert(userLanguages).values(userLanguageMappings);
+    }
+
+    // Update user details
     const updatedUser = await db
       .update(users)
       .set({

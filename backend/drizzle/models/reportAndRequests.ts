@@ -18,9 +18,9 @@ import { scouts } from "./scouts";
 export const featureRequests = pgTable("feature_requests", {
   id: serial("id").primaryKey(),
   featureName: text("feature_name").notNull(),
-  userId: integer("user_id")
-    .references(() => users.id)
-    .notNull(),
+  userId: text("user_id") // Change from integer() to text()
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   requestedAt: timestamp("requested_at").defaultNow().notNull(),
 });
 
