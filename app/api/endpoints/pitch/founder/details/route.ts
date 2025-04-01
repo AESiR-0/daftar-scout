@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
 import { pitch, focusSectors, pitchFocusSectors } from "@/backend/drizzle/models/pitch";
 import { eq, inArray } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
-// GET: Fetch pitch details by pitchId, including focus sectors
+// GET: Fetch pitch details by pitchId from request body
 export async function GET(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { pitchId } = await body;
+    const pitchId = req.headers.get("pitch_id");
 
     if (!pitchId) {
       return NextResponse.json(
@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Fetch pitch details
     const pitchData = await db
       .select({
         id: pitch.id,
@@ -36,7 +35,6 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Fetch related focus sectors
     const focusSectorData = await db
       .select({
         sectorName: focusSectors.sectorName,
@@ -47,7 +45,6 @@ export async function GET(req: NextRequest) {
 
     const focusSectorsList = focusSectorData.map((fs) => fs.sectorName);
 
-    // Combine pitch data with focus sectors
     const result = {
       ...pitchData[0],
       focusSectors: focusSectorsList,
@@ -63,16 +60,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: Create a new pitch with details and focus sectors
+// POST: Create a new pitch with details and generate pitchId
 export async function POST(req: NextRequest) {
   try {
     const postBody = await req.json();
-    const { pitchId, pitchName, location, demoLink, stage, focusSectors: sectorNames } = postBody;
+    const { pitchName, location, demoLink, stage, focusSectors: sectorNames } = postBody;
 
     // Validate required fields
-    if (!pitchId || !pitchName) {
+    if (!pitchName) {
       return NextResponse.json(
-        { error: "pitchId and pitchName are required" },
+        { error: "pitchName is required" },
         { status: 400 }
       );
     }
@@ -84,9 +81,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Generate pitchId: first 3 chars of pitchName + 3 random numbers + UUID suffix
+    const pitchPrefix = pitchName.slice(0, 3).toLowerCase();
+    const randomNum = Math.floor(100 + Math.random() * 900); // 3-digit random number (100-999)
+    const uuidSuffix = randomUUID().split("-")[0]; // First part of UUID for uniqueness
+    const pitchId = `${pitchPrefix}${randomNum}-${uuidSuffix}`; // e.g., "tes472-8f3b2c1d"
+
     // Start a transaction to ensure atomicity
     const result = await db.transaction(async (tx) => {
-      // Insert or update the pitch
+      // Insert the pitch with generated pitchId
       const newPitch = await tx
         .insert(pitch)
         .values({
@@ -97,20 +100,10 @@ export async function POST(req: NextRequest) {
           stage: stage || null,
           createdAt: new Date(),
         })
-        .onConflictDoUpdate({
-          target: pitch.id,
-          set: {
-            pitchName,
-            location: location || null,
-            demoLink: demoLink || null,
-            stage: stage || null,
-          },
-        })
         .returning();
 
       // Handle focus sectors
       if (sectorNames.length > 0) {
-        // Fetch or create focus sectors
         const existingSectors = await tx
           .select({ id: focusSectors.id, sectorName: focusSectors.sectorName })
           .from(focusSectors)
@@ -119,7 +112,6 @@ export async function POST(req: NextRequest) {
         const existingSectorNames = existingSectors.map((s) => s.sectorName);
         const newSectorNames = sectorNames.filter((name) => !existingSectorNames.includes(name));
 
-        // Insert new focus sectors if they don’t exist
         let newSectors: any[] = [];
         if (newSectorNames.length > 0) {
           newSectors = await tx
@@ -128,18 +120,11 @@ export async function POST(req: NextRequest) {
             .returning({ id: focusSectors.id, sectorName: focusSectors.sectorName });
         }
 
-        // Combine existing and new sector IDs
         const allSectorIds = [
           ...existingSectors.map((s) => s.id),
           ...newSectors.map((s) => s.id),
         ];
 
-        // Clear existing pitch-focus sector relations
-        await tx
-          .delete(pitchFocusSectors)
-          .where(eq(pitchFocusSectors.pitchId, pitchId));
-
-        // Insert new pitch-focus sector relations
         await tx.insert(pitchFocusSectors).values(
           allSectorIds.map((focusSectorId) => ({
             pitchId,
@@ -152,7 +137,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(
-      { message: "Pitch created/updated successfully", data: result },
+      { message: "Pitch created successfully", data: result, pitchId },
       { status: 201 }
     );
   } catch (error: any) {

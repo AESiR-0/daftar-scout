@@ -1,13 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch"; // Ensure this is imported
+import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { eq } from "drizzle-orm";
+import { auth } from "@/auth";
+import { users } from "@/backend/drizzle/models/users";
 
-// GET: Fetch team members for a pitch by pitchId
+// GET: Fetch team members for a pitch by pitchId from request body
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const pitchId = searchParams.get("pitchId");
+    const session = await auth();
+        if (!session) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        const { user } = session;
+        if (!user) {
+          return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+        if (!user?.email) {
+          return NextResponse.json(
+            { error: "Invalid user email" },
+            { status: 400 }
+          );
+        }
+      
+    const pitchId = req.headers.get("pitch_id");
 
     if (!pitchId) {
       return NextResponse.json(
@@ -36,6 +52,7 @@ export async function GET(req: NextRequest) {
         id: pitchTeam.id,
         userId: pitchTeam.userId,
         pitchId: pitchTeam.pitchId,
+        designation: pitchTeam.designation,
       })
       .from(pitchTeam)
       .where(eq(pitchTeam.pitchId, pitchId));
@@ -59,9 +76,33 @@ export async function GET(req: NextRequest) {
 // POST: Add a team member to a pitch
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { pitchId, userId } = body;
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { user } = session;
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    if (!user?.email) {
+      return NextResponse.json(
+        { error: "Invalid user email" },
+        { status: 400 }
+      );
+    }
 
+    
+
+    const body = await req.json();
+    const { pitchId, email, designation } = body;
+    const userExist = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, user.email))
+    .limit(1);
+    
+    const userId = userExist[0].id; // Get the userId from the session
+    
     // Validate required fields
     if (!pitchId || !userId) {
       return NextResponse.json(
@@ -90,7 +131,7 @@ export async function POST(req: NextRequest) {
       .values({
         userId,
         pitchId,
-        designation: "Team Member", // Provide a default or appropriate value for designation
+        designation: designation || "Team Member", // Default if not provided
       })
       .returning();
 
@@ -108,10 +149,9 @@ export async function POST(req: NextRequest) {
     if (error.code === "23503") {
       return NextResponse.json(
         {
-          error:
-            error.detail.includes("user_id")
-              ? "Invalid userId: user does not exist"
-              : "Invalid pitchId: pitch does not exist",
+          error: error.detail.includes("user_id")
+            ? "Invalid userId: user does not exist"
+            : "Invalid pitchId: pitch does not exist",
         },
         { status: 400 }
       );

@@ -7,9 +7,7 @@ export async function GET(
   req: NextRequest
 ) {
   try {
-    const body = await req.json();
-    const { pitchId } = await body;
-
+    const pitchId = req.headers.get("pitch_id");
     // Validate path parameter
     if (!pitchId) {
       return NextResponse.json(
@@ -59,7 +57,6 @@ export async function POST(
     const body = await req.json();
     const {
       pitchId,
-      pitchName,
       location,
       scoutId,
       demoLink,
@@ -75,12 +72,6 @@ export async function POST(
     if (!pitchId) {
       return NextResponse.json(
         { error: "pitchId is required" },
-        { status: 400 }
-      );
-    }
-    if (!pitchName || typeof pitchName !== "string") {
-      return NextResponse.json(
-        { error: "pitchName is required and must be a string" },
         { status: 400 }
       );
     }
@@ -148,6 +139,14 @@ export async function POST(
       .where(eq(pitch.id, pitchId))
       .limit(1);
 
+    const pitchName: any = existingPitch.length > 0 ? existingPitch[0].pitchName : null;
+    if (!pitchName) {
+      return NextResponse.json(
+        { error: "Pitch name is required" },
+        { status: 400 }
+      );
+    }
+
     if (existingPitch.length > 0) {
       // Update existing pitch
       await db
@@ -174,7 +173,7 @@ export async function POST(
         scoutId,
         demoLink,
         stage,
-        askForInvestor: askForInvestor ?? false,
+        askForInvestor: askForInvestor ?? "",
         createdAt: new Date(),
         status,
         isCompleted: isCompleted ?? false,

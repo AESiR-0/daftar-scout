@@ -23,7 +23,7 @@ export const pitch = pgTable("pitch", {
   ),
   demoLink: text("demo_link"),
   stage: text("stage"),
-  askForInvestor: boolean("ask_for_investor").default(false),
+  askForInvestor: text("ask_for_investor"),
   createdAt: timestamp("created_at").defaultNow(),
   status: text("status"),
   isCompleted: boolean("is_completed").default(false),

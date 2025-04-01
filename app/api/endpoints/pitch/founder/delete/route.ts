@@ -7,8 +7,7 @@ export async function GET(
   req: NextRequest
 ) {
   try {
-    const body = await req.json();
-    const { pitchId } = await body;
+    const pitchId = req.headers.get("pitch_id");
 
     // Validate path parameter
     if (!pitchId) {
