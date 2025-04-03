@@ -15,13 +15,14 @@ import { users } from "./users";
 import { pitch } from "./pitch";
 import { scouts } from "./scouts";
 
+// drizzle schema
 export const featureRequests = pgTable("feature_requests", {
   id: serial("id").primaryKey(),
-  featureName: text("feature_name").notNull(),
-  userId: text("user_id") // Change from integer() to text()
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  requestedAt: timestamp("requested_at").defaultNow().notNull(),
+  featureName: varchar("feature_name", { length: 255 }).notNull(),
+  description: text("description"),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  status: varchar("status", { length: 50 }).default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const featureTracking = pgTable("feature_tracking", {

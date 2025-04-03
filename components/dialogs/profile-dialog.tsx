@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -38,8 +38,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { signOut } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Combobox } from "@/components/ui/combobox";
-import format_Date from "@/lib/formatDate";
 import { formatDate } from "@/lib/format-date";
 import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -48,7 +46,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
+import { useSession } from "next-auth/react"; // For userId
 
 interface ProfileData {
   firstName: string;
@@ -57,18 +55,8 @@ interface ProfileData {
   phone: string;
   gender: string;
   dateOfBirth: string;
-  primaryLanguage: string;
-  secondaryLanguage: string;
-  languageProficiency: {
-    primary: "beginner" | "intermediate" | "advanced";
-    secondary: "beginner" | "intermediate" | "advanced";
-  };
-  country: string;
-  city: string;
-  company: string;
-  position: string;
-  industry: string;
-  experience: string;
+  languages: string[];
+  joinedDate: string;
 }
 
 interface ProfileDialogProps {
@@ -76,34 +64,12 @@ interface ProfileDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-interface FeedbackEntry {
+interface FeatureEntry {
   id: string;
-  message: string;
-  status: "pending" | "in-progress" | "completed";
-  createdAt: string;
+  featureName: string;
+  userId: string;
+  createdAt: string; // Assuming the table has a created_at field
 }
-
-interface DaftarOption {
-  id: string;
-  name: string;
-}
-
-interface DaftarDesignation {
-  [daftarId: string]: string;
-}
-
-const daftarOptions: DaftarOption[] = [
-  { id: "1", name: "Women's Network" },
-  { id: "2", name: "Young Professionals Network" },
-  { id: "3", name: "Swiggy" },
-];
-
-const navItems = [
-  { title: "Profile", value: "profile", icon: UserCircle },
-  { title: "Feature Request", value: "feature", icon: MessageSquarePlus },
-  { title: "Privacy Policy", value: "privacy", icon: Shield },
-  { title: "Delete Account", value: "delete", icon: Trash2 },
-];
 
 type ProfileTab =
   | "account"
@@ -116,30 +82,12 @@ type ProfileTab =
 
 export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const { toast } = useToast();
+  const { data: session } = useSession(); // Get user session for userId
   const [activeTab, setActiveTab] = useState<ProfileTab>("account");
   const [isEditing, setIsEditing] = useState(false);
   const [featureRequest, setFeatureRequest] = useState("");
   const [featureName, setFeatureName] = useState("");
-  const [feedbackHistory] = useState<FeedbackEntry[]>([
-    {
-      id: "1",
-      message: "Add dark mode support across the platform",
-      status: "completed",
-      createdAt: "2024-03-15T10:30:00",
-    },
-    {
-      id: "2",
-      message: "Implement bulk document upload feature",
-      status: "in-progress",
-      createdAt: "2024-03-10T14:20:00",
-    },
-    {
-      id: "3",
-      message: "Add calendar integration for meetings",
-      status: "pending",
-      createdAt: "2024-03-05T09:15:00",
-    },
-  ]);
+  const [featureHistory, setFeatureHistory] = useState<FeatureEntry[]>([]);
   const [profileData, setProfileData] = useState({
     firstName: "John",
     lastName: "Doe",
@@ -152,29 +100,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   });
   const [satisfied, setSatisfied] = useState<boolean | undefined>();
   const [feedbackText, setFeedbackText] = useState("");
-  const [featureHistory] = useState([
-    {
-      id: "1",
-      name: "Dark Mode",
-      description: "Add dark mode support across the platform",
-      status: "completed",
-      createdAt: "2024-03-15T10:30:00",
-    },
-    {
-      id: "2",
-      name: "Bulk Upload",
-      description: "Implement bulk document upload feature",
-      status: "in-progress",
-      createdAt: "2024-03-10T14:20:00",
-    },
-    {
-      id: "3",
-      name: "Calendar Integration",
-      description: "Add calendar integration for meetings",
-      status: "pending",
-      createdAt: "2024-03-05T09:15:00",
-    },
-  ]);
+  const [isLoadingFeatures, setIsLoadingFeatures] = useState(false);
 
   const tabs: { id: ProfileTab; label: string }[] = [
     { id: "account", label: "My Account" },
@@ -186,14 +112,40 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     { id: "logout", label: "Logout" },
   ];
 
-  const getStatusColor = (status: FeedbackEntry["status"]) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-500/10 text-green-500 border-green-500/20";
-      case "in-progress":
-        return "bg-muted text-muted-foreground border-muted-foreground/20";
-      case "pending":
-        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+  useEffect(() => {
+    if (activeTab === "feature" && session?.user?.id) {
+      fetchFeatureRequests();
+    }
+  }, [activeTab, session]);
+
+  const fetchFeatureRequests = async () => {
+    setIsLoadingFeatures(true);
+    try {
+      const response = await fetch("/api/endpoints/pitch/founder/features", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) throw new Error("Failed to fetch feature requests");
+      const data = await response.json();
+
+      // Map API data to FeatureEntry interface
+      const mappedFeatures: FeatureEntry[] = data.map((f: any) => ({
+        id: f.id.toString(),
+        featureName: f.featureName,
+        userId: f.userId,
+        createdAt: f.createdAt || new Date().toISOString(), // Assuming created_at exists
+      }));
+
+      setFeatureHistory(mappedFeatures);
+    } catch (error) {
+      console.error("Error fetching features:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load feature requests",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingFeatures(false);
     }
   };
 
@@ -202,14 +154,55 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     onOpenChange(false);
   };
 
-  const handleSubmitFeature = () => {
-    toast({
-      title: "Feature request submitted",
-      description:
-        "Thank you for your feedback. We'll review your request shortly.",
-    });
-    setFeatureName("");
-    setFeatureRequest("");
+  const handleSubmitFeature = async () => {
+    if (!session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit a feature request",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/endpoints/pitch/founder/features", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          featureName: `${featureName}: ${featureRequest}`,
+          userId: session.user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit feature request");
+      }
+
+      toast({
+        title: "Feature request submitted",
+        description: "Thank you for your feedback. We'll review your request shortly.",
+      });
+
+      // Add to local history optimistically
+      const newFeature: FeatureEntry = {
+        id: Date.now().toString(), // Temporary ID until server provides one
+        featureName: `${featureName}: ${featureRequest}`,
+        userId: session.user.id,
+        createdAt: new Date().toISOString(),
+      };
+      setFeatureHistory((prev) => [newFeature, ...prev]);
+
+      setFeatureName("");
+      setFeatureRequest("");
+    } catch (error: any) {
+      console.error("Error submitting feature:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit feature request",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -328,8 +321,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                             variant="outline"
                             className={cn(
                               "w-full justify-start text-left font-normal rounded-[0.35rem] bg-[#1a1a1a]",
-                              !profileData.dateOfBirth &&
-                                "text-muted-foreground"
+                              !profileData.dateOfBirth && "text-muted-foreground"
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -382,10 +374,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                                 "French",
                                 "German",
                               ]
-                                .filter(
-                                  (lang) =>
-                                    !profileData.languages.includes(lang)
-                                )
+                                .filter((lang) => !profileData.languages.includes(lang))
                                 .map((lang) => (
                                   <SelectItem key={lang} value={lang}>
                                     {lang}
@@ -395,10 +384,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                           </Select>
                         )}
                         {profileData.languages.map((lang) => (
-                          <Badge
-                            key={lang}
-                            className="bg-muted rounded-[0.35rem]"
-                          >
+                          <Badge key={lang} className="bg-muted rounded-[0.35rem]">
                             {lang}
                             <Button
                               variant="ghost"
@@ -407,9 +393,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                               onClick={() =>
                                 setProfileData((prev) => ({
                                   ...prev,
-                                  languages: prev.languages.filter(
-                                    (l) => l !== lang
-                                  ),
+                                  languages: prev.languages.filter((l) => l !== lang),
                                 }))
                               }
                             >
@@ -442,15 +426,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     {profileData.gender}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">
-                      Date of Birth:
-                    </span>{" "}
+                    <span className="text-muted-foreground">Date of Birth:</span>{" "}
                     {new Date(profileData.dateOfBirth).toLocaleDateString()}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">
-                      Preferred Languages:
-                    </span>{" "}
+                    <span className="text-muted-foreground">Preferred Languages:</span>{" "}
                     {profileData.languages.join(", ")}
                   </p>
                   <div className="text-xs pt-4">
@@ -469,8 +449,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                We're in the process of setting up our ticket system, but for
-                now, feel free to reach out to us at{" "}
+                We're in the process of setting up our ticket system, but for now, feel free to reach out to us at{" "}
                 <a
                   href="mailto:support@daftaros.com"
                   className="text-blue-500 hover:text-blue-400 underline"
@@ -486,7 +465,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       case "feedback":
         return (
           <div className="space-y-4">
-            {/* Input Card */}
             <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <div className="space-y-4">
                 <p className="text-sm">Are you happy with us?</p>
@@ -494,9 +472,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   <Button
                     variant="outline"
                     size="lg"
-                    className={cn(
-                      satisfied === true && "bg-muted rounded-[0.35rem]"
-                    )}
+                    className={cn(satisfied === true && "bg-muted rounded-[0.35rem]")}
                     onClick={() => setSatisfied(true)}
                   >
                     Yes
@@ -504,9 +480,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   <Button
                     variant="outline"
                     size="lg"
-                    className={cn(
-                      satisfied === false && "bg-muted rounded-[0.35rem]"
-                    )}
+                    className={cn(satisfied === false && "bg-muted rounded-[0.35rem]")}
                     onClick={() => setSatisfied(false)}
                   >
                     No
@@ -521,31 +495,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                 </div>
                 <Button
                   disabled={satisfied === undefined || !feedbackText.trim()}
-                  className=" rounded-[0.35rem]"
+                  className="rounded-[0.35rem]"
                   onClick={handleFeedbackSubmit}
                 >
                   Submit
                 </Button>
-              </div>
-            </Card>
-
-            {/* History Card */}
-            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
-              <h4 className="text-[14px] font-medium mb-4">History</h4>
-              <div className="space-y-4">
-                {feedbackHistory.map((feedback) => (
-                  <div
-                    key={feedback.id}
-                    className="py-3 rounded-[0.35rem] space-y-2"
-                  >
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm">{feedback.message}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {format_Date(feedback.createdAt)}
-                    </p>
-                  </div>
-                ))}
               </div>
             </Card>
           </div>
@@ -555,7 +509,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         return (
           <div className="space-y-4">
             {/* Input Card */}
-            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+            <Card className="border-noneKILL rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Input
@@ -584,24 +538,24 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
             {/* History Card */}
             <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <h4 className="text-[14px] font-medium mb-4">History</h4>
-              <div className="space-y-4">
-                {featureHistory.map((feature) => (
-                  <div
-                    key={feature.id}
-                    className="py-3 rounded-[0.35rem] space-y-2"
-                  >
-                    <div className="flex justify-between items-center">
-                      <h5 className="text-sm font-medium">{feature.name}</h5>
+              {isLoadingFeatures ? (
+                <p className="text-muted-foreground">Loading feature requests...</p>
+              ) : featureHistory.length === 0 ? (
+                <p className="text-muted-foreground">No feature requests yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {featureHistory.map((feature) => (
+                    <div key={feature.id} className="py-3 rounded-[0.35rem] space-y-2">
+                      <div className="flex justify-between items-center">
+                        <h5 className="text-sm font-medium">{feature.featureName}</h5>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(feature.createdAt)}
+                      </span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {feature.description}
-                    </p>
-                    <span className="text-xs text-muted-foreground">
-                      {format_Date(feature.createdAt)}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
         );
@@ -616,9 +570,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     <section.icon className="h-4 w-4" />
                     <h4 className="font-medium">{section.title}</h4>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {section.content}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{section.content}</p>
                 </div>
               ))}
             </div>
@@ -630,8 +582,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                We're sad to say goodbye.This action can't be undone, and all
-                your data will be permanently lost.
+                We're sad to say goodbye. This action can't be undone, and all your data will be permanently lost.
               </p>
               <Button
                 variant="outline"
@@ -646,7 +597,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
       case "logout":
         return (
-          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto  bg-[#1a1a1a] p-4">
+          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 Are you sure you want to logout?

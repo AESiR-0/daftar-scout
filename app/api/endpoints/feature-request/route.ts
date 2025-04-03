@@ -8,26 +8,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(features);
   } catch (error) {
     console.error("Error fetching features:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch features" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch features" }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { featureName, userId } = await req.json();
-    await db.insert(featureRequests).values({ featureName, userId }).execute();
-    return NextResponse.json(
-      { message: "Feature request submitted" },
-      { status: 201 }
-    );
+    const { featureName, description, userId } = await req.json();
+    const [newFeature] = await db
+      .insert(featureRequests)
+      .values({ featureName, description, userId })
+      .returning();
+    return NextResponse.json({ message: "Feature request submitted", data: newFeature }, { status: 201 });
   } catch (error) {
     console.error("Error submitting feature:", error);
-    return NextResponse.json(
-      { error: "Failed to submit feature" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to submit feature" }, { status: 500 });
   }
 }
