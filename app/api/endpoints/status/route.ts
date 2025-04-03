@@ -6,7 +6,6 @@ import { scouts } from "@/backend/drizzle/models/scouts"; // Assuming scouts exi
 import { sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-export const runtime = "nodejs"; // Prevents Edge runtime issues
 
 export const GET = async () => {
   try {

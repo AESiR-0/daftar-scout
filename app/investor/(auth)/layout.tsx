@@ -18,7 +18,7 @@ export default async function Layout({
   // Check if the user is authenticated
   const session = await auth();
   if (!session?.user) {
-    redirect("/login");
+    redirect("/login/investor");
   }
   const user = await db
     .select({ role: users?.role })

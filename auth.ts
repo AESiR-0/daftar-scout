@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { db } from "@/backend/database";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { eq, and } from "drizzle-orm";
 import {
   users,
   accounts,
@@ -31,22 +32,79 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   pages: {
-    signIn: `/login/:path*`,
+    signIn: `/login/*`,
   },
   session: { strategy: "jwt" },
 
   callbacks: {
-    authorized: async ({ auth }) => {
-      // Logged in users are authenticated, otherwise redirect to login page
-      return !!auth
-    },
-    async signIn() {
+    async signIn({ user, account }) {
+      if (!user.email || !account) return false; // Ensure the user has an email
+
+      // Find an existing user by email
+      const existingUser = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, user.email));
+
+      if (existingUser.length > 0) {
+        const userId = existingUser[0].id;
+
+        // Check if an OAuth account is already linked
+        const linkedAccount = await db
+          .select()
+          .from(accounts)
+          .where(
+            and(
+              eq(accounts.userId, userId),
+              eq(accounts.provider, account?.provider)
+            )
+          );
+
+        if (linkedAccount.length === 0) {
+          // If no linked account, insert it
+          await db.insert(accounts).values({
+            userId,
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+            access_token: account.access_token,
+            refresh_token: account.refresh_token,
+            type: "oidc", // Add the required 'type' field
+          });
+        }
+      } else {
+        // Create a new temp user if no user exists
+        const [newUser] = await db
+          .insert(users)
+          .values({
+            name: user.name as string,
+            email: user.email,
+            role: "temp", // Assign a temporary role
+            image: user.image,
+          })
+          .returning();
+
+        // Link the new user with the OAuth account
+        await db.insert(accounts).values({
+          userId: newUser.id,
+          provider: account.provider,
+          providerAccountId: account.providerAccountId,
+          access_token: account.access_token,
+          refresh_token: account.refresh_token,
+          type: "oidc",
+        });
+
+        // Redirect to complete sign-up
+        return true;
+      }
+
       return true;
     },
-    async session({ session, token }) {
+
+    async session({ session }) {
       return session;
     },
-    async jwt({ token, user }) {
+
+    async jwt({ token }) {
       return token;
     },
   },

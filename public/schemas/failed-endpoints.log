@@ -1,0 +1,21 @@
+/feature-request/: HTTP 500: Internal Server Error
+feature-tracking/: HTTP 404: Not Found
+/listing-time/: HTTP 401: Unauthorized
+/mapping/: HTTP 401: Unauthorized
+/pitch/: HTTP 401: Unauthorized
+/pitch/founder/answers/: HTTP 405: Method Not Allowed
+/pitch/founder/delete/: HTTP 500: Internal Server Error
+/pitch/founder/offer/: HTTP 500: Internal Server Error
+/pitch/founder/details/: HTTP 500: Internal Server Error
+/pitch/founder/offer/: HTTP 500: Internal Server Error
+/pitch/founder/pitch/: HTTP 500: Internal Server Error
+/pitch/founder/questions/: HTTP 500: Internal Server Error
+/pitch/founder/team/: HTTP 400: Bad Request
+/pitch/investor/analysis/: HTTP 500: Internal Server Error
+/pitch/investor/details/: HTTP 500: Internal Server Error
+/pitch/investor/note/: HTTP 500: Internal Server Error
+/pitch/investor/offer/: HTTP 500: Internal Server Error
+/pitch/investor/offer/action/: HTTP 405: Method Not Allowed
+/pitch/investor/team/: HTTP 500: Internal Server Error
+/reports/: HTTP 500: Internal Server Error
+/reports/status: HTTP 500: Internal Server Error

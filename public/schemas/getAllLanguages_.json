@@ -1,0 +1,4 @@
+{
+  "success": "boolean",
+  "data": "Array<object>"
+}

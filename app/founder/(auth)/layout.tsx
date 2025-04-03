@@ -17,7 +17,7 @@ export default async function Layout({
 }) {
   const session = await auth();
   if (!session?.user) {
-    redirect("/login");
+    redirect("/login/founder");
   }
   const user = await db
     .select({ role: users?.role })
