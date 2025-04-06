@@ -5,10 +5,33 @@ import {
   daftarInvestors,
   daftarStructure,
 } from "@/backend/drizzle/models/daftar";
-import { structure } from "@/backend/drizzle/models/daftar"; // structure model
+import { structure } from "@/backend/drizzle/models/daftar";
 import { users } from "@/backend/drizzle/models/users";
 import { auth } from "@/auth";
 import { eq } from "drizzle-orm";
+
+// Function to generate a unique alphanumeric daftarId
+async function generateDaftarId(name: string): Promise<string> {
+  const prefix = name.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, "X"); // Take first 3 letters, uppercase, replace non-letters with X
+  let daftarId: string = "";
+  let isUnique = false;
+
+  while (!isUnique) {
+    const randomNum = Math.floor(100 + Math.random() * 900); // 3-digit random number (100-999)
+    daftarId = `${prefix}${randomNum}`;
+
+    // Check if the generated daftarId already exists
+    const existingDaftar = await db
+      .select()
+      .from(daftar)
+      .where(eq(daftar.id, daftarId))
+      .limit(1)
+      .execute();
+    isUnique = existingDaftar.length === 0;
+  }
+
+  return daftarId;
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -53,7 +76,7 @@ export async function POST(req: NextRequest) {
     const currentUser = dbUser[0];
     const data = await req.json();
 
-    const requiredFields = ["id", "name", "structure"];
+    const requiredFields = ["name", "structure", "bigPicture", "location"];
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json(
@@ -63,20 +86,23 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 1. Insert into daftar
+    // Generate unique daftarId
+    const daftarId = await generateDaftarId(data.name);
+
+    // Insert into daftar
     await db.insert(daftar).values({
-      id: data.id,
+      id: daftarId,
       name: data.name,
       profileUrl: data.profileUrl || null,
-      structure: data.structure, // store structure name here for quick access
+      structure: data.structure, // Store structure name for quick access
       website: data.website || null,
       type: data.type || null,
-      bigPicture: data.bigPicture || null,
-      location: data.location || null,
+      bigPicture: data.bigPicture,
+      location: data.location,
       createdAt: new Date(),
     });
 
-    // 2. Insert or find structure by name
+    // Insert or find structure by name
     let structureEntry = await db
       .select()
       .from(structure)
@@ -98,24 +124,24 @@ export async function POST(req: NextRequest) {
       structureId = inserted[0].id;
     }
 
-    // 3. Link structure to daftar
+    // Link structure to daftar
     await db.insert(daftarStructure).values({
-      daftarId: data.id,
+      daftarId,
       structureId,
     });
 
-    // 4. Add user to daftarInvestors
+    // Add user to daftarInvestors
     await db.insert(daftarInvestors).values({
-      daftarId: data.id,
+      daftarId,
       investorId: currentUser.id,
       status: "active",
-      designation: data.designation || "Member", // ✅ default to "Member"
+      designation: data.designation || "Member",
       joinType: "creator",
       joinDate: new Date(),
     });
 
     return NextResponse.json(
-      { message: "Daftar created and linked successfully" },
+      { message: "Daftar created and linked successfully", daftarId },
       { status: 201 }
     );
   } catch (error) {
