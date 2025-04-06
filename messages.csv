@@ -1,7 +1,0 @@
-Category,Key,Title,Message
-emptyStates,noPitchesInvestor,No Pitches Yet,"It looks like there are no pitches here. When a founder shares their vision, you'll find it waiting for you."
-emptyStates,noPitchesFounder,No Pitches Yet,"It looks like there are no pitches here. Share your vision, you'll find the right Investor waiting for you."
-emptyStates,noScouts,No Scouts Available,"Your network is waiting to grow. When scouts join, you'll see them here, ready to explore the next big opportunity."
-emptyStates,scoutPlanningStage,Scouting in Progress,This scout is in the planning stage. Stay tuned—great ideas take time to take shape.
-errors,pageNotFound,Page Not Found,The page you're looking for doesn't exist. Try heading back or exploring something new.
-errors,formError,Something's Missing,Please check your details and try again. Every field helps bring your vision to life.
