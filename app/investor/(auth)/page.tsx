@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 export default function InvestorIntroPage() {
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [createDaftarOpen, setCreateDaftarOpen] = useState(false);
   useEffect(() => {
     async function getDaftar() {
@@ -21,7 +22,9 @@ export default function InvestorIntroPage() {
       if (data.length > 0) {
         console.log("data", data);
         router.push("/investor/scout");
+        setLoading(false);
       } else {
+        setLoading(false);
         setCreateDaftarOpen(true);
       }
     }
@@ -36,6 +39,31 @@ export default function InvestorIntroPage() {
     setCreateDaftarOpen(false);
     router.push("/investor/loading");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen gap-10 flex items-center flex-col justify-center">
+        <h2 className="text-2xl"> Loading...</h2>
+
+        <svg
+          className="animate-spin h-10 w-10 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle className="opacity-25" cx="12" cy="12" r="10" fill="none" />
+          <path
+            className="opacity-75"
+            d="M4 12a8 8 0 1 1 16 0A8 8 0 0 1 4 12z"
+          />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">

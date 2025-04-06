@@ -12,7 +12,10 @@ import { eq, inArray } from "drizzle-orm";
 
 // Function to generate a unique alphanumeric daftarId
 async function generateDaftarId(name: string): Promise<string> {
-  const prefix = name.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, "X"); // Take first 3 letters, uppercase, replace non-letters with X
+  const prefix = name
+    .slice(0, 3)
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "X"); // Take first 3 letters, uppercase, replace non-letters with X
   let daftarId: string = "";
   let isUnique = false;
 
@@ -79,6 +82,7 @@ export async function GET(req: NextRequest) {
       .select({
         id: daftar.id,
         name: daftar.name,
+        description: daftar.bigPicture,
       })
       .from(daftar)
       .where(inArray(daftar.id, daftarIds));

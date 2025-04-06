@@ -126,7 +126,7 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
         throw new Error("Address is required");
       }
 
-      const response = await fetch("/api/daftar", {
+      const response = await fetch("/api/endpoints/daftar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

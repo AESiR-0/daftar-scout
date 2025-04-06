@@ -1,9 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { auth } from "@/auth";
+import { useState } from "react";
 
 export default function FounderIntroPage() {
   const router = useRouter();

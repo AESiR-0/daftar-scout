@@ -1,25 +1,35 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { getCookie } from "@/lib/helper/cookies";
 
 interface CreateScoutDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onScoutCreate?: (scout: { scoutId: string; scoutName: string; daftarId: string | null; investorId: string | null }) => void; // Optional callback
+  onScoutCreate?: () => void; // Optional callback when a scout is created
 }
 
-export function CreateScoutDialog({ open, onOpenChange, onScoutCreate }: CreateScoutDialogProps) {
+export function CreateScoutDialog({
+  open,
+  onOpenChange,
+  onScoutCreate,
+}: CreateScoutDialogProps) {
   const [scoutName, setScoutName] = useState("");
-  const [daftarId, setDaftarId] = useState("");
   const [investorId, setInvestorId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
+  const daftarId = getCookie("selectedDaftarId") || "";
   const handleSubmit = async () => {
     if (!scoutName.trim()) {
       toast({
@@ -38,8 +48,7 @@ export function CreateScoutDialog({ open, onOpenChange, onScoutCreate }: CreateS
         },
         body: JSON.stringify({
           scoutName,
-          daftarId: daftarId.trim() || null,
-          investorId: investorId.trim() || null,
+          daftarId: daftarId,
         }),
       });
 
@@ -58,17 +67,11 @@ export function CreateScoutDialog({ open, onOpenChange, onScoutCreate }: CreateS
 
       // Call the optional callback with the new scout data
       if (onScoutCreate) {
-        onScoutCreate({
-          scoutId: newScout.scoutId,
-          scoutName: newScout.scoutName,
-          daftarId: newScout.daftarId,
-          investorId: newScout.investorPitch, // Assuming investorId maps to investorPitch
-        });
+        onScoutCreate();
       }
 
       // Reset form and close dialog
       setScoutName("");
-      setDaftarId("");
       setInvestorId("");
       onOpenChange(false);
     } catch (error: any) {

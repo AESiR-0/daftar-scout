@@ -1,133 +1,118 @@
-"use client"
-import { useSearch } from "@/lib/context/search-context"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
-import { useState } from "react"
-import { InsightsDialog } from "@/components/dialogs/insights-dialog"
-import MeetingsPage from "@/app/founder/(auth)/meetings/page"
-import { CreateScoutDialog } from "@/components/dialogs/create-scout-dialog"
-import { useToast } from "@/hooks/use-toast"
+"use client";
+
+import { useSearch } from "@/lib/context/search-context";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { InsightsDialog } from "@/components/dialogs/insights-dialog";
+import MeetingsPage from "@/app/founder/(auth)/meetings/page";
+import { CreateScoutDialog } from "@/components/dialogs/create-scout-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Scout {
-  id: string
-  title: string
-  postedby: string
-  status: 'Planning' | 'Scheduled' | 'Active' | 'Closed'
-  scheduledDate?: string
+  id: string;
+  title: string;
+  collaborator: string[];
+  postedby: string;
+  status: "Planning" | "Scheduled" | "Active" | "Closed";
+  scheduledDate?: string | null;
 }
 
 interface ScoutStatus {
-  planning: Scout[]
-  scheduled: Scout[]
-  active: Scout[]
-  closed: Scout[]
-}
-
-const initialScoutStatus: ScoutStatus = {
-  planning: [
-    {
-      id: 'green-energy',
-      title: "Green Energy Initiative",
-      postedby: "Nithin Kamath",
-      status: "Planning",
-    },
-  ],
-  scheduled: [
-    {
-      id: 'ai-ventures',
-      title: "AI Ventures",
-      postedby: "Aman Gupta",
-      status: "Scheduled",
-      scheduledDate: "Feb 20th, 2025, 10:00 AM"
-    },
-  ],
-  active: [
-    {
-      id: 'tech-startup',
-      title: "Tech Startup Fund",
-      postedby: "GUSEC",
-      status: "Active",
-    },
-  ],
-  closed: [
-    {
-      id: 'fintech',
-      title: "Fintech Innovation",
-      postedby: "Narayan Murthy",
-      status: "Closed",
-    },
-  ],
+  Planning: Scout[];
+  Scheduled: Scout[];
+  Active: Scout[];
+  Closed: Scout[];
 }
 
 export default function ScoutPage() {
-  const { searchQuery, filterValue } = useSearch()
-  const [insightsOpen, setInsightsOpen] = useState(false)
-  const [showMeetings, setShowMeetings] = useState(false)
-  const [showContent, setShowContent] = useState(false)
-  const [createScoutOpen, setCreateScoutOpen] = useState(false)
-  const [scoutStatus, setScoutStatus] = useState<ScoutStatus>(initialScoutStatus)
-  const { toast } = useToast()
+  const router = useRouter();
+  const { searchQuery, filterValue } = useSearch();
+  const [loading, setLoading] = useState(true);
+  const [insightsOpen, setInsightsOpen] = useState(false);
+  const [showMeetings, setShowMeetings] = useState(false);
+  const [createScoutOpen, setCreateScoutOpen] = useState(false);
+  const [scoutStatus, setScoutStatus] = useState<ScoutStatus>({
+    Planning: [],
+    Scheduled: [],
+    Active: [],
+    Closed: [],
+  });
 
-  const filteredScouts = Object.entries(scoutStatus).reduce((acc, [key, scouts]) => {
-    const filtered = scouts.filter((scout: any) => {
-      const matchesSearch = scout.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        scout.postedby.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesFilter = filterValue === 'all' || scout.status.toLowerCase() === filterValue.toLowerCase()
-      return matchesSearch && matchesFilter
-    })
-    return { ...acc, [key]: filtered }
-  }, {} as ScoutStatus)
+  const { toast } = useToast();
+  useEffect(() => {
+    const fetchScoutStatus = async () => {
+      try {
+        const res = await fetch("/api/endpoints/scouts", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-  const handleScoutCreate = (scoutName: string) => {
-    setScoutStatus(prev => ({
-      ...prev,
-      planning: [
-        {
-          id: 'new-scout',
-          title: scoutName,
-          postedby: "NA",
-          status: "Planning",
-        },
-        ...prev.planning,
-      ]
-    }))
+        const data = await res.json();
 
+        const grouped: ScoutStatus = {
+          Planning: [],
+          Scheduled: [],
+          Active: [],
+          Closed: [],
+        };
+
+        data.forEach((item: any) => {
+          const statusKey = item.status as keyof ScoutStatus;
+
+          // Skip if status is invalid
+          if (!grouped[statusKey]) return;
+
+          const scout: Scout = {
+            id: item.id,
+            title: item.title,
+            collaborator: item.collaborator ?? [],
+            postedby: item.postedby,
+            status: item.status,
+            scheduledDate: item.scheduledDate ?? null,
+          };
+
+          grouped[statusKey].push(scout);
+        });
+
+        setScoutStatus(grouped);
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        console.error("Failed to fetch scouts:", error);
+      }
+    };
+
+    fetchScoutStatus();
+  }, []);
+
+  const filteredScouts = Object.entries(scoutStatus).reduce(
+    (acc, [key, scouts]) => {
+      const filtered = scouts.filter((scout: any) => {
+        const matchesSearch =
+          scout.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          scout.postedby.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter =
+          filterValue === "all" ||
+          scout.status.toLowerCase() === filterValue.toLowerCase();
+        return matchesSearch && matchesFilter;
+      });
+      return { ...acc, [key]: filtered };
+    },
+    {} as ScoutStatus
+  );
+
+  const handleScoutCreate = () => {
+    router.refresh();
     toast({
       title: "Scout Created",
       description: "New scout has been added to planning",
-    })
-  }
-
-
-  // if (!showContent) {
-  //   return (
-  //     <div className="min-h-screen flex flex-col items-center  justify-center p-4">
-  //       <div className="max-w-3xl w-full space-y-8 text-center">
-  //         {/* Video Container */}
-  //         <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-  //           <video
-  //             className="w-full h-full object-cover"
-  //             src="/videos/intro.mp4"
-  //             controls
-  //           >
-  //             Your browser does not support the video tag.
-  //           </video>
-  //         </div>
-
-  //         {/* Button */}
-  //         <Button
-  //           variant="secondary"
-  //           size="lg"
-  //           className="px-8 py-6 text-md"
-  //           onClick={() => setShowContent(true)}
-  //         >
-  //           Create Scout
-  //         </Button>
-  //       </div>
-  //     </div>
-  //   )
-  // }
+    });
+  };
 
   return (
     <div className="space-y-6 px-20 mt-4 container mx-auto">
@@ -135,28 +120,40 @@ export default function ScoutPage() {
         <Button
           variant="outline"
           onClick={() => setShowMeetings(true)}
-          className={showMeetings ? "bg-muted rounded-[0.3rem]" : "rounded-[0.3rem]"}
+          disabled={loading}
+          className={
+            showMeetings ? "bg-muted rounded-[0.3rem]" : "rounded-[0.3rem]"
+          }
         >
           Meetings
-          <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
-            {scoutStatus.active.length}
+          <Badge
+            variant="secondary"
+            className="text-xs bg-muted text-muted-foreground"
+          >
+            {scoutStatus.Active.length}
           </Badge>
         </Button>
 
         <Button
           variant="outline"
           onClick={() => setShowMeetings(false)}
-          className={showMeetings ? "rounded-[0.3rem]" : "bg-muted rounded-[0.3rem]"}
-
+          disabled={loading}
+          className={
+            showMeetings ? "rounded-[0.3rem]" : "bg-muted rounded-[0.3rem]"
+          }
         >
           ScoutBoard
-          <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
-            {scoutStatus.active.length}
+          <Badge
+            variant="secondary"
+            className="text-xs bg-muted text-muted-foreground"
+          >
+            {scoutStatus.Active.length}
           </Badge>
         </Button>
 
         <Button
           variant="outline"
+          disabled={loading}
           className="h-9 rounded-[0.3rem]"
           onClick={() => setCreateScoutOpen(true)}
         >
@@ -166,6 +163,10 @@ export default function ScoutPage() {
 
       {showMeetings ? (
         <MeetingsPage />
+      ) : loading ? (
+        <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)]">
+          <h2 className="text-center text-muted-foreground">Loading...</h2>
+        </div>
       ) : (
         <div className="grid grid-cols-4 gap-6">
           {Object.entries(filteredScouts).map(([status, scouts]) => (
@@ -175,8 +176,13 @@ export default function ScoutPage() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <h2 className="font-semibold capitalize text-foreground">{status}</h2>
-                  <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
+                  <h2 className="font-semibold capitalize text-foreground">
+                    {status}
+                  </h2>
+                  <Badge
+                    variant="secondary"
+                    className="text-xs bg-muted text-muted-foreground"
+                  >
                     {scouts.length}
                   </Badge>
                 </div>
@@ -185,18 +191,29 @@ export default function ScoutPage() {
               <div className="space-y-5">
                 {scouts.map((scout: any) => (
                   <Link
-                    key={scout.title}
-                    href={`/investor/scout/${scout.title.toLowerCase().replace(/ /g, '-')}${scout.status === "Planning"
-                      ? "/planning"
-                      : scout.status === "Scheduled"
-                        ? "/scheduled"
-                        : ""
-                      }`}
+                    key={scout.id}
+                    href={`/investor/scout/${scout.id
+                      .toLowerCase()
+                      .replace(/ /g, "-")}`}
                   >
                     <div className="p-4 m-2 rounded-[0.35rem] hover:border-muted-foreground hover:border bg-background transition-colors">
-                      <h3 className="font-medium text-sm text-foreground">{scout.title}</h3>
+                      <h3 className="font-medium text-sm text-foreground">
+                        {scout.title}
+                      </h3>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Collaboration : <span className="font-medium">{scout.postedby}</span>
+                        Collaboration :{" "}
+                        <span className="font-medium">
+                          {scout.collaborator.map(
+                            (collaboration: string, num: number) =>
+                              `${collaboration} ${
+                                scout.collaborator.length === 1
+                                  ? ""
+                                  : num == scout.collaborator.length - 1
+                                  ? "and"
+                                  : ", "
+                              } `
+                          )}
+                        </span>
                       </p>
                     </div>
                   </Link>
@@ -213,10 +230,7 @@ export default function ScoutPage() {
         </div>
       )}
 
-      <InsightsDialog
-        open={insightsOpen}
-        onOpenChange={setInsightsOpen}
-      />
+      <InsightsDialog open={insightsOpen} onOpenChange={setInsightsOpen} />
 
       <CreateScoutDialog
         open={createScoutOpen}
@@ -224,5 +238,5 @@ export default function ScoutPage() {
         onScoutCreate={handleScoutCreate}
       />
     </div>
-  )
-} 
+  );
+}
