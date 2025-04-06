@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { redirect } from "next/navigation";
 
 const profileSchema: any = z.object({
   name: z.string().min(1, "First name cannot be empty"),
@@ -118,6 +119,7 @@ export default function UserProfileClient({
       if (!res.ok) throw new Error("Failed to update profile");
 
       toast({ title: "Success", description: "Profile updated successfully!" });
+      redirect('/investor')
     } catch {
       toast({
         title: "Error",

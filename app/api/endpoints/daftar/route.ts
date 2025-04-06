@@ -8,7 +8,7 @@ import {
 import { structure } from "@/backend/drizzle/models/daftar"; // structure model
 import { users } from "@/backend/drizzle/models/users";
 import { auth } from "@/auth";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,8 +17,50 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const entries = await db.select().from(daftar);
-    return NextResponse.json(entries, { status: 200 });
+    const { user } = session;
+    if (!user?.email) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // 1. Get user from DB
+    const dbUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, user.email))
+      .limit(1);
+
+    if (!dbUser.length) {
+      return NextResponse.json({ error: "DB User not found" }, { status: 404 });
+    }
+
+    const currentUser = dbUser[0];
+
+    // 2. Get all daftarInvestors entries where investorId = current user ID
+    const investorEntries = await db
+      .select({
+        daftarId: daftarInvestors.daftarId,
+      })
+      .from(daftarInvestors)
+      .where(eq(daftarInvestors.investorId, currentUser.id));
+
+    const daftarIds = investorEntries
+      .map((entry) => entry.daftarId)
+      .filter((id): id is string => id !== null);
+
+    if (daftarIds.length === 0) {
+      return NextResponse.json([], { status: 200 });
+    }
+
+    // 3. Get daftar entries by IDs
+    const daftars = await db
+      .select({
+        id: daftar.id,
+        name: daftar.name,
+      })
+      .from(daftar)
+      .where(inArray(daftar.id, daftarIds));
+
+    return NextResponse.json(daftars, { status: 200 });
   } catch (error) {
     console.error("GET /api/daftar error:", error);
     return NextResponse.json(

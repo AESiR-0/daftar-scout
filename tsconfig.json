@@ -20,9 +20,17 @@
     ],
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@auth/core": ["node_modules/@auth/core"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "scrapper/scrapper.js"],
+  "include": [
+    "next-env.d.ts",
+    "types/next-auth.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "scrapper/scrapper.js"
+  ],
   "exclude": ["node_modules"]
 }

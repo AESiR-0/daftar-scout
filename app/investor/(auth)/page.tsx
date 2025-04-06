@@ -1,16 +1,32 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreateDaftarDialog } from "@/components/dialogs/create-daftar-dialog";
-import { CompleteProfileDialog } from "@/components/dialogs/complete-profile-dialog";
 import { useRouter } from "next/navigation";
 
 export default function InvestorIntroPage() {
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [createDaftarOpen, setCreateDaftarOpen] = useState(false);
-
+  useEffect(() => {
+    async function getDaftar() {
+      const response = await fetch("/api/endpoints/daftar", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (data.length > 0) {
+        console.log("data", data);
+        router.push("/investor/scout");
+      } else {
+        setCreateDaftarOpen(true);
+      }
+    }
+    getDaftar();
+  }, []);
   // const handleProfileComplete = () => {
   //   setProfileOpen(false)
   //   setCreateDaftarOpen(true)
