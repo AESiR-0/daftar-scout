@@ -1,0 +1,33 @@
+version: "3.7"
+
+services:
+  nextjs:
+    build: .
+    container_name: nextjs-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://neondb_owner:npg_Kya0dcoDV2XL@ep-winter-hill-a1bh2o6p.ap-southeast-1.aws.neon.tech/daftaros?sslmode=require
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: neondb_owner
+      POSTGRES_PASSWORD: npg_Kya0dcoDV2XL
+      POSTGRES_DB: daftaros
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+
+networks:
+  app-network:
+    driver: bridge
