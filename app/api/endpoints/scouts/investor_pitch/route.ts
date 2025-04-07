@@ -22,10 +22,7 @@ export async function POST(req: NextRequest) {
       .limit(1);
 
     if (existingScout.length === 0) {
-      return NextResponse.json(
-        { error: "Scout not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Scout not found" }, { status: 404 });
     }
 
     const updatedScout = await db

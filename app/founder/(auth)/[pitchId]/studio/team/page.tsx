@@ -72,8 +72,9 @@ export default function TeamPage() {
     try {
       const response = await fetch("/api/endpoints/pitch/founder/team", {
         method: "GET",
-        headers: { "Content-Type": "application/json",
-          ...(pitchId && { "pitch_id": pitchId }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(pitchId && { pitch_id: pitchId }),
         },
       });
       if (!response.ok) throw new Error("Failed to fetch team members");
@@ -115,7 +116,12 @@ export default function TeamPage() {
       return;
     }
 
-    if (!newMember.firstName || !newMember.lastName || !newMember.email || !newMember.designation) {
+    if (
+      !newMember.firstName ||
+      !newMember.lastName ||
+      !newMember.email ||
+      !newMember.designation
+    ) {
       toast({
         title: "Error",
         description: "All fields are required",
@@ -147,13 +153,13 @@ export default function TeamPage() {
         firstName: newMember.firstName,
         lastName: newMember.lastName,
         email: newMember.email,
-        age: "25",
+        age: "Not Specified",
         gender: "Not Specified",
         location: "Not Specified",
         language: ["English"],
         status: "pending",
         joinDate: new Date().toISOString().split("T")[0],
-        phone: "+971526374859",
+        phone: "To be added",
       };
 
       setMembers([...members, newTeamMember]);
@@ -207,7 +213,11 @@ export default function TeamPage() {
         <div className="flex gap-4">
           <Avatar className="h-48 w-48 rounded-[0.35rem]">
             {member.imageUrl ? (
-              <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
+              <AvatarImage
+                src={member.imageUrl}
+                alt={member.firstName}
+                className="rounded-[0.35rem]"
+              />
             ) : (
               <AvatarFallback className="rounded-[0.35rem] text-xl">
                 {getInitials(`${member.firstName} ${member.lastName}`)}
@@ -240,12 +250,31 @@ export default function TeamPage() {
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{member.designation}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {member.designation}
+                  </p>
                 )}
-                {member.age && <div className="flex items-center gap-2"><span>{member.age}</span><span>{member.gender}</span></div>}
-                {member.email && <div className="flex items-center gap-2"><p>{member.email}</p></div>}
-                {member.phone && <div className="flex items-center gap-2"><p>{formatPhoneNumber(member.phone)}</p></div>}
-                {member.location && <div className="flex items-center gap-2"><p>{member.location}</p></div>}
+                {member.age && (
+                  <div className="flex items-center gap-2">
+                    <span>{member.age}</span>
+                    <span>{member.gender}</span>
+                  </div>
+                )}
+                {member.email && (
+                  <div className="flex items-center gap-2">
+                    <p>{member.email}</p>
+                  </div>
+                )}
+                {member.phone && (
+                  <div className="flex items-center gap-2">
+                    <p>{formatPhoneNumber(member.phone)}</p>
+                  </div>
+                )}
+                {member.location && (
+                  <div className="flex items-center gap-2">
+                    <p>{member.location}</p>
+                  </div>
+                )}
                 {member.language && (
                   <p className="text-sm text-muted-foreground">
                     Preferred languages: {member.language.join(", ")}
@@ -300,10 +329,14 @@ export default function TeamPage() {
                 {member.firstName} {member.lastName}
               </h4>
               {member.isCurrentUser && (
-                <span className="text-xs bg-muted px-2 py-0.5 rounded">You</span>
+                <span className="text-xs bg-muted px-2 py-0.5 rounded">
+                  You
+                </span>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">{member.designation}</p>
+            <p className="text-sm text-muted-foreground">
+              {member.designation}
+            </p>
             <p className="text-sm text-muted-foreground">{member.email}</p>
           </div>
         </div>
@@ -322,7 +355,9 @@ export default function TeamPage() {
   return (
     <div className="space-y-4 px-10">
       {!pitchId && (
-        <p className="text-sm text-muted-foreground">Create a pitch first to manage your team.</p>
+        <p className="text-sm text-muted-foreground">
+          Create a pitch first to manage your team.
+        </p>
       )}
       {pitchId && (
         <>
@@ -331,28 +366,42 @@ export default function TeamPage() {
               <Input
                 placeholder="First Name"
                 value={newMember.firstName}
-                onChange={(e) => setNewMember({ ...newMember, firstName: e.target.value })}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, firstName: e.target.value })
+                }
               />
               <Input
                 placeholder="Last Name"
                 value={newMember.lastName}
-                onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, lastName: e.target.value })
+                }
               />
               <Input
                 placeholder="Designation"
                 value={newMember.designation}
-                onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, designation: e.target.value })
+                }
               />
               <Input
                 placeholder="Email"
                 type="email"
                 value={newMember.email}
-                onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, email: e.target.value })
+                }
               />
               <Button
                 onClick={handleInvite}
                 className="w-[25%] bg-muted hover:bg-muted/50"
-                disabled={isLoading || !newMember.firstName || !newMember.lastName || !newMember.email || !newMember.designation}
+                disabled={
+                  isLoading ||
+                  !newMember.firstName ||
+                  !newMember.lastName ||
+                  !newMember.email ||
+                  !newMember.designation
+                }
               >
                 {isLoading ? "Inviting..." : "Invite"}
               </Button>

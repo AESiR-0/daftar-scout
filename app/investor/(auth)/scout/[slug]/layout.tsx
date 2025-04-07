@@ -1,12 +1,5 @@
 import { ScoutSidebar } from "@/components/navbar/scout-sidebar";
 
-interface ScoutStatus {
-  isPlanning: boolean;
-  isScheduling: boolean;
-  scheduledDate?: string;
-}
-
-
 async function getInvestorPitchData({
   scoutId,
   pitchId,
@@ -42,11 +35,11 @@ export default async function ScoutLayout({
   children: React.ReactNode;
   params: { slug: string };
 }) {
-  const status = getScoutStatus(params.slug);
+  const status = await getInvestorPitchData(params.slug);
 
   // Simulate fetching relevant pitch data
   const scoutId = params.slug; // Or map this slug to a proper scoutId
-  const pitchId = "some-pitch-id"; // Replace with actual pitchId logic 
+  const pitchId = "some-pitch-id"; // Replace with actual pitchId logic
 
   const investorPitchData = await getInvestorPitchData({ scoutId, pitchId });
 

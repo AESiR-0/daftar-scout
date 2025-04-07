@@ -1,101 +1,71 @@
-"use client"
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ChevronDown, ChevronRight, Share2 } from "lucide-react"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import Link from "next/link"
-import { Badge } from "../ui/badge"
-import { EndScoutingDialog } from "../dialogs/end-scouting-dialog"
-import { UpdatesDialog } from "../dialogs/updates-dialog"
-import { LaunchProgramDialog } from "../dialogs/launch-program-dialog"
-import { InsightsDialog } from "../dialogs/insights-dialog"
-import { usePathname } from "next/navigation"
+"use client";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChevronDown, ChevronRight, Share2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
+import { Badge } from "../ui/badge";
+import { EndScoutingDialog } from "../dialogs/end-scouting-dialog";
+import { UpdatesDialog } from "../dialogs/updates-dialog";
+import { LaunchProgramDialog } from "../dialogs/launch-program-dialog";
+import { InsightsDialog } from "../dialogs/insights-dialog";
+import { usePathname } from "next/navigation";
 
 interface Pitch {
-  id: string
-  pitchName: string
-  daftarName: string
-  Believer: string
-  averageNPS: string
-  interestedCount: string
+  id: string;
+  pitchName: string;
+  daftarName: string;
+  Believer: string;
+  averageNPS: string;
+  interestedCount: string;
 }
 
 interface Section {
-  id: string
-  title: string
-  pitches: Pitch[]
+  id: string;
+  title: string;
+  pitches: Pitch[];
 }
 
-const sections: Section[] = [
-  {
-    id: "inbox",
-    title: "Inbox",
-    pitches: [
-      { id: "1", pitchName: "AI Chatbot", daftarName: "Tech Startup", Believer: "3", averageNPS: "NA", interestedCount: "NA" },
-      { id: "2", pitchName: "Blockchain Solution", daftarName: "Tech Startup", Believer: "3", averageNPS: "NA", interestedCount: "NA" },
-      { id: "7", pitchName: "IoT Platform", daftarName: "Tech Startup", Believer: "4", averageNPS: "NA", interestedCount: "NA" },
-      { id: "8", pitchName: "Cloud Service", daftarName: "Tech Startup", Believer: "5", averageNPS: "NA", interestedCount: "NA" },
-      { id: "9", pitchName: "ML Solution", daftarName: "Tech Startup", Believer: "4", averageNPS: "NA", interestedCount: "NA" },
-    ]
-  },
-  {
-    id: "inDiscussion",
-    title: "In Discussion",
-    pitches: [
-      { id: "3", pitchName: "E-commerce Platform", daftarName: "FinTech Pro", Believer: "3", averageNPS: "7.8/10", interestedCount: "2" },
-    ]
-  },
-  {
-    id: "dealAccepted",
-    title: "Deal Accepted",
-    pitches: [
-      { id: "4", pitchName: "HealthTech App", daftarName: "EduTech", Believer: "5", averageNPS: "9.2/10", interestedCount: "4" },
-    ]
-  },
-  {
-    id: "dealCancelled",
-    title: "Deal Cancelled",
-    pitches: [
-      { id: "5", pitchName: "Green Energy", daftarName: "HealthTech", Believer: "3", averageNPS: "7/10", interestedCount: "1" },
-    ]
-  },
-  {
-    id: "deleted",
-    title: "Pitch Deleted",
-    pitches: [
-      { id: "6", pitchName: "Old Startup Idea", daftarName: "Tech Startup", Believer: "3", averageNPS: "5/10", interestedCount: "0" },
-    ]
-  }
-]
-
-export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = false }: { scoutSlug?: string, isPlanning?: boolean, isScheduling?: boolean }) {
-  const [expandedSections, setExpandedSections] = useState<string[]>(["inbox"])
-  const [endScoutingOpen, setEndScoutingOpen] = useState(false)
-  const [updatesOpen, setUpdatesOpen] = useState(false)
-  const [launchProgramOpen, setLaunchProgramOpen] = useState(false)
-  const [insightsOpen, setInsightsOpen] = useState(false)
-  const [isShowScroll, setIsShowScroll] = useState(true)
-  const pathname = usePathname()
+export function ScoutSidebar({
+  scoutSlug,
+  isPlanning = true,
+  isScheduling = false,
+  sections,
+}: {
+  scoutSlug?: string;
+  isPlanning?: boolean;
+  isScheduling?: boolean;
+  sections: Section[];
+}) {
+  const [expandedSections, setExpandedSections] = useState<string[]>(["inbox"]);
+  const [endScoutingOpen, setEndScoutingOpen] = useState(false);
+  const [updatesOpen, setUpdatesOpen] = useState(false);
+  const [launchProgramOpen, setLaunchProgramOpen] = useState(false);
+  const [insightsOpen, setInsightsOpen] = useState(false);
+  const [isShowScroll, setIsShowScroll] = useState(true);
+  const pathname = usePathname();
   useEffect(() => {
     if (pathname.includes("planning") || pathname.includes("scheduled")) {
-      setIsShowScroll(false)
+      setIsShowScroll(false);
     }
-  }, [pathname])
+  }, [pathname]);
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev =>
+    setExpandedSections((prev) =>
       prev.includes(sectionId)
-        ? prev.filter(id => id !== sectionId)
+        ? prev.filter((id) => id !== sectionId)
         : [...prev, sectionId]
-    )
-  }
-
-
+    );
+  };
 
   // Format scout name for display
-  const scoutName = scoutSlug === undefined ? "Test" : scoutSlug.split('-').map(word =>
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ')
+  const scoutName =
+    scoutSlug === undefined
+      ? "Test"
+      : scoutSlug
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
 
   if (isPlanning) {
     return (
@@ -107,7 +77,9 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
               <h2 className="text-[14px] font-semibold">{scoutName}</h2>
             </div>
             <div className="px-4 py-2">
-              <Link href={`/investor/studio/details?mode=edit&programId=${scoutSlug}`}>
+              <Link
+                href={`/investor/studio/details?mode=edit&programId=${scoutSlug}`}
+              >
                 <Button
                   variant="link"
                   size="sm"
@@ -123,10 +95,8 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
           <div className="flex-1" />
         </div>
       </div>
-    )
-  }
-
-  else if (isScheduling) {
+    );
+  } else if (isScheduling) {
     return (
       <div className="w-[16rem]  p-4  h-full">
         <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
@@ -135,11 +105,10 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
               <h2 className="text-[14px] font-semibold">{scoutName}</h2>
             </div>
           </div>
-          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-          </div>
+          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -155,7 +124,8 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
               <Button
                 variant="link"
                 size="sm"
-                className="w-full text-white px-0 justify-start" >
+                className="w-full text-white px-0 justify-start"
+              >
                 Studio
               </Button>
             </Link>
@@ -172,49 +142,59 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
         </div>
 
         {/* Scrollable Sections */}
-        {isShowScroll && <ScrollArea className="flex-1">
-          <div className="space-y-2">
-            {sections.map((section) => (
-              <div key={section.id}>
-                <Button
-                  variant="ghost"
-                  className="w-full px-2 justify-between font-normal "
-                  onClick={() => toggleSection(section.id)}
-                >
-                  <div className="flex items-center gap-2">
-                    {expandedSections.includes(section.id) ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                    {section.title} <Badge variant="secondary">{section.pitches.length}</Badge>
-                  </div>
-                </Button>
+        {isShowScroll && (
+          <ScrollArea className="flex-1">
+            <div className="space-y-2">
+              {sections.map((section) => (
+                <div key={section.id}>
+                  <Button
+                    variant="ghost"
+                    className="w-full px-2 justify-between font-normal "
+                    onClick={() => toggleSection(section.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {expandedSections.includes(section.id) ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                      {section.title}{" "}
+                      <Badge variant="secondary">
+                        {section.pitches.length}
+                      </Badge>
+                    </div>
+                  </Button>
 
-                {expandedSections.includes(section.id) && (
-                  <div className="mx-4 space-y-2 mt-2">
-                    {section.pitches.map((pitch) => (
-                      <Link
-                        key={pitch.id}
-                        href={`/investor/scout/${scoutSlug}/details/${pitch.id}`}
-                      >
-                        <Card className="hover:bg-muted/50 mt-1 transition-colors">
-                          <CardContent className="p-4 space-y-2">
-                            <h3 className="font-medium text-sm">{pitch.pitchName}</h3>
-                            <div className="text-xs text-muted-foreground">
-                              <p>NPS Score: {pitch.averageNPS}</p>
-                              <p>Interested Team Members: {pitch.interestedCount}</p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>}
+                  {expandedSections.includes(section.id) && (
+                    <div className="mx-4 space-y-2 mt-2">
+                      {section.pitches.map((pitch) => (
+                        <Link
+                          key={pitch.id}
+                          href={`/investor/scout/${scoutSlug}/details/${pitch.id}`}
+                        >
+                          <Card className="hover:bg-muted/50 mt-1 transition-colors">
+                            <CardContent className="p-4 space-y-2">
+                              <h3 className="font-medium text-sm">
+                                {pitch.pitchName}
+                              </h3>
+                              <div className="text-xs text-muted-foreground">
+                                <p>NPS Score: {pitch.averageNPS}</p>
+                                <p>
+                                  Interested Team Members:{" "}
+                                  {pitch.interestedCount}
+                                </p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        )}
 
         {/* Action Buttons */}
         <div className="px-4 py-2 border-t">
@@ -265,7 +245,7 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
           open={endScoutingOpen}
           onOpenChange={setEndScoutingOpen}
           onConfirm={() => {
-            console.log("Ending scouting process...")
+            console.log("Ending scouting process...");
           }}
         />
 
@@ -274,10 +254,10 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
           onOpenChange={setUpdatesOpen}
           updates={[]}
           onAddUpdate={(content: string) => {
-            console.log("Adding update:", content)
+            console.log("Adding update:", content);
           }}
           onDeleteUpdate={(id: string) => {
-            console.log("Deleting update:", id)
+            console.log("Deleting update:", id);
           }}
         />
 
@@ -285,15 +265,12 @@ export function ScoutSidebar({ scoutSlug, isPlanning = true, isScheduling = fals
           open={launchProgramOpen}
           onOpenChange={setLaunchProgramOpen}
           onSubmitFeedback={(feedback: string) => {
-            console.log("Submitting feedback:", feedback)
+            console.log("Submitting feedback:", feedback);
           }}
         />
 
-        <InsightsDialog
-          open={insightsOpen}
-          onOpenChange={setInsightsOpen}
-        />
+        <InsightsDialog open={insightsOpen} onOpenChange={setInsightsOpen} />
       </div>
     </div>
-  )
-} 
+  );
+}
