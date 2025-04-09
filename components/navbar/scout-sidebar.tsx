@@ -31,12 +31,10 @@ export function ScoutSidebar({
   scoutSlug,
   isPlanning = true,
   isScheduling = false,
-  sections,
 }: {
   scoutSlug?: string;
   isPlanning?: boolean;
   isScheduling?: boolean;
-  sections: Section[];
 }) {
   const [expandedSections, setExpandedSections] = useState<string[]>(["inbox"]);
   const [endScoutingOpen, setEndScoutingOpen] = useState(false);

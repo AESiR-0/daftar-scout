@@ -9,7 +9,6 @@ import { SearchProvider } from "@/lib/context/search-context";
 import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
-
 export default async function Layout({
   children,
 }: {

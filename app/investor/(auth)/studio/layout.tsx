@@ -1,18 +1,18 @@
-import { StudioNav } from "@/components/navbar/studio-nav"
-import { StudioSidebar } from "@/components/navbar/studio-sidebar"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { StudioNav } from "@/components/navbar/studio-nav";
+import { StudioSidebar } from "@/components/navbar/studio-sidebar";
+import { DaftarProvider } from "@/lib/context/daftar-context";
 
 export default function StudioLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode;
 }) {
-    return (
-        <div className="flex min-h-screen">
-            <StudioSidebar />
-            <main className="flex-1 overflow-y-auto">
-                {children}
-            </main>
-        </div>
-    )
+  return (
+    <div className="flex min-h-screen">
+      <DaftarProvider>
+        <StudioSidebar />
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </DaftarProvider>
+    </div>
+  );
 }

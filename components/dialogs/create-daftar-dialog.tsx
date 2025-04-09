@@ -22,7 +22,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useSession } from "next-auth/react";
 
 interface CreateDaftarDialogProps {
   open: boolean;
@@ -63,7 +62,11 @@ const countries = [
   "Greece",
 ];
 
-export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaftarDialogProps) {
+export function CreateDaftarDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: CreateDaftarDialogProps) {
   const [formData, setFormData] = useState({
     name: "",
     structure: "",
@@ -81,7 +84,6 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const { toast } = useToast();
-  const { data: session } = useSession();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -101,15 +103,6 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
   };
 
   const handleCreate = async () => {
-    if (!session) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to create a Daftar",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsCreating(true);
     try {
       const location = [
@@ -224,14 +217,19 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                   <Label>Daftar Structure *</Label>
                   <Select
                     value={formData.structure}
-                    onValueChange={(value) => handleInputChange("structure", value)}
+                    onValueChange={(value) =>
+                      handleInputChange("structure", value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select structure" />
                     </SelectTrigger>
                     <SelectContent>
                       {daftarStructures.map((structure) => (
-                        <SelectItem key={structure} value={structure.toLowerCase()}>
+                        <SelectItem
+                          key={structure}
+                          value={structure.toLowerCase()}
+                        >
                           {structure}
                         </SelectItem>
                       ))}
@@ -244,7 +242,9 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                   <Input
                     placeholder="Enter website (e.g., www.example.com)"
                     value={formData.website}
-                    onChange={(e) => handleInputChange("website", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("website", e.target.value)
+                    }
                   />
                 </div>
 
@@ -254,30 +254,41 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                     <Input
                       placeholder="Street Address"
                       value={formData.address.street}
-                      onChange={(e) => handleAddressChange("street", e.target.value)}
+                      onChange={(e) =>
+                        handleAddressChange("street", e.target.value)
+                      }
                       required
                     />
                     <Input
                       placeholder="City"
                       value={formData.address.city}
-                      onChange={(e) => handleAddressChange("city", e.target.value)}
+                      onChange={(e) =>
+                        handleAddressChange("city", e.target.value)
+                      }
                       required
                     />
                     <Input
                       placeholder="State"
                       value={formData.address.state}
-                      onChange={(e) => handleAddressChange("state", e.target.value)}
+                      onChange={(e) =>
+                        handleAddressChange("state", e.target.value)
+                      }
                     />
                     <Select
                       value={formData.address.country}
-                      onValueChange={(value) => handleAddressChange("country", value)}
+                      onValueChange={(value) =>
+                        handleAddressChange("country", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select country" />
                       </SelectTrigger>
                       <SelectContent>
                         {countries.map((country) => (
-                          <SelectItem key={country} value={country.toLowerCase()}>
+                          <SelectItem
+                            key={country}
+                            value={country.toLowerCase()}
+                          >
                             {country}
                           </SelectItem>
                         ))}
@@ -286,7 +297,9 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                     <Input
                       placeholder="Postal Code"
                       value={formData.address.postalCode}
-                      onChange={(e) => handleAddressChange("postalCode", e.target.value)}
+                      onChange={(e) =>
+                        handleAddressChange("postalCode", e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -296,7 +309,9 @@ export function CreateDaftarDialog({ open, onOpenChange, onSuccess }: CreateDaft
                   <Textarea
                     placeholder="Enter your Daftar's vision"
                     value={formData.vision}
-                    onChange={(e) => handleInputChange("vision", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("vision", e.target.value)
+                    }
                     required
                   />
                 </div>

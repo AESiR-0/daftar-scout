@@ -9,11 +9,18 @@ import { useState } from "react";
 import { getCookie } from "@/lib/helper/cookies";
 import { SelectDaftarDialog } from "@/components/dialogs/select-daftar-dialog";
 import { CreateDaftarDialog } from "@/components/dialogs/create-daftar-dialog";
-import { url } from "inspector";
+import { useDaftar } from "@/lib/context/daftar-context";
 
+interface Daftar {
+  id: string;
+  name: string;
+  description: string;
+  profileUrl: string;
+}
 export function AppSidebar({ role }: { role: string }) {
   const navItems = role === "investor" ? investorNavItems : founderNavItems;
   const pathname = usePathname();
+  const { daftars, selectedDaftar, setSelectedDaftar } = useDaftar();
   const [selectDaftarOpen, setSelectDaftarOpen] = useState(false);
   const [createDaftarOpen, setCreateDaftarOpen] = useState(false);
   const profileUrl = getCookie("profileUrl");
@@ -84,6 +91,9 @@ export function AppSidebar({ role }: { role: string }) {
 
       <SelectDaftarDialog
         open={selectDaftarOpen}
+        daftars={daftars}
+        onSelect={setSelectedDaftar}
+        selected={selectedDaftar}
         onOpenChange={setSelectDaftarOpen}
         onCreateNew={handleCreateDaftar}
       />

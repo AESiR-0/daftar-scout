@@ -1,31 +1,24 @@
 import { ScoutSidebar } from "@/components/navbar/scout-sidebar";
 
-async function getInvestorPitchData({
-  scoutId,
-  pitchId,
-}: {
-  scoutId: string;
-  pitchId: string;
-}) {
+async function getScoutStatus({ scoutId }: { scoutId: string }) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/investor-pitch`,
+    `${process.env.BASE_URL}/api/endpoints/scouts/getStatus?scoutId=${scoutId}`,
     {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ scoutId, pitchId }),
-      cache: "no-store",
     }
   );
 
-  if (!res.ok) {
-    console.error("Failed to fetch investor pitch data");
-    return null;
+  if (!(res.status === 200)) {
+    console.error("Failed to fetch scout status", res.status);
+    return res.json();
   }
 
   const json = await res.json();
-  return json.data;
+  console.log(json);
+  return json;
 }
 
 export default async function ScoutLayout({
@@ -35,19 +28,29 @@ export default async function ScoutLayout({
   children: React.ReactNode;
   params: { slug: string };
 }) {
-  const status = await getInvestorPitchData(params.slug);
+  const { slug } = await params;
+  const res = await fetch(
+    `${process.env.BASE_URL}/api/endpoints/scouts/getStatus?scoutId=${slug}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
-  // Simulate fetching relevant pitch data
-  const scoutId = params.slug; // Or map this slug to a proper scoutId
-  const pitchId = "some-pitch-id"; // Replace with actual pitchId logic
+  if (!(res.status === 200)) {
+    console.error("Failed to fetch scout status", res.status);
+  }
 
-  const investorPitchData = await getInvestorPitchData({ scoutId, pitchId });
-
+  const json = await res.json();
+  const { status, name } = await json;
   return (
     <div className="flex h-[calc(100vh-4rem)]">
       <ScoutSidebar
-        isPlanning={status.isPlanning}
-        isScheduling={status.isScheduling}
+        scoutSlug={name}
+        isPlanning={status === "Planning"}
+        isScheduling={status === "Scheduled"}
       />
       <div className="flex-1">
         {status.isPlanning ? (
@@ -64,13 +67,6 @@ export default async function ScoutLayout({
               Your scout is scheduled and will be live on {status.scheduledDate}
               .
             </p>
-          </div>
-        ) : investorPitchData && investorPitchData.length > 0 ? (
-          <div className="p-4">
-            {/* Render pitch info, or keep children */}
-            <pre className="text-sm bg-muted p-2 rounded">
-              {JSON.stringify(investorPitchData, null, 2)}
-            </pre>
           </div>
         ) : (
           children

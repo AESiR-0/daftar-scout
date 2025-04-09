@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { scoutId, investorPitch } = body;
+    const { scoutId } = body;
 
     if (!scoutId) {
       return NextResponse.json(

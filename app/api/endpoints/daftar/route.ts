@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "DB User not found" }, { status: 404 });
     }
 
-    const currentUser = dbUser[0];
+    const currentUser = await dbUser[0];
 
     // 2. Get all daftarInvestors entries where investorId = current user ID
     const investorEntries = await db
