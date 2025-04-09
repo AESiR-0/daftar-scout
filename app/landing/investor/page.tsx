@@ -34,7 +34,7 @@ type Story = EconomyStory | CaseStudiesStory
 
 const stories: Record<StoryTab, Story> = {
   economy: {
-    title: "New Startup Economy",
+    title: "Backing Tomorrow, Today",
     content: "",
     hasVideo: true,
     video: "/assets/economy.mp4",
@@ -211,7 +211,7 @@ export default function InvestorPage() {
                     key={key}
                     onClick={() => setActiveStory(key as StoryTab)}
                     className={cn(
-                      "text-left w-full py-1 transition-colors font-serif border-b border-black/20",
+                      "text-left w-full py-1 transition-colors text-sm font-serif border-b border-black/20",
                       activeStory === key 
                         ? "text-black font-bold" 
                         : "text-black/70 hover:text-black"

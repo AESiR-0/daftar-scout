@@ -220,7 +220,7 @@ export default function ApprovalPage() {
                         <h4 className="text-sm text-muted-foreground">{section.title}</h4>
                         <ul className="space-y-1">
                           {section.errors.map((error, errorIndex) => (
-                            <li key={errorIndex} className="text-xs text-destructive flex items-start gap-2">
+                            <li key={errorIndex} className="text-xs text-white flex items-start gap-2">
                               <span className="mt-0.5">•</span>
                               <span>{error}</span>
                             </li>

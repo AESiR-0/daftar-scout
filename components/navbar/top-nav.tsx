@@ -154,10 +154,10 @@ export function TopNav({ role }: { role: string }) {
                 )}
               </Button>
               {'icon' in action && action.icon === Play && hasNewPlay && (
-                <span className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full" />
+                <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
               )}
               {'icon' in action && action.icon === Bell && hasNewNotifications && (
-                <span className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full" />
+                <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
               )}
             </div>
           ))}

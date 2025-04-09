@@ -86,11 +86,7 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
       <DialogContent className="max-w-3xl h-[600px] p-0">
         <ScrollArea className="h-full">
           <div className="p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-semibold">Schedule Meeting</h2>
-              <p className="text-sm text-muted-foreground">Fill in the details to schedule a new meeting</p>
-            </div>
-
+            
             <div className="grid gap-4">
               <div className="space-y-2">
                 <Label>Meeting Title</Label>

@@ -28,7 +28,7 @@ export function RootSidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="w-[60px] min-h-screen h-full">
+    <div className="w-fit min-h-screen h-full">
       <div className="flex h-full justify-between pb-10 flex-col">
         {/* Top Section */}
         <div>
@@ -48,13 +48,13 @@ export function RootSidebar() {
                   key={item.title}
                   onClick={() => router.push(item.path)}
                   className={cn(
-                    "flex flex-col items-center justify-center rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground w-full",
-                    pathname === item.path ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                    "flex items-center justify-start rounded-[0.35rem] px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground w-full",
+                    pathname === item.path ? "bg-accent  text-accent-foreground" : "text-muted-foreground",
                     "my-4"
                   )}
                 >
                   <item.icon className="h-6 w-6" />
-                  <span className="text-[10px] mt-1">{item.title}</span>
+                  <span className="text-[10px] ml-2">{item.title}</span>
                 </button>
               ))}
             </nav>

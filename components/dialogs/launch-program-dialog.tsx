@@ -17,7 +17,7 @@ export function LaunchProgramDialog({ open, onOpenChange, onSubmitFeedback }: La
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader>
+        <DialogHeader hidden={true}>
           <DialogTitle className="flex items-center gap-2">
             Daftar OS Technology Update
           </DialogTitle>

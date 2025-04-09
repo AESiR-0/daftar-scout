@@ -205,13 +205,11 @@ export function NotificationDialog({
               <div className="space-y-4">
                 {requests.map((request) => (
                   <Card key={request.id} className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors">
-                    <div className="p-4 space-y-4">
-                      <div className="">
+                    <div className="p-4 space-y-2">
                         <h4 className="text-sm font-medium">{request.scoutName}</h4>
                         <p className="text-sm text-muted-foreground">
                           {request.scoutVision}
                         </p>
-                      </div>
                       <div className="">
                         <p className="text-xs text-muted-foreground">
                           Daftar: {request.daftarName}
@@ -286,14 +284,6 @@ export function NotificationDialog({
                           }}
                         >
                           Copy Link
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="text-xs rounded-[0.35rem]"
-                          onClick={() => router.push(`/investor/studio/${link.id}`)}
-                        >
-                          View Scout
                         </Button>
                       </div>
                     </div>

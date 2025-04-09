@@ -668,7 +668,7 @@ export function DaftarDialog({
       case "billing":
         return (
           <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
-            <div className="border rounded-lg p-6 space-y-6">
+            <div className="rounded-lg p-6 space-y-6">
               <div className="space-y-2">
                 <h3 className="font-medium">Current Plan</h3>
                 <p className="text-sm text-muted-foreground">Free Plan</p>

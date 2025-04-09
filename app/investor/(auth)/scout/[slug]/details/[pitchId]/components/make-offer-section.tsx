@@ -372,7 +372,7 @@ export function MakeOfferSection() {
                 variant="outline"
                 className="rounded-[0.35rem]"
               >
-                Accept
+                Send
               </Button>
 
               <Button variant="outline" 
