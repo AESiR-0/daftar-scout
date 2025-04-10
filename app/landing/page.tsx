@@ -11,9 +11,8 @@ export default function LandingPage() {
                     <h1 className="text-6xl font-light tracking-tight">
                         <span className="text-blue-500">Daftar</span> Operating System
                     </h1>
-                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                        For founders pitching their startup ideas to the world and investors scouting the next big opportunity,
-                        Daftar OS is the software you can trust.
+                    <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+                    For founders pitching their startup ideas and investors scouting the next big opportunity.
                     </p>
                 </div>
 

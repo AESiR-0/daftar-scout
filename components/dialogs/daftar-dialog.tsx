@@ -665,26 +665,18 @@ export function DaftarDialog({
           </Card>
         )
 
-      case "billing":
-        return (
-          <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
-            <div className="rounded-lg p-6 space-y-6">
-              <div className="space-y-2">
-                <h3 className="font-medium">Current Plan</h3>
-                <p className="text-sm text-muted-foreground">Free Plan</p>
+        case "billing":
+          return (
+            <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
+              <div className="p-6 space-y-4 text-center">
+                <CreditCard className="h-12 w-12 mx-auto text-muted-foreground" />
+                <h3 className="text-lg font-medium text-white">No Billing Yet!</h3>
+                <p className="text-sm text-muted-foreground">
+                  Enjoy Daftar completely free for now.
+                </p>
               </div>
-
-              <div className="space-y-2">
-                <h3 className="font-medium">Billing Information</h3>
-                <p className="text-sm text-muted-foreground">No billing information added</p>
-              </div>
-
-              <Button className="rounded-[0.35rem]" variant="outline">
-                Upgrade Plan
-              </Button>
-            </div>
-          </Card>
-        )
+            </Card>
+          );
 
       case "privacy":
         return (

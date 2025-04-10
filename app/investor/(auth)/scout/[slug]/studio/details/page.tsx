@@ -94,7 +94,7 @@ export default function DetailsPage() {
             <Label>Scout&apos;s Vision</Label>
             <div className="rounded-lg">
               <textarea
-                className="w-full h-[250px] bg-muted/50 text-white border p-4 rounded-lg"
+                className="w-full h-[250px] bg-muted/50 text-white border p-4 rounded-[0.35rem]"
                 value={details.description}
                 onChange={(e) =>
                   setDetails((prev) => ({

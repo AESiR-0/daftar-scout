@@ -38,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { signOut } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { formatDate } from "@/lib/format-date";
+import { formatDate } from "@/lib/format-date"; // Assuming this is the correct import
 import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -46,7 +46,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useSession } from "next-auth/react"; // For userId
+import { useSession } from "next-auth/react";
 
 interface ProfileData {
   firstName: string;
@@ -68,7 +68,14 @@ interface FeatureEntry {
   id: string;
   featureName: string;
   userId: string;
-  createdAt: string; // Assuming the table has a created_at field
+  createdAt: string;
+}
+
+interface SupportEntry {
+  id: string;
+  supportName: string;
+  userId: string;
+  createdAt: string;
 }
 
 type ProfileTab =
@@ -82,12 +89,15 @@ type ProfileTab =
 
 export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const { toast } = useToast();
-  const { data: session } = useSession(); // Get user session for userId
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<ProfileTab>("account");
   const [isEditing, setIsEditing] = useState(false);
   const [featureRequest, setFeatureRequest] = useState("");
   const [featureName, setFeatureName] = useState("");
   const [featureHistory, setFeatureHistory] = useState<FeatureEntry[]>([]);
+  const [supportRequest, setSupportRequest] = useState("");
+  const [supportName, setSupportName] = useState("");
+  const [supportHistory, setSupportHistory] = useState<SupportEntry[]>([]);
   const [profileData, setProfileData] = useState({
     firstName: "John",
     lastName: "Doe",
@@ -101,6 +111,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const [satisfied, setSatisfied] = useState<boolean | undefined>();
   const [feedbackText, setFeedbackText] = useState("");
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(false);
+  const [isLoadingSupport, setIsLoadingSupport] = useState(false);
 
   const tabs: { id: ProfileTab; label: string }[] = [
     { id: "account", label: "My Account" },
@@ -116,6 +127,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     if (activeTab === "feature" && session?.user?.id) {
       fetchFeatureRequests();
     }
+    if (activeTab === "support" && session?.user?.id) {
+      fetchSupportRequests();
+    }
   }, [activeTab, session]);
 
   const fetchFeatureRequests = async () => {
@@ -128,12 +142,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       if (!response.ok) throw new Error("Failed to fetch feature requests");
       const data = await response.json();
 
-      // Map API data to FeatureEntry interface
       const mappedFeatures: FeatureEntry[] = data.map((f: any) => ({
         id: f.id.toString(),
         featureName: f.featureName,
         userId: f.userId,
-        createdAt: f.createdAt || new Date().toISOString(), // Assuming created_at exists
+        createdAt: f.createdAt || new Date().toISOString(),
       }));
 
       setFeatureHistory(mappedFeatures);
@@ -146,6 +159,36 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       });
     } finally {
       setIsLoadingFeatures(false);
+    }
+  };
+
+  const fetchSupportRequests = async () => {
+    setIsLoadingSupport(true);
+    try {
+      const response = await fetch("/api/endpoints/support", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.ok) throw new Error("Failed to fetch support requests");
+      const data = await response.json();
+
+      const mappedSupport: SupportEntry[] = data.map((s: any) => ({
+        id: s.id.toString(),
+        supportName: s.supportName,
+        userId: s.userId,
+        createdAt: s.createdAt || new Date().toISOString(),
+      }));
+
+      setSupportHistory(mappedSupport);
+    } catch (error) {
+      console.error("Error fetching support:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load support requests",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingSupport(false);
     }
   };
 
@@ -184,9 +227,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         description: "Thank you for your feedback. We'll review your request shortly.",
       });
 
-      // Add to local history optimistically
       const newFeature: FeatureEntry = {
-        id: Date.now().toString(), // Temporary ID until server provides one
+        id: Date.now().toString(),
         featureName: `${featureName}: ${featureRequest}`,
         userId: session.user.id,
         createdAt: new Date().toISOString(),
@@ -200,6 +242,56 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       toast({
         title: "Error",
         description: error.message || "Failed to submit feature request",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmitSupport = async () => {
+    if (!session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit a support request",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/endpoints/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          supportName: `${supportName}: ${supportRequest}`,
+          userId: session.user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit support request");
+      }
+
+      toast({
+        title: "Support request submitted",
+        description: "Thank you for reaching out. We'll get back to you soon.",
+      });
+
+      const newSupport: SupportEntry = {
+        id: Date.now().toString(),
+        supportName: `${supportName}: ${supportRequest}`,
+        userId: session.user.id,
+        createdAt: new Date().toISOString(),
+      };
+      setSupportHistory((prev) => [newSupport, ...prev]);
+
+      setSupportName("");
+      setSupportRequest("");
+    } catch (error: any) {
+      console.error("Error submitting support:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit support request",
         variant: "destructive",
       });
     }
@@ -446,20 +538,57 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
       case "support":
         return (
-          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                We're in the process of setting up our ticket system, but for now, feel free to reach out to us at{" "}
-                <a
-                  href="mailto:support@daftaros.com"
-                  className="text-blue-500 hover:text-blue-400 underline"
+          <div className="space-y-4">
+            {/* Input Card */}
+            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Input
+                    placeholder="Support request title"
+                    value={supportName}
+                    onChange={(e) => setSupportName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder="Describe your issue or question"
+                    value={supportRequest}
+                    onChange={(e) => setSupportRequest(e.target.value)}
+                  />
+                </div>
+                <Button
+                  onClick={handleSubmitSupport}
+                  className="rounded-[0.35rem] bg-blue-500"
+                  disabled={!supportRequest.trim() || !supportName.trim()}
                 >
-                  support@daftaros.com
-                </a>
-                . Our tech team will get back to you as soon as possible.
-              </p>
-            </div>
-          </Card>
+                  Submit
+                </Button>
+              </div>
+            </Card>
+
+            {/* History Card */}
+            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+              <h4 className="text-[14px] font-medium mb-4">History</h4>
+              {isLoadingSupport ? (
+                <p className="text-muted-foreground">Loading support requests...</p>
+              ) : supportHistory.length === 0 ? (
+                <p className="text-muted-foreground">No support requests yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {supportHistory.map((support) => (
+                    <div key={support.id} className="py-3 rounded-[0.35rem] space-y-2">
+                      <div className="flex justify-between items-center">
+                        <h5 className="text-sm font-medium">{support.supportName}</h5>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(support.createdAt)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </div>
         );
 
       case "feedback":
@@ -495,7 +624,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                 </div>
                 <Button
                   disabled={satisfied === undefined || !feedbackText.trim()}
-                  className="rounded-[0.35rem]"
+                  className="rounded-[0.35rem] bg-blue-500"
                   onClick={handleFeedbackSubmit}
                 >
                   Submit
@@ -509,7 +638,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         return (
           <div className="space-y-4">
             {/* Input Card */}
-            <Card className="border-noneKILL rounded-[0.35rem] bg-[#1a1a1a] p-4">
+            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Input
@@ -527,7 +656,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                 </div>
                 <Button
                   onClick={handleSubmitFeature}
-                  className="rounded-[0.35rem]"
+                  className="rounded-[0.35rem] bg-blue-500"
                   disabled={!featureRequest.trim() || !featureName.trim()}
                 >
                   Submit
@@ -585,7 +714,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                 We're sad to say goodbye. This action can't be undone, and all your data will be permanently lost.
               </p>
               <Button
-                variant="outline"
+                variant="destructive"
                 className="rounded-[0.35rem]"
                 onClick={handleDeleteAccount}
               >
@@ -603,7 +732,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                 Are you sure you want to logout?
               </p>
               <Button
-                variant="outline"
+                variant="destructive"
                 className="rounded-[0.35rem]"
                 onClick={handleLogout}
               >

@@ -111,7 +111,7 @@ export default function SchedulePage() {
                 </div>
               </div>
               {dateError && (
-                <p className="text-sm text-destructive">{dateError}</p>
+                <p className="text-sm text-white">{dateError}</p>
               )}
               {isScheduled && (
                 <p className="text-sm text-muted-foreground">
@@ -147,11 +147,11 @@ export default function SchedulePage() {
                 <div className="space-y-2">
                   <h4 className="text-sm text-muted-foreground">Schedule Issues</h4>
                   <ul className="space-y-1">
-                    <li className="text-xs text-destructive flex items-start gap-2">
+                    <li className="text-xs text-white flex items-start gap-2">
                       <span className="mt-0.5">•</span>
                       <span>Last pitch date not selected</span>
                     </li>
-                    <li className="text-xs text-destructive flex items-start gap-2">
+                    <li className="text-xs text-white flex items-start gap-2">
                       <span className="mt-0.5">•</span>
                       <span>Launch date must be before last pitch date</span>
                     </li>
