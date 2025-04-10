@@ -131,27 +131,23 @@ export const investorStudioNavItems = [
   // },
   {
     title: "Approval",
-    url: "/investor/studio/approval",
+    url: "approval",
     icon: CheckCircle,
   },
   // {
   //   title: "Meetings",
-  //   url: "/investor/studio/meetings",
+  //   url: "meetings",
   //   icon: Calendar,
   // },
   {
     title: "Schedule",
-    url: "/investor/studio/schedule",
+    url: "schedule",
     icon: Calendar,
   },
-  {
-    title: "Logs",
-    url: "/investor/studio/logs",
-    icon: FileSpreadsheet,
-  },
+
   {
     title: "Delete",
-    url: "/investor/studio/delete",
+    url: "delete",
     icon: Trash2,
     className: "text-red-500 hover:text-red-600",
   },
