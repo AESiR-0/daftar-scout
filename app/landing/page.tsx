@@ -39,7 +39,7 @@ export default function LandingPage() {
                     {/* Sarvodaya text below video */}
                     <div className="text-left ml-[6.5rem]">
                         <p className="text-2xl font-light" style={{ color: "#DD00B4" }}>
-                            Sarvodaya
+                        The Problem Statement
                         </p>
                     </div>
                 </div>

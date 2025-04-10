@@ -135,11 +135,10 @@ export default function SchedulePage() {
           <Card className="border-none bg-[#0e0e0e]">
             <CardContent className="p-6">
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Schedule Blocked</h3>
                 <div className="space-y-2">
                   <h4 className="text-sm text-muted-foreground">Pending Approvals</h4>
                   <ul className="space-y-1">
-                    <li className="text-xs text-destructive flex items-start gap-2">
+                    <li className="text-xs flex items-start gap-2">
                       <span className="mt-0.5">•</span>
                       <span>2 team members haven't approved yet</span>
                     </li>
