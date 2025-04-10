@@ -8,8 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { z } from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 // Dynamically import map component to avoid SSR issues
 const MapComponent = dynamic(() => import("@/components/map"), {
@@ -22,8 +29,6 @@ const MapComponent = dynamic(() => import("@/components/map"), {
 });
 
 // Constants
-const locationPattern = /^([^/]+)\/([^/]+)\/([^/]+)$/;
-
 const communitiesData = [
   { label: "Auto - rickshaw drivers", value: "auto-rickshaw" },
   { label: "Black Lives Matter activists", value: "black-lives" },
@@ -152,6 +157,7 @@ export default function AudiencePage() {
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [openFilters, setOpenFilters] = useState(false);
 
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
     null
@@ -183,29 +189,72 @@ export default function AudiencePage() {
   const handleLocationInput = async (value: string) => {
     setLocationInput(value);
 
-    const match = value.match(locationPattern);
-    if (match) {
-      const [_, country, state, city] = match;
-      setLocation({
-        country: country.trim(),
-        state: state.trim(),
-        city: city.trim(),
-      });
+    // Normalize separators: replace all common separators with a single space
+    const normalizedInput = value
+      .replace(/[-\/,]+/g, " ")
+      .trim()
+      .split(/\s+/);
 
+    let country = "";
+    let state = "";
+    let city = "";
+
+    if (normalizedInput.length === 3) {
+      // Assume either "country state city" or "city state country"
+      const [first, second, third] = normalizedInput.map((part) =>
+        part.charAt(0).toUpperCase() + part.slice(1)
+      );
+
+      // Default to "city state country" unless first part seems like a country
+      if (first.length <= 3 || ["USA", "UK", "India"].includes(first.toUpperCase())) {
+        // Likely "country state city"
+        country = first;
+        state = second;
+        city = third;
+      } else {
+        // Assume "city state country"
+        city = first;
+        state = second;
+        country = third;
+      }
+    } else if (normalizedInput.length === 2) {
+      // Assume "state city" or "city state"
+      const [first, second] = normalizedInput.map((part) =>
+        part.charAt(0).toUpperCase() + part.slice(1)
+      );
+      city = first;
+      state = second;
+      country = ""; // Country omitted
+    } else if (normalizedInput.length === 1) {
+      // Single input, assume city
+      city = normalizedInput[0].charAt(0).toUpperCase() + normalizedInput[0].slice(1);
+      state = "";
+      country = "";
+    }
+
+    setLocation({ country, state, city });
+
+    // Construct query for Nominatim API
+    const queryParts = [city, state, country].filter(Boolean).join(", ");
+    if (queryParts) {
       try {
-        const query = `${city}, ${state}, ${country}`;
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            query
+            queryParts
           )}`
         );
         const data = await response.json();
         if (data && data[0]) {
           setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+        } else {
+          setCoordinates(null); // Reset if no match found
         }
       } catch (error) {
         console.error("Error fetching coordinates:", error);
+        setCoordinates(null);
       }
+    } else {
+      setCoordinates(null); // Clear coordinates if input is empty
     }
   };
 
@@ -258,82 +307,92 @@ export default function AudiencePage() {
 
   return (
     <div className="container px-10 mx-auto py-6">
-      <ScrollArea className="h-[80vh]">
-        <div className="space-y-6">
-          {/* Location Input */}
-          <div className="space-y-4">
-            <Label>Pin Location</Label>
-            <Input
-              placeholder="Country/State/City"
-              value={locationInput}
-              onChange={(e) => handleLocationInput(e.target.value)}
-            />
-            <div className="w-full h-[400px] rounded-lg overflow-hidden border">
-              <MapComponent coordinates={coordinates} />
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="space-y-4">
-            <Combobox
-              label="Community"
-              value={
-                communitiesData.find((c) => c.value === selectedCommunities[0])
-                  ?.label || "Select Community"
-              }
-              options={communitiesData}
-              selected={selectedCommunities}
-              onChange={(value: string) =>
-                setSelectedCommunities((prev) => [...prev, value])
-              }
-            />
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <AgeRange
-                  minAge={ageRange[0].toString()}
-                  maxAge={ageRange[1].toString()}
-                  onMinChange={(value) =>
-                    setAgeRange([Number(value), ageRange[1]])
-                  }
-                  onMaxChange={(value) =>
-                    setAgeRange([ageRange[0], Number(value)])
-                  }
-                />
-              </div>
-              <div className="flex-1">
-                <Combobox
-                  label="Gender"
-                  value="Add"
-                  options={genders}
-                  selected={selectedGenders}
-                  onChange={(value: string) =>
-                    setSelectedGenders((prev) => [...prev, value])
-                  }
-                />
-              </div>
-            </div>
-
-            <Combobox
-              label="Stage"
-              value="Add"
-              options={stages}
-              selected={selectedStages}
-              onChange={(value: string) =>
-                setSelectedStages((prev) => [...prev, value])
-              }
-            />
-            <Combobox
-              label="Sector"
-              value="Add"
-              options={sectors}
-              selected={selectedSectors}
-              onChange={(value: string) =>
-                setSelectedSectors((prev) => [...prev, value])
-              }
-            />
+      <div className="space-y-6">
+        {/* Location Input */}
+        <div className="space-y-4">
+          <Label>Pin Location</Label>
+          <Input
+            placeholder="e.g. India-Maharashtra-Mumbai or Mumbai-Maharashtra-India"
+            value={locationInput}
+            onChange={(e) => handleLocationInput(e.target.value)}
+          />
+          <div className="w-full h-[400px] rounded-lg overflow-hidden border">
+            <MapComponent coordinates={coordinates} />
           </div>
         </div>
-      </ScrollArea>
+
+        {/* Filters Button and Dialog */}
+        <div>
+          <Dialog open={openFilters} onOpenChange={setOpenFilters}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Edit Audience Filters</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Audience Filters</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <Combobox
+                  label="Community"
+                  value={
+                    communitiesData.find(
+                      (c) => c.value === selectedCommunities[0]
+                    )?.label || "Select Community"
+                  }
+                  options={communitiesData}
+                  selected={selectedCommunities}
+                  onChange={(value: string) =>
+                    setSelectedCommunities((prev) => [...prev, value])
+                  }
+                />
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <AgeRange
+                      minAge={ageRange[0].toString()}
+                      maxAge={ageRange[1].toString()}
+                      onMinChange={(value) =>
+                        setAgeRange([Number(value), ageRange[1]])
+                      }
+                      onMaxChange={(value) =>
+                        setAgeRange([ageRange[0], Number(value)])
+                      }
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Combobox
+                      label="Gender"
+                      value="Add"
+                      options={genders}
+                      selected={selectedGenders}
+                      onChange={(value: string) =>
+                        setSelectedGenders((prev) => [...prev, value])
+                      }
+                    />
+                  </div>
+                </div>
+                <Combobox
+                  label="Stage"
+                  value="Add"
+                  options={stages}
+                  selected={selectedStages}
+                  onChange={(value: string) =>
+                    setSelectedStages((prev) => [...prev, value])
+                  }
+                />
+                <Combobox
+                  label="Sector"
+                  value="Add"
+                  options={sectors}
+                  selected={selectedSectors}
+                  onChange={(value: string) =>
+                    setSelectedSectors((prev) => [...prev, value])
+                  }
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
     </div>
   );
 }

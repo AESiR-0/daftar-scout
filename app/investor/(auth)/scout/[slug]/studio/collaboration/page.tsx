@@ -6,13 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import formatDate from "@/lib/formatDate";
-import { X, Info } from "lucide-react";
+import { X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { InvestorProfile } from "@/components/InvestorProfile";
 
 type CollaborationStatus = "Pending" | "Accepted" | "Declined";
@@ -97,7 +92,6 @@ export default function CollaborationPage() {
         throw new Error(data.error || "Failed to invite");
       }
 
-      // Optionally, re-fetch or optimistically add to UI
       toast({
         title: "Invitation sent",
         description: `Invitation sent to Daftar ${daftarId}`,
@@ -153,92 +147,86 @@ export default function CollaborationPage() {
                   onChange={(e) => setDaftarId(e.target.value.toUpperCase())}
                   maxLength={6}
                 />
-                <div className="flex gap-2">
-                  <Button onClick={handleInvite} variant="outline">
-                    Invite
-                  </Button>
-                  <HoverCard>
-                    <HoverCardTrigger asChild>
-                      <Button variant="outline" size="icon">
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-[48rem] flex m-auto">
-                      <div className="w-2/3 flex justify-center items-center">
-                        <video
-                          src="example.mp4"
-                          className="w-[80%] h-full object-cover"
-                          controls
-                        />
-                      </div>
-                      <div className="w-1/3 space-y-4">
-                        <h4 className="text-sm font-semibold">
-                          About Collaboration
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          A collaborator helps your Scout connect with the right
-                          partners in a specific location and reach a larger
-                          audience.
-                          <br />
-                          <br />
-                          Since they've been working in the area for a long
-                          time, they understand the local ecosystem and speak
-                          the language founders speak.
-                          <br />
-                          <br />
-                          They're typically incubators, accelerators, angels,
-                          founder's offices, or VCs with strong local networks.
-                        </p>
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                </div>
+                <Button onClick={handleInvite} variant="outline">
+                  Invite
+                </Button>
               </div>
 
-              {/* Collaborators List */}
+              {/* Collaborators List or Empty State */}
               <div className="space-y-4">
-                {collaborators.map((collaborator) => (
-                  <div
-                    key={collaborator.id}
-                    className="flex items-center justify-between p-4 border rounded-lg bg-background"
-                  >
-                    <div>
-                      <InvestorProfile
-                        investor={{
-                          daftarName: collaborator.daftarName,
-                          structure: collaborator.daftarDetails.structure,
-                          website: collaborator.daftarDetails.website,
-                          location: collaborator.daftarDetails.location,
-                          bigPicture: collaborator.daftarDetails.bigPicture,
-                          onDaftarSince: collaborator.addedAt,
-                          imageUrl: "https://github.com/shadcn.png",
-                        }}
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Status: {collaborator.status}
-                      </p>
-                      <p className="text-xs mt-1 text-muted-foreground">
-                        {formatDate(collaborator.addedAt)}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeCollaborator(collaborator.id)}
+                {collaborators.length > 0 ? (
+                  collaborators.map((collaborator) => (
+                    <div
+                      key={collaborator.id}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
                     >
-                      <X className="h-4 w-4" />
-                    </Button>
+                      <div>
+                        <InvestorProfile
+                          investor={{
+                            daftarName: collaborator.daftarName,
+                            structure: collaborator.daftarDetails.structure,
+                            website: collaborator.daftarDetails.website,
+                            location: collaborator.daftarDetails.location,
+                            bigPicture: collaborator.daftarDetails.bigPicture,
+                            onDaftarSince: collaborator.addedAt,
+                            imageUrl: "https://github.com/shadcn.png",
+                          }}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Status: {collaborator.status}
+                        </p>
+                        <p className="text-xs mt-1 text-muted-foreground">
+                          {formatDate(collaborator.addedAt)}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeCollaborator(collaborator.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground p-4">
+                    <h4 className="text-sm font-semibold mb-4">
+                      About Collaboration
+                    </h4>
+                    <p>
+                      A collaborator helps your Scout connect with the right
+                      partners in a specific location and reach a larger
+                      audience.
+                      <br />
+                      <br />
+                      Since they've been working in the area for a long time,
+                      they understand the local ecosystem and speak the
+                      language founders speak.
+                      <br />
+                      <br />
+                      They're typically incubators, accelerators, angels,
+                      founder's offices, or VCs with strong local networks.
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Column - Info (1/3 width) */}
+        {/* Right Column - Support (1/3 width) */}
         <div>
           <Card className="border-none bg-[#0e0e0e]">
             <CardContent className="space-y-6">
+              {/* Video at the Top */}
+              <div className="w-full">
+                <video
+                  src="example.mp4"
+                  className="w-full h-auto object-cover rounded-lg"
+                  controls
+                />
+              </div>
+
               <h3 className="text-lg font-semibold">Support</h3>
               <p className="text-sm text-muted-foreground">
                 Looking for the right collaborator? Whether you have someone in

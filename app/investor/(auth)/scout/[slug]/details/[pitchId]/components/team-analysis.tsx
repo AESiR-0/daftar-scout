@@ -140,7 +140,7 @@ export function TeamAnalysisSection({
                                         placeholder="Why do you want to meet... or not meet... in the startup?"
                                         value={note}
                                         onChange={(e) => setNote(e.target.value)}
-                                        className="min-h-[100px]"
+                                        className="min-h-[100px] rounded-[0.35rem] bg-muted/50 text-white border p-4"
                                     />
                                 </div>
                             </div>
