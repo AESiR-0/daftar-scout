@@ -1,76 +1,113 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Editor } from "novel-lightweight"
-import { useTheme } from "next-themes"
+import { useState, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { z } from "zod";
+import debounce from "lodash.debounce";
 
-interface ScoutDetails {
-  name: string;
-  description: string;
-}
+// Zod schema for validation
+const scoutSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Vision is required"),
+});
+
+type ScoutDetails = z.infer<typeof scoutSchema>;
 
 export default function DetailsPage() {
-  const pathname = usePathname()
-  const { theme } = useTheme()
-  const mode = pathname.split('/')[3]
-  const ScoutId = pathname.split('/')[4]
+  const pathname = usePathname();
+  const ScoutId = pathname.split("/")[4];
+
   const [details, setDetails] = useState<ScoutDetails>({
     name: "",
     description: "",
-  })
+  });
 
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  // Fetch details on mount
   useEffect(() => {
-    if (mode === 'edit' && ScoutId) {
-      fetchScoutDetails(ScoutId)
-    }
-  }, [mode, ScoutId])
+    const fetchDetails = async () => {
+      const res = await fetch(
+        `/api/endpoints/scouts/details?scoutId=${ScoutId}`
+      );
+      const data = await res.json();
+      if (data?.data) {
+        setDetails({
+          name: data.data.scoutName || "",
+          description: data.data.scoutVision || "",
+        });
+      }
+    };
 
-  const fetchScoutDetails = async (id: string) => {
-    // Simulate API call
-    const data = {
-      name: "Example Scout",
-      description: "Scout description..."
-    }
-    setDetails(data)
-  }
+    fetchDetails();
+  }, [ScoutId]);
 
-  const handleSave = async () => {
-    if (mode === 'edit') {
-      console.log("Updating Scout:", ScoutId, details)
+  // Debounced save function
+  const debouncedSave = useCallback(
+    debounce(async (data: ScoutDetails) => {
+      const parsed = scoutSchema.safeParse(data);
+      if (!parsed.success) return;
+
+      await fetch("/api/endpoints/scouts/details", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          scoutId: ScoutId,
+          scoutName: data.name,
+          scoutVision: data.description,
+        }),
+      });
+    }, 800),
+    [ScoutId]
+  );
+
+  // Trigger save on change
+  useEffect(() => {
+    if (!initialLoad) {
+      debouncedSave(details);
     } else {
-      console.log("Creating new Scout:", details)
+      setInitialLoad(false);
     }
-  }
+  }, [details, debouncedSave]);
 
   return (
     <Card className="border-none mt-4 container mx-auto px-3 bg-[#0e0e0e]">
-      <CardContent className="">
+      <CardContent>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Scout Name</Label>
             <Input
               value={details.name}
-              onChange={(e) => setDetails({ ...details, name: e.target.value })}
+              onChange={(e) =>
+                setDetails((prev) => ({ ...prev, name: e.target.value }))
+              }
               placeholder="Enter Scout name"
             />
           </div>
 
           <div className="space-y-2">
             <Label>Scout&apos;s Vision</Label>
-            <div className="  rounded-lg">
-              <textarea name="" id="" className="w-full h-[250px] bg-muted/50 text-white border p-4 rounded-lg"></textarea>
+            <div className="rounded-lg">
+              <textarea
+                className="w-full h-[250px] bg-muted/50 text-white border p-4 rounded-lg"
+                value={details.description}
+                onChange={(e) =>
+                  setDetails((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                placeholder="Describe your vision"
+              ></textarea>
             </div>
           </div>
         </div>
-
-
       </CardContent>
     </Card>
-  )
+  );
 }
-
