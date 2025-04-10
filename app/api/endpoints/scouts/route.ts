@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { daftarScouts, scouts } from "@/backend/drizzle/models/scouts";
+import {
+  daftarScouts,
+  scouts,
+  scoutApproved,
+} from "@/backend/drizzle/models/scouts";
 import { eq, inArray } from "drizzle-orm";
 import { auth } from "@/auth"; // Assuming you have an auth utility
 import { users } from "@/backend/drizzle/models/users"; // Assuming you have a users table
@@ -153,28 +157,46 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Parse the request body
     const body = await req.json();
-
-    // Extract and validate required fields
     const { scoutName, daftarId } = body;
 
     const scoutId = await generateScoutId(scoutName);
 
-    // Insert the new scout into the database
+    // Insert the new scout
     const newScout = await db
       .insert(scouts)
       .values({
-        scoutId: scoutId,
-        scoutName: scoutName,
+        scoutId,
+        scoutName,
         scoutCreatedAt: new Date(),
         daftarId: daftarId || null,
       })
       .returning();
+
+    // Link scout to daftar
     await db.insert(daftarScouts).values({
-      scoutId: scoutId,
-      daftarId: daftarId,
+      scoutId,
+      daftarId,
     });
+
+    // Fetch all investors for the given daftarId
+    const daftarMembers = await db
+      .select({ investorId: daftarInvestors.investorId })
+      .from(daftarInvestors)
+      .where(eq(daftarInvestors.daftarId, daftarId));
+
+    // Insert all members into scoutApproved
+    if (daftarMembers.length > 0) {
+      const approvedInserts = daftarMembers.map((member) => ({
+        scoutId,
+        investorId: member.investorId,
+        isApproved: null,
+        approvedAt: null,
+      }));
+
+      await db.insert(scoutApproved).values(approvedInserts);
+    }
+
     return NextResponse.json(
       { message: "Scout created successfully", data: newScout[0] },
       { status: 200 }
