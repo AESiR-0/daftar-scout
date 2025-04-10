@@ -22,9 +22,12 @@ interface Question {
 }
 
 export default function InvestorQuestionsPage() {
-//   const { scoutId }; 
+  const pathname = usePathname();
+  const scoutId = pathname.split("/")[2];
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  );
   const [language, setLanguage] = useState("English");
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,19 +37,19 @@ export default function InvestorQuestionsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (scoutId) {
-      fetchQuestions();
-    }
-  }, [scoutId]);
+    fetchQuestions();
+  }, []);
 
   const fetchQuestions = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/questions", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scoutId }), // Note: Should be headers or query params (see below)
-      });
+      const response = await fetch(
+        `/api/endpoints/pitch/founder/questions?scoutId=${scoutId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch questions");
       const data = await response.json();
 
@@ -76,7 +79,10 @@ export default function InvestorQuestionsPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, questionId: number) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    questionId: number
+  ) => {
     const file = e.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
@@ -84,7 +90,10 @@ export default function InvestorQuestionsPage() {
     }
   };
 
-  const handleUploadVideo = async (e: React.MouseEvent<HTMLButtonElement>, questionId: number) => {
+  const handleUploadVideo = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    questionId: number
+  ) => {
     const file = fileInputRef.current?.files?.[0];
     if (!file) {
       toast({
@@ -149,13 +158,20 @@ export default function InvestorQuestionsPage() {
                         className="w-full rounded-[0.35rem] aspect-video"
                       />
                       <div className="flex gap-2">
-                        <Button variant="outline" onClick={clearVideo} className="w-full">
+                        <Button
+                          variant="outline"
+                          onClick={clearVideo}
+                          className="w-full"
+                        >
                           <X className="h-4 w-4 mr-2" />
                           Remove Video
                         </Button>
                         <Button
                           variant="outline"
-                          onClick={(e) => selectedQuestion && handleUploadVideo(e, selectedQuestion.id)}
+                          onClick={(e) =>
+                            selectedQuestion &&
+                            handleUploadVideo(e, selectedQuestion.id)
+                          }
                           className="w-full"
                         >
                           <Upload className="h-4 w-4 mr-2" />
@@ -172,11 +188,15 @@ export default function InvestorQuestionsPage() {
                         <Video className="h-6 w-6 text-blue-500" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium">Upload your answer</p>
+                        <p className="text-sm font-medium">
+                          Upload your answer
+                        </p>
                         <p className="text-xs text-gray-500 mt-1">
                           Click to upload or drag and drop
                         </p>
-                        <p className="text-xs text-gray-500">MP4, WebM or Ogg (max. 20MB)</p>
+                        <p className="text-xs text-gray-500">
+                          MP4, WebM or Ogg (max. 20MB)
+                        </p>
                       </div>
                     </div>
                   )}
@@ -185,7 +205,10 @@ export default function InvestorQuestionsPage() {
                     accept="video/*"
                     className="hidden"
                     ref={fileInputRef}
-                    onChange={(e) => selectedQuestion && handleFileChange(e, selectedQuestion.id)}
+                    onChange={(e) =>
+                      selectedQuestion &&
+                      handleFileChange(e, selectedQuestion.id)
+                    }
                   />
                   <div className="mt-5">
                     <Combobox

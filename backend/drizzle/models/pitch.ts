@@ -10,7 +10,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { scouts } from "./scouts";
+import { scoutQuestions, scouts } from "./scouts";
 import { users } from "./users";
 
 // 🏆 Pitch Model
@@ -90,7 +90,7 @@ export const founderAnswers = pgTable("founder_answers", {
   pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
   pitchAnswerUrl: text("pitch_answer_url").notNull(),
   questionId: varchar("question_id", { length: 255 }).references(
-    () => scouts.scoutId
+    () => scoutQuestions.id
   ),
   answerLanguage: text("answer_language"),
 });
@@ -131,6 +131,7 @@ export const pitchTeam = pgTable("pitch_team", {
   id: serial("id").primaryKey(),
   userId: text("user_id").references(() => users.id),
   designation: text("designation").notNull(),
+  hasApproved: boolean("has_approved").default(false),
   pitchId: text("pitchId").references(() => pitch.id),
 });
 

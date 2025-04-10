@@ -55,9 +55,8 @@ export const daftarScouts = pgTable("daftar_scouts", {
     () => scouts.scoutId
   ),
   daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id),
-  isPending : boolean('is_pending'),
-  addedAt : timestamp("added_at").defaultNow(),
-  
+  isPending: boolean("is_pending"),
+  addedAt: timestamp("added_at").defaultNow(),
 });
 
 export const scoutDocuments = pgTable("scout_documents", {

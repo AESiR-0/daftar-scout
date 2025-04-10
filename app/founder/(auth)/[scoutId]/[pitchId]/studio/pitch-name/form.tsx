@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +11,13 @@ import dynamic from "next/dynamic";
 import { useToast } from "@/hooks/use-toast";
 import { usePitch } from "@/contexts/PitchContext"; // Import the context hook
 
-const stages = ["Idea", "Prototyping To MVP", "Product-Market Fit", "Early Traction", "Growth"];
+const stages = [
+  "Idea",
+  "Prototyping To MVP",
+  "Product-Market Fit",
+  "Early Traction",
+  "Growth",
+];
 const sectors = ["AI", "Healthcare", "Blockchain", "Fintech", "E-commerce"];
 
 const MapComponent = dynamic(() => import("@/components/map"), {
@@ -33,9 +37,17 @@ interface Location {
 
 const locationPattern = /^([^/]+)\/([^/]+)\/([^/]+)$/;
 
-export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: string }) {
+function debounce(fn: Function, delay: number) {
+  let timeout: ReturnType<typeof setTimeout>;
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
+export default function PitchNameForm({ pitchId }: { pitchId: string }) {
   const { toast } = useToast();
-  const { setPitchId } = usePitch(); // Use context to set pitchId
+
   const [pitchName, setPitchName] = useState("");
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
@@ -52,19 +64,20 @@ export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: s
   const [locationInput, setLocationInput] = useState("");
 
   useEffect(() => {
-    if (mode === "edit" && pitch) {
-      fetchPitchDetails();
-    }
-  }, [pitch, mode]);
+    fetchPitchDetails();
+  }, []);
 
   const fetchPitchDetails = async () => {
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/details", {
-        method: "GET",
-        headers: { "Content-Type": "application/json",
-          ...(pitch && { "pitch_id": pitch })
-        },
-      });
+      const response = await fetch(
+        `/api/endpoints/pitch/founder/details?pitchId=${pitchId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch pitch details");
       const data = await response.json();
 
@@ -82,11 +95,16 @@ export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: s
       if (data.location) {
         const query = data.location.split("/").reverse().join(", ");
         const geoResponse = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            query
+          )}`
         );
         const geoData = await geoResponse.json();
         if (geoData && geoData[0]) {
-          setCoordinates([parseFloat(geoData[0].lat), parseFloat(geoData[0].lon)]);
+          setCoordinates([
+            parseFloat(geoData[0].lat),
+            parseFloat(geoData[0].lon),
+          ]);
         }
       }
     } catch (error) {
@@ -101,31 +119,40 @@ export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: s
 
   const handleLocationInput = async (value: string) => {
     setLocationInput(value);
-
-    const match = value.match(locationPattern);
-    if (match) {
-      const [_, country, state, city] = match;
-      setLocation({
-        country: country.trim(),
-        state: state.trim(),
-        city: city.trim(),
-      });
-
-      try {
-        const query = `${city}, ${state}, ${country}`;
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
-        );
-        const data = await response.json();
-
-        if (data && data[0]) {
-          setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
-        }
-      } catch (error) {
-        console.error("Error fetching coordinates:", error);
-      }
-    }
+    debounceLocation(value); // Debounce the location change
   };
+
+  // Use the debounced function for the location input
+  const debounceLocation = useCallback(
+    debounce(async (value: string) => {
+      const match = value.match(locationPattern);
+      if (match) {
+        const [_, country, state, city] = match;
+        setLocation({
+          country: country.trim(),
+          state: state.trim(),
+          city: city.trim(),
+        });
+
+        try {
+          const query = `${city}, ${state}, ${country}`;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+              query
+            )}`
+          );
+          const data = await response.json();
+
+          if (data && data[0]) {
+            setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+          }
+        } catch (error) {
+          console.error("Error fetching coordinates:", error);
+        }
+      }
+    }, 500), // Debounce delay of 500ms
+    []
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -140,10 +167,7 @@ export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: s
     };
 
     try {
-      const url =
-        mode === "edit" && pitch
-          ? `/api/endpoints/pitch/founder/details?pitchId=${pitch}` // Placeholder for edit mode
-          : "/api/endpoints/pitch/founder/details";
+      const url = "/api/endpoints/pitch/founder/details";
 
       const response = await fetch(url, {
         method: "POST",
@@ -159,21 +183,11 @@ export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: s
       const result = await response.json();
       const newPitchId = result.pitchId;
       setGeneratedPitchId(newPitchId);
-      setPitchId(newPitchId); // Set in global context
 
       toast({
         title: "Success",
         description: `${result.message} (Pitch ID: ${newPitchId})`,
       });
-
-      if (mode === "create") {
-        setPitchName("");
-        setLocationInput("");
-        setDemoLink("");
-        setSelectedStage(null);
-        setSelectedSectors([]);
-        setCoordinates(null);
-      }
     } catch (error: any) {
       console.error("Error submitting pitch:", error);
       toast({
@@ -252,7 +266,11 @@ export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: s
                   key={sector}
                   variant="secondary"
                   className="text-xs cursor-pointer hover:bg-muted"
-                  onClick={() => setSelectedSectors((prev) => prev.filter((s) => s !== sector))}
+                  onClick={() =>
+                    setSelectedSectors((prev) =>
+                      prev.filter((s) => s !== sector)
+                    )
+                  }
                 >
                   {sector} <X className="h-3 w-3 ml-1" />
                 </Badge>
@@ -260,7 +278,7 @@ export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: s
             </div>
           </div>
 
-          {generatedPitchId && mode === "create" && (
+          {generatedPitchId && (
             <p className="text-sm text-muted-foreground">
               Generated Pitch ID: {generatedPitchId}
             </p>
@@ -271,7 +289,7 @@ export default function PitchNameForm({ pitch, mode }: { pitch?: string; mode: s
             disabled={isLoading || !pitchName.trim()}
             className="w-full"
           >
-            {isLoading ? "Saving..." : mode === "edit" ? "Update Pitch" : "Create Pitch"}
+            {isLoading && "Saving..."}
           </Button>
         </form>
       </CardContent>

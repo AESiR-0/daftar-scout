@@ -220,51 +220,51 @@ export const scoutStudioNavItems = [
 export const founderStudioNavItems = [
   {
     title: "Scout Details",
-    url: "/founder/studio/scout-details",
+    url: "scout-details",
     icon: FileSpreadsheet,
   },
   {
     title: "Pitch Name",
-    url: "/founder/studio/pitch-name",
+    url: "pitch-name",
     icon: FileText,
   },
   {
     title: "Team",
-    url: "/founder/studio/team",
+    url: "team",
     icon: Users2,
   },
   {
     title: "Investor's Questions",
-    url: "/founder/studio/investor-questions",
+    url: "investor-questions",
     icon: HelpCircle,
   },
   {
     title: "Pitch",
-    url: "/founder/studio/pitch",
+    url: "pitch",
     icon: Video,
   },
   {
     title: "Documents",
-    url: "/founder/studio/documents",
+    url: "documents",
     icon: Folder,
     subItems: [
       {
         title: "Private",
-        url: "/founder/studio/documents/private",
+        url: "documents/private",
       },
       {
         title: "Received",
-        url: "/founder/studio/documents/received",
+        url: "documents/received",
       },
       {
         title: "Sent",
-        url: "/founder/studio/documents/sent",
+        url: "documents/sent",
       },
     ],
   },
   {
     title: "Offer",
-    url: "/founder/studio/offer",
+    url: "offer",
     icon: FileSpreadsheet,
   },
   // {

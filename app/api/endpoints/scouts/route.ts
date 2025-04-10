@@ -5,7 +5,7 @@ import {
   scouts,
   scoutApproved,
 } from "@/backend/drizzle/models/scouts";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, or, not, and } from "drizzle-orm";
 import { auth } from "@/auth"; // Assuming you have an auth utility
 import { users } from "@/backend/drizzle/models/users"; // Assuming you have a users table
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar"; // Assuming you have an investordaftar table
@@ -55,19 +55,6 @@ export async function GET(req: NextRequest) {
     const userRole = user[0].role;
     const investorId = user[0].id;
     // Fetch the daftarId associated with the investorId from the investordaftar table
-    const investordaftar = await db
-      .select()
-      .from(daftarInvestors) // Replace with the actual table name if different
-      .where(eq(daftarInvestors.investorId, investorId));
-
-    if (!investordaftar.length) {
-      return NextResponse.json(
-        { message: "Daftar ID not found" },
-        { status: 404 }
-      );
-    }
-
-    const daftarId = investordaftar[0].daftarId;
 
     let scoutsList,
       collaboratorsList: { daftarName: string; scoutId: string | null }[];
@@ -83,8 +70,32 @@ export async function GET(req: NextRequest) {
           scheduledDate: scouts.lastDayToPitch,
           postedBy: scouts.daftarId,
         })
-        .from(scouts);
+        .from(scouts)
+        .where(
+          and(
+            eq(scouts.isArchived, true),
+            or(
+              not(eq(scouts.status, "planning")),
+              not(eq(scouts.status, "Planning")),
+              not(eq(scouts.status, "scheduled")),
+              not(eq(scouts.status, "Scheduled"))
+            )
+          )
+        );
     } else {
+      const investordaftar = await db
+        .select()
+        .from(daftarInvestors) // Replace with the actual table name if different
+        .where(eq(daftarInvestors.investorId, investorId));
+
+      if (!investordaftar.length) {
+        return NextResponse.json(
+          { message: "Daftar ID not found" },
+          { status: 404 }
+        );
+      }
+
+      const daftarId = investordaftar[0].daftarId;
       // If the user is not a founder, fetch scouts related to their daftarId
       scoutsList = await db
         .select({

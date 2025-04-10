@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { usePitch } from "@/contexts/PitchContext"; // Import context hook
+import { usePathname } from "next/navigation";
 
 interface TeamMember {
   id: string;
@@ -30,7 +31,8 @@ interface TeamMember {
 
 export default function TeamPage() {
   const { toast } = useToast();
-  const { pitchId } = usePitch(); // Get pitchId from context
+  const pathname = usePathname();
+  const pitchId = pathname.split("/")[2]; // Get pitchId from context
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -70,13 +72,15 @@ export default function TeamPage() {
 
   const fetchTeamMembers = async () => {
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/team", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(pitchId && { pitch_id: pitchId }),
-        },
-      });
+      const response = await fetch(
+        `/api/endpoints/pitch/founder/team?pitchId=${pitchId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) throw new Error("Failed to fetch team members");
       const { data } = await response.json();
 
@@ -137,7 +141,7 @@ export default function TeamPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
-          userId: newMember.email, // Placeholder
+          email: newMember.email, // Placeholder
           designation: newMember.designation,
         }),
       });

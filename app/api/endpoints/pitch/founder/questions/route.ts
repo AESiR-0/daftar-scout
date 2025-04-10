@@ -3,13 +3,10 @@ import { db } from "@/backend/database";
 import { scoutQuestions } from "@/backend/drizzle/models/scouts";
 import { eq } from "drizzle-orm";
 
-export async function GET(
-  req: NextRequest
-) {
+export async function GET(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { scoutId } = await body;
-
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId");
     // Validate path parameter
     if (!scoutId) {
       return NextResponse.json(

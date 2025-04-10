@@ -9,6 +9,7 @@ export default function FounderIntroPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   if (isLoading) {
+    router.push("/founder/loading");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Loading...</p>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
 import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
-import { eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { auth } from "@/auth";
 import { users } from "@/backend/drizzle/models/users";
 
@@ -9,21 +9,21 @@ import { users } from "@/backend/drizzle/models/users";
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
-        if (!session) {
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-        const { user } = session;
-        if (!user) {
-          return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-        if (!user?.email) {
-          return NextResponse.json(
-            { error: "Invalid user email" },
-            { status: 400 }
-          );
-        }
-      
-    const pitchId = req.headers.get("pitch_id");
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { user } = session;
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    if (!user?.email) {
+      return NextResponse.json(
+        { error: "Invalid user email" },
+        { status: 400 }
+      );
+    }
+    const { searchParams } = new URL(req.url);
+    const pitchId = searchParams.get("pitchId");
 
     if (!pitchId) {
       return NextResponse.json(
@@ -40,10 +40,7 @@ export async function GET(req: NextRequest) {
       .limit(1);
 
     if (pitchExists.length === 0) {
-      return NextResponse.json(
-        { error: "Pitch not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Pitch not found" }, { status: 404 });
     }
 
     // Fetch team members (userIds) for the given pitchId
@@ -91,18 +88,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    
-
     const body = await req.json();
     const { pitchId, email, designation } = body;
     const userExist = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, user.email))
-    .limit(1);
-    
+      .select()
+      .from(users)
+      .where(and(eq(users.email, email), eq(users.role, "founder")))
+      .limit(1);
+    console.log(userExist, email);
+
+    if (userExist.length <= 0)
+      return NextResponse.json(
+        { error: "User does not exist" },
+        { status: 500 }
+      );
     const userId = userExist[0].id; // Get the userId from the session
-    
+
     // Validate required fields
     if (!pitchId || !userId) {
       return NextResponse.json(
@@ -119,10 +120,7 @@ export async function POST(req: NextRequest) {
       .limit(1);
 
     if (pitchExists.length === 0) {
-      return NextResponse.json(
-        { error: "Pitch not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Pitch not found" }, { status: 404 });
     }
 
     // Insert the new team member

@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Clock, MinusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { PaymentDialog } from "@/components/dialogs/payment-dialog";
 import formatDate from "@/lib/formatDate";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -104,36 +104,32 @@ export default function PitchPage() {
   const { pitchId } = usePitch(); // Get pitchId from context
   const [specificAsks, setSpecificAsks] = useState("");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>(initialApprovalRequests);
+  const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>(
+    initialApprovalRequests
+  );
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserId] = useState("1"); // Demo: John Smith as current user
 
-  // Fetch pitch details on mount
   useEffect(() => {
     if (pitchId) {
-      fetchPitchDetails();
+      fetchTeamDetails();
     }
   }, [pitchId]);
 
-  const fetchPitchDetails = async () => {
+  const fetchTeamDetails = async () => {
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/pitch", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(pitchId && { "pitch_id": pitchId }) // Conditionally add pitch_id
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch pitch details");
+      const response = await fetch(
+        `/api/endpoints/pitch/founder/team?pitchId=${pitchId}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch team details");
       const data = await response.json();
-      setSpecificAsks(data.askForInvestor || "");
-      // Note: Team approvals could be fetched from a separate endpoint if server-side
+      setApprovalRequests(data); // Assuming the team data is in the response
     } catch (error) {
-      console.error("Error fetching pitch details:", error);
+      console.error("Error fetching team details:", error);
       toast({
         title: "Error",
-        description: "Failed to load pitch details",
+        description: "Failed to load team details",
         variant: "destructive",
       });
     }
@@ -184,21 +180,34 @@ export default function PitchPage() {
   };
 
   // Handle approval toggle
-  const handleApprovalToggle = (requestId: string) => {
+  const handleApprovalToggle = async (requestId: string) => {
     if (requestId !== currentUserId) return;
 
-    setApprovalRequests((prev) =>
-      prev.map((req) =>
-        req.id === requestId
-          ? {
-              ...req,
-              status: req.status === "approved" ? "pending" : "approved",
-              date: formatDate(new Date().toISOString()),
-            }
-          : req
-      )
+    const updatedApprovalRequests = approvalRequests.map((req) =>
+      req.id === requestId
+        ? {
+            ...req,
+            status:
+              req.status === "approved"
+                ? ("pending" as "pending")
+                : ("approved" as "approved"),
+            date: formatDate(new Date().toISOString()),
+          }
+        : req
     );
-    // Optionally save to server here with a separate endpoint
+
+    setApprovalRequests(updatedApprovalRequests);
+
+    // Optionally send the update to the server
+    await fetch("/api/endpoints/pitch/founder/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pitchId,
+        userId: requestId, // Assuming requestId is the user's ID
+        hasApproved: true,
+      }),
+    });
   };
 
   // Handle pitch submission
@@ -258,7 +267,9 @@ export default function PitchPage() {
   };
 
   const totalMembers = approvalRequests.length;
-  const approvedCount = approvalRequests.filter((req) => req.status === "approved").length;
+  const approvedCount = approvalRequests.filter(
+    (req) => req.status === "approved"
+  ).length;
 
   return (
     <div className="px-10 container mx-auto py-5 space-y-6 flex gap-8">
@@ -291,7 +302,8 @@ export default function PitchPage() {
               htmlFor="terms"
               className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              I confirm that this pitch is ready for team approval and submission
+              I confirm that this pitch is ready for team approval and
+              submission
             </label>
           </div>
 
@@ -315,7 +327,9 @@ export default function PitchPage() {
                     </Avatar>
                     <div>
                       <p className="text-sm font-medium">{member.username}</p>
-                      <p className="text-xs text-muted-foreground">{member.designation}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {member.designation}
+                      </p>
                     </div>
                   </div>
                   <div
@@ -353,7 +367,10 @@ export default function PitchPage() {
         </Card>
       </div>
 
-      <PaymentDialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog} />
+      <PaymentDialog
+        open={showPaymentDialog}
+        onOpenChange={setShowPaymentDialog}
+      />
     </div>
   );
 }

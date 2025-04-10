@@ -20,10 +20,24 @@ interface Daftar {
 export function AppSidebar({ role }: { role: string }) {
   const navItems = role === "investor" ? investorNavItems : founderNavItems;
   const pathname = usePathname();
-  const { daftars, selectedDaftar, setSelectedDaftar } = useDaftar();
+  const { daftars, selectedDaftar, setSelectedDaftar } =
+    role === "investor"
+      ? useDaftar()
+      : {
+          setSelectedDaftar: () => console.log("founder"),
+          selectedDaftar: "",
+          daftars: [
+            {
+              id: "string",
+              name: "string",
+              description: "string",
+              profileUrl: "string",
+            },
+          ],
+        };
   const [selectDaftarOpen, setSelectDaftarOpen] = useState(false);
   const [createDaftarOpen, setCreateDaftarOpen] = useState(false);
-  const profileUrl = getCookie("profileUrl");
+  // const profileUrl = getCookie("profileUrl") || "";
   if (pathname === "/founder/loading") {
     return null;
   } else if (pathname === "/investor/loading") {
@@ -80,24 +94,24 @@ export function AppSidebar({ role }: { role: string }) {
         <div className="absolute bottom-[90px] left-4">
           <Button
             size="icon"
-            style={{
-              background: `url('${profileUrl}')`,
-            }}
+            // style={{
+            //   background: `url('${profileUrl}')`,
+            // }}
             className="rounded-full bg-[#1a1a1a] border-2 border-[#2a2a2a] h-8 w-8"
             onClick={() => setSelectDaftarOpen(true)}
           ></Button>
         </div>
       )}
-
-      <SelectDaftarDialog
-        open={selectDaftarOpen}
-        daftars={daftars}
-        onSelect={setSelectedDaftar}
-        selected={selectedDaftar}
-        onOpenChange={setSelectDaftarOpen}
-        onCreateNew={handleCreateDaftar}
-      />
-
+      {role === "investor" && (
+        <SelectDaftarDialog
+          open={selectDaftarOpen}
+          daftars={daftars}
+          onSelect={setSelectedDaftar}
+          selected={selectedDaftar}
+          onOpenChange={setSelectDaftarOpen}
+          onCreateNew={handleCreateDaftar}
+        />
+      )}
       <CreateDaftarDialog
         open={createDaftarOpen}
         onOpenChange={setCreateDaftarOpen}

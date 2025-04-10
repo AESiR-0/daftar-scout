@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { pitch, focusSectors, pitchFocusSectors } from "@/backend/drizzle/models/pitch";
+import {
+  pitch,
+  focusSectors,
+  pitchFocusSectors,
+} from "@/backend/drizzle/models/pitch";
 import { eq, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 // GET: Fetch pitch details by pitchId from request body
 export async function GET(req: NextRequest) {
   try {
-    const pitchId = req.headers.get("pitch_id");
-
+    const { searchParams } = new URL(req.url);
+    const pitchId = searchParams.get("pitchId");
     if (!pitchId) {
       return NextResponse.json(
         { error: "pitchId is required" },
@@ -29,10 +33,7 @@ export async function GET(req: NextRequest) {
       .limit(1);
 
     if (pitchData.length === 0) {
-      return NextResponse.json(
-        { error: "Pitch not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Pitch not found" }, { status: 404 });
     }
 
     const focusSectorData = await db
@@ -40,7 +41,10 @@ export async function GET(req: NextRequest) {
         sectorName: focusSectors.sectorName,
       })
       .from(pitchFocusSectors)
-      .innerJoin(focusSectors, eq(pitchFocusSectors.focusSectorId, focusSectors.id))
+      .innerJoin(
+        focusSectors,
+        eq(pitchFocusSectors.focusSectorId, focusSectors.id)
+      )
       .where(eq(pitchFocusSectors.pitchId, pitchId));
 
     const focusSectorsList = focusSectorData.map((fs) => fs.sectorName);
@@ -64,7 +68,13 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const postBody = await req.json();
-    const { pitchName, location, demoLink, stage, focusSectors: sectorNames } = postBody;
+    const {
+      pitchName,
+      location,
+      demoLink,
+      stage,
+      focusSectors: sectorNames,
+    } = postBody;
 
     // Validate required fields
     if (!pitchName) {
@@ -110,14 +120,19 @@ export async function POST(req: NextRequest) {
           .where(inArray(focusSectors.sectorName, sectorNames));
 
         const existingSectorNames = existingSectors.map((s) => s.sectorName);
-        const newSectorNames = sectorNames.filter((name) => !existingSectorNames.includes(name));
+        const newSectorNames = sectorNames.filter(
+          (name) => !existingSectorNames.includes(name)
+        );
 
         let newSectors: any[] = [];
         if (newSectorNames.length > 0) {
           newSectors = await tx
             .insert(focusSectors)
             .values(newSectorNames.map((name) => ({ sectorName: name })))
-            .returning({ id: focusSectors.id, sectorName: focusSectors.sectorName });
+            .returning({
+              id: focusSectors.id,
+              sectorName: focusSectors.sectorName,
+            });
         }
 
         const allSectorIds = [
@@ -137,8 +152,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(
-      { message: "Pitch created successfully", data: result, pitchId },
-      { status: 201 }
+      { message: "Success", data: result, pitchId },
+      { status: 200 }
     );
   } catch (error: any) {
     console.error("Error creating pitch:", error);
