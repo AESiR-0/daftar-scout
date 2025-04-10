@@ -1,24 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import formatDate from "@/lib/formatDate";
-import { DaftarProfile } from "@/components/DaftarProfile";
-import { X, Plus, Info } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import { X, Info } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { InvestorProfile } from "@/components/InvestorProfile";
+
 type CollaborationStatus = "Pending" | "Accepted" | "Declined";
 
 interface Collaborator {
@@ -40,43 +36,105 @@ export default function CollaborationPage() {
   const [daftarId, setDaftarId] = useState("");
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
 
-  const handleInvite = () => {
+  const scoutId = "scout_123"; // Replace with dynamic value if needed
+
+  useEffect(() => {
+    const fetchCollaborators = async () => {
+      try {
+        const res = await fetch(
+          `/api/endpoints/scouts/collaboration?scoutId=${scoutId}`
+        );
+        const data = await res.json();
+
+        // Map DB structure to UI structure
+        const formatted: Collaborator[] = data.map((item: any) => ({
+          id: item.id,
+          daftarId: item.daftarId,
+          daftarName: item.daftar?.name || "Unknown Daftar",
+          status: item.isPending ? "Pending" : "Accepted",
+          addedAt: item.createdAt || new Date().toISOString(),
+          daftarDetails: {
+            structure: item.daftar?.structure || "Unknown",
+            website: item.daftar?.website || "N/A",
+            location: item.daftar?.location || "N/A",
+            bigPicture: item.daftar?.bigPicture || "No description",
+          },
+        }));
+
+        setCollaborators(formatted);
+      } catch (error) {
+        toast({
+          title: "Error fetching collaborators",
+          description: "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchCollaborators();
+  }, []);
+
+  const handleInvite = async () => {
     if (daftarId.length !== 6) {
       toast({
         title: "Invalid Daftar ID",
         description: "Please enter a valid 6-character Daftar ID",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    // Add new collaborator
-    const newCollaborator: Collaborator = {
-      id: Math.random().toString(),
-      daftarId: daftarId,
-      daftarName: "tech innovators",
-      status: "Pending",
-      addedAt: new Date().toISOString(),
-      daftarDetails: {
-        structure: "Government Incubator",
-        website: "www.example.com",
-        location: "Mumbai, India",
-        bigPicture: "Building the next generation of financial infrastructure"
-      }
-    };
+    try {
+      const res = await fetch("/api/endpoints/scouts/collaboration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scoutId, daftarId }),
+      });
 
-    setCollaborators([...collaborators, newCollaborator]);
-    setDaftarId("");
-    toast({
-      title: "Invitation sent",
-      description: `Invitation sent to Daftar ${daftarId}`
-    });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to invite");
+      }
+
+      // Optionally, re-fetch or optimistically add to UI
+      toast({
+        title: "Invitation sent",
+        description: `Invitation sent to Daftar ${daftarId}`,
+      });
+
+      setCollaborators((prev) => [
+        ...prev,
+        {
+          id: Math.random().toString(),
+          daftarId,
+          daftarName: "tech innovators",
+          status: "Pending",
+          addedAt: new Date().toISOString(),
+          daftarDetails: {
+            structure: "Government Incubator",
+            website: "www.example.com",
+            location: "Mumbai, India",
+            bigPicture:
+              "Building the next generation of financial infrastructure",
+          },
+        },
+      ]);
+
+      setDaftarId("");
+    } catch (error: any) {
+      toast({
+        title: "Failed to send invite",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const removeCollaborator = (id: string) => {
-    setCollaborators(collaborators.filter(c => c.id !== id));
+    setCollaborators(collaborators.filter((c) => c.id !== id));
     toast({
-      title: "Collaborator removed"
+      title: "Collaborator removed",
     });
   };
 
@@ -109,19 +167,27 @@ export default function CollaborationPage() {
                       <div className="w-2/3 flex justify-center items-center">
                         <video
                           src="example.mp4"
-                          poster=""
                           className="w-[80%] h-full object-cover"
                           controls
                         />
                       </div>
                       <div className="w-1/3 space-y-4">
-                        <h4 className="text-sm font-semibold">About Collaboration</h4>
+                        <h4 className="text-sm font-semibold">
+                          About Collaboration
+                        </h4>
                         <p className="text-sm text-muted-foreground">
-                          A collaborator helps your Scout connect with the right partners in a specific location and reach a larger audience.
-                          <br /><br />
-                          Since they've been working in the area for a long time, they understand the local ecosystem and speak the language founders speak.
-                          <br /><br />
-                          They're typically incubators, accelerators, angels, founder's offices, or VCs with strong local networks.
+                          A collaborator helps your Scout connect with the right
+                          partners in a specific location and reach a larger
+                          audience.
+                          <br />
+                          <br />
+                          Since they've been working in the area for a long
+                          time, they understand the local ecosystem and speak
+                          the language founders speak.
+                          <br />
+                          <br />
+                          They're typically incubators, accelerators, angels,
+                          founder's offices, or VCs with strong local networks.
                         </p>
                       </div>
                     </HoverCardContent>
@@ -145,7 +211,7 @@ export default function CollaborationPage() {
                           location: collaborator.daftarDetails.location,
                           bigPicture: collaborator.daftarDetails.bigPicture,
                           onDaftarSince: collaborator.addedAt,
-                          imageUrl: "https://github.com/shadcn.png"
+                          imageUrl: "https://github.com/shadcn.png",
                         }}
                       />
                       <p className="text-xs text-muted-foreground">
@@ -175,38 +241,21 @@ export default function CollaborationPage() {
             <CardContent className="space-y-6">
               <h3 className="text-lg font-semibold">Support</h3>
               <p className="text-sm text-muted-foreground">
-                Looking for the right collaborator? Whether you have someone in mind or need help finding the perfect match, Daftar's got you covered.
-                <br /><br />
+                Looking for the right collaborator? Whether you have someone in
+                mind or need help finding the perfect match, Daftar's got you
+                covered.
+                <br />
+                <br />
                 Schedule a quick call with us, and we'll help you figure it out.
               </p>
 
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="How can we help you?"
-                    className="h-24"
-                  />
+                <Textarea placeholder="How can we help you?" className="h-24" />
+                <Input placeholder="When should we call you? e.g. 2:00 PM IST" />
+                <div className="flex gap-2">
+                  <Input className="w-20" placeholder="+91" />
+                  <Input className="flex-1" placeholder="Enter phone number" />
                 </div>
-
-                <div className="space-y-2">
-                  <Input
-                    placeholder="When should we call you? e.g. 2:00 PM IST"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      className="w-20"
-                      placeholder="+91"
-                    />
-                    <Input
-                      className="flex-1"
-                      placeholder="Enter phone number"
-                    />
-                  </div>
-                </div>
-
                 <Button variant="outline" className="w-full">
                   Schedule a Meeting
                 </Button>

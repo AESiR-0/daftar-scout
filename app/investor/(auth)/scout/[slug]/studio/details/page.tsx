@@ -18,7 +18,7 @@ type ScoutDetails = z.infer<typeof scoutSchema>;
 
 export default function DetailsPage() {
   const pathname = usePathname();
-  const ScoutId = pathname.split("/")[4];
+  const ScoutId = pathname.split("/")[3];
 
   const [details, setDetails] = useState<ScoutDetails>({
     name: "",

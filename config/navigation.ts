@@ -1,4 +1,25 @@
-import { LayoutDashboard, Users, DollarSign, Building, Play, ScrollText, Folder, Bell, Calendar, Crown, FileText, Video, MessageCircle, HelpCircle, UserPlus, Trash2, FileSpreadsheet, Users2, CheckCircle, Presentation } from "lucide-react"
+import {
+  LayoutDashboard,
+  Users,
+  DollarSign,
+  Building,
+  Play,
+  ScrollText,
+  Folder,
+  Bell,
+  Calendar,
+  Crown,
+  FileText,
+  Video,
+  MessageCircle,
+  HelpCircle,
+  UserPlus,
+  Trash2,
+  FileSpreadsheet,
+  Users2,
+  CheckCircle,
+  Presentation,
+} from "lucide-react";
 
 export const investorNavItems = [
   // {
@@ -21,8 +42,7 @@ export const investorNavItems = [
   //   url: "/investor/premium",
   //   icon: Crown,
   // }
-]
-
+];
 
 export const founderNavItems = [
   // {
@@ -50,58 +70,58 @@ export const founderNavItems = [
   //   url: "/founder/premium",
   //   icon: Crown,
   // }
-]
+];
 
 export const topNavConfig = {
   investor: [
-    { text: 'Journal', action: 'journal' },
-    { text: 'Subscription', action: 'subscription' },
-    { icon: Play, action: 'play' },
-    { icon: Bell, action: 'notifications' },
-    { icon: Folder, action: 'daftar' },
+    { text: "Journal", action: "journal" },
+    { text: "Subscription", action: "subscription" },
+    { icon: Play, action: "play" },
+    { icon: Bell, action: "notifications" },
+    { icon: Folder, action: "daftar" },
   ],
   founder: [
-    { text: 'Journal', action: 'journal' },
-    { text: 'Subscription', action: 'subscription' },
-    { icon: Play, action: 'play' },
-    { icon: Bell, action: 'notifications' },
-  ]
-}
+    { text: "Journal", action: "journal" },
+    { text: "Subscription", action: "subscription" },
+    { icon: Play, action: "play" },
+    { icon: Bell, action: "notifications" },
+  ],
+};
 
 export const investorStudioNavItems = [
   {
     title: "Scout Details",
-    url: "/investor/studio/details",
+    url: "details",
     icon: FileSpreadsheet,
   },
   {
     title: "Audience",
-    url: "/investor/studio/audience",
+    url: "audience",
     icon: Users,
   },
   {
     title: "Collaboration",
-    url: "/investor/studio/collaboration",
+    url: "collaboration",
     icon: Users2,
   },
   {
     title: "Scout Document",
-    url: "/investor/studio/documents",
+    url: "documents",
     icon: FileText,
   },
   {
     title: "Founder's Pitch",
-    url: "/investor/studio/founder-pitch",
+    url: "founder-pitch",
     icon: Video,
   },
   {
     title: "Investor's Pitch",
-    url: "/investor/studio/investor-pitch",
+    url: "investor-pitch",
     icon: MessageCircle,
   },
   {
     title: "FAQs",
-    url: "/investor/studio/faqs",
+    url: "faqs",
     icon: HelpCircle,
   },
   // {
@@ -135,7 +155,7 @@ export const investorStudioNavItems = [
     icon: Trash2,
     className: "text-red-500 hover:text-red-600",
   },
-]
+];
 
 export const scoutStudioNavItems = [
   {
@@ -199,7 +219,7 @@ export const scoutStudioNavItems = [
     icon: Trash2,
     className: "text-red-500 hover:text-red-600",
   },
-]
+];
 
 export const founderStudioNavItems = [
   {
@@ -243,8 +263,8 @@ export const founderStudioNavItems = [
       {
         title: "Sent",
         url: "/founder/studio/documents/sent",
-      }
-    ]
+      },
+    ],
   },
   {
     title: "Offer",
@@ -267,4 +287,4 @@ export const founderStudioNavItems = [
     icon: Trash2,
     className: "text-red-500 hover:text-red-600",
   },
-] 
+];

@@ -32,7 +32,7 @@ export function ScoutSidebar({
   isPlanning = true,
   isScheduling = false,
 }: {
-  scoutSlug?: string;
+  scoutSlug: string[];
   isPlanning?: boolean;
   isScheduling?: boolean;
 }) {
@@ -43,6 +43,8 @@ export function ScoutSidebar({
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [isShowScroll, setIsShowScroll] = useState(true);
   const pathname = usePathname();
+  const isStudio = pathname.includes("studio");
+
   useEffect(() => {
     if (pathname.includes("planning") || pathname.includes("scheduled")) {
       setIsShowScroll(false);
@@ -57,14 +59,11 @@ export function ScoutSidebar({
   };
 
   // Format scout name for display
-  const scoutName =
-    scoutSlug === undefined
-      ? "Test"
-      : scoutSlug
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-
+  const scoutName = scoutSlug === undefined ? "Test" : scoutSlug[0];
+  const scoutId = scoutSlug[1];
+  if (isStudio) {
+    return null;
+  }
   if (isPlanning) {
     return (
       <div className="w-[16rem] p-4 h-full">
@@ -75,9 +74,7 @@ export function ScoutSidebar({
               <h2 className="text-[14px] font-semibold">{scoutName}</h2>
             </div>
             <div className="px-4 py-2">
-              <Link
-                href={`/investor/studio/details?mode=edit&programId=${scoutSlug}`}
-              >
+              <Link href={`${scoutId}/studio/details`}>
                 <Button
                   variant="link"
                   size="sm"
@@ -108,7 +105,6 @@ export function ScoutSidebar({
       </div>
     );
   }
-
   return (
     <div className="w-[16rem]  py-4 pl-4 h-full">
       <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">

@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
+import { useState, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { AgeRange } from "./components/age-range";
 import { Combobox } from "./components/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin } from "lucide-react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { z } from "zod";
 
 // Dynamically import map component to avoid SSR issues
 const MapComponent = dynamic(() => import("@/components/map"), {
@@ -21,11 +21,17 @@ const MapComponent = dynamic(() => import("@/components/map"), {
   ),
 });
 
+// Constants
+const locationPattern = /^([^/]+)\/([^/]+)\/([^/]+)$/;
+
 const communitiesData = [
   { label: "Auto - rickshaw drivers", value: "auto-rickshaw" },
   { label: "Black Lives Matter activists", value: "black-lives" },
   { label: "Coastal cleanup crews", value: "coastal" },
-  { label: "Criminals seeking to change their lives positively", value: "criminals" },
+  {
+    label: "Criminals seeking to change their lives positively",
+    value: "criminals",
+  },
   { label: "Delivery gig workers", value: "delivery" },
   { label: "Doctors in tech", value: "doctors" },
   { label: "Eco - friendly fashion designers", value: "eco-friendly" },
@@ -112,126 +118,221 @@ const genders = [
   { value: "open-for-all", label: "Open For All" },
 ];
 
-// Add location pattern
-const locationPattern = /^([^/]+)\/([^/]+)\/([^/]+)$/;
-
 interface Location {
   country: string;
   state: string;
   city: string;
 }
 
+// Zod Schema
+const AudienceSchema = z.object({
+  locationInput: z.string().optional().default(""),
+  selectedCommunities: z.array(z.string()).optional().default([]),
+  selectedGenders: z.array(z.string()).optional().default([]),
+  selectedStages: z.array(z.string()).optional().default([]),
+  selectedSectors: z.array(z.string()).optional().default([]),
+  ageRange: z.tuple([z.number(), z.number()]).optional().default([18, 65]),
+});
+
 export default function AudiencePage() {
+  const pathname = usePathname();
+  const scoutId = pathname.split("/")[3];
   const [locationInput, setLocationInput] = useState("");
   const [location, setLocation] = useState<Location>({
     country: "",
     state: "",
-    city: ""
+    city: "",
   });
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [selectedCommunities, setSelectedCommunities] = useState<string[]>(["auto-rickshaw"]);
+  const [selectedCommunities, setSelectedCommunities] = useState<string[]>([
+    "auto-rickshaw",
+  ]);
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [selectedStages, setSelectedStages] = useState<string[]>([]);
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
+    null
+  );
+
+  const fetchInitialData = async () => {
+    try {
+      const res = await fetch(
+        `/api/endpoints/scouts/audience?scoutId=${scoutId}`
+      );
+      const data = await res.json();
+      const parsed = AudienceSchema.parse(data);
+
+      setLocationInput(parsed.locationInput || "");
+      setSelectedCommunities(parsed.selectedCommunities || []);
+      setSelectedGenders(parsed.selectedGenders || []);
+      setSelectedStages(parsed.selectedStages || []);
+      setSelectedSectors(parsed.selectedSectors || []);
+      setAgeRange(parsed.ageRange || [18, 65]);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
+
   const handleLocationInput = async (value: string) => {
     setLocationInput(value);
-    
-    // Parse location when input matches pattern (Country/State/City)
+
     const match = value.match(locationPattern);
     if (match) {
       const [_, country, state, city] = match;
       setLocation({
         country: country.trim(),
         state: state.trim(),
-        city: city.trim()
+        city: city.trim(),
       });
 
       try {
         const query = `${city}, ${state}, ${country}`;
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            query
+          )}`
         );
         const data = await response.json();
-        
         if (data && data[0]) {
           setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
         }
       } catch (error) {
-        console.error('Error fetching coordinates:', error);
+        console.error("Error fetching coordinates:", error);
       }
     }
   };
 
+  // Debounced AutoSave
+  const autoSave = useCallback(() => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    const timer = setTimeout(async () => {
+      try {
+        const formData = AudienceSchema.parse({
+          locationInput,
+          selectedCommunities,
+          selectedGenders,
+          selectedStages,
+          selectedSectors,
+          ageRange,
+        });
+        const payload = { ...formData, scoutId };
+        await fetch("/api/endpoints/scouts/audience", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (error) {
+        console.error("Error autosaving:", error);
+      }
+    }, 1000); // 1s debounce
+
+    setDebounceTimer(timer);
+  }, [
+    locationInput,
+    selectedCommunities,
+    selectedGenders,
+    selectedStages,
+    selectedSectors,
+    ageRange,
+    debounceTimer,
+  ]);
+
+  // Trigger autosave on relevant changes
+  useEffect(() => {
+    autoSave();
+  }, [
+    locationInput,
+    selectedCommunities,
+    selectedGenders,
+    selectedStages,
+    selectedSectors,
+    ageRange,
+  ]);
+
   return (
     <div className="container px-10 mx-auto py-6">
       <ScrollArea className="h-[80vh]">
-      <div className="space-y-6">
-        {/* Location Input */}
-        <div className="space-y-4">
-          <Label>Pin Location</Label>
-          <Input
-            placeholder="Country/State/City"
-            value={locationInput}
-            onChange={(e) => handleLocationInput(e.target.value)}
-          />
-
-          {/* Map */}
-          <div className="w-full h-[400px] rounded-lg overflow-hidden border">
-            <MapComponent coordinates={coordinates} />
-          </div>
-        </div>
-
-        {/* Other inputs */}
-        <div className="space-y-4">
-          <Combobox
-            label="Community"
-            value={communitiesData.find(c => c.value === selectedCommunities[0])?.label || "Select Community"}
-            options={communitiesData}
-            selected={selectedCommunities}
-            onChange={(value: string) => setSelectedCommunities(prev => [...prev, value])}
-          />
-
-          {/* Age and Gender row */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <AgeRange
-                minAge={ageRange[0].toString()}
-                maxAge={ageRange[1].toString()}
-                onMinChange={(value) => setAgeRange([Number(value), ageRange[1]])}
-                onMaxChange={(value) => setAgeRange([ageRange[0], Number(value)])}
-              />
-            </div>
-            <div className="flex-1">
-              <Combobox
-                label="Gender"
-                value="Add"
-                options={genders}
-                selected={selectedGenders}
-                onChange={(value: string) => setSelectedGenders(prev => [...prev, value])}
-              />
+        <div className="space-y-6">
+          {/* Location Input */}
+          <div className="space-y-4">
+            <Label>Pin Location</Label>
+            <Input
+              placeholder="Country/State/City"
+              value={locationInput}
+              onChange={(e) => handleLocationInput(e.target.value)}
+            />
+            <div className="w-full h-[400px] rounded-lg overflow-hidden border">
+              <MapComponent coordinates={coordinates} />
             </div>
           </div>
 
-          <Combobox
-            label="Stage"
-            value="Add"
-            options={stages}
-            selected={selectedStages}
-            onChange={(value: string) => setSelectedStages(prev => [...prev, value])}
-          />
+          {/* Filters */}
+          <div className="space-y-4">
+            <Combobox
+              label="Community"
+              value={
+                communitiesData.find((c) => c.value === selectedCommunities[0])
+                  ?.label || "Select Community"
+              }
+              options={communitiesData}
+              selected={selectedCommunities}
+              onChange={(value: string) =>
+                setSelectedCommunities((prev) => [...prev, value])
+              }
+            />
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <AgeRange
+                  minAge={ageRange[0].toString()}
+                  maxAge={ageRange[1].toString()}
+                  onMinChange={(value) =>
+                    setAgeRange([Number(value), ageRange[1]])
+                  }
+                  onMaxChange={(value) =>
+                    setAgeRange([ageRange[0], Number(value)])
+                  }
+                />
+              </div>
+              <div className="flex-1">
+                <Combobox
+                  label="Gender"
+                  value="Add"
+                  options={genders}
+                  selected={selectedGenders}
+                  onChange={(value: string) =>
+                    setSelectedGenders((prev) => [...prev, value])
+                  }
+                />
+              </div>
+            </div>
 
-          <Combobox
-            label="Sector"
-            value="Add"
-            options={sectors}
-            selected={selectedSectors}
-            onChange={(value: string) => setSelectedSectors(prev => [...prev, value])}
-          />
+            <Combobox
+              label="Stage"
+              value="Add"
+              options={stages}
+              selected={selectedStages}
+              onChange={(value: string) =>
+                setSelectedStages((prev) => [...prev, value])
+              }
+            />
+            <Combobox
+              label="Sector"
+              value="Add"
+              options={sectors}
+              selected={selectedSectors}
+              onChange={(value: string) =>
+                setSelectedSectors((prev) => [...prev, value])
+              }
+            />
+          </div>
         </div>
-      </div>
       </ScrollArea>
     </div>
   );
