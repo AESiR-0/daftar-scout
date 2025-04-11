@@ -1,22 +1,21 @@
-// app/api/video-handler/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import * as util from "util";
-import { exec } from "child_process";
-import { Readable } from "stream";
+import ffmpeg from "fluent-ffmpeg";
 
+// Initialize Supabase client
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  "https://yvaoyubwynyvqfelhzcd.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2YW95dWJ3eW55dnFmZWxoemNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwNDEyMzIsImV4cCI6MjA1OTYxNzIzMn0.V4-TQm-R5HUyLUBIu4uBKzYXAUpHvE7YALkGhGeQx_M"
 );
-const execPromise = util.promisify(exec);
 
+// Set the config for your Next.js API
 export const config = {
   api: {
-    bodyParser: false, // We handle raw body for large files
+    bodyParser: true,
   },
 };
 
+// Compression function
 export async function POST(req: NextRequest) {
   const { videoUrl } = await req.json();
 
@@ -25,75 +24,77 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Step 1: Download video from the URL
+    // Step 1: Fetch the video file (or provide a direct link)
     const videoResponse = await fetch(videoUrl);
-    const videoBuffer = await videoResponse.arrayBuffer(); // Use .arrayBuffer() in Node.js
-    const videoData = Buffer.from(videoBuffer); // Convert to Node.js Buffer
+    const vid = await videoResponse.arrayBuffer();
+    const videoBuffer = Buffer.from(vid);
+    console.log("here 0");
 
-    // Step 2: Compress the video in memory
-    const compressedBuffer = await compressVideo(videoData);
+    // Step 2: Compress the video with FFmpeg
+    const compressedVideoBuffer = await compressVideo(videoBuffer);
+    console.log("here");
 
-    // Step 3: Upload the compressed video to Supabase (storing only the compressed video URL)
-    const compressedFileName = `compressed_${Date.now()}.mp4`;
+    // Step 3: Upload compressed video to Supabase storage
     const { data, error } = await supabase.storage
-      .from("videos")
-      .upload(`compressed/${compressedFileName}`, compressedBuffer, {
-        contentType: "video/mp4",
-      });
+      .from("videos") // Replace with your bucket name
+      .upload(
+        `compressed/${Date.now()}_compressed.mp4`,
+        compressedVideoBuffer,
+        {
+          contentType: "video/mp4",
+        }
+      );
+    console.log("here 2");
 
     if (error) {
-      return new NextResponse("Error uploading compressed video", {
-        status: 500,
-      });
+      return new NextResponse(
+        `Error uploading compressed video: ${error.message}`,
+        { status: 500 }
+      );
     }
 
-    // Step 4: Return the compressed video URL
-    const compressedVideoUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/videos/compressed/${compressedFileName}`;
+    // Step 4: Generate the public URL for the compressed video
+    const publicUrl = supabase.storage
+      .from("videos")
+      .getPublicUrl(data.path).publicURL;
 
     return new NextResponse(
       JSON.stringify({
-        message: "Video uploaded and compressed successfully",
-        compressedVideoUrl,
+        message: "Video compressed successfully",
+        compressedVideoUrl: publicUrl,
       }),
       { status: 200 }
     );
-  } catch (err) {
+  } catch (error) {
     return new NextResponse(`Error`, { status: 500 });
   }
 }
 
-// Function to compress video buffer in memory
-async function compressVideo(videoBuffer: Buffer) {
-  const videoStream = new Readable();
-  videoStream.push(videoBuffer);
-  videoStream.push(null);
+// Video compression logic using FFmpeg
+function compressVideo(videoBuffer: Buffer): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const ffmpegProcess = ffmpeg()
+      .input(videoBuffer)
+      .inputFormat("mp4")
+      .outputOptions("-vcodec", "libx264", "-crf", "28") // CRF value controls compression (lower = better quality)
+      .outputFormat("mp4")
+      .on("end", () => {
+        console.log("Compression finished.");
+      })
+      .on("error", (err: any) => {
+        console.error("Error during compression:", err);
+        reject(err);
+      })
+      .pipe();
 
-  const compressedVideoBuffer: Buffer[] = [];
+    const chunks: Buffer[] = [];
+    ffmpegProcess.on("data", (chunk) => {
+      chunks.push(chunk);
+    });
 
-  // Compress the video using FFmpeg
-  const ffmpeg = exec("ffmpeg -i pipe:0 -vcodec libx264 -crf 28 -f mp4 pipe:1");
-  if (!ffmpeg.stdout || !ffmpeg.stdin) {
-    throw new Error("FFmpeg streams are not properly initialized");
-  }
-
-  ffmpeg.stdout.on("data", (chunk) => {
-    compressedVideoBuffer.push(chunk);
-  });
-
-  ffmpeg.on("close", () => {
-    const compressedBuffer = Buffer.concat(compressedVideoBuffer);
-    return compressedBuffer; // Return the compressed buffer
-  });
-
-  videoStream.pipe(ffmpeg.stdin);
-
-  return new Promise<Buffer>((resolve, reject) => {
-    ffmpeg.on("exit", (code) => {
-      if (code !== 0) {
-        reject(new Error("FFmpeg process failed"));
-      } else {
-        resolve(Buffer.concat(compressedVideoBuffer));
-      }
+    ffmpegProcess.on("end", () => {
+      const compressedBuffer = Buffer.concat(chunks);
+      resolve(compressedBuffer); // Return the compressed video as Buffer
     });
   });
 }
