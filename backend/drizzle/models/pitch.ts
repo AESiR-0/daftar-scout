@@ -89,9 +89,7 @@ export const founderAnswers = pgTable("founder_answers", {
   id: serial("id").primaryKey(),
   pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
   pitchAnswerUrl: text("pitch_answer_url").notNull(),
-  questionId: varchar("question_id", { length: 255 }).references(
-    () => scoutQuestions.id
-  ),
+  questionId: integer("question_id").references(() => scoutQuestions.id),
   answerLanguage: text("answer_language"),
 });
 
@@ -136,15 +134,6 @@ export const pitchTeam = pgTable("pitch_team", {
 });
 
 // 🔗 Relationships
-export const pitchRelations = relations(pitch, ({ many, one }) => ({
-  documents: many(pitchDocs),
-  offers: many(offers),
-  founderAnswers: many(founderAnswers),
-  deleteRequests: many(pitchDelete),
-  focusSectors: many(pitchFocusSectors),
-  investorPitches: many(investorPitch), // Added new relation
-  scout: one(scouts, { fields: [pitch.scoutId], references: [scouts.scoutId] }),
-}));
 
 export const focusSectorRelations = relations(focusSectors, ({ many }) => ({
   pitches: many(pitchFocusSectors),
@@ -154,17 +143,6 @@ export const offerRelations = relations(offers, ({ many, one }) => ({
   actions: many(offerActions),
   pitch: one(pitch, { fields: [offers.pitchId], references: [pitch.id] }),
   offeredBy: one(users, { fields: [offers.offerBy], references: [users.id] }),
-}));
-
-export const investorAnswerRelations = relations(founderAnswers, ({ one }) => ({
-  pitch: one(pitch, {
-    fields: [founderAnswers.pitchId],
-    references: [pitch.id],
-  }),
-  question: one(scouts, {
-    fields: [founderAnswers.questionId],
-    references: [scouts.scoutId],
-  }),
 }));
 
 export const pitchDeleteRelations = relations(pitchDelete, ({ one }) => ({

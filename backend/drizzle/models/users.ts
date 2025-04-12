@@ -32,6 +32,7 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   deletedOn: timestamp("deleted_on"), // Nullable
+  journal: text("journal").notNull(),
 });
 
 export const accounts = pgTable(

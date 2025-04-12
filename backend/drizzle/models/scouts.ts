@@ -12,7 +12,6 @@ import {
 import { relations } from "drizzle-orm";
 import { daftar } from "./daftar";
 import { users } from "./users";
-import { timeStamp } from "console";
 
 export const scouts = pgTable("scouts", {
   scoutId: varchar("scout_id", { length: 255 }).primaryKey(),
