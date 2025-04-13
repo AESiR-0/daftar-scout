@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { usePathname } from "next/navigation";
 import { Upload, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadVideo } from "@/lib/actions/video";
+import { uploadInvestorsPitchVideo } from "@/lib/actions/video";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
 import { usePitch } from "@/contexts/PitchContext"; // Assuming scoutId is part of PitchContext
@@ -23,7 +23,7 @@ interface Question {
 
 export default function InvestorQuestionsPage() {
   const pathname = usePathname();
-  const scoutId = pathname.split("/")[2];
+  const scoutId = pathname.split("/")[3];
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
     null
@@ -105,11 +105,9 @@ export default function InvestorQuestionsPage() {
     }
 
     try {
-      const url = await uploadVideo(file, questionId);
+      const url = await uploadInvestorsPitchVideo(file, scoutId);
       setPreviewUrl(url);
-      setQuestions((prev) =>
-        prev.map((q) => (q.id === questionId ? { ...q, videoUrl: url } : q))
-      );
+      
       toast({
         title: "Video uploaded successfully",
         description: "Your video has been uploaded successfully",

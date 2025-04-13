@@ -45,8 +45,7 @@ export const scoutQuestions = pgTable("scout_questions", {
   scoutQuestion: text("scout_question").notNull(),
   scoutAnswerSampleUrl: text("scout_answer_sample_url"),
   language: text("language"),
-  isCustom: boolean("is_custom").default(false),
-  isSample: boolean("is_sample").default(false),
+  isCustom: boolean("is_custom").default(true),
 });
 
 export const daftarScouts = pgTable("daftar_scouts", {

@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { scoutId } = body;
+    const { url, scoutId } = body;
 
     if (!scoutId) {
       return NextResponse.json(
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const updatedScout = await db
       .update(scouts)
       .set({
-        investorPitch: investorPitch || null,
+        investorPitch: url || null,
       })
       .where(eq(scouts.scoutId, scoutId))
       .returning();
@@ -43,4 +43,21 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// app/api/investor-pitch/route.ts (extend same file)
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const scoutId = searchParams.get("scoutId");
+
+  if (!scoutId) {
+    return NextResponse.json({ error: "Scout ID missing" }, { status: 400 });
+  }
+
+  const pitch = await db
+    .select({ url: scouts.investorPitch })
+    .from(scouts)
+    .where(eq(scouts.scoutId, scoutId));
+  const url = pitch[0].url;
+  return NextResponse.json({ url });
 }
