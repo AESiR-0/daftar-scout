@@ -1,0 +1,1 @@
+ALTER TABLE "scouts" ALTER COLUMN "status" SET DEFAULT 'Planning';

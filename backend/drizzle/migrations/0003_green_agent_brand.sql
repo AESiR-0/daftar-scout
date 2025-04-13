@@ -1,0 +1,1 @@
+ALTER TABLE "scouts" ADD COLUMN "targeted_gender" text;

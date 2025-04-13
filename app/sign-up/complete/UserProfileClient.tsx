@@ -116,10 +116,10 @@ export default function UserProfileClient({
         body: JSON.stringify({ formData: formState, email: userMail }),
       });
 
-      if (!res.ok) throw new Error("Failed to update profile");
+      if (res.status !== 200) throw new Error("Failed to update profile");
 
       toast({ title: "Success", description: "Profile updated successfully!" });
-      redirect('/investor')
+      redirect("/investor");
     } catch {
       toast({
         title: "Error",

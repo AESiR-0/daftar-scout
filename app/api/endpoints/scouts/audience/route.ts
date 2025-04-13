@@ -12,6 +12,7 @@ export async function PATCH(req: NextRequest) {
       targetAudAgeStart,
       targetAudAgeEnd,
       scoutCommunity,
+      targetedGender,
       scoutStage,
       scoutSector,
     } = body;
@@ -40,6 +41,7 @@ export async function PATCH(req: NextRequest) {
           targetAudLocation ?? existingScout[0].targetAudLocation,
         targetAudAgeStart:
           targetAudAgeStart ?? existingScout[0].targetAudAgeStart,
+        targetedGender: targetedGender ?? existingScout[0].targetedGender,
         targetAudAgeEnd: targetAudAgeEnd ?? existingScout[0].targetAudAgeEnd,
         scoutCommunity: scoutCommunity ?? existingScout[0].scoutCommunity,
         scoutStage: scoutStage ?? existingScout[0].scoutStage,

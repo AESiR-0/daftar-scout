@@ -34,7 +34,10 @@ const communitiesData = [
   { label: "Auto - rickshaw drivers", value: "auto-rickshaw" },
   { label: "Black Lives Matter activists", value: "black-lives" },
   { label: "Coastal cleanup crews", value: "coastal" },
-  { label: "Criminals seeking to change their lives positively", value: "criminals" },
+  {
+    label: "Criminals seeking to change their lives positively",
+    value: "criminals",
+  },
   { label: "Delivery gig workers", value: "delivery" },
   { label: "Doctors in tech", value: "doctors" },
   { label: "Eco - friendly fashion designers", value: "eco-friendly" },
@@ -121,68 +124,74 @@ const genders = [
   { value: "open-for-all", label: "Open For All" },
 ];
 
-interface Location {
-  country: string;
-  state: string;
-  city: string;
-}
-
 // Zod Schema
 const AudienceSchema = z.object({
-  locationInput: z.string().optional().default(""),
-  selectedCommunities: z.string().optional().default(""),
-  selectedGenders: z.string().optional().default(""),
-  selectedStages: z.string().optional().default(""),
-  selectedSectors: z.string().optional().default(""),
-  ageRange: z.tuple([z.number(), z.number()]).optional().default([18, 65]),
+  targetAudLocation: z.string().optional().default(""),
+  scoutCommunity: z.string().optional().default(""),
+  targetedGender: z.string().optional().default(""),
+  scoutStage: z.string().optional().default(""),
+  scoutSector: z.string().optional().default(""),
+  targetAudAgeStart: z.number().optional().default(18),
+  targetAudAgeEnd: z.number().optional().default(65),
 });
 
 export default function AudiencePage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
-  const [locationInput, setLocationInput] = useState("");
-  const [location, setLocation] = useState<Location>({
+  const [targetAudLocation, setTargetAudLocation] = useState("");
+  const [location, setLocation] = useState({
     country: "",
     state: "",
     city: "",
   });
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [selectedCommunities, setSelectedCommunities] = useState<string>("auto-rickshaw");
-  const [selectedGenders, setSelectedGenders] = useState<string>("");
-  const [selectedStages, setSelectedStages] = useState<string>("");
-  const [selectedSectors, setSelectedSectors] = useState<string>("");
-  const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+
+  const [scoutCommunity, setScoutCommunity] = useState<string>("auto-rickshaw");
+  const [targetedGender, setTargetedGender] = useState<string>("");
+  const [scoutStage, setScoutStage] = useState<string>("");
+  const [scoutSector, setScoutSector] = useState<string>("");
+  const [targetAudAgeStart, setTargetAudAgeStart] = useState<number>(18);
+  const [targetAudAgeEnd, setTargetAudAgeEnd] = useState<number>(65);
+
   const [openFilters, setOpenFilters] = useState(false);
 
   // Temporary state for dialog
-  const [tempCommunities, setTempCommunities] = useState<string>(selectedCommunities);
-  const [tempGenders, setTempGenders] = useState<string>(selectedGenders);
-  const [tempStages, setTempStages] = useState<string>(selectedStages);
-  const [tempSectors, setTempSectors] = useState<string>(selectedSectors);
-  const [tempAgeRange, setTempAgeRange] = useState<[number, number]>(ageRange);
-
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  const [tempScoutCommunity, setTempScoutCommunity] =
+    useState<string>(scoutCommunity);
+  const [tempTargetedGender, setTempTargetedGender] =
+    useState<string>(targetedGender);
+  const [tempScoutStage, setTempScoutStage] = useState<string>(scoutStage);
+  const [tempScoutSector, setTempScoutSector] = useState<string>(scoutSector);
+  const [tempAgeRange, setTempAgeRange] = useState<[number, number]>([
+    targetAudAgeStart,
+    targetAudAgeEnd,
+  ]);
 
   const fetchInitialData = async () => {
     try {
-      const res = await fetch(`/api/endpoints/scouts/audience?scoutId=${scoutId}`);
+      const res = await fetch(
+        `/api/endpoints/scouts/audience?scoutId=${scoutId}`
+      );
       const data = await res.json();
       const parsed = AudienceSchema.parse(data);
 
-      setLocationInput(parsed.locationInput || "");
-      setSelectedCommunities(parsed.selectedCommunities || "");
-      setSelectedGenders(parsed.selectedGenders || "");
-      setSelectedStages(parsed.selectedStages || "");
-      setSelectedSectors(parsed.selectedSectors || "");
-      setAgeRange(parsed.ageRange || [18, 65]);
+      setTargetAudLocation(parsed.targetAudLocation || "");
+      setScoutCommunity(parsed.scoutCommunity || "");
+      setTargetedGender(parsed.targetedGender || "");
+      setScoutStage(parsed.scoutStage || "");
+      setScoutSector(parsed.scoutSector || "");
+      setTargetAudAgeStart(parsed.targetAudAgeStart || 18);
+      setTargetAudAgeEnd(parsed.targetAudAgeEnd || 65);
 
       // Initialize temp state
-      setTempCommunities(parsed.selectedCommunities || "");
-      setTempGenders(parsed.selectedGenders || "");
-      setTempStages(parsed.selectedStages || "");
-      setTempSectors(parsed.selectedSectors || "");
-      setTempAgeRange(parsed.ageRange || [18, 65]);
+      setTempScoutCommunity(parsed.scoutCommunity || "");
+      setTempTargetedGender(parsed.targetedGender || "");
+      setTempScoutStage(parsed.scoutStage || "");
+      setTempScoutSector(parsed.scoutSector || "");
+      setTempAgeRange([
+        parsed.targetAudAgeStart || 18,
+        parsed.targetAudAgeEnd || 65,
+      ]);
     } catch (err) {
       console.error("Error fetching data:", err);
     }
@@ -192,81 +201,17 @@ export default function AudiencePage() {
     fetchInitialData();
   }, []);
 
-  const handleLocationInput = async (value: string) => {
-    setLocationInput(value);
-
-    const normalizedInput = value
-      .replace(/[-\/,]+/g, " ")
-      .trim()
-      .split(/\s+/);
-
-    let country = "";
-    let state = "";
-    let city = "";
-
-    if (normalizedInput.length === 3) {
-      const [first, second, third] = normalizedInput.map((part) =>
-        part.charAt(0).toUpperCase() + part.slice(1)
-      );
-      if (first.length <= 3 || ["USA", "UK", "India"].includes(first.toUpperCase())) {
-        country = first;
-        state = second;
-        city = third;
-      } else {
-        city = first;
-        state = second;
-        country = third;
-      }
-    } else if (normalizedInput.length === 2) {
-      const [first, second] = normalizedInput.map((part) =>
-        part.charAt(0).toUpperCase() + part.slice(1)
-      );
-      city = first;
-      state = second;
-      country = "";
-    } else if (normalizedInput.length === 1) {
-      city = normalizedInput[0].charAt(0).toUpperCase() + normalizedInput[0].slice(1);
-      state = "";
-      country = "";
-    }
-
-    setLocation({ country, state, city });
-
-    const queryParts = [city, state, country].filter(Boolean).join(", ");
-    if (queryParts) {
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            queryParts
-          )}`
-        );
-        const data = await response.json();
-        if (data && data[0]) {
-          setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
-        } else {
-          setCoordinates(null);
-        }
-      } catch (error) {
-        console.error("Error fetching coordinates:", error);
-        setCoordinates(null);
-      }
-    } else {
-      setCoordinates(null);
-    }
-  };
-
-  // Debounced AutoSave
   const autoSave = useCallback(() => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-    const timer = setTimeout(async () => {
+    const saveData = async () => {
       try {
         const formData = AudienceSchema.parse({
-          locationInput,
-          selectedCommunities,
-          selectedGenders,
-          selectedStages,
-          selectedSectors,
-          ageRange,
+          targetAudLocation,
+          scoutCommunity,
+          targetedGender,
+          scoutStage,
+          scoutSector,
+          targetAudAgeStart,
+          targetAudAgeEnd,
         });
         const payload = { ...formData, scoutId };
         await fetch("/api/endpoints/scouts/audience", {
@@ -277,59 +222,49 @@ export default function AudiencePage() {
       } catch (error) {
         console.error("Error autosaving:", error);
       }
-    }, 1000);
+    };
 
-    setDebounceTimer(timer);
+    const timer = setTimeout(saveData, 2000);
+    return () => clearTimeout(timer);
   }, [
-    locationInput,
-    selectedCommunities,
-    selectedGenders,
-    selectedStages,
-    selectedSectors,
-    ageRange,
-    debounceTimer,
+    targetAudLocation,
+    scoutCommunity,
+    targetedGender,
+    scoutStage,
+    scoutSector,
+    targetAudAgeStart,
+    targetAudAgeEnd,
   ]);
 
   useEffect(() => {
     autoSave();
   }, [
-    locationInput,
-    selectedCommunities,
-    selectedGenders,
-    selectedStages,
-    selectedSectors,
-    ageRange,
+    targetAudLocation,
+    scoutCommunity,
+    targetedGender,
+    scoutStage,
+    scoutSector,
+    targetAudAgeStart,
+    targetAudAgeEnd,
   ]);
 
-  // Apply filters
   const applyFilters = () => {
-    setSelectedCommunities(tempCommunities);
-    setSelectedGenders(tempGenders);
-    setSelectedStages(tempStages);
-    setSelectedSectors(tempSectors);
-    setAgeRange(tempAgeRange);
+    setScoutCommunity(tempScoutCommunity);
+    setTargetedGender(tempTargetedGender);
+    setScoutStage(tempScoutStage);
+    setScoutSector(tempScoutSector);
+    setTargetAudAgeStart(tempAgeRange[0]);
+    setTargetAudAgeEnd(tempAgeRange[1]);
     setOpenFilters(false);
   };
 
-  // Clear filters
   const clearFilters = () => {
-    setTempCommunities("");
-    setTempGenders("");
-    setTempStages("");
-    setTempSectors("");
+    setTempScoutCommunity("");
+    setTempTargetedGender("");
+    setTempScoutStage("");
+    setTempScoutSector("");
     setTempAgeRange([18, 65]);
   };
-
-  // Sync temp state when dialog opens
-  useEffect(() => {
-    if (openFilters) {
-      setTempCommunities(selectedCommunities);
-      setTempGenders(selectedGenders);
-      setTempStages(selectedStages);
-      setTempSectors(selectedSectors);
-      setTempAgeRange(ageRange);
-    }
-  }, [openFilters, selectedCommunities, selectedGenders, selectedStages, selectedSectors, ageRange]);
 
   return (
     <div className="container px-10 mx-auto py-6">
@@ -339,8 +274,8 @@ export default function AudiencePage() {
           <Label>Pin Location</Label>
           <Input
             placeholder="e.g. India-Maharashtra-Mumbai or Mumbai-Maharashtra-India"
-            value={locationInput}
-            onChange={(e) => handleLocationInput(e.target.value)}
+            value={targetAudLocation}
+            onChange={(e) => setTargetAudLocation(e.target.value)}
           />
           <div className="w-full h-[400px] rounded-lg overflow-hidden border">
             <MapComponent coordinates={coordinates} />
@@ -349,71 +284,75 @@ export default function AudiencePage() {
 
         {/* Filters Button and Dialog */}
         <div>
-        <Dialog open={openFilters} onOpenChange={setOpenFilters}>
-          <DialogTrigger asChild>
-            <Button variant="outline">Edit Audience Filters</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Audience Filters</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <Label>Community</Label>
-                <Combobox
-                  options={communitiesData.map(item => item.value)} // Map to string[]
-                  value={tempCommunities}
-                  onSelect={(value) => setTempCommunities(value)}
-                  placeholder="Select a community"
-                />
-              </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <AgeRange
-                    minAge={tempAgeRange[0].toString()}
-                    maxAge={tempAgeRange[1].toString()}
-                    onMinChange={(value) => setTempAgeRange([Number(value), tempAgeRange[1]])}
-                    onMaxChange={(value) => setTempAgeRange([tempAgeRange[0], Number(value)])}
-                  />
-                </div>
-                <div className="flex-1">
-                  <Label>Gender</Label>
+          <Dialog open={openFilters} onOpenChange={setOpenFilters}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Edit Audience Filters</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Audience Filters</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Community</Label>
                   <Combobox
-                    options={genders.map(item => item.value)} // Map to string[]
-                    value={tempGenders}
-                    onSelect={(value) => setTempGenders(value)}
-                    placeholder="Select a gender"
+                    options={communitiesData.map((item) => item.value)}
+                    value={tempScoutCommunity}
+                    onSelect={(value) => setTempScoutCommunity(value)}
+                    placeholder="Select a community"
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <AgeRange
+                      minAge={tempAgeRange[0].toString()}
+                      maxAge={tempAgeRange[1].toString()}
+                      onMinChange={(value) =>
+                        setTempAgeRange([Number(value), tempAgeRange[1]])
+                      }
+                      onMaxChange={(value) =>
+                        setTempAgeRange([tempAgeRange[0], Number(value)])
+                      }
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Label>Gender</Label>
+                    <Combobox
+                      options={genders.map((item) => item.value)}
+                      value={tempTargetedGender}
+                      onSelect={(value) => setTempTargetedGender(value)}
+                      placeholder="Select a gender"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Stage</Label>
+                  <Combobox
+                    options={stages.map((item) => item.value)}
+                    value={tempScoutStage}
+                    onSelect={(value) => setTempScoutStage(value)}
+                    placeholder="Select a stage"
+                  />
+                </div>
+                <div>
+                  <Label>Sector</Label>
+                  <Combobox
+                    options={sectors.map((item) => item.value)}
+                    value={tempScoutSector}
+                    onSelect={(value) => setTempScoutSector(value)}
+                    placeholder="Select a sector"
                   />
                 </div>
               </div>
-              <div>
-                <Label>Stage</Label>
-                <Combobox
-                  options={stages.map(item => item.value)} // Map to string[]
-                  value={tempStages}
-                  onSelect={(value) => setTempStages(value)}
-                  placeholder="Select a stage"
-                />
-              </div>
-              <div>
-                <Label>Sector</Label>
-                <Combobox
-                  options={sectors.map(item => item.value)} // Map to string[]
-                  value={tempSectors}
-                  onSelect={(value) => setTempSectors(value)}
-                  placeholder="Select a sector"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={clearFilters}>
-                Clear Filters
-              </Button>
-              <Button onClick={applyFilters}>Apply</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={clearFilters}>
+                  Clear Filters
+                </Button>
+                <Button onClick={applyFilters}>Apply</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
     </div>
   );
