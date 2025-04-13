@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { AgeRange } from "./components/age-range";
-import { Combobox } from "./components/combobox";
+import { Combobox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import dynamic from "next/dynamic";
@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -33,10 +34,7 @@ const communitiesData = [
   { label: "Auto - rickshaw drivers", value: "auto-rickshaw" },
   { label: "Black Lives Matter activists", value: "black-lives" },
   { label: "Coastal cleanup crews", value: "coastal" },
-  {
-    label: "Criminals seeking to change their lives positively",
-    value: "criminals",
-  },
+  { label: "Criminals seeking to change their lives positively", value: "criminals" },
   { label: "Delivery gig workers", value: "delivery" },
   { label: "Doctors in tech", value: "doctors" },
   { label: "Eco - friendly fashion designers", value: "eco-friendly" },
@@ -132,10 +130,10 @@ interface Location {
 // Zod Schema
 const AudienceSchema = z.object({
   locationInput: z.string().optional().default(""),
-  selectedCommunities: z.array(z.string()).optional().default([]),
-  selectedGenders: z.array(z.string()).optional().default([]),
-  selectedStages: z.array(z.string()).optional().default([]),
-  selectedSectors: z.array(z.string()).optional().default([]),
+  selectedCommunities: z.string().optional().default(""),
+  selectedGenders: z.string().optional().default(""),
+  selectedStages: z.string().optional().default(""),
+  selectedSectors: z.string().optional().default(""),
   ageRange: z.tuple([z.number(), z.number()]).optional().default([18, 65]),
 });
 
@@ -149,34 +147,42 @@ export default function AudiencePage() {
     city: "",
   });
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [selectedCommunities, setSelectedCommunities] = useState<string[]>([
-    "auto-rickshaw",
-  ]);
-  const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
-  const [selectedStages, setSelectedStages] = useState<string[]>([]);
-  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [selectedCommunities, setSelectedCommunities] = useState<string>("auto-rickshaw");
+  const [selectedGenders, setSelectedGenders] = useState<string>("");
+  const [selectedStages, setSelectedStages] = useState<string>("");
+  const [selectedSectors, setSelectedSectors] = useState<string>("");
   const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [openFilters, setOpenFilters] = useState(false);
 
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
-    null
-  );
+  // Temporary state for dialog
+  const [tempCommunities, setTempCommunities] = useState<string>(selectedCommunities);
+  const [tempGenders, setTempGenders] = useState<string>(selectedGenders);
+  const [tempStages, setTempStages] = useState<string>(selectedStages);
+  const [tempSectors, setTempSectors] = useState<string>(selectedSectors);
+  const [tempAgeRange, setTempAgeRange] = useState<[number, number]>(ageRange);
+
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
   const fetchInitialData = async () => {
     try {
-      const res = await fetch(
-        `/api/endpoints/scouts/audience?scoutId=${scoutId}`
-      );
+      const res = await fetch(`/api/endpoints/scouts/audience?scoutId=${scoutId}`);
       const data = await res.json();
       const parsed = AudienceSchema.parse(data);
 
       setLocationInput(parsed.locationInput || "");
-      setSelectedCommunities(parsed.selectedCommunities || []);
-      setSelectedGenders(parsed.selectedGenders || []);
-      setSelectedStages(parsed.selectedStages || []);
-      setSelectedSectors(parsed.selectedSectors || []);
+      setSelectedCommunities(parsed.selectedCommunities || "");
+      setSelectedGenders(parsed.selectedGenders || "");
+      setSelectedStages(parsed.selectedStages || "");
+      setSelectedSectors(parsed.selectedSectors || "");
       setAgeRange(parsed.ageRange || [18, 65]);
+
+      // Initialize temp state
+      setTempCommunities(parsed.selectedCommunities || "");
+      setTempGenders(parsed.selectedGenders || "");
+      setTempStages(parsed.selectedStages || "");
+      setTempSectors(parsed.selectedSectors || "");
+      setTempAgeRange(parsed.ageRange || [18, 65]);
     } catch (err) {
       console.error("Error fetching data:", err);
     }
@@ -189,7 +195,6 @@ export default function AudiencePage() {
   const handleLocationInput = async (value: string) => {
     setLocationInput(value);
 
-    // Normalize separators: replace all common separators with a single space
     const normalizedInput = value
       .replace(/[-\/,]+/g, " ")
       .trim()
@@ -200,33 +205,26 @@ export default function AudiencePage() {
     let city = "";
 
     if (normalizedInput.length === 3) {
-      // Assume either "country state city" or "city state country"
       const [first, second, third] = normalizedInput.map((part) =>
         part.charAt(0).toUpperCase() + part.slice(1)
       );
-
-      // Default to "city state country" unless first part seems like a country
       if (first.length <= 3 || ["USA", "UK", "India"].includes(first.toUpperCase())) {
-        // Likely "country state city"
         country = first;
         state = second;
         city = third;
       } else {
-        // Assume "city state country"
         city = first;
         state = second;
         country = third;
       }
     } else if (normalizedInput.length === 2) {
-      // Assume "state city" or "city state"
       const [first, second] = normalizedInput.map((part) =>
         part.charAt(0).toUpperCase() + part.slice(1)
       );
       city = first;
       state = second;
-      country = ""; // Country omitted
+      country = "";
     } else if (normalizedInput.length === 1) {
-      // Single input, assume city
       city = normalizedInput[0].charAt(0).toUpperCase() + normalizedInput[0].slice(1);
       state = "";
       country = "";
@@ -234,7 +232,6 @@ export default function AudiencePage() {
 
     setLocation({ country, state, city });
 
-    // Construct query for Nominatim API
     const queryParts = [city, state, country].filter(Boolean).join(", ");
     if (queryParts) {
       try {
@@ -247,14 +244,14 @@ export default function AudiencePage() {
         if (data && data[0]) {
           setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
         } else {
-          setCoordinates(null); // Reset if no match found
+          setCoordinates(null);
         }
       } catch (error) {
         console.error("Error fetching coordinates:", error);
         setCoordinates(null);
       }
     } else {
-      setCoordinates(null); // Clear coordinates if input is empty
+      setCoordinates(null);
     }
   };
 
@@ -280,7 +277,7 @@ export default function AudiencePage() {
       } catch (error) {
         console.error("Error autosaving:", error);
       }
-    }, 1000); // 1s debounce
+    }, 1000);
 
     setDebounceTimer(timer);
   }, [
@@ -293,7 +290,6 @@ export default function AudiencePage() {
     debounceTimer,
   ]);
 
-  // Trigger autosave on relevant changes
   useEffect(() => {
     autoSave();
   }, [
@@ -304,6 +300,36 @@ export default function AudiencePage() {
     selectedSectors,
     ageRange,
   ]);
+
+  // Apply filters
+  const applyFilters = () => {
+    setSelectedCommunities(tempCommunities);
+    setSelectedGenders(tempGenders);
+    setSelectedStages(tempStages);
+    setSelectedSectors(tempSectors);
+    setAgeRange(tempAgeRange);
+    setOpenFilters(false);
+  };
+
+  // Clear filters
+  const clearFilters = () => {
+    setTempCommunities("");
+    setTempGenders("");
+    setTempStages("");
+    setTempSectors("");
+    setTempAgeRange([18, 65]);
+  };
+
+  // Sync temp state when dialog opens
+  useEffect(() => {
+    if (openFilters) {
+      setTempCommunities(selectedCommunities);
+      setTempGenders(selectedGenders);
+      setTempStages(selectedStages);
+      setTempSectors(selectedSectors);
+      setTempAgeRange(ageRange);
+    }
+  }, [openFilters, selectedCommunities, selectedGenders, selectedStages, selectedSectors, ageRange]);
 
   return (
     <div className="container px-10 mx-auto py-6">
@@ -323,75 +349,71 @@ export default function AudiencePage() {
 
         {/* Filters Button and Dialog */}
         <div>
-          <Dialog open={openFilters} onOpenChange={setOpenFilters}>
-            <DialogTrigger asChild>
-              <Button variant="outline">Edit Audience Filters</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Audience Filters</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
+        <Dialog open={openFilters} onOpenChange={setOpenFilters}>
+          <DialogTrigger asChild>
+            <Button variant="outline">Edit Audience Filters</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Audience Filters</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Community</Label>
                 <Combobox
-                  label="Community"
-                  value={
-                    communitiesData.find(
-                      (c) => c.value === selectedCommunities[0]
-                    )?.label || "Select Community"
-                  }
-                  options={communitiesData}
-                  selected={selectedCommunities}
-                  onChange={(value: string) =>
-                    setSelectedCommunities((prev) => [...prev, value])
-                  }
-                />
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <AgeRange
-                      minAge={ageRange[0].toString()}
-                      maxAge={ageRange[1].toString()}
-                      onMinChange={(value) =>
-                        setAgeRange([Number(value), ageRange[1]])
-                      }
-                      onMaxChange={(value) =>
-                        setAgeRange([ageRange[0], Number(value)])
-                      }
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Combobox
-                      label="Gender"
-                      value="Add"
-                      options={genders}
-                      selected={selectedGenders}
-                      onChange={(value: string) =>
-                        setSelectedGenders((prev) => [...prev, value])
-                      }
-                    />
-                  </div>
-                </div>
-                <Combobox
-                  label="Stage"
-                  value="Add"
-                  options={stages}
-                  selected={selectedStages}
-                  onChange={(value: string) =>
-                    setSelectedStages((prev) => [...prev, value])
-                  }
-                />
-                <Combobox
-                  label="Sector"
-                  value="Add"
-                  options={sectors}
-                  selected={selectedSectors}
-                  onChange={(value: string) =>
-                    setSelectedSectors((prev) => [...prev, value])
-                  }
+                  options={communitiesData.map(item => item.value)} // Map to string[]
+                  value={tempCommunities}
+                  onSelect={(value) => setTempCommunities(value)}
+                  placeholder="Select a community"
                 />
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <AgeRange
+                    minAge={tempAgeRange[0].toString()}
+                    maxAge={tempAgeRange[1].toString()}
+                    onMinChange={(value) => setTempAgeRange([Number(value), tempAgeRange[1]])}
+                    onMaxChange={(value) => setTempAgeRange([tempAgeRange[0], Number(value)])}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Label>Gender</Label>
+                  <Combobox
+                    options={genders.map(item => item.value)} // Map to string[]
+                    value={tempGenders}
+                    onSelect={(value) => setTempGenders(value)}
+                    placeholder="Select a gender"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Stage</Label>
+                <Combobox
+                  options={stages.map(item => item.value)} // Map to string[]
+                  value={tempStages}
+                  onSelect={(value) => setTempStages(value)}
+                  placeholder="Select a stage"
+                />
+              </div>
+              <div>
+                <Label>Sector</Label>
+                <Combobox
+                  options={sectors.map(item => item.value)} // Map to string[]
+                  value={tempSectors}
+                  onSelect={(value) => setTempSectors(value)}
+                  placeholder="Select a sector"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={clearFilters}>
+                Clear Filters
+              </Button>
+              <Button onClick={applyFilters}>Apply</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
       </div>
     </div>
   );

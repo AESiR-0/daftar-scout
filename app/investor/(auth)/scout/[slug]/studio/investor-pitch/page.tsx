@@ -95,7 +95,6 @@ export default function InvestorPitchPage() {
   return (
     <Card className="border-none mt-4 container mx-auto px-4 bg-[#0e0e0e]">
       <CardContent className="pt-6">
-        <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-3 gap-8">
             {/* Left Section: Video Upload */}
             <div className="col-span-2">
@@ -195,7 +194,6 @@ export default function InvestorPitchPage() {
            
             </div>
           </div>
-        </div>
       </CardContent>
     </Card>
   )
