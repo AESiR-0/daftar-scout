@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
 import { investorPitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
+import { auth } from "@/auth";
+import { users } from "@/backend/drizzle/models/users";
 
-export async function GET(
-  req: NextRequest
-) {
+export async function GET(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { scoutId, pitchId } = await body;
-
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId");
+    const pitchId = searchParams.get("pitchId");
     // Validate parameters
     if (!scoutId || !pitchId) {
       return NextResponse.json(
-        { error: "scoutId, pitchId, and investorId are required" },
+        { error: "scoutId and pitchId are required" },
         { status: 400 }
       );
     }
@@ -29,33 +29,44 @@ export async function GET(
           eq(investorPitch.scoutId, scoutId),
           eq(investorPitch.pitchId, pitchId)
         )
-      )
-      .limit(1);
+      );
 
     if (result.length === 0) {
       return NextResponse.json(
-        { error: "No analysis found for this scoutId, pitchId, and investorId" },
+        {
+          error: "No analysis found for this scoutId, pitchId, and investorId",
+        },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ analysis: result[0].analysis || "" }, { status: 200 });
+    return NextResponse.json({ analysis: result }, { status: 200 });
   } catch (error) {
     console.error("Error fetching investor analysis:", error);
-    return NextResponse.json({ error: "Failed to fetch analysis" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch analysis" },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { scoutId: string; pitchId: string } }
-) {
+export async function POST(req: NextRequest) {
   try {
-    const { scoutId, pitchId } = params;
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId");
+    const pitchId = searchParams.get("pitchId");
     const body = await req.json();
-    const { investorId, analysis } = body;
+    const { analysis } = body;
+    const session = await auth();
+    if (!session || !session.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const user = await db
+      .select({ investorId: users.id })
+      .from(users)
+      .where(eq(users.email, session.user.email));
+    const { investorId } = await user[0];
 
-    // Validate parameters
     if (!scoutId || !pitchId || !investorId) {
       return NextResponse.json(
         { error: "scoutId, pitchId, and investorId are required" },
@@ -114,6 +125,9 @@ export async function POST(
     );
   } catch (error) {
     console.error("Error saving investor analysis:", error);
-    return NextResponse.json({ error: "Failed to save analysis" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to save analysis" },
+      { status: 500 }
+    );
   }
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,8 +13,7 @@ import { InvestorsNote } from "./components/investors-note";
 import DocumentsSection from "./components/documents-section";
 import { FoundersPitchSection } from "./components/founders-pitch";
 import { TeamAnalysisSection } from "./components/team-analysis";
-import MeetingsPage from "@/app/founder/(auth)/[pitchId]/studio/meetings/page";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { MakeOfferSection } from "./components/make-offer-section";
 import { DeclinePitchDialog } from "./components/decline-pitch-dialog";
@@ -30,6 +29,7 @@ const Chart = dynamic(() => import("react-apexcharts"), {
 });
 
 /** ------------- Types -------------- **/
+
 interface Document {
   id: string;
   name: string;
@@ -104,11 +104,12 @@ interface TeamMember {
 }
 
 interface PitchDetails {
+  id: string;
   daftarName: string;
   pitchName: string;
   status: string;
   teamMembers: TeamMemberDetails[];
-  sections: {
+  fields: {
     investorsNote: string;
     documentation: Document[];
     foundersPitch: FoundersPitch;
@@ -117,40 +118,7 @@ interface PitchDetails {
   };
 }
 
-// const chartConfig: any = {
-//   options: {
-//     chart: {
-//       type: "area" as any,
-//       background: "transparent",
-//       toolbar: { show: false }
-//     },
-//     stroke: {
-//       curve: "smooth" as any,
-//       width: 2
-//     },
-//     fill: {
-//       type: "gradient" as any,
-//       gradient: {
-//         shadeIntensity: 1,
-//         opacityFrom: 0.4,
-//         opacityTo: 0.1,
-//         stops: [0, 90, 100]
-//       }
-//     },
-//     colors: ["#2563eb"],
-//     theme: { mode: "dark" },
-//     grid: { borderColor: "#334155" },
-//     xaxis: {
-//       categories: ["Jan", "Feb", "Mar", "Apr", "May"],
-//       labels: { style: { colors: "#94a3b8" } }
-//     },
-//     yaxis: {
-//       labels: { style: { colors: "#94a3b8" } }
-//     }
-//   }
-// };
-
-const sections = [
+const fields = [
   { id: "founders-pitch", label: "Founder's Pitch" },
   { id: "founders-team", label: "Founder's Team" },
   { id: "investors-analysis", label: "Investor's Analysis" },
@@ -160,17 +128,19 @@ const sections = [
 ] as const;
 
 const formatPhoneNumber = (phone: string) => {
-  // Match country code (anything from start until last 10 digits)
+  if (!phone) return "";
   const match = phone.match(/^(.+?)(\d{10})$/);
   if (match) {
     return `${match[1]} ${match[2]}`;
   }
   return phone;
 };
+
 const getInitials = (name: string) => {
   const [firstName, lastName] = name.split(" ");
   return firstName?.[0] + (lastName?.[0] || "");
 };
+
 const MemberCard = ({ member }: { member: TeamMember }) => (
   <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
     <div className="flex justify-between items-start">
@@ -184,7 +154,7 @@ const MemberCard = ({ member }: { member: TeamMember }) => (
             />
           ) : (
             <AvatarFallback className="rounded-[0.35rem] text-xl">
-              {getInitials(member.firstName)}
+              {getInitials(`${member.firstName} ${member.lastName}`)}
             </AvatarFallback>
           )}
         </Avatar>
@@ -197,7 +167,6 @@ const MemberCard = ({ member }: { member: TeamMember }) => (
           <p className="text-sm mt-1 text-muted-foreground">
             {member.designation}
           </p>
-
           <div className="">
             <div className="space-y-1 mt-1 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
@@ -215,7 +184,7 @@ const MemberCard = ({ member }: { member: TeamMember }) => (
               </div>
               <p className="text-sm text-muted-foreground">
                 Preferred languages to connect with investors:{" "}
-                {member.language.join(", ")}
+                {/* {member.language.join(", ")} */}
               </p>
             </div>
           </div>
@@ -232,135 +201,56 @@ export default function PitchDetailsPage() {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
-  const [pitchDetails, setPitchDetails] = useState<PitchDetails>({
-    daftarName: "Tech Startup",
-    pitchName: "AI Chatbot",
-    status: "In Review",
-    teamMembers: [
-      {
-        firstName: "Alex",
-        lastName: "Johnson",
-        age: "25",
-        email: "alex@example.com",
-        phone: "1234567890",
-        gender: "Male",
-        location: "New York, NY",
-        language: ["English", "Hindi"],
-        imageUrl: "https://github.com/shadcn.png",
-        designation: "Chief Technology Officer",
-      },
-      {
-        firstName: "Emily",
-        lastName: "Smith",
-        age: "28",
-        email: "emily@example.com",
-        phone: "9876543210",
-        gender: "Female",
-        location: "San Francisco, CA",
-        language: ["English", "Spanish"],
-        imageUrl: "https://github.com/shadcn.png",
-        designation: "Product Manager",
-      },
-    ],
-    sections: {
-      investorsNote: "This is a promising startup with great potential...",
-      documentation: [
-        {
-          id: "1",
-          name: "Financial_Model.xlsx",
-          uploadedBy: "John Doe",
-          uploadedAt: "2024-03-20",
-        },
-        {
-          id: "2",
-          name: "Pitch_Deck.pdf",
-          uploadedBy: "Sarah Smith",
-          uploadedAt: "2024-03-19",
-        },
-      ],
-      foundersPitch: {
-        status: "Under Review",
-        location: "Dubai, UAE",
-        stage: "Seed",
-        sectors: ["AI/ML", "SaaS"],
-        questions: [
-          {
-            id: 1,
-            question: "What inspired you to start this venture?",
-            videoUrl: "https://example.com/video1",
-          },
-          {
-            id: 2,
-            question: "What problem are you solving and for whom?",
-            videoUrl: "https://example.com/video2",
-          },
-          {
-            id: 3,
-            question: "What's your unique value proposition?",
-            videoUrl: "https://example.com/video3",
-          },
-          {
-            id: 4,
-            question: "Who are your competitors and what's your advantage?",
-            videoUrl: "https://example.com/video4",
-          },
-          {
-            id: 5,
-            question: "What's your business model and go-to-market strategy?",
-            videoUrl: "https://example.com/video5",
-          },
-          {
-            id: 6,
-            question: "What are your funding requirements and use of funds?",
-            videoUrl: "https://example.com/video6",
-          },
-        ],
-      },
-      analysis: {
-        performanceData: [45, 52, 38, 65, 78],
-        investmentDistribution: [30, 25, 20, 15, 10],
-      },
-      teamAnalysis: [
-        {
-          id: "1",
-          analyst: {
-            name: "Sarah Johnson",
-            role: "Investment Analyst",
-            avatar: "/avatars/sarah.jpg",
-            daftarName: "Tech Startup",
-          },
-          belief: "yes",
-          note: "<p>The team has shown exceptional capability...</p>",
-          date: "2024-03-20T10:00:00Z",
-          nps: 5,
-        },
-        {
-          id: "2",
-          analyst: {
-            name: "Mike Wilson",
-            role: "Senior Scout",
-            avatar: "/avatars/mike.jpg",
-            daftarName: "Tech Startup",
-          },
-          belief: "no",
-          note: "<p>While the idea is promising, I have concerns about...</p>",
-          date: "2024-03-19T15:30:00Z",
-          nps: 3,
-        },
-      ],
-    },
-  });
+  const [pitchDetails, setPitchDetails] = useState<PitchDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const params = useParams();
+  const pathname = usePathname();
   const router = useRouter();
+  const pitchId = pathname.split("/")[5];
 
-  // Add current profile (this could come from your auth context)
-  const currentProfile = {
+  const currentProfile: Profile = {
     id: "current-user",
     name: "Current User",
     role: "Investment Analyst",
     avatar: "/avatars/current-user.jpg",
-    daftarName: "Tech Startup",
+    daftarName: pitchDetails?.pitchName || "Tech Startup",
   };
+
+  // Fetch pitch data
+  useEffect(() => {
+    const fetchPitch = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/endpoints/pitch/investor?pitchId=${pitchId}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to fetch pitch");
+        }
+
+        const data: PitchDetails = await response.json();
+        setPitchDetails(data);
+      } catch (err) {
+        setError((err as Error).message);
+        toast({
+          title: "Error",
+          description: (err as Error).message,
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPitch();
+  }, [params.pitchId, toast]);
 
   const handleSubmitAnalysis = async (data: {
     belief: "yes" | "no";
@@ -369,19 +259,19 @@ export default function PitchDetailsPage() {
     nps: number | null;
   }) => {
     try {
-      // Add your API call here
       const response = await fetch("/api/analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId: params.pitchId,
-          ...data,
+          believeRating: data.nps,
+          analysis: data.note,
+          shouldMeet: data.belief === "yes",
         }),
       });
 
       if (!response.ok) throw new Error("Failed to submit analysis");
 
-      // Update local state
       const newAnalysis: TeamAnalysis = {
         id: Date.now().toString(),
         belief: data.belief,
@@ -391,25 +281,35 @@ export default function PitchDetailsPage() {
         nps: data.nps || 0,
       };
 
-      setPitchDetails((prev) => ({
-        ...prev,
-        sections: {
-          ...prev.sections,
-          teamAnalysis: [newAnalysis, ...prev.sections.teamAnalysis],
-        },
-      }));
+      setPitchDetails((prev) =>
+        prev
+          ? {
+              ...prev,
+              fields: {
+                ...prev.fields,
+                teamAnalysis: [newAnalysis, ...prev.fields.teamAnalysis],
+              },
+            }
+          : prev
+      );
 
-      // Show success toast
+      toast({
+        title: "Success",
+        description: "Analysis submitted successfully",
+        variant: "success",
+      });
     } catch (error) {
-      // Show error toast
+      toast({
+        title: "Error",
+        description: "Failed to submit analysis",
+        variant: "destructive",
+      });
       console.error(error);
     }
   };
 
   const handleUploadDocument = async (file: File) => {
     try {
-      // Add your file upload logic here
-      // Example:
       const formData = new FormData();
       formData.append("file", file);
       formData.append("pitchId", params.pitchId as string);
@@ -421,16 +321,30 @@ export default function PitchDetailsPage() {
 
       if (!response.ok) throw new Error("Upload failed");
 
-      // Update local state
       const newDoc = await response.json();
-      setPitchDetails((prev) => ({
-        ...prev,
-        sections: {
-          ...prev.sections,
-          documentation: [newDoc, ...prev.sections.documentation],
-        },
-      }));
+      setPitchDetails((prev) =>
+        prev
+          ? {
+              ...prev,
+              fields: {
+                ...prev.fields,
+                documentation: [newDoc, ...prev.fields.documentation],
+              },
+            }
+          : prev
+      );
+
+      toast({
+        title: "Success",
+        description: "Document uploaded successfully",
+        variant: "success",
+      });
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload document",
+        variant: "destructive",
+      });
       console.error(error);
       throw error;
     }
@@ -438,24 +352,37 @@ export default function PitchDetailsPage() {
 
   const handleDeleteDocument = async (id: string) => {
     try {
-      // Add your delete logic here
       const response = await fetch(`/api/documents/${id}`, {
         method: "DELETE",
       });
 
       if (!response.ok) throw new Error("Delete failed");
 
-      // Update local state
-      setPitchDetails((prev) => ({
-        ...prev,
-        sections: {
-          ...prev.sections,
-          documentation: prev.sections.documentation.filter(
-            (doc) => doc.id !== id
-          ),
-        },
-      }));
+      setPitchDetails((prev) =>
+        prev
+          ? {
+              ...prev,
+              fields: {
+                ...prev.fields,
+                documentation: prev.fields.documentation.filter(
+                  (doc) => doc.id !== id
+                ),
+              },
+            }
+          : prev
+      );
+
+      toast({
+        title: "Success",
+        description: "Document deleted successfully",
+        variant: "success",
+      });
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
+        variant: "destructive",
+      });
       console.error(error);
       throw error;
     }
@@ -463,7 +390,6 @@ export default function PitchDetailsPage() {
 
   const handleMakeOffer = async (offerContent: string) => {
     try {
-      // Add your API call here
       await fetch("/api/offers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -492,7 +418,6 @@ export default function PitchDetailsPage() {
 
   const handleDeclinePitch = async (reason: string) => {
     try {
-      // Add your API call here
       await fetch("/api/pitches/decline", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -519,47 +444,39 @@ export default function PitchDetailsPage() {
     }
   };
 
-  // Add helper function for initials
-  const getInitials = (name: string) => {
-    const words = name.split(" ");
-    return words.length > 1 ? words[0][0] + words[1][0] : name[0];
-  };
-
-  // Add this helper function near the getInitials function
   const formatLanguages = (languages: string[]) => {
     if (languages.length === 0) return "";
     if (languages.length === 1) return languages[0];
     if (languages.length === 2) return `${languages[0]} and ${languages[1]}`;
-
     const lastLanguage = languages[languages.length - 1];
     const otherLanguages = languages.slice(0, -1).join(", ");
     return `${otherLanguages} and ${lastLanguage}`;
   };
 
-  // Add this helper function to process data for charts
-  const processTeamData = () => {
-    const ageData = pitchDetails.teamMembers.map((member) => ({
+  const processTeamData = (teamMembers: TeamMemberDetails[]) => {
+    const ageData = teamMembers.map((member) => ({
       x: member.firstName,
-      y: parseInt(member.age),
+      y: parseInt(member.age) || 0,
     }));
 
-    const genderCount = pitchDetails.teamMembers.reduce((acc, member) => {
+    const genderCount = teamMembers.reduce((acc, member) => {
       acc[member.gender] = (acc[member.gender] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    const languageCount = pitchDetails.teamMembers.reduce((acc, member) => {
-      member.language.forEach((lang) => {
-        acc[lang] = (acc[lang] || 0) + 1;
-      });
-      return acc;
+    const languageCount = teamMembers.reduce((acc, member) => {
+      // member.forEach((lang) => {
+      //   acc[lang] = (acc[lang] || 0) + 1;
+      // });
+      // return acc;
+      return 2;
     }, {} as Record<string, number>);
 
     const averageAge =
-      pitchDetails.teamMembers.reduce(
-        (sum, member) => sum + parseInt(member.age),
+      teamMembers.reduce(
+        (sum, member) => sum + (parseInt(member.age) || 0),
         0
-      ) / pitchDetails.teamMembers.length;
+      ) / (teamMembers.length || 1);
 
     return {
       ageData,
@@ -572,14 +489,37 @@ export default function PitchDetailsPage() {
     };
   };
 
-  const { ageData, genderData, languageData, averageAge } = processTeamData();
+  if (loading) {
+    return (
+      <div className="container mx-auto py-10">
+        <div className="h-64 bg-muted animate-pulse rounded-lg" />
+      </div>
+    );
+  }
+
+  if (error || !pitchDetails) {
+    return (
+      <div className="container mx-auto py-10">
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-destructive">
+              {error || "Failed to load pitch details"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { ageData, genderData, languageData, averageAge } = processTeamData(
+    pitchDetails.teamMembers
+  );
 
   return (
     <ScrollArea className="h-[calc(100vh-6rem)]">
-      {/* Navigation */}
       <div className="flex justify-between items-center border-b border-border py-2 px-4">
         <div className="flex gap-1">
-          {sections.map((section) => (
+          {fields.map((section) => (
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
@@ -594,7 +534,7 @@ export default function PitchDetailsPage() {
               {section.label}
               <span
                 className={cn(
-                  "absolute inset-x-0 -bottom-[10px] h-[2px] transition-opacity rounded-[035rem]",
+                  "absolute inset-x-0 -bottom-[10px] h-[2px] transition-opacity rounded-[0.35rem]",
                   activeSection === section.id
                     ? "bg-foreground opacity-100"
                     : "bg-foreground opacity-0 group-hover:opacity-100"
@@ -618,22 +558,26 @@ export default function PitchDetailsPage() {
         />
       </div>
       <div className="container mx-auto">
-        {/* Content */}
         <div className="mt-10">
           {activeSection === "investors-note" && (
-            <InvestorsNote note={pitchDetails.sections.investorsNote} />
+            <InvestorsNote note={pitchDetails.fields.investorsNote} />
           )}
-          {activeSection === "documents" && <DocumentsSection />}
+          {activeSection === "documents" && (
+            <DocumentsSection
+              documents={pitchDetails.fields.documentation}
+              onUpload={handleUploadDocument}
+              onDelete={handleDeleteDocument}
+            />
+          )}
           {activeSection === "founders-team" && (
             <div className="space-y-6">
               <Card className="border-none bg-[#0e0e0e]">
                 <CardContent>
-                  <div className="flex gap-8">
-                    {/* Left column - Member Cards */}
-                    <div className="w-[25%] space-y-2">
+                  <div className="flex flex-col gap-8">
+                    <div className=" flex w-full gap-5 ">
                       {pitchDetails.teamMembers.map((member) => {
                         const transformedMember: TeamMember = {
-                          id: member.firstName,
+                          id: `${member.firstName}-${member.lastName}`,
                           firstName: member.firstName,
                           lastName: member.lastName,
                           email: member.email,
@@ -647,92 +591,75 @@ export default function PitchDetailsPage() {
                         };
                         return (
                           <MemberCard
-                            key={member.firstName}
+                            key={transformedMember.id}
                             member={transformedMember}
                           />
                         );
                       })}
                     </div>
-
-                    {/* Middle column - Charts */}
-                    <div className="w-[45%] space-y-6">
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">
-                          Team Members ({pitchDetails.teamMembers.length}) |{" "}
-                          <span className="text-muted-foreground">
-                            Average Age: {averageAge}
-                          </span>
-                        </h3>
-
-                        <div className="space-y-6 ">
-                          {/* Age Line Chart */}
-                          {/* <Card className="border-none bg-[#1a1a1a] p-4">
-                            <h4 className="text-sm font-medium mb-2">Age Distribution</h4>
-                            <div className="h-[200px]">
-                              <LineChart 
-                                data={ageData}
-                                categories={['Age']}
-                              />
-                            </div>
-                          </Card> */}
-
-                          {/* Gender Pie Chart */}
-                          <Card className="border-none bg-[#1a1a1a] p-4">
-                            <h4 className="text-sm font-medium mb-2">
-                              Gender Ratio
-                            </h4>
-                            <div className="h-[200px]">
-                              <PieChart data={genderData} />
-                            </div>
-                          </Card>
+                    <div className="flex gap-20">
+                      <div className=" space-y-6">
+                        <div>
+                          <h3 className="text-lg font-medium mb-4">
+                            Team Members ({pitchDetails.teamMembers.length}) |{" "}
+                            <span className="text-muted-foreground">
+                              Average Age: {averageAge.toFixed(1)}
+                            </span>
+                          </h3>
+                          <div className="space-y-6">
+                            <Card className="border-none bg-[#1a1a1a] p-4">
+                              <h4 className="text-sm font-medium mb-2">
+                                Gender Ratio
+                              </h4>
+                              <div className="h-[200px]">
+                                <PieChart data={genderData} />
+                              </div>
+                            </Card>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Right column - Languages */}
-                    <div className="w-[30%] mt-11">
-                      <Card className="border-none bg-[#1a1a1a] p-4">
-                        <h4 className="text-sm font-medium mb-4">
-                          Preferred Languages to Connect with Investors
-                        </h4>
-                        <div className="space-y-2">
-                          {languageData.map(([language, count]) => (
-                            <div
-                              key={language}
-                              className="flex items-center justify-between p-2 rounded-md bg-background"
-                            >
-                              <span className="text-sm">{language}</span>
-                              <Badge variant="secondary">{count}</Badge>
-                            </div>
-                          ))}
-                        </div>
-                      </Card>
+                      <div className=" mt-11">
+                        <Card className="border-none bg-[#1a1a1a] p-4">
+                          <h4 className="text-sm font-medium mb-4">
+                            Preferred Languages to Connect with Investors
+                          </h4>
+                          <div className="space-y-2">
+                            {languageData.map(([language, count]) => (
+                              <div
+                                key={language}
+                                className="flex items-center justify-between p-2 rounded-md bg-background"
+                              >
+                                <span className="text-sm">{language}</span>
+                                <Badge variant="secondary">{count}</Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </Card>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
           )}
-          {activeSection === "meetings" && <MeetingsPage />}
           {activeSection === "founders-pitch" && (
             <FoundersPitchSection
-              pitch={pitchDetails.sections.foundersPitch}
+              pitch={pitchDetails.fields.foundersPitch}
               onScheduleMeeting={() => setScheduleMeetingOpen(true)}
             />
           )}
           {activeSection === "investors-analysis" && (
             <TeamAnalysisSection
-              teamAnalysis={pitchDetails.sections.teamAnalysis}
+              teamAnalysis={pitchDetails.fields.teamAnalysis}
               currentProfile={currentProfile}
               onSubmitAnalysis={handleSubmitAnalysis}
             />
           )}
-          {activeSection === "make-offer" && <MakeOfferSection />}
+          {activeSection === "make-offer" && (
+            <MakeOfferSection onMakeOffer={handleMakeOffer} />
+          )}
         </div>
       </div>
-
-      {/* Dialogs */}
-
       <ScheduleMeetingDialog
         open={scheduleMeetingOpen}
         onOpenChange={setScheduleMeetingOpen}

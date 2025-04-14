@@ -43,7 +43,6 @@ export const scoutQuestions = pgTable("scout_questions", {
     () => scouts.scoutId
   ),
   scoutQuestion: text("scout_question").notNull(),
-  scoutAnswerSampleUrl: text("scout_answer_sample_url"),
   language: text("language"),
   isCustom: boolean("is_custom").default(true),
 });
@@ -61,12 +60,16 @@ export const daftarScouts = pgTable("daftar_scouts", {
 export const scoutDocuments = pgTable("scout_documents", {
   docId: uuid("doc_id").defaultRandom().primaryKey(),
   docUrl: text("doc_url").notNull(),
-  docTypeL: text("doc_type"),
+  docType: text("doc_type"),
+  size: integer("size"), // size in bytes or kb, you can convert accordingly
   scoutId: varchar("scout_id", { length: 255 }).references(
     () => scouts.scoutId
   ),
+  daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id),
+  uploadedBy: varchar("uploaded_by", { length: 255 }).references(
+    () => users.id
+  ), // assuming users table
   isPrivate: boolean("is_private").default(false),
-  uploadedBy: varchar("uploaded_by", { length: 255 }),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
 });
 

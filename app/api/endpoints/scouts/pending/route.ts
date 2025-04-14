@@ -92,28 +92,6 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Check scout questions
-    const questionsEmpty = await db
-      .select({
-        scoutAnswerSampleUrl: scoutQuestions.scoutAnswerSampleUrl,
-        language: scoutQuestions.language,
-      })
-      .from(scoutQuestions)
-      .where(eq(scoutQuestions.scoutId, scoutId));
-
-    for (const q of questionsEmpty) {
-      if (!q.scoutAnswerSampleUrl?.trim()) {
-        issues.push(
-          "Please ensure the field in scoutAnswerSampleUrl of scoutQuestions"
-        );
-        break;
-      }
-      if (!q.language?.trim()) {
-        issues.push("Please ensure the field in language of scoutQuestions");
-        break;
-      }
-    }
-
     // Check approvals list
     const listOfUsers = await db
       .select({

@@ -47,6 +47,7 @@ export default function InvestorPitchPage() {
     if (res.status == 200) {
       const { url } = await res.json();
       setVideoUrl(url);
+      console.log(url);
     } else {
       toast({
         title: "Fetch Failed",
@@ -57,7 +58,7 @@ export default function InvestorPitchPage() {
   }
   useEffect(() => {
     fetchInvestorsPitch();
-  }, [scoutId]);
+  }, []);
 
   const handleUpload = () => {
     fileInputRef.current?.click();
@@ -134,7 +135,7 @@ export default function InvestorPitchPage() {
                 <div className="border-2 flex flex-col border-dashed border-gray-700 rounded-lg p-6">
                   <div className="space-y-4 animate-in fade-in-50 duration-300">
                     <video
-                      src="/videos/sample-pitch.mp4"
+                      src={videoUrl || "/dummyVideo.mp4"}
                       controls
                       poster="/images/sample-pitch-thumbnail.jpg"
                       className="w-full rounded-[0.35rem] aspect-video"

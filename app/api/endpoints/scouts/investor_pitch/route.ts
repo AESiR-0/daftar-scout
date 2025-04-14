@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { url, scoutId } = body;
+    const { videoUrl, scoutId } = body;
 
     if (!scoutId) {
       return NextResponse.json(
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const updatedScout = await db
       .update(scouts)
       .set({
-        investorPitch: url || null,
+        investorPitch: videoUrl,
       })
       .where(eq(scouts.scoutId, scoutId))
       .returning();

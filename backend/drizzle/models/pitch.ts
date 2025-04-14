@@ -29,6 +29,7 @@ export const pitch = pgTable("pitch", {
   isCompleted: boolean("is_completed").default(false),
   teamSize: integer("team_size"),
   isPaid: boolean("is_paid").default(false),
+  investorStatus: text("investor_status").default("inbox"),
 });
 
 // 🚀 Focus Sectors
@@ -100,7 +101,8 @@ export const pitchDelete = pgTable("pitch_delete", {
   founderId: varchar("founder_id", { length: 255 }).references(() => users.id),
   isAgreed: boolean("is_agreed").default(false),
 });
-// 📊 Investor Pitch (NEW MODEL)
+
+
 export const investorPitch = pgTable("investor_pitch", {
   id: serial("id").primaryKey(),
   pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
@@ -124,7 +126,7 @@ export const investorPitch = pgTable("investor_pitch", {
   deal: boolean("deal").default(false),
 });
 
-// Founders Team
+
 export const pitchTeam = pgTable("pitch_team", {
   id: serial("id").primaryKey(),
   userId: text("user_id").references(() => users.id),

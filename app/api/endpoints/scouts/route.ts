@@ -72,14 +72,11 @@ export async function GET(req: NextRequest) {
         })
         .from(scouts)
         .where(
-          and(
-            eq(scouts.isArchived, true),
-            or(
-              not(eq(scouts.status, "planning")),
-              not(eq(scouts.status, "Planning")),
-              not(eq(scouts.status, "scheduled")),
-              not(eq(scouts.status, "Scheduled"))
-            )
+          or(
+            not(eq(scouts.status, "planning")),
+            not(eq(scouts.status, "Planning")),
+            not(eq(scouts.status, "scheduled")),
+            not(eq(scouts.status, "Scheduled"))
           )
         );
     } else {

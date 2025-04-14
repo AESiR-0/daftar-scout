@@ -8,13 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface InvestorProfileProps {
   investor: {
-    name: string;
+    daftarName: string;
     structure: string;
+    onDaftarSince: string;
     website: string;
     location: string;
-    onDaftarSince: string;
     bigPicture: string;
-    imageUrl?: string;
+    image?: string;
   };
 }
 
@@ -35,14 +35,14 @@ export function InvestorProfile({ investor }: InvestorProfileProps) {
   return (
     <HoverCard>
       <HoverCardTrigger className="underline hover:underline cursor-pointer">
-        {investor.name}
+        {investor.daftarName}
       </HoverCardTrigger>
       <HoverCardContent className="w-72">
         <Avatar className="h-20 w-20 mb-5 text-3xl">
-          {investor.imageUrl ? (
-            <AvatarImage src={investor.imageUrl} alt={investor.name} />
+          {investor.image ? (
+            <AvatarImage src={investor.image} alt={investor.website} />
           ) : (
-            <AvatarFallback>{getInitials(investor.name)}</AvatarFallback>
+            <AvatarFallback>{getInitials(investor.daftarName)}</AvatarFallback>
           )}
         </Avatar>
         <div>

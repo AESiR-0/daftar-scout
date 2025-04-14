@@ -1,26 +1,5 @@
 import { ScoutSidebar } from "@/components/navbar/scout-sidebar";
 
-async function getScoutStatus({ scoutId }: { scoutId: string }) {
-  const res = await fetch(
-    `${process.env.BASE_URL}/api/endpoints/scouts/getStatus?scoutId=${scoutId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  if (!(res.status === 200)) {
-    console.error("Failed to fetch scout status", res.status);
-    return res.json();
-  }
-
-  const json = await res.json();
-  console.log(json);
-  return json;
-}
-
 export default async function ScoutLayout({
   children,
   params,
@@ -29,6 +8,7 @@ export default async function ScoutLayout({
   params: { slug: string };
 }) {
   const { slug } = await params;
+
   const res = await fetch(
     `${process.env.BASE_URL}/api/endpoints/scouts/getStatus?scoutId=${slug}`,
     {

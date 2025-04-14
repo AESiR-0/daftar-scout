@@ -61,6 +61,7 @@ export const daftarInvestors = pgTable("daftar_investors", {
   designation: varchar("designation", { length: 100 }),
   joinDate: timestamp("join_date").defaultNow(),
   joinType: varchar("join_type", { length: 50 }).default("invite"),
+  analysiOn: timestamp("analysis_date"),
 });
 
 export const daftarInvestorsRelations = relations(

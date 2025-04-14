@@ -35,7 +35,9 @@ export async function GET(req: NextRequest) {
       .from(pitchTeam)
       .where(eq(pitchTeam.userId, dbUser.id));
 
-    const pitchIds = userPitchTeams.map((team) => team.pitchId).filter((id): id is string => id !== null);
+    const pitchIds = userPitchTeams
+      .map((team) => team.pitchId)
+      .filter((id): id is string => id !== null);
 
     // Fetch pitches only where user is on the team
     const userPitches = await db

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronDown, ChevronRight, Share2 } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
@@ -13,12 +13,13 @@ import { InsightsDialog } from "../dialogs/insights-dialog";
 import { usePathname } from "next/navigation";
 
 interface Pitch {
-  id: string;
+  pitchId: string;
   pitchName: string;
   daftarName: string;
   Believer: string;
   averageNPS: string;
   interestedCount: string;
+  status: string;
 }
 
 interface Section {
@@ -42,14 +43,49 @@ export function ScoutSidebar({
   const [launchProgramOpen, setLaunchProgramOpen] = useState(false);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [isShowScroll, setIsShowScroll] = useState(true);
+  const [sections, setSections] = useState<Section[]>([]);
   const pathname = usePathname();
   const isStudio = pathname.includes("studio");
-
+  const scoutId = pathname.split("/")[3];
   useEffect(() => {
     if (pathname.includes("planning") || pathname.includes("scheduled")) {
       setIsShowScroll(false);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          `/api/endpoints/scouts/pitchesList?scoutId=${scoutId}`
+        );
+        const data: Pitch[] = await res.json().then((res) => res.data);
+
+        const grouped: Record<string, Pitch[]> = {};
+        await data.map((pitch) => {
+          if (!grouped[pitch.status]) {
+            grouped[pitch.status] = [];
+          }
+          grouped[pitch.status].push(pitch);
+        });
+
+        const mappedSections: Section[] = Object.entries(grouped).map(
+          ([status, pitches], idx) => ({
+            id: (idx + 1).toString(),
+            title: status,
+            pitches,
+          })
+        );
+
+        setSections(mappedSections);
+      } catch (err) {
+        console.error("Failed to fetch pitches:", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
       prev.includes(sectionId)
@@ -58,17 +94,14 @@ export function ScoutSidebar({
     );
   };
 
-  // Format scout name for display
   const scoutName = scoutSlug === undefined ? "Test" : scoutSlug[0];
-  const scoutId = scoutSlug[1];
-  if (isStudio) {
-    return null;
-  }
+
+  if (isStudio) return null;
+
   if (isPlanning) {
     return (
       <div className="w-[16rem] p-4 h-full">
         <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
-          {/* Scout Name Header */}
           <div className="border-b shrink-0">
             <div className="border-b px-4 py-4">
               <h2 className="text-[14px] font-semibold">{scoutName}</h2>
@@ -85,13 +118,13 @@ export function ScoutSidebar({
               </Link>
             </div>
           </div>
-
-          {/* Empty flex space */}
           <div className="flex-1" />
         </div>
       </div>
     );
-  } else if (isScheduling) {
+  }
+
+  if (isScheduling) {
     return (
       <div className="w-[16rem]  p-4  h-full">
         <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
@@ -100,15 +133,15 @@ export function ScoutSidebar({
               <h2 className="text-[14px] font-semibold">{scoutName}</h2>
             </div>
           </div>
-          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm"></div>
+          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm" />
         </div>
       </div>
     );
   }
+
   return (
-    <div className="w-[16rem]  py-4 pl-4 h-full">
+    <div className="w-[16rem] py-4 pl-4 h-full">
       <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
-        {/* Scout Name Header */}
         <div className="border-b shrink-0">
           <div className="border-b px-4 py-4">
             <h2 className="text-[14px] font-semibold">{scoutName}</h2>
@@ -123,7 +156,6 @@ export function ScoutSidebar({
                 Studio
               </Button>
             </Link>
-
             <Button
               variant="link"
               size="sm"
@@ -135,12 +167,11 @@ export function ScoutSidebar({
           </div>
         </div>
 
-        {/* Scrollable Sections */}
         {isShowScroll && (
           <ScrollArea className="flex-1">
             <div className="space-y-2">
-              {sections.map((section) => (
-                <div key={section.id}>
+              {sections.map((section, index) => (
+                <div key={index}>
                   <Button
                     variant="ghost"
                     className="w-full px-2 justify-between font-normal "
@@ -152,7 +183,7 @@ export function ScoutSidebar({
                       ) : (
                         <ChevronRight className="h-4 w-4" />
                       )}
-                      {section.title}{" "}
+                      {section.title}
                       <Badge variant="secondary">
                         {section.pitches.length}
                       </Badge>
@@ -160,11 +191,11 @@ export function ScoutSidebar({
                   </Button>
 
                   {expandedSections.includes(section.id) && (
-                    <div className="mx-4 space-y-2 mt-2">
-                      {section.pitches.map((pitch) => (
+                    <div key={section.id} className="mx-4 space-y-2 mt-2">
+                      {section.pitches.map((pitch, index) => (
                         <Link
-                          key={pitch.id}
-                          href={`/investor/scout/${scoutSlug}/details/${pitch.id}`}
+                          key={index}
+                          href={`/investor/scout/${scoutId}/details/${pitch.pitchId}`}
                         >
                           <Card className="hover:bg-muted/50 mt-1 transition-colors">
                             <CardContent className="p-4 space-y-2">
@@ -190,7 +221,6 @@ export function ScoutSidebar({
           </ScrollArea>
         )}
 
-        {/* Action Buttons */}
         <div className="px-4 py-2 border-t">
           <Button
             size="sm"
@@ -209,32 +239,8 @@ export function ScoutSidebar({
           >
             End Scouting
           </Button>
-
-          {/* <Button
-          variant="outline"
-          size="sm"
-          className="w-full justify-start"
-          onClick={() => setInsightsOpen(true)}
-        >
-          Insights
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full justify-start"
-          onClick={() => {
-            const url = window.location.href;
-            navigator.clipboard.writeText(url).then(() => {
-              alert("Link copied to clipboard!");
-            });
-          }}
-        >
-          <Share2 className="h-4 w-4 mr-2" />
-          Share
-        </Button> */}
         </div>
 
-        {/* Dialogs */}
         <EndScoutingDialog
           open={endScoutingOpen}
           onOpenChange={setEndScoutingOpen}
@@ -242,7 +248,6 @@ export function ScoutSidebar({
             console.log("Ending scouting process...");
           }}
         />
-
         <UpdatesDialog
           open={updatesOpen}
           onOpenChange={setUpdatesOpen}
@@ -254,7 +259,6 @@ export function ScoutSidebar({
             console.log("Deleting update:", id);
           }}
         />
-
         <LaunchProgramDialog
           open={launchProgramOpen}
           onOpenChange={setLaunchProgramOpen}
@@ -262,7 +266,6 @@ export function ScoutSidebar({
             console.log("Submitting feedback:", feedback);
           }}
         />
-
         <InsightsDialog open={insightsOpen} onOpenChange={setInsightsOpen} />
       </div>
     </div>

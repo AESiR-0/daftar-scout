@@ -9,11 +9,17 @@ export async function GET(req: NextRequest) {
   if (!scoutId) {
     return NextResponse.json({ message: "Missing scoutId" }, { status: 400 });
   }
-
-  const scoutStatus = await db
-    .select({ name: scouts.scoutName, status: scouts.status })
-    .from(scouts)
-    .where(eq(scouts.scoutId, scoutId));
-  const { name, status } = scoutStatus[0];
-  return NextResponse.json({ name, status }, { status: 200 });
+  try {
+    const scoutStatus = await db
+      .select({ name: scouts.scoutName, status: scouts.status })
+      .from(scouts)
+      .where(eq(scouts.scoutId, scoutId));
+    const { name, status } = scoutStatus[0];
+    return NextResponse.json({ name, status }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json(
+      { message: "Scout not found : ", e },
+      { status: 500 }
+    );
+  }
 }

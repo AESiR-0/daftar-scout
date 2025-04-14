@@ -13,15 +13,12 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 const DUMMY_EMAIL = process.env.DUMMY_EMAIL || "pratham@daftaros.com";
 const DUMMY_PASSWORD = process.env.DUMMY_PASSWORD || "Daftarcore123$"; // make sure this user exists in Supabase
 
-export async function uploadInvestorsPitchVideo(file: File, scoutId: string) {
+export async function uploadInvestorPitchDocument(file: File, scoutId: string) {
   // 1. Sign in the dummy user
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: DUMMY_EMAIL,
     password: DUMMY_PASSWORD,
   });
-
-  const user = await supabase.auth.getUser();
-  console.log(user); // should not be null
 
   if (signInError) {
     throw new Error("Failed to sign in: " + signInError.message);
@@ -35,10 +32,10 @@ export async function uploadInvestorsPitchVideo(file: File, scoutId: string) {
   }
 
   // 3. Upload
-  const filePath = `investor-pitch/${scoutId}-${Date.now()}-${file.name}`;
+  const filePath = `investor-docs/${scoutId}-${Date.now()}-${file.name}`;
 
   const { data, error } = await supabase.storage
-    .from("videos")
+    .from("documents") // 👈 new bucket
     .upload(filePath, file, {
       cacheControl: "3600",
       upsert: false,
@@ -50,7 +47,7 @@ export async function uploadInvestorsPitchVideo(file: File, scoutId: string) {
 
   // 4. Optional: get public URL (if allowed)
   const { data: publicUrlData } = supabase.storage
-    .from("videos")
+    .from("documents")
     .getPublicUrl(filePath);
 
   return publicUrlData.publicUrl;
