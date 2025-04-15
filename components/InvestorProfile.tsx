@@ -46,7 +46,7 @@ export function InvestorProfile({ investor }: InvestorProfileProps) {
           )}
         </Avatar>
         <div>
-          <h4 className="text-sm font-medium">{investor.name}</h4>
+          {/* <h4 className="text-sm font-medium">{investor.name}</h4> */}
           <p className="text-xs text-muted-foreground">{investor.structure}</p>
         </div>
 

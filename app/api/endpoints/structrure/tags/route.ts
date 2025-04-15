@@ -35,7 +35,9 @@ export async function GET(req: NextRequest) {
 
     if (!collaborators.length) return NextResponse.json([]);
 
-    const collaboratorIds = collaborators.map((d) => d.collaboratorId);
+    const collaboratorIds = collaborators
+      .map((d) => d.collaboratorId)
+      .filter((id): id is string => id !== null);
 
     // Get structures of all collaborators
     const structures = await db

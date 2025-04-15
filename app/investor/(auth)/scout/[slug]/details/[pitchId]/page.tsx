@@ -465,11 +465,10 @@ export default function PitchDetailsPage() {
     }, {} as Record<string, number>);
 
     const languageCount = teamMembers.reduce((acc, member) => {
-      // member.forEach((lang) => {
-      //   acc[lang] = (acc[lang] || 0) + 1;
-      // });
-      // return acc;
-      return 2;
+      member.language.forEach((lang) => {
+        acc[lang] = (acc[lang] || 0) + 1;
+      });
+      return acc;
     }, {} as Record<string, number>);
 
     const averageAge =
@@ -564,9 +563,9 @@ export default function PitchDetailsPage() {
           )}
           {activeSection === "documents" && (
             <DocumentsSection
-              documents={pitchDetails.fields.documentation}
-              onUpload={handleUploadDocument}
-              onDelete={handleDeleteDocument}
+            // // documents={pitchDetails.fields.documentation}
+            // onUpload={handleUploadDocument}
+            // onDelete={handleDeleteDocument}
             />
           )}
           {activeSection === "founders-team" && (
@@ -650,13 +649,13 @@ export default function PitchDetailsPage() {
           )}
           {activeSection === "investors-analysis" && (
             <TeamAnalysisSection
-              teamAnalysis={pitchDetails.fields.teamAnalysis}
-              currentProfile={currentProfile}
-              onSubmitAnalysis={handleSubmitAnalysis}
+            // currentProfile={currentProfile}
             />
           )}
           {activeSection === "make-offer" && (
-            <MakeOfferSection onMakeOffer={handleMakeOffer} />
+            <MakeOfferSection
+            // onMakeOffer={handleMakeOffer}
+            />
           )}
         </div>
       </div>

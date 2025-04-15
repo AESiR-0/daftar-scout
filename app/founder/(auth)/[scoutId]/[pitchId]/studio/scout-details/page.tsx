@@ -22,6 +22,7 @@ interface Update {
 }
 
 interface Collaboration {
+  daftarName: string;
   name: string;
   structure: string;
   website: string;
@@ -139,90 +140,93 @@ export default function Page() {
                 </div>
 
                 <div className="mt-2 space-y-2">
-                  <div className="text-sm text-muted-foreground">
-                    Collaboration: <InvestorProfile investor={collaboration} />
-                  </div>
-                  <p className="text-xs text-muted-foreground font-bold">
-                    Last date for pitch: {lastDayToPitch}
-                  </p>
+                  Collaboration:{" "}
+                  <InvestorProfile
+                    investor={{
+                      ...collaboration,
+                      daftarName: collaboration.name,
+                    }}
+                  />
+                  Collaboration: <InvestorProfile investor={collaboration} />
                 </div>
+                <p className="text-xs text-muted-foreground font-bold">
+                  Last date for pitch: {lastDayToPitch}
+                </p>
               </div>
             </div>
-            <div className=" ml-6 pl-3 h-full">
-              {/* Tabs Section */}
-              <Tabs defaultValue="details" className="space-y-4">
-                <TabsList>
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="faqs" className="flex items-center gap-1">
-                    FAQs
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
-                      {faqs.length}
-                    </span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="updates"
-                    className="flex items-center gap-1"
-                  >
-                    Updates
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
-                      {updates.length}
-                    </span>
-                  </TabsTrigger>
-                </TabsList>
+          </div>
+          <div className=" ml-6 pl-3 h-full">
+            {/* Tabs Section */}
+            <Tabs defaultValue="details" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="faqs" className="flex items-center gap-1">
+                  FAQs
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
+                    {faqs.length}
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="updates"
+                  className="flex items-center gap-1"
+                >
+                  Updates
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem] ">
+                    {updates.length}
+                  </span>
+                </TabsTrigger>
+              </TabsList>
 
-                <TabsContent value="details" className="border-l-4 px-5 py-5">
-                  <div className="p-2 pt-0  space-y-3">
-                    {Object.entries(scout.details).map(([key, value]) => (
-                      <div key={key} className="rounded-[0.35rem]  ">
-                        <p className="text-sm text-muted-foreground ">
-                          {key}: <span className="font-medium">{value}</span>
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
+              <TabsContent value="details" className="border-l-4 px-5 py-5">
+                <div className="p-2 pt-0  space-y-3">
+                  {Object.entries(scout.details).map(([key, value]) => (
+                    <div key={key} className="rounded-[0.35rem]  ">
+                      <p className="text-sm text-muted-foreground ">
+                        {key}: <span className="font-medium">{value}</span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
 
-                <TabsContent value="faqs" className="border-l-4 px-5 py-5">
-                  <div className="space-y-4">
-                    {faqs.map((faq, index) => (
-                      <div key={index} className="space-y-2">
-                        <h3 className="text-muted-foreground">
-                          {faq.question}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
+              <TabsContent value="faqs" className="border-l-4 px-5 py-5">
+                <div className="space-y-4">
+                  {faqs.map((faq, index) => (
+                    <div key={index} className="space-y-2">
+                      <h3 className="text-muted-foreground">{faq.question}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
 
-                <TabsContent value="updates" className="border-l-4 px-5 py-5">
-                  <div className="space-y-2   ">
-                    {updates.map((update, index) => (
-                      <div
-                        key={index}
-                        className="p-4 pb-0 pt-0 rounded-[0.35rem]  "
-                      >
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(update.updateDate).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            }
-                          )}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {update.updateInfo}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
+              <TabsContent value="updates" className="border-l-4 px-5 py-5">
+                <div className="space-y-2   ">
+                  {updates.map((update, index) => (
+                    <div
+                      key={index}
+                      className="p-4 pb-0 pt-0 rounded-[0.35rem]  "
+                    >
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(update.updateDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          }
+                        )}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {update.updateInfo}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </ScrollArea>
       </div>

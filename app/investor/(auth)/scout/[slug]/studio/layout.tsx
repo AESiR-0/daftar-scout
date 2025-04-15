@@ -1,4 +1,3 @@
-import { StudioNav } from "@/components/navbar/studio-nav";
 import { StudioSidebar } from "@/components/navbar/studio-sidebar";
 import { DaftarProvider } from "@/lib/context/daftar-context";
 

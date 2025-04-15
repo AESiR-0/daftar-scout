@@ -33,7 +33,10 @@ export async function GET(req: NextRequest) {
       .from(daftar)
       .where(gt(daftar.createdAt, sql`NOW() - INTERVAL '30 days'`))
       .leftJoin(pitch, gt(pitch.createdAt, sql`NOW() - INTERVAL '30 days'`))
-      .leftJoin(scouts, gt(scouts.scoutCreatedAt, sql`NOW() - INTERVAL '30 days'`));
+      .leftJoin(
+        scouts,
+        gt(scouts.scoutCreatedAt, sql`NOW() - INTERVAL '30 days'`)
+      );
 
     // Calculate ratio of listed to new (avoiding division by zero)
     const ratioListedToNew = {
@@ -46,7 +49,7 @@ export async function GET(req: NextRequest) {
     const [askedCount] = await db
       .select({ asked: sql<number>`COUNT(*)`.mapWith(Number) })
       .from(pitch)
-      .where(eq(pitch.askForInvestor, true));
+      .where(eq(pitch.askForInvestor, "true"));
 
     // Count "Tagged" (Focus Sectors linked to pitches)
     const [taggedCount] = await db

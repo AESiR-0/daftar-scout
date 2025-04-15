@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+  useEffect,
+  useState,
+} from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -187,23 +195,57 @@ export default function Page() {
 
                 <TabsContent value="updates" className="border-l-4 px-5 py-5">
                   <div className="space-y-2">
-                    {transformedScout.updates.map((update, index) => (
-                      <div
-                        key={index}
-                        className="p-4 pb-0 pt-0 rounded-[0.35rem]"
-                      >
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(update.date).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {update.content}
-                        </p>
-                      </div>
-                    ))}
+                    {transformedScout.updates.map(
+                      (
+                        update: {
+                          date: string | number | Date;
+                          content:
+                            | string
+                            | number
+                            | bigint
+                            | boolean
+                            | ReactElement<
+                                unknown,
+                                string | JSXElementConstructor<any>
+                              >
+                            | Iterable<ReactNode>
+                            | ReactPortal
+                            | Promise<
+                                | string
+                                | number
+                                | bigint
+                                | boolean
+                                | ReactPortal
+                                | ReactElement<
+                                    unknown,
+                                    string | JSXElementConstructor<any>
+                                  >
+                                | Iterable<ReactNode>
+                                | null
+                                | undefined
+                              >
+                            | null
+                            | undefined;
+                        },
+                        index: Key | null | undefined
+                      ) => (
+                        <div
+                          key={index}
+                          className="p-4 pb-0 pt-0 rounded-[0.35rem]"
+                        >
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(update.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {update.content}
+                          </p>
+                        </div>
+                      )
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>

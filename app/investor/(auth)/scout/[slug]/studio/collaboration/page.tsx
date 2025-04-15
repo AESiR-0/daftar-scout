@@ -169,7 +169,7 @@ export default function CollaborationPage() {
                             location: collaborator.daftarDetails.location,
                             bigPicture: collaborator.daftarDetails.bigPicture,
                             onDaftarSince: collaborator.addedAt,
-                            imageUrl: "https://github.com/shadcn.png",
+                            // imageUrl: "https://github.com/shadcn.png",
                           }}
                         />
                         <p className="text-xs text-muted-foreground">
@@ -200,8 +200,8 @@ export default function CollaborationPage() {
                       <br />
                       <br />
                       Since they've been working in the area for a long time,
-                      they understand the local ecosystem and speak the
-                      language founders speak.
+                      they understand the local ecosystem and speak the language
+                      founders speak.
                       <br />
                       <br />
                       They're typically incubators, accelerators, angels,

@@ -52,9 +52,7 @@ interface TeamAnalysisSectionProps {
   pitchId: string;
 }
 
-export function TeamAnalysisSection({
-  currentProfile,
-}: TeamAnalysisSectionProps) {
+export function TeamAnalysisSection() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
   const pitchId = pathname.split("/")[5];
