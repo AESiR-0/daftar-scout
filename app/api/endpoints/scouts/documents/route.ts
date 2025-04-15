@@ -1,11 +1,10 @@
 import { db } from "@/backend/database";
 import { scoutDocuments, daftarScouts } from "@/backend/drizzle/models/scouts";
 import { users } from "@/backend/drizzle/models/users";
-import { daftarInvestors } from "@/backend/drizzle/models/daftar";
+import { daftarInvestors, daftar } from "@/backend/drizzle/models/daftar";
 import { auth } from "@/auth";
 import { eq, and, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
-
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -28,6 +27,7 @@ export async function GET(req: Request) {
         isPrivate: scoutDocuments.isPrivate,
         uploadedAt: scoutDocuments.uploadedAt,
         uploadedBy: scoutDocuments.uploadedBy,
+        daftarId: scoutDocuments.daftarId,
       })
       .from(scoutDocuments)
       .where(eq(scoutDocuments.scoutId, scoutId));
@@ -40,7 +40,9 @@ export async function GET(req: Request) {
     }
 
     // Fetch user details
-    const userIds = documents.map((doc) => doc.uploadedBy).filter((id) => id !== null);
+    const userIds = documents
+      .map((doc) => doc.uploadedBy)
+      .filter((id): id is string => !!id);
     const usersResult = await db
       .select({
         id: users.id,
@@ -52,15 +54,17 @@ export async function GET(req: Request) {
 
     const userMap = new Map(usersResult.map((user) => [user.id, user]));
 
-    // Fetch daftar name
-    const daftarIds = [...new Set(documents.map((doc) => doc.daftarId))];
+    // Fetch daftar name using correct table
+    const daftarIds = [...new Set(documents.map((doc) => doc.daftarId))].filter(
+      (id): id is string => id !== null
+    );
     const daftarResult = await db
       .select({
-        id: daftarInvestors.daftarId,
-        name: daftarInvestors.name,
+        id: daftar.id,
+        name: daftar.name,
       })
-      .from(daftarInvestors)
-      .where(daftarInvestors.daftarId.in(daftarIds));
+      .from(daftar)
+      .where(inArray(daftar.id, daftarIds));
 
     const daftarMap = new Map(
       daftarResult.map((daftar) => [daftar.id, daftar.name])
@@ -74,8 +78,8 @@ export async function GET(req: Request) {
       size: doc.size,
       isPrivate: doc.isPrivate,
       uploadedAt: doc.uploadedAt,
-      uploadedBy: userMap.get(doc.uploadedBy) || null,
-      daftarName: daftarMap.get(doc.daftarId) || null,
+      uploadedBy: doc.uploadedBy ? userMap.get(doc.uploadedBy) || null : null,
+      daftarName: doc.daftarId ? daftarMap.get(doc.daftarId) || null : null,
     }));
 
     return NextResponse.json(response, { status: 200 });

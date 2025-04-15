@@ -24,7 +24,6 @@ export async function GET(req: NextRequest) {
         scoutAnswerSampleUrl: scoutQuestions.scoutAnswerSampleUrl,
         language: scoutQuestions.language,
         isCustom: scoutQuestions.isCustom,
-        isSample: scoutQuestions.isSample,
       })
       .from(scoutQuestions)
       .where(eq(scoutQuestions.scoutId, scoutId));
