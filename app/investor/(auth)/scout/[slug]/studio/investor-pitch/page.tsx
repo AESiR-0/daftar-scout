@@ -91,11 +91,40 @@ export default function InvestorPitchPage() {
   const handleUploadVideo = async () => {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("scoutId", scoutId);
 
     try {
-      const url = await uploadInvestorsPitchVideo(file, scoutId); // `scoutId` must be in scope
+      const res = await fetch("/api/endpoints/compress", {
+        method: "POST",
+        body: formData,
+      });
 
-      const res = await fetch("/api/endpoints/scouts/investor_pitch", {
+      const data = await res.json();
+      if (!data.file) throw new Error("Compression failed");
+
+      // Convert base64 back to File object
+      const byteCharacters = atob(data.file);
+      const byteArrays = [];
+
+      for (let i = 0; i < byteCharacters.length; i += 512) {
+        const slice = byteCharacters.slice(i, i + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let j = 0; j < slice.length; j++) {
+          byteNumbers[j] = slice.charCodeAt(j);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+
+      const compressedBlob = new Blob(byteArrays, { type: "video/mp4" });
+      const compressedFile = new File([compressedBlob], file.name, {
+        type: "video/mp4",
+      });
+      const url = await uploadInvestorsPitchVideo(compressedFile, scoutId); // `scoutId` must be in scope
+
+      const res2 = await fetch("/api/endpoints/scouts/investor_pitch", {
         method: "POST",
         body: JSON.stringify({ scoutId, videoUrl: url }),
         headers: {
@@ -103,7 +132,7 @@ export default function InvestorPitchPage() {
         },
       });
 
-      if (res.status === 200) {
+      if (res2.status === 200) {
         toast({
           title: "Video uploaded",
           description: "Your pitch video has been uploaded successfully",

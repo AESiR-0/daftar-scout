@@ -32,7 +32,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import formatDate from "@/lib/formatDate";
-import { StudioCard } from "@/app/founder/(auth)/[pitchId]/studio/components/layout/studio-card";
 
 interface MeetingDetails {
   agenda: string;
@@ -86,7 +85,7 @@ export default function MeetingsPage() {
   };
 
   return (
-    <StudioCard>
+    <>
       <ScrollArea className="h-[calc(100vh-10rem)]">
         <div className="space-y-6 mx-auto">
           <div className="flex items-center justify-between">
@@ -224,6 +223,6 @@ export default function MeetingsPage() {
         open={scheduleMeetingOpen}
         onOpenChange={setScheduleMeetingOpen}
       />
-    </StudioCard>
+    </>
   );
 }
