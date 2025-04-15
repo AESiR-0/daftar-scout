@@ -95,7 +95,7 @@ export async function PATCH(req: NextRequest) {
         name: firstName,
         lastName,
         gender,
-        dob: new Date(dateOfBirth),
+        dob: dateOfBirth ? new Date(dateOfBirth).toISOString() : null,
         countryCode,
         number,
       })
