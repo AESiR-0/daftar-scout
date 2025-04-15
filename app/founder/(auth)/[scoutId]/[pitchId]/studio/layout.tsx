@@ -3,12 +3,9 @@ import { PitchProvider } from "@/contexts/PitchContext";
 
 export default async function StudioLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: { slug: string };
 }) {
-  const { slug } = await params;
   return (
     <div className="flex min-h-screen">
       <StudioSidebar />
