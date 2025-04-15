@@ -3,9 +3,7 @@ import { db } from "@/backend/database";
 import { pitchDelete } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 
-export async function GET(
-  req: NextRequest
-) {
+export async function GET(req: NextRequest) {
   try {
     const pitchId = req.headers.get("pitch_id");
 
@@ -38,9 +36,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  req: NextRequest
-) {
+export async function POST(req: NextRequest) {
   try {
     const postBody = await req.json();
     const { pitchId } = await postBody;
@@ -75,7 +71,12 @@ export async function POST(
     const existingRequest = await db
       .select()
       .from(pitchDelete)
-      .where(and(eq(pitchDelete.pitchId, pitchId), eq(pitchDelete.founderId, founderId)))
+      .where(
+        and(
+          eq(pitchDelete.pitchId, pitchId),
+          eq(pitchDelete.founderId, founderId)
+        )
+      )
       .limit(1);
 
     if (existingRequest.length > 0) {
@@ -85,7 +86,12 @@ export async function POST(
         .set({
           isAgreed,
         })
-        .where(and(eq(pitchDelete.pitchId, pitchId), eq(pitchDelete.founderId, founderId)));
+        .where(
+          and(
+            eq(pitchDelete.pitchId, pitchId),
+            eq(pitchDelete.founderId, founderId)
+          )
+        );
     } else {
       // Insert new deletion request
       await db.insert(pitchDelete).values({
@@ -96,7 +102,10 @@ export async function POST(
     }
 
     return NextResponse.json(
-      { status: "success", message: "Pitch delete request processed successfully" },
+      {
+        status: "success",
+        message: "Pitch delete request processed successfully",
+      },
       { status: 200 }
     );
   } catch (error) {
@@ -108,12 +117,10 @@ export async function POST(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { pitch_id: string } }
-) {
+export async function DELETE(req: NextRequest) {
   try {
-    const pitchId = params.pitch_id;
+    const { searchParams } = new URL(req.url);
+    const pitchId = searchParams.get("pitchId");
 
     // Validate path parameter
     if (!pitchId) {
@@ -139,7 +146,12 @@ export async function DELETE(
     const existingRequest = await db
       .select()
       .from(pitchDelete)
-      .where(and(eq(pitchDelete.pitchId, pitchId), eq(pitchDelete.founderId, founderId)))
+      .where(
+        and(
+          eq(pitchDelete.pitchId, pitchId),
+          eq(pitchDelete.founderId, founderId)
+        )
+      )
       .limit(1);
 
     if (existingRequest.length === 0) {
@@ -152,10 +164,18 @@ export async function DELETE(
     // Delete the request
     await db
       .delete(pitchDelete)
-      .where(and(eq(pitchDelete.pitchId, pitchId), eq(pitchDelete.founderId, founderId)));
+      .where(
+        and(
+          eq(pitchDelete.pitchId, pitchId),
+          eq(pitchDelete.founderId, founderId)
+        )
+      );
 
     return NextResponse.json(
-      { status: "success", message: "Pitch delete request removed successfully" },
+      {
+        status: "success",
+        message: "Pitch delete request removed successfully",
+      },
       { status: 200 }
     );
   } catch (error) {
