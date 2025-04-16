@@ -137,7 +137,8 @@ export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
               <div className="flex justify-center">
                 <Button 
                   onClick={handleSubmit}
-                  className="bg-red-600 hover:bg-red-700 rounded-[0.35rem] text-white"
+                  variant="destructive"
+                  className=" rounded-[0.35rem] text-white"
                 >
                   Report
                 </Button>

@@ -370,12 +370,12 @@ export function MakeOfferSection() {
                 onClick={() => handleSendOffer(offerMessage)}
                 disabled={!offerMessage.trim()}
                 variant="outline"
-                className="rounded-[0.35rem]"
+                className="rounded-[0.35rem] bg-blue-500"
               >
                 Send
               </Button>
 
-              <Button variant="outline" 
+              <Button variant="destructive" 
                 onClick={() => handleDeclineOffer(offerMessage)}
                 disabled={!offerMessage.trim()}
                 className="rounded-[0.35rem]"

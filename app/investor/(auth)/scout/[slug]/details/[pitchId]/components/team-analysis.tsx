@@ -133,12 +133,12 @@ export function TeamAnalysisSection() {
       : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-10">
       <div className="flex justify-between gap-10">
         {/* Left side - Your Analysis */}
         <div className="w-1/2">
           <Card className="border-none bg-[#0e0e0e]">
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>How strongly do you believe in the startup?</Label>

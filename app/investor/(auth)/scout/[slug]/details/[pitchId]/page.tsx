@@ -19,6 +19,7 @@ import { MakeOfferSection } from "./components/make-offer-section";
 import { DeclinePitchDialog } from "./components/decline-pitch-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PieChart } from "@/components/ui/charts";
+import { Loader2 } from "lucide-react";
 
 // Import ApexCharts with NoSSR
 const Chart = dynamic(() => import("react-apexcharts"), {
@@ -465,10 +466,11 @@ export default function PitchDetailsPage() {
     }, {} as Record<string, number>);
 
     const languageCount = teamMembers.reduce((acc, member) => {
-      member.language.forEach((lang) => {
-        acc[lang] = (acc[lang] || 0) + 1;
-      });
-      return acc;
+      // member.language.forEach((lang) => {
+      //   acc[lang] = (acc[lang] || 0) + 1;
+      // });
+      // return acc;
+      return 2;
     }, {} as Record<string, number>);
 
     const averageAge =
@@ -490,8 +492,8 @@ export default function PitchDetailsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-10">
-        <div className="h-64 bg-muted animate-pulse rounded-lg" />
+      <div className="container flex justify-center align-center m-10">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
@@ -544,8 +546,9 @@ export default function PitchDetailsPage() {
         </div>
         <div className="flex gap-2 mr-10">
           <Button
-            variant="outline"
+            variant="destructive"
             size="sm"
+            className="rounded-[0.35rem]"
             onClick={() => setReportDialogOpen(true)}
           >
             Report
@@ -556,8 +559,7 @@ export default function PitchDetailsPage() {
           onOpenChange={setReportDialogOpen}
         />
       </div>
-      <div className="container mx-auto">
-        <div className="mt-10">
+      <div className="container mx-auto mt-10">
           {activeSection === "investors-note" && (
             <InvestorsNote note={pitchDetails.fields.investorsNote} />
           )}
@@ -569,11 +571,11 @@ export default function PitchDetailsPage() {
             />
           )}
           {activeSection === "founders-team" && (
-            <div className="space-y-6">
+            <div className="space-y-6 mt-4">
               <Card className="border-none bg-[#0e0e0e]">
                 <CardContent>
-                  <div className="flex flex-col gap-8">
-                    <div className=" flex w-full gap-5 ">
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className=" grid grid-cols-2 gap-5 ">
                       {pitchDetails.teamMembers.map((member) => {
                         const transformedMember: TeamMember = {
                           id: `${member.firstName}-${member.lastName}`,
@@ -596,7 +598,8 @@ export default function PitchDetailsPage() {
                         );
                       })}
                     </div>
-                    <div className="flex gap-20">
+                    {/* agregate data */}
+                    <div className="grid grid-cols-2 gap-4">
                       <div className=" space-y-6">
                         <div>
                           <h3 className="text-lg font-medium mb-4">
@@ -617,7 +620,7 @@ export default function PitchDetailsPage() {
                           </div>
                         </div>
                       </div>
-                      <div className=" mt-11">
+                      <div className=" mt-[4.5rem]">
                         <Card className="border-none bg-[#1a1a1a] p-4">
                           <h4 className="text-sm font-medium mb-4">
                             Preferred Languages to Connect with Investors
@@ -645,7 +648,7 @@ export default function PitchDetailsPage() {
             <FoundersPitchSection
               pitch={pitchDetails.fields.foundersPitch}
               onScheduleMeeting={() => setScheduleMeetingOpen(true)}
-            />
+            />  
           )}
           {activeSection === "investors-analysis" && (
             <TeamAnalysisSection
@@ -657,7 +660,6 @@ export default function PitchDetailsPage() {
             // onMakeOffer={handleMakeOffer}
             />
           )}
-        </div>
       </div>
       <ScheduleMeetingDialog
         open={scheduleMeetingOpen}

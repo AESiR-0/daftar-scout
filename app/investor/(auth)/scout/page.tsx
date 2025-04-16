@@ -16,13 +16,13 @@ interface Scout {
   title: string;
   collaborator: string[];
   postedby: string;
-  status: "Planning" | "Scheduled" | "Active" | "Closed";
+  status: "Planning" | "scheduled" | "Active" | "Closed";
   scheduledDate?: string | null;
 }
 
 interface ScoutStatus {
   Planning: Scout[];
-  Scheduled: Scout[];
+  scheduled: Scout[];
   Active: Scout[];
   Closed: Scout[];
 }
@@ -36,7 +36,7 @@ export default function ScoutPage() {
   const [createScoutOpen, setCreateScoutOpen] = useState(false);
   const [scoutStatus, setScoutStatus] = useState<ScoutStatus>({
     Planning: [],
-    Scheduled: [],
+    scheduled: [],
     Active: [],
     Closed: [],
   });
@@ -56,7 +56,7 @@ export default function ScoutPage() {
 
         const grouped: ScoutStatus = {
           Planning: [],
-          Scheduled: [],
+          scheduled: [],
           Active: [],
           Closed: [],
         };

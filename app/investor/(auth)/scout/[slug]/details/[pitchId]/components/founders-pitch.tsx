@@ -155,7 +155,7 @@ export function FoundersPitchSection({ pitch, onScheduleMeeting }: FoundersPitch
     }
 
     return (
-        <Card className="w-full border-none my-5 p-0 bg-[#0e0e0e]">
+        <Card className="w-full border-none mt-10 p-0 bg-[#0e0e0e]">
             <CardContent className="border-none">
                 <div className="flex flex-col justify-center">
                     <div className="flex h-fit gap-10">
