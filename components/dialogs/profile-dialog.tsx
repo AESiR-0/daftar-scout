@@ -38,7 +38,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { signOut } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { formatDate } from "@/lib/format-date"; // Assuming this is the correct import
+import { formatDate } from "@/lib/format-date";
 import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -47,6 +47,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSession } from "next-auth/react";
+import { desc } from "drizzle-orm";
 
 interface ProfileData {
   firstName: string;
@@ -54,7 +55,7 @@ interface ProfileData {
   email: string;
   phone: string;
   gender: string;
-  dateOfBirth: string;
+  dateOfBirth: string | null;
   languages: string[];
   joinedDate: string;
 }
@@ -92,22 +93,14 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<ProfileTab>("account");
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [featureRequest, setFeatureRequest] = useState("");
   const [featureName, setFeatureName] = useState("");
   const [featureHistory, setFeatureHistory] = useState<FeatureEntry[]>([]);
   const [supportRequest, setSupportRequest] = useState("");
   const [supportName, setSupportName] = useState("");
   const [supportHistory, setSupportHistory] = useState<SupportEntry[]>([]);
-  const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john@example.com",
-    phone: "+1 234 567 890",
-    gender: "Male",
-    dateOfBirth: "1990-01-01",
-    languages: ["English", "Hindi"],
-    joinedDate: "Feb 14, 2024",
-  });
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [satisfied, setSatisfied] = useState<boolean | undefined>();
   const [feedbackText, setFeedbackText] = useState("");
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(false);
@@ -123,6 +116,97 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     { id: "logout", label: "Logout" },
   ];
 
+  // Fetch profile data when dialog opens
+  useEffect(() => {
+    if (open && session?.user?.email) {
+      fetchProfileData();
+    }
+  }, [open, session]);
+
+  const fetchProfileData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/endpoints/me", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch profile");
+      }
+
+      const data = await response.json();
+      setProfileData({
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        gender: data.gender || "",
+        dateOfBirth: data.dateOfBirth || null,
+        languages: data.languages || [],
+        joinedDate: data.joinedDate || new Date().toDateString(),
+      });
+    } catch (error: any) {
+      console.error("Error fetching profile:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load profile data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!profileData || !session?.user?.id) {
+      toast({
+        title: "Error",
+        description: "Unable to save profile",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/endpoints/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: session.user.id,
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          phone: profileData.phone,
+          gender: profileData.gender,
+          dateOfBirth: profileData.dateOfBirth,
+          languages: profileData.languages,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to update profile");
+      }
+
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been saved successfully",
+      });
+      setIsEditing(false);
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save profile changes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "feature" && session?.user?.id) {
       fetchFeatureRequests();
@@ -135,7 +219,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const fetchFeatureRequests = async () => {
     setIsLoadingFeatures(true);
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/features", {
+      const response = await fetch("/api/endpoints/feature-request", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
@@ -143,10 +227,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       const data = await response.json();
 
       const mappedFeatures: FeatureEntry[] = data.map((f: any) => ({
-        id: f.id.toString(),
         featureName: f.featureName,
-        userId: f.userId,
-        createdAt: f.createdAt || new Date().toISOString(),
+        featureRequest: f.description,
       }));
 
       setFeatureHistory(mappedFeatures);
@@ -208,12 +290,12 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     }
 
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/features", {
+      const response = await fetch("/api/endpoints/feature-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          featureName: `${featureName}: ${featureRequest}`,
-          userId: session.user.id,
+          featureName: featureName,
+          description: featureRequest,
         }),
       });
 
@@ -318,6 +400,20 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const renderContent = () => {
     switch (activeTab) {
       case "account":
+        if (isLoading) {
+          return (
+            <Card className="border-none rounded-[0.35rem] h-[500px] bg-[#1a1a1a] p-4">
+              <p className="text-muted-foreground">Loading profile...</p>
+            </Card>
+          );
+        }
+        if (!profileData) {
+          return (
+            <Card className="border-none rounded-[0.35rem] h-[500px] bg-[#1a1a1a] p-4">
+              <p className="text-muted-foreground">Unable to load profile</p>
+            </Card>
+          );
+        }
         return (
           <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a]">
             <div className="p-4 space-y-4">
@@ -325,7 +421,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-20 w-20">
                     <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarFallback>
+                      {profileData.firstName[0]}
+                      {profileData.lastName[0]}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
                     <h3 className="text-lg font-medium">{`${profileData.firstName} ${profileData.lastName}`}</h3>
@@ -339,6 +438,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   size="icon"
                   className="rounded-[0.35rem]"
                   onClick={() => setIsEditing(!isEditing)}
+                  disabled={isLoading}
                 >
                   {isEditing ? (
                     <X className="h-4 w-4" />
@@ -356,11 +456,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       <Input
                         value={profileData.firstName}
                         onChange={(e) =>
-                          setProfileData((prev) => ({
-                            ...prev,
-                            firstName: e.target.value,
-                          }))
+                          setProfileData((prev) =>
+                            prev ? { ...prev, firstName: e.target.value } : prev
+                          )
                         }
+                        disabled={isLoading}
                       />
                     </div>
                     <div className="space-y-2">
@@ -368,11 +468,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       <Input
                         value={profileData.lastName}
                         onChange={(e) =>
-                          setProfileData((prev) => ({
-                            ...prev,
-                            lastName: e.target.value,
-                          }))
+                          setProfileData((prev) =>
+                            prev ? { ...prev, lastName: e.target.value } : prev
+                          )
                         }
+                        disabled={isLoading}
                       />
                     </div>
                     <div className="space-y-2">
@@ -380,11 +480,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       <Input
                         value={profileData.phone}
                         onChange={(e) =>
-                          setProfileData((prev) => ({
-                            ...prev,
-                            phone: e.target.value,
-                          }))
+                          setProfileData((prev) =>
+                            prev ? { ...prev, phone: e.target.value } : prev
+                          )
                         }
+                        disabled={isLoading}
                       />
                     </div>
                     <div className="space-y-2">
@@ -392,8 +492,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       <Select
                         value={profileData.gender}
                         onValueChange={(value) =>
-                          setProfileData((prev) => ({ ...prev, gender: value }))
+                          setProfileData((prev) =>
+                            prev ? { ...prev, gender: value } : prev
+                          )
                         }
+                        disabled={isLoading}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select gender" />
@@ -415,6 +518,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                               "w-full justify-start text-left font-normal rounded-[0.35rem] bg-[#1a1a1a]",
                               !profileData.dateOfBirth && "text-muted-foreground"
                             )}
+                            disabled={isLoading}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {profileData.dateOfBirth ? (
@@ -427,16 +531,25 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={new Date(profileData.dateOfBirth)}
+                            selected={
+                              profileData.dateOfBirth
+                                ? new Date(profileData.dateOfBirth)
+                                : undefined
+                            }
                             onSelect={(date) => {
                               if (date) {
-                                setProfileData((prev) => ({
-                                  ...prev,
-                                  dateOfBirth: date.toISOString().split("T")[0],
-                                }));
+                                setProfileData((prev) =>
+                                  prev
+                                    ? {
+                                        ...prev,
+                                        dateOfBirth: date.toISOString().split("T")[0],
+                                      }
+                                    : prev
+                                );
                               }
                             }}
                             initialFocus
+                            disabled={isLoading}
                           />
                         </PopoverContent>
                       </Popover>
@@ -448,12 +561,17 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                           <Select
                             onValueChange={(value) => {
                               if (!profileData.languages.includes(value)) {
-                                setProfileData((prev) => ({
-                                  ...prev,
-                                  languages: [...prev.languages, value],
-                                }));
+                                setProfileData((prev) =>
+                                  prev
+                                    ? {
+                                        ...prev,
+                                        languages: [...prev.languages, value],
+                                      }
+                                    : prev
+                                );
                               }
                             }}
+                            disabled={isLoading}
                           >
                             <SelectTrigger className="w-[180px]">
                               <SelectValue placeholder="Add language" />
@@ -476,18 +594,28 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                           </Select>
                         )}
                         {profileData.languages.map((lang) => (
-                          <Badge key={lang} className="bg-muted rounded-[0.35rem]">
+                          <Badge
+                            key={lang}
+                            className="bg-muted rounded-[0.35rem]"
+                          >
                             {lang}
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-4 w-4 ml-1 hover:bg-transparent"
                               onClick={() =>
-                                setProfileData((prev) => ({
-                                  ...prev,
-                                  languages: prev.languages.filter((l) => l !== lang),
-                                }))
+                                setProfileData((prev) =>
+                                  prev
+                                    ? {
+                                        ...prev,
+                                        languages: prev.languages.filter(
+                                          (l) => l !== lang
+                                        ),
+                                      }
+                                    : prev
+                                )
                               }
+                              disabled={isLoading}
                             >
                               <X className="h-3 w-3 rounded-[0.35rem]" />
                             </Button>
@@ -497,10 +625,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     </div>
                   </div>
                   <Button
-                    onClick={() => setIsEditing(false)}
+                    onClick={handleSaveProfile}
                     className="w-full rounded-[0.35rem]"
+                    disabled={isLoading}
                   >
-                    Save Changes
+                    {isLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
               ) : (
@@ -515,15 +644,21 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   </p>
                   <p className="text-sm">
                     <span className="text-muted-foreground">Gender:</span>{" "}
-                    {profileData.gender}
+                    {profileData.gender || "Not specified"}
                   </p>
                   <p className="text-sm">
                     <span className="text-muted-foreground">Date of Birth:</span>{" "}
-                    {new Date(profileData.dateOfBirth).toLocaleDateString()}
+                    {profileData.dateOfBirth
+                      ? new Date(profileData.dateOfBirth).toLocaleDateString()
+                      : "Not specified"}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Preferred Languages:</span>{" "}
-                    {profileData.languages.join(", ")}
+                    <span className="text-muted-foreground">
+                      Preferred Languages:
+                    </span>{" "}
+                    {profileData.languages.length > 0
+                      ? profileData.languages.join(", ")
+                      : "None"}
                   </p>
                   <div className="text-xs pt-4">
                     <span className="text-muted-foreground">
@@ -539,7 +674,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       case "support":
         return (
           <div className="space-y-4">
-            {/* Input Card */}
             <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -565,8 +699,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                 </Button>
               </div>
             </Card>
-
-            {/* History Card */}
             <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <h4 className="text-[14px] font-medium mb-4">History</h4>
               {isLoadingSupport ? (
@@ -576,9 +708,14 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
               ) : (
                 <div className="space-y-4">
                   {supportHistory.map((support) => (
-                    <div key={support.id} className="py-3 rounded-[0.35rem] space-y-2">
+                    <div
+                      key={support.id}
+                      className="py-3 rounded-[0.35rem] space-y-2"
+                    >
                       <div className="flex justify-between items-center">
-                        <h5 className="text-sm font-medium">{support.supportName}</h5>
+                        <h5 className="text-sm font-medium">
+                          {support.supportName}
+                        </h5>
                       </div>
                       <span className="text-xs text-muted-foreground">
                         {formatDate(support.createdAt)}
@@ -601,7 +738,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   <Button
                     variant="outline"
                     size="lg"
-                    className={cn(satisfied === true && "bg-muted rounded-[0.35rem]")}
+                    className={cn(
+                      satisfied === true && "bg-muted rounded-[0.35rem]"
+                    )}
                     onClick={() => setSatisfied(true)}
                   >
                     Yes
@@ -609,7 +748,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   <Button
                     variant="outline"
                     size="lg"
-                    className={cn(satisfied === false && "bg-muted rounded-[0.35rem]")}
+                    className={cn(
+                      satisfied === false && "bg-muted rounded-[0.35rem]"
+                    )}
                     onClick={() => setSatisfied(false)}
                   >
                     No
@@ -637,7 +778,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       case "feature":
         return (
           <div className="space-y-4">
-            {/* Input Card */}
             <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -663,8 +803,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                 </Button>
               </div>
             </Card>
-
-            {/* History Card */}
             <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <h4 className="text-[14px] font-medium mb-4">History</h4>
               {isLoadingFeatures ? (
@@ -674,9 +812,14 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
               ) : (
                 <div className="space-y-4">
                   {featureHistory.map((feature) => (
-                    <div key={feature.id} className="py-3 rounded-[0.35rem] space-y-2">
+                    <div
+                      key={feature.id}
+                      className="py-3 rounded-[0.35rem] space-y-2"
+                    >
                       <div className="flex justify-between items-center">
-                        <h5 className="text-sm font-medium">{feature.featureName}</h5>
+                        <h5 className="text-sm font-medium">
+                          {feature.featureName}
+                        </h5>
                       </div>
                       <span className="text-xs text-muted-foreground">
                         {formatDate(feature.createdAt)}
@@ -699,7 +842,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     <section.icon className="h-4 w-4" />
                     <h4 className="font-medium">{section.title}</h4>
                   </div>
-                  <p className="text-sm text-muted-foreground">{section.content}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {section.content}
+                  </p>
                 </div>
               ))}
             </div>
@@ -711,7 +856,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                We're sad to say goodbye. This action can't be undone, and all your data will be permanently lost.
+                We're sad to say goodbye. This action can't be undone, and all
+                your data will be permanently lost.
               </p>
               <Button
                 variant="destructive"
