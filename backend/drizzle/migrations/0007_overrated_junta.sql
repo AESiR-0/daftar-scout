@@ -1,8 +1,9 @@
 CREATE TABLE "support_requests" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"support_name" text NOT NULL,
-	"description" text NOT NULL,
-	"user_id" integer NOT NULL,
+	"support_name" varchar(255) NOT NULL,
+	"description" text,
+	"user_id" varchar(255) NOT NULL,
+	"status" varchar(50) DEFAULT 'pending',
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint

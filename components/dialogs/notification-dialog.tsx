@@ -1,29 +1,43 @@
-"use client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn } from "@/lib/utils"
-import { useState } from "react"
-import { Card } from "@/components/ui/card"
-import { Calendar } from "lucide-react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import { format } from "date-fns"
-import { Badge } from "@/components/ui/badge"
-import formatDate from "@/lib/formatDate"
-import { Check, X } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { toast } from "@/hooks/use-toast"
+"use client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import formatDate from "@/lib/formatDate";
+import { Check, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
-type NotificationTab = "updates" | "alerts" | "news" | "scout-requests" | "scout-links"
+type NotificationTab =
+  | "updates"
+  | "alerts"
+  | "news"
+  | "scout-requests"
+  | "scout-links";
 
 interface NotificationItem {
-  id: string
-  title: string
-  description: string
-  date: string
-  isRead: boolean
-  type: NotificationTab
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  isRead: boolean;
+  type: NotificationTab;
 }
 
 interface ScoutRequest {
@@ -56,7 +70,7 @@ const notifications: NotificationItem[] = [
     description: "You have received a new pitch from Tech Startup Inc.",
     date: "Feb 14, 2025, 10:00 AM",
     isRead: false,
-    type: "updates"
+    type: "updates",
   },
   {
     id: "2",
@@ -64,7 +78,7 @@ const notifications: NotificationItem[] = [
     description: "Upcoming meeting with investors tomorrow at 2 PM",
     date: "Feb 14, 2025, 10:00 AM",
     isRead: true,
-    type: "alerts"
+    type: "alerts",
   },
   {
     id: "3",
@@ -72,32 +86,34 @@ const notifications: NotificationItem[] = [
     description: "New features have been added to the platform",
     date: "Feb 14, 2025, 10:00 AM",
     isRead: true,
-    type: "news"
-  }
-]
+    type: "news",
+  },
+];
 
 const scoutRequests: ScoutRequest[] = [
   {
     id: "1",
     scoutName: "Tech Innovators Scout",
-    scoutVision: "Connecting innovative startups with strategic investors in the deep tech space",
+    scoutVision:
+      "Connecting innovative startups with strategic investors in the deep tech space",
     daftarName: "Tech Innovators",
     requestedAt: "Feb 14, 2024, 10:00 AM",
   },
   {
     id: "2",
     scoutName: "FinTech Future Scout",
-    scoutVision: "Building bridges between emerging fintech solutions and growth capital",
+    scoutVision:
+      "Building bridges between emerging fintech solutions and growth capital",
     daftarName: "FinTech Solutions",
     requestedAt: "Feb 13, 2024, 2:30 PM",
     status: {
       action: "accepted",
       by: "John Smith",
       designation: "Investment Director",
-      timestamp: "Feb 13, 2024, 3:45 PM"
-    }
-  }
-]
+      timestamp: "Feb 13, 2024, 3:45 PM",
+    },
+  },
+];
 
 const scoutLinks: ScoutLink[] = [
   {
@@ -106,7 +122,7 @@ const scoutLinks: ScoutLink[] = [
     daftar: "Tech Innovators",
     createdAt: "Feb 20, 2024",
     status: "active",
-    collaborators: 3
+    collaborators: 3,
   },
   {
     id: "2",
@@ -114,7 +130,7 @@ const scoutLinks: ScoutLink[] = [
     daftar: "FinTech Solutions",
     createdAt: "Feb 15, 2024",
     status: "active",
-    collaborators: 2
+    collaborators: 2,
   },
   {
     id: "3",
@@ -122,53 +138,58 @@ const scoutLinks: ScoutLink[] = [
     daftar: "Health Innovations",
     createdAt: "Jan 10, 2024",
     status: "inactive",
-    collaborators: 0
-  }
-]
+    collaborators: 0,
+  },
+];
 
 export function NotificationDialog({
   open,
   onOpenChange,
-  role = "founder"
+  role = "founder",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   role?: "founder" | "investor" | undefined;
 }) {
-  const [activeTab, setActiveTab] = useState<NotificationTab>(role === "investor" ? "scout-requests" : "updates");
+  const [activeTab, setActiveTab] = useState<NotificationTab>(
+    role === "investor" ? "scout-requests" : "updates"
+  );
   const [requests, setRequests] = useState<ScoutRequest[]>(scoutRequests);
   const [links] = useState<ScoutLink[]>(scoutLinks);
   const router = useRouter();
 
   // Get available tabs based on role
-  const availableTabs = role === "investor" 
-    ? ["scout-requests", "scout-links", "updates", "alerts", "news"]
-    : ["updates", "alerts", "news"];
+  const availableTabs =
+    role === "investor"
+      ? ["scout-requests", "scout-links", "updates", "alerts", "news"]
+      : ["updates", "alerts", "news"];
 
   // Add counts for each tab
   const tabCounts = {
-    updates: notifications.filter(n => n.type === "updates").length,
-    alerts: notifications.filter(n => n.type === "alerts").length,
-    news: notifications.filter(n => n.type === "news").length,
+    updates: notifications.filter((n) => n.type === "updates").length,
+    alerts: notifications.filter((n) => n.type === "alerts").length,
+    news: notifications.filter((n) => n.type === "news").length,
     "scout-requests": scoutRequests.length,
-    "scout-links": links.length
-  }
+    "scout-links": links.length,
+  };
 
   const handleAction = (requestId: string, action: "accepted" | "declined") => {
-    setRequests(prev => prev.map(req => {
-      if (req.id === requestId) {
-        return {
-          ...req,
-          status: {
-            action,
-            by: "John Smith", // Replace with actual user
-            designation: "Investment Director", // Replace with actual designation
-            timestamp: formatDate(new Date().toLocaleString())
-          }
-        };
-      }
-      return req;
-    }));
+    setRequests((prev) =>
+      prev.map((req) => {
+        if (req.id === requestId) {
+          return {
+            ...req,
+            status: {
+              action,
+              by: "John Smith", // Replace with actual user
+              designation: "Investment Director", // Replace with actual designation
+              timestamp: formatDate(new Date().toLocaleString()),
+            },
+          };
+        }
+        return req;
+      })
+    );
   };
 
   return (
@@ -204,12 +225,17 @@ export function NotificationDialog({
             {activeTab === "scout-requests" ? (
               <div className="space-y-4">
                 {requests.map((request) => (
-                  <Card key={request.id} className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors">
+                  <Card
+                    key={request.id}
+                    className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
+                  >
                     <div className="p-4 space-y-2">
-                        <h4 className="text-sm font-medium">{request.scoutName}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {request.scoutVision}
-                        </p>
+                      <h4 className="text-sm font-medium">
+                        {request.scoutName}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {request.scoutVision}
+                      </p>
                       <div className="">
                         <p className="text-xs text-muted-foreground">
                           Daftar: {request.daftarName}
@@ -222,23 +248,25 @@ export function NotificationDialog({
                       {request.status ? (
                         <div className="text-xs text-muted-foreground border-t pt-2">
                           <p>
-                            {request.status.action === "accepted" ? "Accepted" : "Declined"} by{" "}
-                            {request.status.by}
+                            {request.status.action === "accepted"
+                              ? "Accepted"
+                              : "Declined"}{" "}
+                            by {request.status.by}
                           </p>
                           <p>{formatDate(request.status.timestamp)}</p>
                         </div>
                       ) : (
                         <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             className="rounded-[0.35rem]"
                             onClick={() => handleAction(request.id, "accepted")}
                           >
                             Accept
                           </Button>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             className="rounded-[0.35rem]"
                             onClick={() => handleAction(request.id, "declined")}
@@ -254,13 +282,15 @@ export function NotificationDialog({
             ) : activeTab === "scout-links" ? (
               <div className="space-y-4">
                 {links.map((link) => (
-                  <Card 
-                    key={link.id} 
+                  <Card
+                    key={link.id}
                     className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                   >
                     <div className="p-4 space-y-2">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium">{link.scoutName}</h4>
+                        <h4 className="text-sm font-medium">
+                          {link.scoutName}
+                        </h4>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Daftar: {link.daftar}
@@ -270,17 +300,20 @@ export function NotificationDialog({
                         <span>{link.collaborators} collaborators</span>
                       </div>
                       <div className="flex gap-2 mt-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           className="text-xs rounded-[0.35rem]"
                           onClick={() => {
                             // Handle copy link
-                            navigator.clipboard.writeText(`https://daftar.com/scout/${link.id}`)
+                            navigator.clipboard.writeText(
+                              `https://daftar.com/scout/${link.id}`
+                            );
                             toast({
                               title: "Link copied",
-                              description: "Scout link has been copied to clipboard"
-                            })
+                              description:
+                                "Scout link has been copied to clipboard",
+                            });
                           }}
                         >
                           Copy Link
@@ -292,23 +325,31 @@ export function NotificationDialog({
               </div>
             ) : (
               <div className="space-y-4">
-                {notifications.filter(n => n.type === activeTab).length > 0 ? (
-                  notifications.filter(n => n.type === activeTab).map((notification) => (
-                    <Card key={notification.id} className={cn(
-                      "border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors",
-                      !notification.isRead && "border-l-2 border-l-primary"
-                    )}>
-                      <div className="p-4 space-y-2">
-                        <h4 className="text-sm font-medium">{notification.title}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {notification.description}
-                        </p>
-                        <time className="text-xs text-muted-foreground">
-                          {notification.date}
-                        </time>
-                      </div>
-                    </Card>
-                  ))
+                {notifications.filter((n) => n.type === activeTab).length >
+                0 ? (
+                  notifications
+                    .filter((n) => n.type === activeTab)
+                    .map((notification) => (
+                      <Card
+                        key={notification.id}
+                        className={cn(
+                          "border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors",
+                          !notification.isRead && "border-l-2 border-l-primary"
+                        )}
+                      >
+                        <div className="p-4 space-y-2">
+                          <h4 className="text-sm font-medium">
+                            {notification.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {notification.description}
+                          </p>
+                          <time className="text-xs text-muted-foreground">
+                            {notification.date}
+                          </time>
+                        </div>
+                      </Card>
+                    ))
                 ) : (
                   <p className="text-sm text-muted-foreground text-center">
                     No {activeTab} to show
@@ -320,5 +361,5 @@ export function NotificationDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

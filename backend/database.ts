@@ -1,15 +1,23 @@
 // lib/db.ts
-import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
 declare global {
-  var db: ReturnType<typeof drizzle> | undefined;
+  // This prevents duplicate pools in Next.js dev mode
+  var drizzleDb: ReturnType<typeof drizzle> | undefined;
+  var drizzlePool: Pool | undefined;
 }
 
-const client = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+const pool =
+  global.drizzlePool ??
+  new Pool({
+    connectionString: process.env.DATABASE_URL, // Use pooled connection from Supabase
+    max: 10, // Optional: Supabase free tier max is 10
+  });
 
-export const db = global.db || drizzle(client);
+export const db = global.drizzleDb ?? drizzle(pool);
 
-if (process.env.NODE_ENV !== "production") global.db = db;
+if (process.env.NODE_ENV !== "production") {
+  global.drizzlePool = pool;
+  global.drizzleDb = db;
+}
