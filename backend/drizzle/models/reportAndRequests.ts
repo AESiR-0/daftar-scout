@@ -20,7 +20,7 @@ export const featureRequests = pgTable("feature_requests", {
   id: serial("id").primaryKey(),
   featureName: varchar("feature_name", { length: 255 }).notNull(),
   description: text("description"),
-  userId: varchar("user_id", { length: 255 }).notNull(),
+  userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
   status: varchar("status", { length: 50 }).default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

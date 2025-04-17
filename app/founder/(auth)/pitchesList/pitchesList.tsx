@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { getFounderPitches } from "@/lib/apiActions";
+import formatDate from "@/lib/formatDate";
 
 // Reusing your custom Pitch type
 type Pitch = {
@@ -87,8 +88,9 @@ export default function PitchesList({ pitchBoard }: PitchesListProps) {
                     <h3 className="text-medium">{pitch.pitchName}</h3>
                     <div className="text-xs text-muted-foreground space-y-1">
                       <div>
-                        Created At:
-                        {new Date(pitch.createdAt).toLocaleDateString()}
+                        Created At:{" "}
+                        {/* {new Date(pitch.createdAt).toLocaleDateString()} */}
+                        {formatDate(pitch.createdAt)}
                       </div>
                       <div>Location: {pitch.location}</div>
                     </div>
