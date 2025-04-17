@@ -57,6 +57,13 @@
       "when": 1744916558223,
       "tag": "0007_overrated_junta",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1744918627350,
+      "tag": "0008_square_quentin_quire",
+      "breakpoints": true
     }
   ]
 }
