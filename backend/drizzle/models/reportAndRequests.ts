@@ -38,6 +38,15 @@ export const featureTracking = pgTable("feature_tracking", {
   releaseDate: timestamp("release_date"),
 });
 
+export const SupportRequests = pgTable("support_requests", {
+  id: serial("id").primaryKey(),
+  supportName: varchar("support_name", { length: 255 }).notNull(),
+  description: text("description"),
+  userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+  status: varchar("status", { length: 50 }).default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const postDevAnalysis = pgTable("post_dev_analysis", {
   id: serial("id").primaryKey(),
   featureId: integer("feature_id")

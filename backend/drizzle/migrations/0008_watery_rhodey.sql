@@ -1,0 +1,1 @@
+ALTER TABLE "support_requests" ALTER COLUMN "user_id" SET DATA TYPE varchar(255);

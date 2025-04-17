@@ -47,7 +47,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSession } from "next-auth/react";
-import { desc } from "drizzle-orm";
 
 interface ProfileData {
   firstName: string;
@@ -208,13 +207,13 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   };
 
   useEffect(() => {
-    if (activeTab === "feature" && session?.user?.id) {
+    if (activeTab === "feature") {
       fetchFeatureRequests();
     }
-    if (activeTab === "support" && session?.user?.id) {
+    if (activeTab === "support") {
       fetchSupportRequests();
     }
-  }, [activeTab, session]);
+  }, [activeTab]);
 
   const fetchFeatureRequests = async () => {
     setIsLoadingFeatures(true);
@@ -227,8 +226,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       const data = await response.json();
 
       const mappedFeatures: FeatureEntry[] = data.map((f: any) => ({
+        id: f.id.toString(),
         featureName: f.featureName,
-        featureRequest: f.description,
+        userId: f.userId.toString(),
+        createdAt: f.createdAt || new Date().toISOString(),
       }));
 
       setFeatureHistory(mappedFeatures);
@@ -257,7 +258,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       const mappedSupport: SupportEntry[] = data.map((s: any) => ({
         id: s.id.toString(),
         supportName: s.supportName,
-        userId: s.userId,
+        userId: s.userId.toString(),
         createdAt: s.createdAt || new Date().toISOString(),
       }));
 
@@ -280,21 +281,12 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   };
 
   const handleSubmitFeature = async () => {
-    if (!session?.user?.id) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to submit a feature request",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       const response = await fetch("/api/endpoints/feature-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          featureName: featureName,
+          featureName,
           description: featureRequest,
         }),
       });
@@ -304,18 +296,20 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         throw new Error(errorData.error || "Failed to submit feature request");
       }
 
+      const { data: newFeature } = await response.json();
+
       toast({
         title: "Feature request submitted",
         description: "Thank you for your feedback. We'll review your request shortly.",
       });
 
-      const newFeature: FeatureEntry = {
-        id: Date.now().toString(),
-        featureName: `${featureName}: ${featureRequest}`,
-        userId: session.user.id,
-        createdAt: new Date().toISOString(),
+      const featureEntry: FeatureEntry = {
+        id: newFeature.id.toString(),
+        featureName: newFeature.featureName,
+        userId: newFeature.userId.toString(),
+        createdAt: newFeature.createdAt || new Date().toISOString(),
       };
-      setFeatureHistory((prev) => [newFeature, ...prev]);
+      setFeatureHistory((prev) => [featureEntry, ...prev]);
 
       setFeatureName("");
       setFeatureRequest("");
@@ -330,22 +324,13 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   };
 
   const handleSubmitSupport = async () => {
-    if (!session?.user?.id) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to submit a support request",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       const response = await fetch("/api/endpoints/support", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          supportName: `${supportName}: ${supportRequest}`,
-          userId: session.user.id,
+          supportName,
+          description: supportRequest,
         }),
       });
 
@@ -354,18 +339,20 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         throw new Error(errorData.error || "Failed to submit support request");
       }
 
+      const { data: newSupport } = await response.json();
+
       toast({
         title: "Support request submitted",
         description: "Thank you for reaching out. We'll get back to you soon.",
       });
 
-      const newSupport: SupportEntry = {
-        id: Date.now().toString(),
-        supportName: `${supportName}: ${supportRequest}`,
-        userId: session.user.id,
-        createdAt: new Date().toISOString(),
+      const supportEntry: SupportEntry = {
+        id: newSupport.id.toString(),
+        supportName: newSupport.supportName,
+        userId: newSupport.userId.toString(),
+        createdAt: newSupport.createdAt || new Date().toISOString(),
       };
-      setSupportHistory((prev) => [newSupport, ...prev]);
+      setSupportHistory((prev) => [supportEntry, ...prev]);
 
       setSupportName("");
       setSupportRequest("");
