@@ -687,6 +687,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   <Textarea
                     placeholder="Describe your issue or question"
                     value={supportRequest}
+                    className="min-h-[100px] bg-muted/50 resize-none rounded-xl"
                     onChange={(e) => setSupportRequest(e.target.value)}
                   />
                 </div>
@@ -739,7 +740,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     variant="outline"
                     size="lg"
                     className={cn(
-                      satisfied === true && "bg-muted rounded-[0.35rem]"
+                      satisfied === true && "bg-blue-500 rounded-[0.35rem]"
                     )}
                     onClick={() => setSatisfied(true)}
                   >
@@ -749,7 +750,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     variant="outline"
                     size="lg"
                     className={cn(
-                      satisfied === false && "bg-muted rounded-[0.35rem]"
+                      satisfied === false && "bg-red-600 rounded-[0.35rem]"
                     )}
                     onClick={() => setSatisfied(false)}
                   >
@@ -760,6 +761,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   <Textarea
                     placeholder="How can we make your experience better?"
                     value={feedbackText}
+                    className="min-h-[100px] bg-muted/50 resize-none rounded-xl"
                     onChange={(e) => setFeedbackText(e.target.value)}
                   />
                 </div>
@@ -791,6 +793,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   <Textarea
                     placeholder="What should we build next, and how will it help your journey?"
                     value={featureRequest}
+                    className="min-h-[100px] bg-muted/50 resize-none rounded-xl"
                     onChange={(e) => setFeatureRequest(e.target.value)}
                   />
                 </div>
