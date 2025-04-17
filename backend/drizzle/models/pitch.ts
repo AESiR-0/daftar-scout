@@ -102,7 +102,6 @@ export const pitchDelete = pgTable("pitch_delete", {
   isAgreed: boolean("is_agreed").default(false),
 });
 
-
 export const investorPitch = pgTable("investor_pitch", {
   id: serial("id").primaryKey(),
   pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
@@ -125,7 +124,6 @@ export const investorPitch = pgTable("investor_pitch", {
   deletedOn: timestamp("deleted_on"),
   deal: boolean("deal").default(false),
 });
-
 
 export const pitchTeam = pgTable("pitch_team", {
   id: serial("id").primaryKey(),

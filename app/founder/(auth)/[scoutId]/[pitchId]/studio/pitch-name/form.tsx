@@ -78,7 +78,8 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
           },
         }
       );
-      if (!response.ok) throw new Error("Failed to fetch pitch details");
+      if (response.status !== 200)
+        throw new Error("Failed to fetch pitch details");
       const data = await response.json();
 
       setPitchName(data.pitchName || "");

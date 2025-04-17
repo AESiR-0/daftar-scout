@@ -6,7 +6,7 @@ import PitchNameForm from "./form";
 
 export default function PitchNamePage() {
   const pathname = usePathname();
-  const pitchId = pathname.split("/")[2];
+  const pitchId = pathname.split("/")[3];
 
   return (
     <StudioCard>

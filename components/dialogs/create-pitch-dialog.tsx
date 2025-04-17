@@ -1,26 +1,52 @@
-"use client"
-import { useState } from "react"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { Input } from "@/components/ui/input"
+"use client";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { usePathname, useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
 
 interface SelectDaftarDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  scoutSlug: string
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  scoutSlug: string;
 }
 
-export function SelectDaftarDialog({ open, onOpenChange, scoutSlug }: SelectDaftarDialogProps) {
-  const router = useRouter()
-  const [pitchName, setPitchName] = useState("")
+export function SelectDaftarDialog({
+  open,
+  onOpenChange,
+  scoutSlug,
+}: SelectDaftarDialogProps) {
+  const router = useRouter();
+  const [pitchName, setPitchName] = useState("");
+  const pathname = usePathname();
+  const scoutId = pathname.split("/")[3];
+  const handleSubmit = async () => {
+    if (!pitchName.trim()) return;
 
-  const handleSubmit = () => {
-    if (pitchName.trim()) {
-      router.push(`/founder/studio?scout=${scoutSlug}&pitch=${pitchName}`)
-      onOpenChange(false)
+    try {
+      const res = await fetch("/api/endpoints/pitch/founder", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pitchName,
+          scoutId, // make sure this is defined in the component
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to create pitch");
+      }
+
+      const { pitchId } = await res.json();
+
+      router.push(`/founder/${scoutSlug}/${pitchId}/studio`);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Pitch creation error:", error);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,8 +61,8 @@ export function SelectDaftarDialog({ open, onOpenChange, scoutSlug }: SelectDaft
             value={pitchName}
             onChange={(e) => setPitchName(e.target.value)}
           />
-          <Button 
-            className="w-full rounded-[0.35rem]" 
+          <Button
+            className="w-full rounded-[0.35rem]"
             onClick={handleSubmit}
             disabled={!pitchName.trim()}
           >
@@ -45,5 +71,5 @@ export function SelectDaftarDialog({ open, onOpenChange, scoutSlug }: SelectDaft
         </div>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}
