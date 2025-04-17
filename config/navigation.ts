@@ -272,11 +272,11 @@ export const founderStudioNavItems = [
   //   url: "/founder/studio/insights",
   //   icon: FileSpreadsheet,
   // },
-  {
-    title: "Bill",
-    url: "/founder/studio/bill",
-    icon: FileSpreadsheet,
-  },
+  // {
+  //   title: "Bill",
+  //   url: "/founder/studio/bill",
+  //   icon: FileSpreadsheet,
+  // },
   {
     title: "Delete",
     url: "/founder/studio/delete",

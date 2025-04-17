@@ -63,7 +63,7 @@ interface DeletionApproval {
   date?: string
 }
 
-type DaftarTab = "details" | "team" | "billing" | "delete" | "privacy"
+type DaftarTab = "details" | "team" | "delete" | "privacy"
 
 const privacySections = [
   {
@@ -89,12 +89,6 @@ interface DaftarDialogProps {
   onSuccess: () => void
 }
 
-const navItems = [
-  { title: "Profile", value: "profile", icon: UserCircle },
-  { title: "Team", value: "team", icon: Users },
-  { title: "Billing", value: "billing", icon: CreditCard },
-  { title: "Delete Daftar", value: "delete", icon: Trash2 }
-]
 const getInitials = (name: string) => {
   const [firstName, lastName] = name.split(' ')
   return firstName?.[0] + (lastName?.[0] || '')
@@ -157,7 +151,7 @@ const dummyTeamMembers: TeamMember[] = [
 const tabs: { id: DaftarTab; label: string; icon: any }[] = [
   { id: "details", label: "Details", icon: UserCircle },
   { id: "team", label: "Team", icon: Users },
-  { id: "billing", label: "Billing", icon: CreditCard },
+  // { id: "billing", label: "Billing", icon: CreditCard },
   { id: "privacy", label: "Privacy Policy", icon: Shield },
   { id: "delete", label: "Delete Daftar", icon: Trash2 }
 ]
@@ -665,18 +659,18 @@ export function DaftarDialog({
           </Card>
         )
 
-        case "billing":
-          return (
-            <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
-              <div className="p-6 space-y-4 text-center">
-                <CreditCard className="h-12 w-12 mx-auto text-muted-foreground" />
-                <h3 className="text-lg font-medium text-white">No Billing Yet!</h3>
-                <p className="text-sm text-muted-foreground">
-                  Enjoy Daftar completely free for now.
-                </p>
-              </div>
-            </Card>
-          );
+        // case "billing":
+        //   return (
+        //     <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
+        //       <div className="p-6 space-y-4 text-center">
+        //         <CreditCard className="h-12 w-12 mx-auto text-muted-foreground" />
+        //         <h3 className="text-lg font-medium text-white">No Billing Yet!</h3>
+        //         <p className="text-sm text-muted-foreground">
+        //           Enjoy Daftar completely free for now.
+        //         </p>
+        //       </div>
+        //     </Card>
+        //   );
 
       case "privacy":
         return (
