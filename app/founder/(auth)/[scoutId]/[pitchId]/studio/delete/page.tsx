@@ -221,7 +221,8 @@ export default function DeletePage() {
               variant="destructive"
               onClick={handleDelete}
               disabled={!userConsent || deleteClicked || isLoading}
-              className="w-[12%] bg-muted hover:bg-muted/50"
+              className="w-[12%] rounded-[0.35rem]"
+
             >
               {isLoading ? "Processing..." : "Delete"}
             </Button>

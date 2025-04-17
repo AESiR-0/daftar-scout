@@ -279,7 +279,7 @@ export const founderStudioNavItems = [
   // },
   {
     title: "Delete",
-    url: "/founder/studio/delete",
+    url: "delete",
     icon: Trash2,
     className: "text-red-500 hover:text-red-600",
   },
