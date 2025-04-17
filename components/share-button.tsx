@@ -34,7 +34,7 @@ export function ShareButton({ title, description }: ShareButtonProps) {
     }
 
     return (
-        <Button variant="outline" className="p-4 py-4" onClick={handleShare}>
+        <Button variant="outline" className="p-4 py-4 rounded-[0.35rem]" onClick={handleShare}>
             Share
         </Button>
     )

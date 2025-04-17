@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  JSXElementConstructor,
-  Key,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,6 +9,13 @@ import { Button } from "@/components/ui/button";
 import { ShareButton } from "@/components/share-button";
 import { SelectDaftarDialog } from "@/components/dialogs/create-pitch-dialog";
 import { InvestorProfile } from "@/components/InvestorProfile";
+import { Card } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 function ErrorPage() {
   return (
@@ -65,7 +64,7 @@ export default function Page() {
   const transformedScout = {
     title: `Scout Opportunity: ${scout.scoutStage}`,
     description: `Sector: ${scout.scoutSector} | Community: ${scout.scoutCommunity}`,
-    videoUrl: scout.investorPitch || "video/mp4.mp4", // Add if available
+    videoUrl: scout.investorPitch || "video/mp4.mp4",
     slug: scoutId,
     details: {
       "Target Audience Age": `${scout.targetAudAgeStart} - ${scout.targetAudAgeEnd}`,
@@ -100,7 +99,7 @@ export default function Page() {
       <div className="space-y-6 container mx-auto px-10 py-8">
         <ScrollArea className="h-[calc(100vh-8rem)]">
           <div className="space-y-6 flex">
-            <div>
+            <div className="flex-1">
               <div className="flex justify-center">
                 <div className="relative aspect-video h-[24rem]">
                   <video
@@ -113,7 +112,7 @@ export default function Page() {
 
               <div className="mt-8">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold">
+                  <h1 className="text-2xl font-bold text-white">
                     {transformedScout.title}
                   </h1>
                   <div className="flex text-md items-center gap-4">
@@ -122,7 +121,7 @@ export default function Page() {
                       description={transformedScout.description}
                     />
                     <Button
-                      className="bg-muted px-4 py-4 hover:bg-muted/50 text-white"
+                      className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"
                       onClick={() => setShowDaftarDialog(true)}
                     >
                       Pitch Now
@@ -143,11 +142,19 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="ml-6 pl-3 h-full">
+            <div className="w-[400px] pl-6">
               <Tabs defaultValue="details" className="space-y-4">
-                <TabsList>
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="faqs" className="flex items-center gap-1">
+                <TabsList className="grid grid-cols-3 gap-2 bg-[#0e0e0e] p-2 rounded-[0.35rem]">
+                  <TabsTrigger
+                    value="details"
+                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50"
+                  >
+                    Details
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="faqs"
+                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50 flex items-center gap-1"
+                  >
                     FAQs
                     <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
                       {transformedScout.faqs.length}
@@ -155,7 +162,7 @@ export default function Page() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="updates"
-                    className="flex items-center gap-1"
+                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50 flex items-center gap-1"
                   >
                     Updates
                     <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
@@ -164,89 +171,96 @@ export default function Page() {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="details" className="border-l-4 px-5 py-5">
-                  <div className="p-2 pt-0 space-y-3">
-                    {Object.entries(transformedScout.details).map(
-                      ([key, value]) => (
-                        <div key={key} className="rounded-[0.35rem]">
-                          <p className="text-sm text-muted-foreground">
-                            {key}: <span className="font-medium">{value}</span>
-                          </p>
-                        </div>
-                      )
-                    )}
-                  </div>
+                <TabsContent value="details">
+                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Scout Details
+                    </h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      {Object.entries(transformedScout.details).map(
+                        ([key, value]) => (
+                          <div
+                            key={key}
+                            className="flex justify-between items-center py-2 border-b border-muted/20 last:border-b-0"
+                          >
+                            <span className="text-sm font-medium text-white">
+                              {key}
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              {value}
+                            </span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </Card>
                 </TabsContent>
 
-                <TabsContent value="faqs" className="border-l-4 px-5 py-5">
-                  <div className="space-y-4">
-                    {transformedScout.faqs.map((faq: any, index: number) => (
-                      <div key={index} className="space-y-2">
-                        <h3 className="text-muted-foreground">
-                          {faq.question}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="updates" className="border-l-4 px-5 py-5">
-                  <div className="space-y-2">
-                    {transformedScout.updates.map(
-                      (
-                        update: {
-                          date: string | number | Date;
-                          content:
-                            | string
-                            | number
-                            | bigint
-                            | boolean
-                            | ReactElement<
-                                unknown,
-                                string | JSXElementConstructor<any>
-                              >
-                            | Iterable<ReactNode>
-                            | ReactPortal
-                            | Promise<
-                                | string
-                                | number
-                                | bigint
-                                | boolean
-                                | ReactPortal
-                                | ReactElement<
-                                    unknown,
-                                    string | JSXElementConstructor<any>
-                                  >
-                                | Iterable<ReactNode>
-                                | null
-                                | undefined
-                              >
-                            | null
-                            | undefined;
-                        },
-                        index: Key | null | undefined
-                      ) => (
-                        <div
+                <TabsContent value="faqs">
+                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Frequently Asked Questions
+                    </h3>
+                    <Accordion type="single" collapsible className="space-y-2">
+                      {transformedScout.faqs.map((faq: any, index: number) => (
+                        <AccordionItem
                           key={index}
-                          className="p-4 pb-0 pt-0 rounded-[0.35rem]"
+                          value={`faq-${index}`}
+                          className="border-b border-muted/20 last:border-b-0"
                         >
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(update.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {update.content}
-                          </p>
-                        </div>
-                      )
-                    )}
-                  </div>
+                          <AccordionTrigger className="text-sm font-medium text-white hover:no-underline py-3">
+                            {faq.question}
+                          </AccordionTrigger>
+                          <AccordionContent className="text-sm text-muted-foreground pt-2">
+                            {faq.answer}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="updates">
+                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Updates
+                    </h3>
+                    <div className="space-y-6 relative">
+                      {transformedScout.updates.map(
+                        (
+                          update: { date: string; content: string },
+                          index: number
+                        ) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-4 relative"
+                          >
+                            <div className="flex flex-col items-center">
+                              <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                              {index < transformedScout.updates.length - 1 && (
+                                <div className="w-0.5 bg-muted/50 flex-1 mt-2" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(update.date).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  }
+                                )}
+                              </p>
+                              <p className="text-sm text-white mt-1">
+                                {update.content}
+                              </p>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </Card>
                 </TabsContent>
               </Tabs>
             </div>
