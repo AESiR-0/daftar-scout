@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Check, Clock, MinusCircle } from "lucide-react";
+import { Check, Clock, MinusCircle, AlertCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -159,7 +159,7 @@ export default function ApprovalPage() {
                   <div className="flex items-center justify-between">
                     {!userApproved && (
                       <h3 className="text-sm font-medium">
-                        Team&apos;s Approval Required
+                        Team's Approval Required
                       </h3>
                     )}
                     <div className="text-sm text-muted-foreground">
@@ -204,21 +204,43 @@ export default function ApprovalPage() {
 
           {/* Right Column: Review Issues */}
           <div className="mt-2">
-            <Card className="border-none bg-[#0e0e0e]">
-              <CardContent className="p-6">
+            <Card className="border-none bg-[#0e0e0e] shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  Review Required
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium">Review Required</h3>
-                  <ul className="list-disc list-inside text-sm text-muted-foreground ml-2 space-y-2">
-                    {issues.map((issue, i) => (
-                      <li key={i}>{issue}</li>
-                    ))}
-                  </ul>
-
-                  {issues.length > 0 && (
-                    <p className="text-xs text-muted-foreground mt-4">
-                      Please review and fix these issues before proceeding with
-                      approval.
-                    </p>
+                  {issues.length > 0 ? (
+                    <>
+                      <ul className="space-y-3">
+                        {issues.map((issue, i) => (
+                          <li
+                            key={i}
+                            className="flex items-start gap-2 p-3 bg-muted/50 rounded-md hover:bg-muted/70 transition-colors cursor-pointer"
+                          >
+                            <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-foreground">
+                              {issue}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-xs text-muted-foreground">
+                        Please address these issues before approving the Scout.
+                      </p>
+                    </>
+                  ) : (
+                    <div className="text-center py-6">
+                      <Check className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                      <p className="text-sm text-foreground">
+                        No issues found
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Everything looks good for approval.
+                      </p>
+                    </div>
                   )}
                 </div>
               </CardContent>
