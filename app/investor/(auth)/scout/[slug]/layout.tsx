@@ -8,6 +8,7 @@ export default async function ScoutLayout({
   params: { slug: string };
 }) {
   const { slug } = await params;
+  console.log("Scout slug:", slug);
 
   const res = await fetch(
     `${process.env.BASE_URL}/api/endpoints/scouts/getStatus?scoutId=${slug}`,

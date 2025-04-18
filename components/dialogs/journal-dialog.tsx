@@ -1,48 +1,93 @@
-"use client"
-import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ScrollText, Bold, Italic, List } from "lucide-react"
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
+"use client";
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { toast } from "@/hooks/use-toast";
 
 interface JournalDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
-  const [note, setNote] = useState("")
+  const [note, setNote] = useState("");
 
   const editor = useEditor({
     extensions: [StarterKit],
     content: note,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML()
-      setNote(html)
+      const html = editor.getHTML();
+      setNote(html);
     },
-  })
+  });
 
-  // Load saved note when dialog opens
+  // Fetch note ONLY when dialog opens
   useEffect(() => {
-    if (open && editor) {
-      const savedNote = localStorage.getItem("journal")
-      if (savedNote) {
-        setNote(savedNote)
-        editor.commands.setContent(savedNote)
+    if (!open) return;
+
+    async function fetchNote() {
+      try {
+        const res = await fetch("/api/endpoints/users/journal");
+        if (res.status === 200) {
+          const data = await res.json();
+          setNote(data.journal);
+          editor?.commands.setContent(data.journal);
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to fetch journal",
+            variant: "destructive",
+          });
+        }
+      } catch (err) {
+        toast({
+          title: "Error",
+          description: "Something went wrong fetching journal",
+          variant: "destructive",
+        });
       }
     }
-  }, [open, editor])
 
-  // Auto-save whenever note changes
+    fetchNote();
+  }, [open, editor]);
+
+  // Debounced auto-save
   useEffect(() => {
-    const saveNote = () => {
-      localStorage.setItem("journal", note)
-      console.log("Auto-saving note...")
-    }
+    if (!note) return;
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/endpoints/users/journal", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ journal: note }),
+        });
 
-    const debounceTimer = setTimeout(saveNote, 500) // Debounce save for 500ms
-    return () => clearTimeout(debounceTimer)
-  }, [note])
+        if (res.status !== 200) {
+          toast({
+            title: "Error",
+            description: "Failed to save note",
+            variant: "destructive",
+          });
+        }
+      } catch (err) {
+        toast({
+          title: "Error",
+          description: "Failed to save note",
+          variant: "destructive",
+        });
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [note]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -54,42 +99,14 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
           <div className="flex items-center gap-2 p-4">
             <h2 className="text-sm font-medium">Journal</h2>
           </div>
-
-          {/* <div className="flex items-center gap-2 p-2 border-b">
-            <button
-              onClick={() => editor?.chain().focus().toggleBold().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor?.isActive('bold') ? 'bg-gray-100' : ''
-              }`}
-            >
-              <Bold className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => editor?.chain().focus().toggleItalic().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor?.isActive('italic') ? 'bg-gray-100' : ''
-              }`}
-            >
-              <Italic className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => editor?.chain().focus().toggleBulletList().run()}
-              className={`p-2 rounded hover:bg-gray-100 ${
-                editor?.isActive('bulletList') ? 'bg-gray-100' : ''
-              }`}
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div> */}
-
           <div className="flex-1 p-4">
-            <EditorContent 
-              editor={editor} 
+            <EditorContent
+              editor={editor}
               className="h-full prose max-w-none"
             />
           </div>
         </div>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}
