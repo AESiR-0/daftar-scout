@@ -8,10 +8,12 @@ export default function FounderPage() {
   const [selectedQuestion, setSelectedQuestion] = useState("problem")
 
   const questions = [
-    { id: "problem", title: "Problem Statement", question: "What problem does your startup solve?" },
-    { id: "solution", title: "Solution", question: "How does your solution address the problem?" },
-    { id: "market", title: "Market", question: "What is your target market size?" },
-    { id: "business", title: "Business Model", question: "How do you plan to make money?" }
+    { id: "problem", title: "Introduce yourself", question: "Introduce yourself" },
+    { id: "solution", title: "How did you come up with the idea ", question: "How did you come up with the idea " },
+    { id: "market", title: "What is the problem are you solving, and why is it really important for you to solve it", question: "What is the problem are you solving, and why is it really important for you to solve it" },
+    { id: "business", title: "Who are your customers, and why would they pay for it", question: "Who are your customers, and why would they pay for it" },
+    { id: "future", title: "How much have you worked on your startup, and where do you see it in 3 years", question: "How much have you worked on your startup, and where do you see it in 3 years" },
+    { id: "help", title: "What challenges are you facing, and what support do you need", question: "What challenges are you facing, and what support do you need" },
   ]
 
   return (
@@ -52,25 +54,55 @@ export default function FounderPage() {
             <h3 className="text-lg font-semibold">Languages</h3>
             <div className="space-y-2">
               <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">English</span>
+                <span className="text-sm">Hindi</span>
               </div>
               <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
                 <span className="text-sm">Hindi</span>
               </div>
               <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Spanish</span>
+                <span className="text-sm">Kanada</span>
               </div>
               <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">French</span>
+                <span className="text-sm">Bengali</span>
               </div>
-            </div>
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">Pahadi</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">Napleese</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">Assamese</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">Gujarati</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">English</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">English</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">Sindhi</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">Punjabi</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">Urdu</span>
+              </div> 
+              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
+                <span className="text-sm">Odia</span>
+              </div> 
+              </div>
           </div>
 
           {/* Video Preview Column */}
-          <div className="col-span-7">
-            <Card className="overflow-hidden border-0 bg-muted/50">
-              <div className="aspect-video relative">
-                <div className="absolute inset-0 flex items-center justify-center">
+          <div className="col-span-6">
+            <Card className="overflow-hidden border-0 h-[700px] bg-muted/50">
+              <div className="aspect-[9/16] relative">
+                <div className="absolute inset-0 flex items-center justify-center h-full w-full">
                   <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -91,14 +123,14 @@ export default function FounderPage() {
           </div>
 
           {/* Questions Column */}
-          <div className="col-span-3 space-y-4">
-            <h3 className="text-lg font-semibold">Key Questions</h3>
+          <div className="col-span-4 space-y-4">
+            <h3 className="text-lg font-semibold">Investor's Questions</h3>
             <div className="space-y-2">
               {questions.map((q) => (
                 <div
                   key={q.id}
                   className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                    selectedQuestion === q.id ? 'text-blue-600 underline' : 'hover:bg-muted'
+                    selectedQuestion === q.id ? 'text-blue-600' : 'hover:bg-muted'
                   }`}
                   onClick={() => setSelectedQuestion(q.id)}
                 >

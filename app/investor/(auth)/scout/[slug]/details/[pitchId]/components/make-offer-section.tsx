@@ -372,7 +372,7 @@ export function MakeOfferSection() {
                 variant="outline"
                 className="rounded-[0.35rem] bg-blue-500"
               >
-                Send
+                Send Offer
               </Button>
 
               <Button variant="destructive" 
@@ -380,7 +380,7 @@ export function MakeOfferSection() {
                 disabled={!offerMessage.trim()}
                 className="rounded-[0.35rem]"
               >
-                Decline
+                Reject Pitch
               </Button>
             </div>
           </div>

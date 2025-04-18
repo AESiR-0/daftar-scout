@@ -12,7 +12,6 @@ interface AgeRangeProps {
 export function AgeRange({ minAge, maxAge, onMinChange, onMaxChange }: AgeRangeProps) {
     return (
         <div className="space-y-2">
-            <Label>Age Range</Label>
             <div className="flex gap-2">
                 <Input
                     type="number"

@@ -67,11 +67,12 @@ export default function Page() {
     videoUrl: scout.investorPitch || "video/mp4.mp4",
     slug: scoutId,
     details: {
-      "Target Audience Age": `${scout.targetAudAgeStart} - ${scout.targetAudAgeEnd}`,
+      Community: scout.scoutCommunity,
+      Gender: scout.scoutGender,
+      Age: `${scout.targetAudAgeStart} - ${scout.targetAudAgeEnd}`,
       Location: scout.targetAudLocation,
       Stage: scout.scoutStage,
       Sector: scout.scoutSector,
-      Community: scout.scoutCommunity,
     },
     faqs: faqs.map((f: any) => ({
       question: f.faqQuestion,
@@ -173,9 +174,6 @@ export default function Page() {
 
                 <TabsContent value="details">
                   <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">
-                      Scout Details
-                    </h3>
                     <div className="grid grid-cols-1 gap-4">
                       {Object.entries(transformedScout.details).map(
                         ([key, value]) => (
@@ -198,9 +196,6 @@ export default function Page() {
 
                 <TabsContent value="faqs">
                   <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">
-                      Frequently Asked Questions
-                    </h3>
                     <Accordion type="single" collapsible className="space-y-2">
                       {transformedScout.faqs.map((faq: any, index: number) => (
                         <AccordionItem
@@ -222,9 +217,6 @@ export default function Page() {
 
                 <TabsContent value="updates">
                   <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">
-                      Updates
-                    </h3>
                     <div className="space-y-6 relative">
                       {transformedScout.updates.map(
                         (

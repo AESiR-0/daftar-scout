@@ -50,20 +50,6 @@ export function VideoDialog({ open, onOpenChange }: VideoDialogProps) {
                 </div>
               </div>
             </div>
-
-            {/* Description Section */}
-            <div className="bg-[#1a1a1a] rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-white">Description</span>
-              </div>
-              <div
-                className={`mt-2 text-sm text-muted-foreground transition-all duration-300`}
-              >
-                <ScrollArea className={isDescriptionExpanded ? "h-[150px] pr-4" : "h-auto"}>
-                  Daftar's Support to Scaling Your Scout Startup's at Daftar. Learn how our platform empowers founders with tools, resources, and community support to take their startups to the next level. This demo walks you through the key features and benefits of collaborating with Daftar, including audience targeting, collaboration tools, and expert guidance.
-                </ScrollArea>
-              </div>
-            </div>
           </div>
         </Card>
       </DialogContent>

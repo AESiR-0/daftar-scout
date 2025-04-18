@@ -370,7 +370,6 @@ export default function AudiencePage() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div>
-                  <Label>Community</Label>
                   <Combobox
                     options={communitiesData.map((community) => community.value)}
                     value={tempScoutCommunity}
@@ -392,7 +391,6 @@ export default function AudiencePage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <Label>Gender</Label>
                     <Combobox
                       options={genders.map((gender) => gender.value)}
                       value={tempTargetedGender}
@@ -402,7 +400,6 @@ export default function AudiencePage() {
                   </div>
                 </div>
                 <div>
-                  <Label>Stage</Label>
                   <Combobox
                     options={stages.map((stage) => stage.value)}
                     value={tempScoutStage}
@@ -411,7 +408,6 @@ export default function AudiencePage() {
                   />
                 </div>
                 <div>
-                  <Label>Sector</Label>
                   <Combobox
                     options={sectors.map((sector) => sector.value)}
                     value={tempScoutSector}
@@ -424,7 +420,7 @@ export default function AudiencePage() {
                 <Button variant="outline" onClick={clearFilters}>
                   Clear Filters
                 </Button>
-                <Button onClick={applyFilters}>Apply</Button>
+                <Button variant="outline" className="bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]" onClick={applyFilters}>Apply</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

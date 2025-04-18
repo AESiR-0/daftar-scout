@@ -208,7 +208,7 @@ export default function ApprovalPage() {
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium">Review Required</h3>
-                  <ul className="list-disc list-inside text-xs text-muted-foreground ml-2 space-y-2">
+                  <ul className="list-disc list-inside text-sm text-muted-foreground ml-2 space-y-2">
                     {issues.map((issue, i) => (
                       <li key={i}>{issue}</li>
                     ))}
