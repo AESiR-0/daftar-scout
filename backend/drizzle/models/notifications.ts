@@ -3,7 +3,8 @@ import { sql } from "drizzle-orm";
 
 export const notifications = pgTable("notifications", {
   id: uuid("id").defaultRandom().primaryKey(),
-
+  title: text("title"),
+  description: text("description"),
   type: text("type").notNull(),
   role: text("role").notNull(),
 

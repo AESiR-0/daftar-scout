@@ -6,8 +6,10 @@ import {
   NotificationRole,
 } from "./type";
 
-interface CreateNotificationInput {
+export interface CreateNotificationInput {
   type: NotificationType;
+  title?: string;
+  description?: string;
   role?: NotificationRole;
   targeted_users?: string[];
   payload?: NotificationPayload;
@@ -16,12 +18,16 @@ interface CreateNotificationInput {
 export async function createNotification({
   type,
   role = "both",
+  title = "",
+  description = "",
   targeted_users = [],
   payload,
 }: CreateNotificationInput) {
   return await db.insert(notifications).values({
     type,
     role,
+    title,
+    description,
     targeted_users,
     payload,
   });

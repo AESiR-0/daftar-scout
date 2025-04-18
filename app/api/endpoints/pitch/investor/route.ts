@@ -60,6 +60,7 @@ export async function GET(req: NextRequest) {
         demoLink: pitch.demoLink,
         teamSize: pitch.teamSize,
         investorStatus: pitch.investorStatus,
+        ask: pitch.askForInvestor,
         createdAt: pitch.createdAt,
       })
       .from(pitch)
@@ -183,6 +184,7 @@ export async function GET(req: NextRequest) {
           status: pitchData[0].status || "Under Review",
           location: pitchData[0].location || "Unknown",
           stage: pitchData[0].stage || "Seed",
+          ask: pitchData[0].ask || "Unknown",
           sectors: sectors.map((s) => s.sectorName),
           questions: answers.map((a) => ({
             id: a.id,

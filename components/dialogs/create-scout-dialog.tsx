@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getCookie } from "@/lib/helper/cookies";
+import { useRouter } from "next/navigation";
 
 interface CreateScoutDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ export function CreateScoutDialog({
   onOpenChange,
   onScoutCreate,
 }: CreateScoutDialogProps) {
+  const router = useRouter();
   const [scoutName, setScoutName] = useState("");
   const [investorId, setInvestorId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,8 +60,8 @@ export function CreateScoutDialog({
       }
 
       const data = await response.json();
-      const newScout = data.data; // Extract the created scout from response
-
+      const newScout = data.data;
+      router.push("/investor/scout");
       toast({
         title: "Scout created",
         description: `Scout "${newScout.scoutName}" (ID: ${newScout.scoutId}) created successfully`,

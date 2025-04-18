@@ -36,7 +36,6 @@ export function DaftarProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/endpoints/daftar");
       const data = await res.json();
       setDaftars(data);
-
       if (data.length === 0) {
         setShowDialog(true);
       } else {
@@ -45,9 +44,9 @@ export function DaftarProvider({ children }: { children: ReactNode }) {
             .split("; ")
             .find((row) => row.startsWith("selectedDaftarId="))
             ?.split("=")[1] ?? "";
-
-        const defaultId = cookieId || data[0].id;
+        const defaultId = cookieId ? cookieId : data[0].id;
         setSelectedDaftar(defaultId);
+        document.cookie = `selectedDaftarId=${defaultId}; path=/`;
       }
     } catch (error) {
       console.error("Failed to fetch daftars", error);

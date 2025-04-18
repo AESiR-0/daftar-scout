@@ -127,6 +127,21 @@ export default function InvestorStudioPage() {
 
     fetchQuestions();
   }, [scoutId]);
+  const [disabled, setDisabled] = useState(true);
+  useEffect(() => {
+    if (selectedOption === "custom") {
+      let count = 0;
+      customQuestions.forEach((q) => {
+        if (q.question === "") {
+          count++;
+        }
+      });
+      if (count === 0) {
+        console.log("All questions filled", count);
+        setDisabled(false);
+      }
+    }
+  }, [customQuestions]);
 
   const handleOptionChange = (option: "sample" | "custom") => {
     if (selectedOption === option) {
@@ -294,6 +309,7 @@ export default function InvestorStudioPage() {
                   </h3>
                   <Button
                     onClick={handleSaveQuestions}
+                    disabled={disabled}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     Save Questions

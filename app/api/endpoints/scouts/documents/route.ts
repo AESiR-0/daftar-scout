@@ -114,25 +114,23 @@ export async function POST(req: Request) {
 
     const userId = userResult[0].id;
 
-    // 2. Check if user is in daftar
-    const investorCheck = await db
-      .select()
-      .from(daftarInvestors)
-      .where(
-        and(
-          eq(daftarInvestors.investorId, userId),
-          eq(daftarInvestors.daftarId, daftarId)
-        )
-      );
+    // const investorCheck = await db
+    //   .select()
+    //   .from(daftarInvestors)
+    //   .where(
+    //     and(
+    //       eq(daftarInvestors.investorId, userId),
+    //       eq(daftarInvestors.daftarId, daftarId)
+    //     )
+    //   );
 
-    if (!investorCheck.length) {
-      return NextResponse.json(
-        { error: "User not part of this Daftar" },
-        { status: 403 }
-      );
-    }
+    // if (!investorCheck.length) {
+    //   return NextResponse.json(
+    //     { error: "User not part of this Daftar" },
+    //     { status: 403 }
+    //   );
+    // }
 
-    // 3. Check if scout belongs to that daftar
     const scoutCheck = await db
       .select()
       .from(daftarScouts)
@@ -142,7 +140,7 @@ export async function POST(req: Request) {
           eq(daftarScouts.daftarId, daftarId)
         )
       );
-
+      
     if (!scoutCheck.length) {
       return NextResponse.json(
         { error: "Scout not found in this Daftar" },

@@ -7,155 +7,63 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import formatDate from "@/lib/formatDate";
-import { Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase/createClient"; // Adjust the import path as necessary
 
-type NotificationTab =
-  | "updates"
-  | "alerts"
+export type NotificationType =
   | "news"
-  | "scout-requests"
-  | "scout-links";
+  | "updates"
+  | "alert"
+  | "scout_link"
+  | "request";
 
-interface NotificationItem {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  isRead: boolean;
-  type: NotificationTab;
+export type NotificationRole = "founder" | "investor" | "both";
+
+export interface NotificationPayload {
+  action?: string;
+  by_user_id?: string;
+  daftar_id?: string;
+  action_by?: string;
+  action_at?: string;
+  scout_id?: string;
+  url?: string;
 }
 
-interface ScoutRequest {
+type Notification = {
   id: string;
-  scoutName: string;
-  scoutVision: string;
-  daftarName: string;
-  requestedAt: string;
-  status?: {
-    action: "accepted" | "declined";
-    by: string;
-    designation: string;
-    timestamp: string;
-  };
-}
+  title?: string;
+  description?: string;
+  type: NotificationType;
+  role: NotificationRole;
+  targeted_users: string[];
+  payload: NotificationPayload;
+  created_at: string;
+};
 
-interface ScoutLink {
-  id: string;
-  scoutName: string;
-  daftar: string;
-  createdAt: string;
-  status: "active" | "inactive";
-  collaborators: number;
-}
-
-const notifications: NotificationItem[] = [
-  {
-    id: "1",
-    title: "New Pitch Received",
-    description: "You have received a new pitch from Tech Startup Inc.",
-    date: "Feb 14, 2025, 10:00 AM",
-    isRead: false,
-    type: "updates",
-  },
-  {
-    id: "2",
-    title: "Meeting Reminder",
-    description: "Upcoming meeting with investors tomorrow at 2 PM",
-    date: "Feb 14, 2025, 10:00 AM",
-    isRead: true,
-    type: "alerts",
-  },
-  {
-    id: "3",
-    title: "Platform Update",
-    description: "New features have been added to the platform",
-    date: "Feb 14, 2025, 10:00 AM",
-    isRead: true,
-    type: "news",
-  },
-];
-
-const scoutRequests: ScoutRequest[] = [
-  {
-    id: "1",
-    scoutName: "Tech Innovators Scout",
-    scoutVision:
-      "Connecting innovative startups with strategic investors in the deep tech space",
-    daftarName: "Tech Innovators",
-    requestedAt: "Feb 14, 2024, 10:00 AM",
-  },
-  {
-    id: "2",
-    scoutName: "FinTech Future Scout",
-    scoutVision:
-      "Building bridges between emerging fintech solutions and growth capital",
-    daftarName: "FinTech Solutions",
-    requestedAt: "Feb 13, 2024, 2:30 PM",
-    status: {
-      action: "accepted",
-      by: "John Smith",
-      designation: "Investment Director",
-      timestamp: "Feb 13, 2024, 3:45 PM",
-    },
-  },
-];
-
-const scoutLinks: ScoutLink[] = [
-  {
-    id: "1",
-    scoutName: "Tech Innovators Scout",
-    daftar: "Tech Innovators",
-    createdAt: "Feb 20, 2024",
-    status: "active",
-    collaborators: 3,
-  },
-  {
-    id: "2",
-    scoutName: "FinTech Scout",
-    daftar: "FinTech Solutions",
-    createdAt: "Feb 15, 2024",
-    status: "active",
-    collaborators: 2,
-  },
-  {
-    id: "3",
-    scoutName: "Health Tech Scout",
-    daftar: "Health Innovations",
-    createdAt: "Jan 10, 2024",
-    status: "inactive",
-    collaborators: 0,
-  },
-];
+// UI-specific tab type (replacing NotificationTab)
+type UITab = "updates" | "alerts" | "news" | "scout-requests" | "scout-links";
 
 export function NotificationDialog({
   open,
   onOpenChange,
   role = "founder",
+  userId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   role?: "founder" | "investor" | undefined;
+  userId: string;
 }) {
-  const [activeTab, setActiveTab] = useState<NotificationTab>(
+  const [activeTab, setActiveTab] = useState<UITab>(
     role === "investor" ? "scout-requests" : "updates"
   );
-  const [requests, setRequests] = useState<ScoutRequest[]>(scoutRequests);
-  const [links] = useState<ScoutLink[]>(scoutLinks);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const router = useRouter();
 
   // Get available tabs based on role
@@ -164,32 +72,123 @@ export function NotificationDialog({
       ? ["scout-requests", "scout-links", "updates", "alerts", "news"]
       : ["updates", "alerts", "news"];
 
+  // Map notification type to UI tab
+  const getUITab = (type: NotificationType): UITab => {
+    const typeMap: { [key in NotificationType]: UITab } = {
+      updates: "updates",
+      alert: "alerts",
+      news: "news",
+      request: "scout-requests",
+      scout_link: "scout-links",
+    };
+    return typeMap[type];
+  };
+
+  // Fetch all notifications from Supabase on mount
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching notifications:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load notifications",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        const filteredNotifications = data.filter(
+          (notif: Notification) =>
+            (notif.targeted_users.length === 0 ||
+              notif.targeted_users.includes(userId)) &&
+            (notif.role === "both" || notif.role === role)
+        );
+        setNotifications(filteredNotifications);
+      }
+    };
+
+    fetchNotifications();
+  }, [userId, role]);
+
+  // Real-time listener for Supabase notifications
+  useEffect(() => {
+    const subscription = supabase
+      .channel("realtime:notifications")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+        },
+        (payload) => {
+          const notif = payload.new as Notification;
+          toast({
+            title: `New notification: ${notif.title || notif.type}`,
+            variant: "default",
+          });
+          const isTargeted =
+            notif.targeted_users.length === 0 ||
+            notif.targeted_users.includes(userId);
+
+          const roleMatches = notif.role === "both" || notif.role === role;
+
+          if (isTargeted && roleMatches) {
+            setNotifications((prev) => [...prev, notif]);
+          }
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on component unmount
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [userId, role]);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      const res = fetch(
+        `/api/endpoints/notifications?userId=${userId}&scoutId=${notifications[0]?.payload?.scout_id}&daftarId=${notifications[0]?.payload?.daftar_id}`
+      );
+    };
+  });
+
   // Add counts for each tab
   const tabCounts = {
     updates: notifications.filter((n) => n.type === "updates").length,
-    alerts: notifications.filter((n) => n.type === "alerts").length,
+    alerts: notifications.filter((n) => n.type === "alert").length,
     news: notifications.filter((n) => n.type === "news").length,
-    "scout-requests": scoutRequests.length,
-    "scout-links": links.length,
+    "scout-requests": notifications.filter((n) => n.type === "request").length,
+    "scout-links": notifications.filter((n) => n.type === "scout_link").length,
   };
 
+  // Local state to track scout request statuses
+  const [requestStatuses, setRequestStatuses] = useState<{
+    [key: string]: {
+      action: "accepted" | "declined";
+      by: string;
+      designation: string;
+      timestamp: string;
+    };
+  }>({});
+
   const handleAction = (requestId: string, action: "accepted" | "declined") => {
-    setRequests((prev) =>
-      prev.map((req) => {
-        if (req.id === requestId) {
-          return {
-            ...req,
-            status: {
-              action,
-              by: "John Smith", // Replace with actual user
-              designation: "Investment Director", // Replace with actual designation
-              timestamp: formatDate(new Date().toLocaleString()),
-            },
-          };
-        }
-        return req;
-      })
-    );
+    setRequestStatuses((prev) => ({
+      ...prev,
+      [requestId]: {
+        action,
+        by: "John Smith", // Replace with actual user
+        designation: "Investment Director", // Replace with actual designation
+        timestamp: formatDate(new Date().toLocaleString()),
+      },
+    }));
   };
 
   return (
@@ -203,7 +202,7 @@ export function NotificationDialog({
             {availableTabs.map((tab) => (
               <button
                 key={tab}
-                onClick={() => setActiveTab(tab as NotificationTab)}
+                onClick={() => setActiveTab(tab as UITab)}
                 className={cn(
                   "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
                   "hover:bg-muted/50",
@@ -224,128 +223,152 @@ export function NotificationDialog({
           <ScrollArea className="h-[500px]">
             {activeTab === "scout-requests" ? (
               <div className="space-y-4">
-                {requests.map((request) => (
-                  <Card
-                    key={request.id}
-                    className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
-                  >
-                    <div className="p-4 space-y-2">
-                      <h4 className="text-sm font-medium">
-                        {request.scoutName}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        {request.scoutVision}
-                      </p>
-                      <div className="">
-                        <p className="text-xs text-muted-foreground">
-                          Daftar: {request.daftarName}
+                {notifications
+                  .filter((n) => n.type === "request")
+                  .map((notification) => (
+                    <Card
+                      key={notification.id}
+                      className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
+                    >
+                      <div className="p-4 space-y-2">
+                        <h4 className="text-sm font-medium">
+                          {notification.payload.daftar_id
+                            ? `Scout for Daftar ${notification.payload.daftar_id}`
+                            : "Unknown Scout"}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {notification.payload.action ||
+                            "Scout request for collaboration"}
                         </p>
-                        <time className="text-xs text-muted-foreground block">
-                          Requested on {formatDate(request.requestedAt)}
-                        </time>
-                      </div>
-
-                      {request.status ? (
-                        <div className="text-xs text-muted-foreground border-t pt-2">
-                          <p>
-                            {request.status.action === "accepted"
-                              ? "Accepted"
-                              : "Declined"}{" "}
-                            by {request.status.by}
+                        <div className="">
+                          <p className="text-xs text-muted-foreground">
+                            Daftar:{" "}
+                            {notification.payload.daftar_id || "Unknown Daftar"}
                           </p>
-                          <p>{formatDate(request.status.timestamp)}</p>
+                          <time className="text-xs text-muted-foreground block">
+                            Requested on {formatDate(notification.created_at)}
+                          </time>
                         </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="rounded-[0.35rem]"
-                            onClick={() => handleAction(request.id, "accepted")}
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="rounded-[0.35rem]"
-                            onClick={() => handleAction(request.id, "declined")}
-                          >
-                            Decline
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
+
+                        {requestStatuses[notification.id] ? (
+                          <div className="text-xs text-muted-foreground border-t pt-2">
+                            <p>
+                              {requestStatuses[notification.id].action ===
+                              "accepted"
+                                ? "Accepted"
+                                : "Declined"}{" "}
+                              by {requestStatuses[notification.id].by}
+                            </p>
+                            <p>
+                              {formatDate(
+                                requestStatuses[notification.id].timestamp
+                              )}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="rounded-[0.35rem]"
+                              onClick={() =>
+                                handleAction(notification.id, "accepted")
+                              }
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="rounded-[0.35rem]"
+                              onClick={() =>
+                                handleAction(notification.id, "declined")
+                              }
+                            >
+                              Decline
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
               </div>
             ) : activeTab === "scout-links" ? (
               <div className="space-y-4">
-                {links.map((link) => (
-                  <Card
-                    key={link.id}
-                    className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
-                  >
-                    <div className="p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium">
-                          {link.scoutName}
-                        </h4>
+                {notifications
+                  .filter((n) => n.type === "scout_link")
+                  .map((notification) => (
+                    <Card
+                      key={notification.id}
+                      className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
+                    >
+                      <div className="p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-medium">
+                            {notification.payload.daftar_id
+                              ? `Scout Link : ${notification.payload.scout_id}`
+                              : "Unknown Scout"}
+                          </h4>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Daftar:{" "}
+                          {notification.payload.daftar_id || "Unknown Daftar"}
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>
+                            Created on {formatDate(notification.created_at)}
+                          </span>
+                          <span>0 collaborators</span>{" "}
+                          {/* No collaborator info in payload */}
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs rounded-[0.35rem]"
+                            onClick={() => {
+                              const link =
+                                notification.payload.url ||
+                                `https://daftar.com/scout/${notification.id}`;
+                              navigator.clipboard.writeText(link);
+                              toast({
+                                title: "Link copied",
+                                description:
+                                  "Scout link has been copied to clipboard",
+                              });
+                            }}
+                          >
+                            Copy Link
+                          </Button>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Daftar: {link.daftar}
-                      </p>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Created on {link.createdAt}</span>
-                        <span>{link.collaborators} collaborators</span>
-                      </div>
-                      <div className="flex gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-xs rounded-[0.35rem]"
-                          onClick={() => {
-                            // Handle copy link
-                            navigator.clipboard.writeText(
-                              `https://daftar.com/scout/${link.id}`
-                            );
-                            toast({
-                              title: "Link copied",
-                              description:
-                                "Scout link has been copied to clipboard",
-                            });
-                          }}
-                        >
-                          Copy Link
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))}
               </div>
             ) : (
               <div className="space-y-4">
-                {notifications.filter((n) => n.type === activeTab).length >
-                0 ? (
+                {notifications.filter((n) => getUITab(n.type) === activeTab)
+                  .length > 0 ? (
                   notifications
-                    .filter((n) => n.type === activeTab)
+                    .filter((n) => getUITab(n.type) === activeTab)
                     .map((notification) => (
                       <Card
                         key={notification.id}
                         className={cn(
-                          "border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors",
-                          !notification.isRead && "border-l-2 border-l-primary"
+                          "border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                         )}
                       >
                         <div className="p-4 space-y-2">
                           <h4 className="text-sm font-medium">
-                            {notification.title}
+                            {notification.title || "Notification"}
                           </h4>
                           <p className="text-sm text-muted-foreground">
-                            {notification.description}
+                            {notification.description
+                              ? notification.description
+                              : "No additional details"}
                           </p>
                           <time className="text-xs text-muted-foreground">
-                            {notification.date}
+                            {formatDate(notification.created_at)}
                           </time>
                         </div>
                       </Card>

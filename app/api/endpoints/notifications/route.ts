@@ -34,7 +34,9 @@ export async function GET(req: NextRequest) {
     // Validate query parameters
     if (!daftarId || !scoutId || !userId) {
       return NextResponse.json(
-        { error: "Missing required query parameters: daftarId, scoutId, userId" },
+        {
+          error: "Missing required query parameters: daftarId, scoutId, userId",
+        },
         { status: 400 }
       );
     }
@@ -53,7 +55,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userName = `${userData[0].firstName || ""} ${userData[0].lastName || ""}`.trim();
+    const userName = `${userData[0].firstName || ""} ${
+      userData[0].lastName || ""
+    }`.trim();
 
     // Fetch Daftar name
     const daftarData = await db
@@ -106,6 +110,9 @@ export async function GET(req: NextRequest) {
     );
   } catch (error) {
     console.error("GET /api/endpoints/names error:", error);
-    return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch data" },
+      { status: 500 }
+    );
   }
 }

@@ -1,14 +1,5 @@
 // lib/uploadPitchVideo.ts
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
+import { supabase } from "@/lib/supabase/createClient";
 
 const DUMMY_EMAIL = process.env.DUMMY_EMAIL || "pratham@daftaros.com";
 const DUMMY_PASSWORD = process.env.DUMMY_PASSWORD || "Daftarcore123$"; // make sure this user exists in Supabase

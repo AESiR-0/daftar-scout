@@ -59,87 +59,11 @@ interface UserProfile {
   daftar: string;
 }
 
-const dummyActivity: ActivityLog[] = [
-  {
-    id: "1",
-    action: "Uploaded",
-    documentName: "Business Plan.pdf",
-    user: "John Smith",
-    timestamp: formatDate("2024-03-20T14:30:00"),
-  },
-  {
-    id: "2",
-    action: "Viewed",
-    documentName: "Financial Projections.xlsx",
-    user: "Sarah Johnson",
-    timestamp: formatDate("2024-03-21T09:15:00"),
-  },
-];
-
-const userProfiles: Record<string, UserProfile> = {
-  "John Smith": {
-    name: "John Smith",
-    designation: "Investment Director",
-    email: "john.smith@techinnovation.com",
-    phone: "+1 (555) 123-4567",
-    languages: ["English", "Mandarin"],
-    daftar: "Tech Innovation Fund",
-  },
-  "Sarah Johnson": {
-    name: "Sarah Johnson",
-    designation: "Senior Associate",
-    email: "sarah.j@vcllc.com",
-    phone: "+1 (555) 987-6543",
-    languages: ["English", "French", "German"],
-    daftar: "Venture Capital LLC",
-  },
-  "Mike Wilson": {
-    name: "Mike Wilson",
-    designation: "Investment Analyst",
-    email: "mike.w@analysis.com",
-    phone: "+1 (555) 456-7890",
-    languages: ["English", "Spanish"],
-    daftar: "Market Analysis Corp",
-  },
-};
+const dummyActivity: ActivityLog[] = [];
 
 export default function DocumentsSection() {
   const { toast } = useToast();
-  const [documentsList, setDocumentsList] = useState<Document[]>([
-    {
-      id: "1",
-      name: "Business Plan.pdf",
-      uploadedBy: "John Smith",
-      daftar: "Tech Innovation Fund",
-      uploadedAt: formatDate("2024-03-20T14:30:00"),
-      type: "private",
-      size: "2.4 MB",
-      scoutName: "innovation fund",
-      isHidden: false,
-      logs: [
-        {
-          action: "Uploaded",
-          timestamp: formatDate("2024-03-20T14:30:00"),
-          user: "John Smith",
-        },
-        {
-          action: "Viewed",
-          timestamp: formatDate("2024-03-21T09:15:00"),
-          user: "Sarah Johnson",
-        },
-      ],
-    },
-    {
-      id: "2",
-      name: "Financial Projections.xlsx",
-      uploadedBy: "Sarah Johnson",
-      daftar: "Venture Capital LLC",
-      uploadedAt: formatDate("2024-03-19T10:15:00"),
-      type: "received",
-      size: "1.8 MB",
-      scoutName: "AI Fund",
-    },
-  ]);
+  const [documentsList, setDocumentsList] = useState<Document[]>([]);
 
   const [recentActivity, setRecentActivity] =
     useState<ActivityLog[]>(dummyActivity);
