@@ -147,7 +147,7 @@ export function ScoutSidebar({
             <h2 className="text-[14px] font-semibold">{scoutName}</h2>
           </div>
           <div className="px-4 py-2">
-            <Link href={`/investor/scout/${scoutSlug}/studio`}>
+            <Link href={`/investor/scout/${scoutId}/studio`}>
               <Button
                 variant="link"
                 size="sm"

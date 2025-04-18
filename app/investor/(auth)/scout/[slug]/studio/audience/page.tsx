@@ -174,35 +174,37 @@ export default function AudiencePage() {
     targetAudAgeEnd,
   ]);
 
+  // Fetch initial data
   const fetchInitialData = async () => {
     try {
       const res = await fetch(
         `/api/endpoints/scouts/audience?scoutId=${scoutId}`
       );
+
       const data = await res.json();
       const parsed = AudienceSchema.parse(data);
-
-      setTargetAudLocation(parsed.targetAudLocation || "");
-      setScoutCommunity(parsed.scoutCommunity || "");
-      setTargetedGender(parsed.targetedGender || "");
-      setScoutStage(parsed.scoutStage || "");
-      setScoutSector(parsed.scoutSector || "");
-      setTargetAudAgeStart(parsed.targetAudAgeStart || 18);
-      setTargetAudAgeEnd(parsed.targetAudAgeEnd || 65);
+      console.log("Parsed data:", parsed);
+      setTargetAudLocation(data.targetAudLocation);
+      setScoutCommunity(data.scoutCommunity);
+      setTargetedGender(data.targetedGender);
+      setScoutStage(data.scoutStage);
+      setScoutSector(data.scoutSector);
+      setTargetAudAgeStart(data.targetAudAgeStart || 18);
+      setTargetAudAgeEnd(data.targetAudAgeEnd || 65);
 
       // Initialize temp state
-      setTempScoutCommunity(parsed.scoutCommunity || "");
-      setTempTargetedGender(parsed.targetedGender || "");
-      setTempScoutStage(parsed.scoutStage || "");
-      setTempScoutSector(parsed.scoutSector || "");
+      setTempScoutCommunity(data.scoutCommunity);
+      setTempTargetedGender(data.targetedGender);
+      setTempScoutStage(data.scoutStage);
+      setTempScoutSector(data.scoutSector);
       setTempAgeRange([
-        parsed.targetAudAgeStart || 18,
-        parsed.targetAudAgeEnd || 65,
+        data.targetAudAgeStart || 18,
+        data.targetAudAgeEnd || 65,
       ]);
 
       // Parse location if present
-      if (parsed.targetAudLocation) {
-        const match = parsed.targetAudLocation.match(locationPattern);
+      if (data.targetAudLocation) {
+        const match = data.targetAudLocation.match(locationPattern);
         if (match) {
           const [, city, state, country] = match;
           setLocation({
@@ -238,8 +240,9 @@ export default function AudiencePage() {
 
   useEffect(() => {
     fetchInitialData();
-  }, []);
+  }, [scoutId]);
 
+  // Handle location input and coordinates
   const handleLocationInput = async (value: string) => {
     setTargetAudLocation(value);
     debounceLocation(value);
@@ -277,53 +280,42 @@ export default function AudiencePage() {
     []
   );
 
-  const autoSave = useCallback(() => {
-    const saveData = async () => {
-      try {
-        const formData = AudienceSchema.parse({
-          targetAudLocation,
-          scoutCommunity,
-          targetedGender,
-          scoutStage,
-          scoutSector,
-          targetAudAgeStart,
-          targetAudAgeEnd,
-        });
-        const payload = { ...formData, scoutId };
-        await fetch("/api/endpoints/scouts/audience", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } catch (error) {
-        console.error("Error autosaving:", error);
+  // Save data to API
+  const saveData = async (formData: z.infer<typeof AudienceSchema>) => {
+    try {
+      const payload = { ...formData, scoutId };
+      const response = await fetch("/api/endpoints/scouts/audience", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}`);
       }
-    };
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
+  };
 
-    const timer = setTimeout(saveData, 2000);
-    return () => clearTimeout(timer);
-  }, [
-    targetAudLocation,
-    scoutCommunity,
-    targetedGender,
-    scoutStage,
-    scoutSector,
-    targetAudAgeStart,
-    targetAudAgeEnd,
-  ]);
+  // Handle blur for location input
+  const handleLocationBlur = () => {
+    try {
+      const formData = AudienceSchema.parse({
+        targetAudLocation,
+        scoutCommunity,
+        targetedGender,
+        scoutStage,
+        scoutSector,
+        targetAudAgeStart,
+        targetAudAgeEnd,
+      });
+      saveData(formData);
+    } catch (error) {
+      console.error("Validation error on location blur:", error);
+    }
+  };
 
-  useEffect(() => {
-    autoSave();
-  }, [
-    targetAudLocation,
-    scoutCommunity,
-    targetedGender,
-    scoutStage,
-    scoutSector,
-    targetAudAgeStart,
-    targetAudAgeEnd,
-  ]);
-
+  // Handle apply filters in dialog
   const applyFilters = () => {
     setScoutCommunity(tempScoutCommunity);
     setTargetedGender(tempTargetedGender);
@@ -331,6 +323,22 @@ export default function AudiencePage() {
     setScoutSector(tempScoutSector);
     setTargetAudAgeStart(tempAgeRange[0]);
     setTargetAudAgeEnd(tempAgeRange[1]);
+
+    try {
+      const formData = AudienceSchema.parse({
+        targetAudLocation,
+        scoutCommunity: tempScoutCommunity,
+        targetedGender: tempTargetedGender,
+        scoutStage: tempScoutStage,
+        scoutSector: tempScoutSector,
+        targetAudAgeStart: tempAgeRange[0],
+        targetAudAgeEnd: tempAgeRange[1],
+      });
+      saveData(formData);
+    } catch (error) {
+      console.error("Validation error on apply filters:", error);
+    }
+
     setOpenFilters(false);
   };
 
@@ -352,6 +360,7 @@ export default function AudiencePage() {
             placeholder="City/State/Country (e.g., Mumbai/Maharashtra/India)"
             value={targetAudLocation}
             onChange={(e) => handleLocationInput(e.target.value)}
+            onBlur={handleLocationBlur}
           />
           <div className="w-full h-[400px] rounded-lg overflow-hidden border">
             <MapComponent coordinates={coordinates} />
@@ -372,7 +381,9 @@ export default function AudiencePage() {
                 <div>
                   <Label>Community</Label>
                   <Combobox
-                    options={communitiesData.map((community) => community.value)}
+                    options={communitiesData.map(
+                      (community) => community.value
+                    )}
                     value={tempScoutCommunity}
                     onSelect={(value) => setTempScoutCommunity(value)}
                     placeholder="Select a community"
