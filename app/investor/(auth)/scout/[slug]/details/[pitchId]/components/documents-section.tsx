@@ -61,7 +61,15 @@ interface UserProfile {
 
 const dummyActivity: ActivityLog[] = [];
 
-export default function DocumentsSection() {
+export default function DocumentsSection({
+  documents,
+  onUpload,
+  onDelete,
+}: {
+  documents: Document[];
+  onUpload: (file: File) => void;
+  onDelete: (docId: string) => void;
+}) {
   const { toast } = useToast();
   const [documentsList, setDocumentsList] = useState<Document[]>([]);
 
@@ -387,6 +395,14 @@ function DocumentsList({
         return null;
     }
   };
+
+  if (!documents) {
+    return (
+      <div className="text-center py-8 text-sm text-muted-foreground">
+        No documents found
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

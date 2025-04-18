@@ -72,34 +72,60 @@ export default function DocumentsPage() {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const response = await fetch(
+        const res = await fetch(
           `/api/endpoints/scouts/documents?scoutId=${scoutId}`
         );
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-        const apiDocuments: ApiDocument[] = await response.json();
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const mappedDocuments: Document[] = apiDocuments.map((doc) => ({
-          id: doc.docId,
-          name:
-            doc.docType || doc.docUrl.split("/").pop() || "Unknown Document",
-          uploadedBy: doc.uploadedBy
-            ? `${doc.uploadedBy.firstName} ${doc.uploadedBy.lastName}`.trim()
-            : "Unknown User",
-          daftar: doc.daftarName || "Unknown Daftar",
-          scoutName: "Scout", // Static, as not provided by API
-          uploadedAt: formatDate(doc.uploadedAt),
-          url: doc.docUrl,
-          type: doc.isPrivate ? "private" : "sent",
-          size: `${(doc.size / (1024 * 1024)).toFixed(1)} MB`,
-          isHidden: false,
-          logs: [],
-        }));
+        const json = await res.json();
+        const apiDocuments = Array.isArray(json)
+          ? json
+          : Array.isArray(json.data)
+          ? json.data
+          : [];
+
+        if (apiDocuments.length === 0) {
+          toast({
+            title: "No documents found",
+            description: "No documents available for this scout",
+          });
+          return;
+        }
+
+        const mappedDocuments: Document[] = apiDocuments.map(
+          (doc: Document) => {
+            let sizeInMB = "Unknown Size";
+
+            if (typeof doc.size === "number") {
+              sizeInMB = `${(doc.size / (1024 * 1024)).toFixed(1)} MB`;
+            } else if (typeof doc.size === "string") {
+              const parsed = parseFloat(doc.size.split(" ")[0]);
+              if (!isNaN(parsed)) {
+                sizeInMB = `${(parsed / (1024 * 1024)).toFixed(1)} MB`;
+              }
+            }
+
+            return {
+              id: doc.id,
+              name: doc.type || doc.url?.split("/").pop() || "Unknown Document",
+              uploadedBy: doc.uploadedBy
+                ? `${doc.uploadedBy}`.trim()
+                : "Unknown User",
+              daftar: doc.daftar || "Unknown Daftar",
+              scoutName: "Scout",
+              uploadedAt: formatDate(doc.uploadedAt),
+              url: doc.url,
+              type: doc.isHidden ? "private" : "sent",
+              size: sizeInMB,
+              isHidden: false,
+              logs: [],
+            };
+          }
+        );
 
         setDocumentsList(mappedDocuments);
-      } catch (error) {
-        console.error("Error fetching documents:", error);
+      } catch (err) {
+        console.error("Error fetching documents:", err);
         toast({
           title: "Error",
           description: "Failed to load documents",
@@ -424,14 +450,14 @@ function DocumentsList({
   onDelete,
   onToggleVisibility,
 }: {
-  documents: Document[];
+  documents?: Document[];
   canDelete?: boolean;
   onDownload: (doc: Document) => void;
   onView: (doc: Document) => void;
   onDelete: (docId: string) => void;
   onToggleVisibility: (docId: string) => void;
 }) {
-  if (documents.length === 0) {
+  if (!documents) {
     return (
       <div className="text-center py-8 text-sm text-muted-foreground">
         No documents found
@@ -472,7 +498,7 @@ function DocumentsList({
     <div className="space-y-4">
       {documents.map((doc) => (
         <div
-          key={doc.id}
+          key={doc.uploadedAt}
           className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${
             doc.isHidden ? "opacity-50" : ""
           }`}

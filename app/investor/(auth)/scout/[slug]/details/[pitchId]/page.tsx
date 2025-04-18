@@ -35,7 +35,17 @@ interface Document {
   id: string;
   name: string;
   uploadedBy: string;
+  daftar: string;
+  scoutName: string;
   uploadedAt: string;
+  type: "private" | "received" | "sent";
+  size: string;
+  logs?: {
+    action: string;
+    timestamp: string;
+    user: string;
+  }[];
+  isHidden?: boolean;
 }
 
 interface FoundersPitch {
@@ -209,7 +219,7 @@ export default function PitchDetailsPage() {
   const pathname = usePathname();
   const router = useRouter();
   const pitchId = pathname.split("/")[5];
-
+  const scoutId = pathname.split("/")[3];
   const currentProfile: Profile = {
     id: "current-user",
     name: "Current User",
@@ -237,6 +247,7 @@ export default function PitchDetailsPage() {
         }
 
         const data: PitchDetails = await response.json();
+        console.log("Fetched pitch details:", data);
         setPitchDetails(data);
       } catch (err) {
         setError((err as Error).message);
@@ -466,11 +477,10 @@ export default function PitchDetailsPage() {
     }, {} as Record<string, number>);
 
     const languageCount = teamMembers.reduce((acc, member) => {
-      // member.language.forEach((lang) => {
-      //   acc[lang] = (acc[lang] || 0) + 1;
-      // });
-      // return acc;
-      return 2;
+      member.language.forEach((lang) => {
+        acc[lang] = (acc[lang] || 0) + 1;
+      });
+      return acc;
     }, {} as Record<string, number>);
 
     const averageAge =
@@ -560,106 +570,104 @@ export default function PitchDetailsPage() {
         />
       </div>
       <div className="container mx-auto mt-10">
-          {activeSection === "investors-note" && (
-            <InvestorsNote note={pitchDetails.fields.investorsNote} />
-          )}
-          {activeSection === "documents" && (
-            <DocumentsSection
-            // // documents={pitchDetails.fields.documentation}
-            // onUpload={handleUploadDocument}
-            // onDelete={handleDeleteDocument}
-            />
-          )}
-          {activeSection === "founders-team" && (
-            <div className="space-y-6 mt-4">
-              <Card className="border-none bg-[#0e0e0e]">
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-8">
-                    <div className=" grid grid-cols-2 gap-5 ">
-                      {pitchDetails.teamMembers.map((member) => {
-                        const transformedMember: TeamMember = {
-                          id: `${member.firstName}-${member.lastName}`,
-                          firstName: member.firstName,
-                          lastName: member.lastName,
-                          email: member.email,
-                          phone: member.phone,
-                          location: member.location,
-                          imageUrl: member.imageUrl,
-                          designation: member.designation,
-                          language: member.language,
-                          age: member.age,
-                          gender: member.gender,
-                        };
-                        return (
-                          <MemberCard
-                            key={transformedMember.id}
-                            member={transformedMember}
-                          />
-                        );
-                      })}
-                    </div>
-                    {/* agregate data */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className=" space-y-6">
-                        <div>
-                          <h3 className="text-lg font-medium mb-4">
-                            Team Members ({pitchDetails.teamMembers.length}) |{" "}
-                            <span className="text-muted-foreground">
-                              Average Age: {averageAge.toFixed(1)}
-                            </span>
-                          </h3>
-                          <div className="space-y-6">
-                            <Card className="border-none bg-[#1a1a1a] p-4">
-                              <h4 className="text-sm font-medium mb-2">
-                                Gender Ratio
-                              </h4>
-                              <div className="h-[200px]">
-                                <PieChart data={genderData} />
-                              </div>
-                            </Card>
-                          </div>
+        {activeSection === "investors-note" && (
+          <InvestorsNote note={pitchDetails.fields.investorsNote} />
+        )}
+        {activeSection === "documents" && (
+          <DocumentsSection
+            documents={pitchDetails.fields.documentation}
+            onUpload={handleUploadDocument}
+            onDelete={handleDeleteDocument}
+          />
+        )}
+        {activeSection === "founders-team" && (
+          <div className="space-y-6 mt-4">
+            <Card className="border-none bg-[#0e0e0e]">
+              <CardContent>
+                <div className="grid grid-cols-2 gap-8">
+                  <div className=" grid grid-cols-2 gap-5 ">
+                    {pitchDetails.teamMembers.map((member) => {
+                      const transformedMember: TeamMember = {
+                        id: `${member.firstName}-${member.lastName}`,
+                        firstName: member.firstName,
+                        lastName: member.lastName,
+                        email: member.email,
+                        phone: member.phone,
+                        location: member.location,
+                        imageUrl: member.imageUrl,
+                        designation: member.designation,
+                        language: member.language,
+                        age: member.age,
+                        gender: member.gender,
+                      };
+                      return (
+                        <MemberCard
+                          key={transformedMember.id}
+                          member={transformedMember}
+                        />
+                      );
+                    })}
+                  </div>
+                  {/* agregate data */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className=" space-y-6">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">
+                          Team Members ({pitchDetails.teamMembers.length}) |{" "}
+                          <span className="text-muted-foreground">
+                            Average Age: {averageAge.toFixed(1)}
+                          </span>
+                        </h3>
+                        <div className="space-y-6">
+                          <Card className="border-none bg-[#1a1a1a] p-4">
+                            <h4 className="text-sm font-medium mb-2">
+                              Gender Ratio
+                            </h4>
+                            <div className="h-[200px]">
+                              <PieChart data={genderData} />
+                            </div>
+                          </Card>
                         </div>
                       </div>
-                      <div className=" mt-[4.5rem]">
-                        <Card className="border-none bg-[#1a1a1a] p-4">
-                          <h4 className="text-sm font-medium mb-4">
-                            Preferred Languages to Connect with Investors
-                          </h4>
-                          <div className="space-y-2">
-                            {languageData.map(([language, count]) => (
-                              <div
-                                key={language}
-                                className="flex items-center justify-between p-2 rounded-md bg-background"
-                              >
-                                <span className="text-sm">{language}</span>
-                                <Badge variant="secondary">{count}</Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </Card>
-                      </div>
+                    </div>
+                    <div className=" mt-[4.5rem]">
+                      <Card className="border-none bg-[#1a1a1a] p-4">
+                        <h4 className="text-sm font-medium mb-4">
+                          Preferred Languages to Connect with Investors
+                        </h4>
+                        <div className="space-y-2">
+                          {languageData.map(([language, count]) => (
+                            <div
+                              key={language}
+                              className="flex items-center justify-between p-2 rounded-md bg-background"
+                            >
+                              <span className="text-sm">{language}</span>
+                              <Badge variant="secondary">{count}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-          {activeSection === "founders-pitch" && (
-            <FoundersPitchSection
-              pitch={pitchDetails.fields.foundersPitch}
-              onScheduleMeeting={() => setScheduleMeetingOpen(true)}
-            />  
-          )}
-          {activeSection === "investors-analysis" && (
-            <TeamAnalysisSection
-            // currentProfile={currentProfile}
-            />
-          )}
-          {activeSection === "make-offer" && (
-            <MakeOfferSection
-            // onMakeOffer={handleMakeOffer}
-            />
-          )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+        {activeSection === "founders-pitch" && (
+          <FoundersPitchSection
+            pitch={pitchDetails.fields.foundersPitch}
+            onScheduleMeeting={() => setScheduleMeetingOpen(true)}
+          />
+        )}
+        {activeSection === "investors-analysis" && (
+          <TeamAnalysisSection currentProfile={currentProfile} />
+        )}
+        {activeSection === "make-offer" && (
+          <MakeOfferSection
+          // onMakeOffer={handleMakeOffer}
+          />
+        )}
       </div>
       <ScheduleMeetingDialog
         open={scheduleMeetingOpen}

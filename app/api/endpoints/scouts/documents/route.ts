@@ -34,8 +34,8 @@ export async function GET(req: Request) {
 
     if (!documents.length) {
       return NextResponse.json(
-        { error: "No documents found for this scout" },
-        { status: 404 }
+        { message: "No documents found for this scout" },
+        { status: 200 }
       );
     }
 
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
           eq(daftarScouts.daftarId, daftarId)
         )
       );
-      
+    console.log("scoutCheck", scoutCheck);
     if (!scoutCheck.length) {
       return NextResponse.json(
         { error: "Scout not found in this Daftar" },

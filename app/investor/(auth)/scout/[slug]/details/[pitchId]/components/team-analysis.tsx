@@ -20,9 +20,18 @@ import {
 } from "@/components/ui/hover-card";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/format-date";
-import { InvestorProfile } from "@/components/investor-profile";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+
+interface Profile {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  daftarName: string;
+}
 
 interface TeamAnalysis {
   id: string;
@@ -38,34 +47,80 @@ interface TeamAnalysis {
   date: string;
 }
 
-interface Profile {
-  id: string;
-  name: string;
-  role: string;
-  daftarName: string;
-  avatar: string;
-}
-
 interface TeamAnalysisSectionProps {
   currentProfile: Profile;
-  scoutId: string;
-  pitchId: string;
 }
 
-export function TeamAnalysisSection() {
+export function TeamAnalysisSection({
+  currentProfile,
+}: TeamAnalysisSectionProps) {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
   const pitchId = pathname.split("/")[5];
+  const { toast } = useToast();
   const [belief, setBelief] = useState<"yes" | "no">();
   const [nps, setNps] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Check if the user has already submitted an analysis
+  useEffect(() => {
+    const checkSubmissionStatus = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `/api/endpoints/pitch/investor/analysis?scoutId=${scoutId}&pitchId=${pitchId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.analysis && data.analysis.length > 0) {
+            setHasSubmitted(true);
+            setTeamAnalysis(
+              data.analysis.map((item: any) => ({
+                id: item.id || Date.now().toString(),
+                nps: item.believeRating || 0,
+                analyst: {
+                  name: currentProfile.name,
+                  role: currentProfile.role,
+                  avatar: currentProfile.avatar,
+                  daftarName: currentProfile.daftarName,
+                },
+                belief: item.shouldMeet ? "yes" : "no",
+                note: item.analysis || "",
+                date: item.lastActionTakenOn || new Date().toISOString(),
+              }))
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Error checking submission status:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load analysis status",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSubmissionStatus();
+  }, [scoutId, pitchId, currentProfile, toast]);
 
   const handleSubmit = async () => {
     if (!belief || !note.trim() || nps === null) return;
     setIsSubmitting(true);
+
     try {
       const response = await fetch(
         `/api/endpoints/pitch/investor/analysis?scoutId=${scoutId}&pitchId=${pitchId}`,
@@ -85,45 +140,44 @@ export function TeamAnalysisSection() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to submit analysis");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit analysis");
       }
 
       setHasSubmitted(true);
+      setTeamAnalysis((prev) => [
+        {
+          id: Date.now().toString(),
+          nps,
+          analyst: currentProfile,
+          belief,
+          note,
+          date: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
       setNote("");
       setBelief(undefined);
       setNps(null);
+
+      toast({
+        title: "Success",
+        description: "Analysis submitted successfully",
+        variant: "success",
+      });
     } catch (error) {
       console.error("Error submitting analysis:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit analysis",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  useEffect(() => {
-    if (!hasSubmitted) return;
-
-    const fetchTeamAnalysis = async () => {
-      try {
-        const response = await fetch(
-          `/api/endpoints/pitch/investor/analysis?scoutId=${scoutId}&pitchId=${pitchId}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch team analysis");
-        }
-
-        const data = await response.json();
-        setTeamAnalysis(data.teamAnalysis);
-      } catch (error) {
-        console.error("Error fetching team analysis:", error);
-      }
-    };
-
-    fetchTeamAnalysis();
-  }, [hasSubmitted, scoutId, pitchId]);
-
   const teamSize = teamAnalysis.length;
-  const votersCount = teamAnalysis.length;
   const interestedCount = teamAnalysis.filter((a) => a.belief === "yes").length;
   const averageNPS =
     teamAnalysis.length > 0
@@ -131,6 +185,14 @@ export function TeamAnalysisSection() {
           teamAnalysis.reduce((sum, a) => sum + a.nps, 0) / teamAnalysis.length
         )
       : 0;
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 mt-10">
@@ -148,9 +210,11 @@ export function TeamAnalysisSection() {
                         key={i}
                         variant={nps === i ? "default" : "outline"}
                         onClick={() => setNps(i)}
+                        disabled={hasSubmitted}
                         className={cn(
                           "w-8 h-8 p-0 rounded-[0.35rem]",
-                          nps === i && "bg-blue-600 hover:bg-blue-700"
+                          nps === i && "bg-blue-600 hover:bg-blue-700",
+                          hasSubmitted && "cursor-not-allowed opacity-50"
                         )}
                       >
                         {i}
@@ -164,20 +228,26 @@ export function TeamAnalysisSection() {
                     <Button
                       variant={belief === "yes" ? "default" : "outline"}
                       onClick={() => setBelief("yes")}
-                      className={
+                      disabled={hasSubmitted}
+                      className={cn(
                         belief === "yes"
                           ? "bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
-                          : "rounded-[0.35rem]"
-                      } 
+                          : "rounded-[0.35rem]",
+                        hasSubmitted && "cursor-not-allowed opacity-50"
+                      )}
                     >
                       Yes
                     </Button>
                     <Button
                       variant={belief === "no" ? "default" : "outline"}
                       onClick={() => setBelief("no")}
-                      className={
-                        belief === "no" ? "bg-red-600 hover:bg-red-700 rounded-[0.35rem]" : "rounded-[0.35rem]"
-                      }
+                      disabled={hasSubmitted}
+                      className={cn(
+                        belief === "no"
+                          ? "bg-red-600 hover:bg-red-700 rounded-[0.35rem]"
+                          : "rounded-[0.35rem]",
+                        hasSubmitted && "cursor-not-allowed opacity-50"
+                      )}
                     >
                       No
                     </Button>
@@ -190,7 +260,11 @@ export function TeamAnalysisSection() {
                     placeholder="Why do you want to meet... or not meet... in the startup?"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    className="min-h-[100px] rounded-[0.35rem] bg-muted/50 text-white border p-4"
+                    disabled={hasSubmitted}
+                    className={cn(
+                      "min-h-[100px] rounded-[0.35rem] bg-muted/50 text-white border p-4",
+                      hasSubmitted && "cursor-not-allowed opacity-50"
+                    )}
                   />
                 </div>
               </div>
@@ -203,11 +277,18 @@ export function TeamAnalysisSection() {
               <Button
                 onClick={handleSubmit}
                 disabled={
-                  !belief || !note.trim() || nps === null || isSubmitting
+                  !belief ||
+                  !note.trim() ||
+                  nps === null ||
+                  isSubmitting ||
+                  hasSubmitted
                 }
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className={cn(
+                  "w-full bg-blue-600 hover:bg-blue-700",
+                  hasSubmitted && "cursor-not-allowed opacity-50"
+                )}
               >
-                Submit Analysis
+                {isSubmitting ? "Submitting..." : "Submit Analysis"}
               </Button>
             </CardContent>
           </Card>
