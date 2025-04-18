@@ -228,7 +228,24 @@ export default function PitchDetailsPage() {
     daftarName: pitchDetails?.pitchName || "Tech Startup",
   };
 
+  const [userId, setUserId] = useState<string | null>(null);
   // Fetch pitch data
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const response = await fetch("/api/endpoints/users/getId", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await response.json();
+        setUserId(data.id);
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+      }
+    };
+    fetchUserId();
+  }, [params]);
   useEffect(() => {
     const fetchPitch = async () => {
       try {
@@ -263,6 +280,7 @@ export default function PitchDetailsPage() {
 
     fetchPitch();
   }, [params.pitchId, toast]);
+  console.log(userId, "user");
 
   const handleSubmitAnalysis = async (data: {
     belief: "yes" | "no";
@@ -571,7 +589,7 @@ export default function PitchDetailsPage() {
       </div>
       <div className="container mx-auto mt-10">
         {activeSection === "investors-note" && (
-          <InvestorsNote note={pitchDetails.fields.investorsNote} />
+          <InvestorsNote scoutId={scoutId} pitchId={pitchId} userId={userId} />
         )}
         {activeSection === "documents" && (
           <DocumentsSection
@@ -665,7 +683,9 @@ export default function PitchDetailsPage() {
         )}
         {activeSection === "make-offer" && (
           <MakeOfferSection
-          // onMakeOffer={handleMakeOffer}
+            pitchId={pitchId}
+            scoutId={scoutId}
+            investorId={userId}
           />
         )}
       </div>

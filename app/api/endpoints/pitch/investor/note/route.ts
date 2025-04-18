@@ -3,12 +3,12 @@ import { db } from "@/backend/database";
 import { investorPitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 
-export async function GET(
-  req: NextRequest
-) {
+export async function GET(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { scoutId, pitchId } = await body;
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId") || null;
+    const pitchId = searchParams.get("pitchId") || null;
+    const investorId = searchParams.get("investorId") || null;
 
     // Validate parameters
     if (!scoutId || !pitchId) {
@@ -27,7 +27,7 @@ export async function GET(
       .where(
         and(
           eq(investorPitch.scoutId, scoutId),
-          eq(investorPitch.pitchId, pitchId),
+          eq(investorPitch.pitchId, pitchId)
         )
       )
       .limit(1);
@@ -42,19 +42,20 @@ export async function GET(
     return NextResponse.json({ note: result[0].note || "" }, { status: 200 });
   } catch (error) {
     console.error("Error fetching investor note:", error);
-    return NextResponse.json({ error: "Failed to fetch note" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch note" },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(
-  req: NextRequest
-) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { scoutId, pitchId, investorId, note } = body;
-
+    const { scoutId, pitchId, userId, note } = body;
+    console.log("Received data:", body);
     // Validate parameters
-    if (!scoutId || !pitchId || !investorId) {
+    if (!scoutId || !pitchId || !userId) {
       return NextResponse.json(
         { error: "scoutId, pitchId, and investorId are required" },
         { status: 400 }
@@ -75,7 +76,7 @@ export async function POST(
         and(
           eq(investorPitch.scoutId, scoutId),
           eq(investorPitch.pitchId, pitchId),
-          eq(investorPitch.investorId, investorId)
+          eq(investorPitch.investorId, userId)
         )
       )
       .limit(1);
@@ -92,7 +93,7 @@ export async function POST(
           and(
             eq(investorPitch.scoutId, scoutId),
             eq(investorPitch.pitchId, pitchId),
-            eq(investorPitch.investorId, investorId)
+            eq(investorPitch.investorId, userId)
           )
         );
     } else {
@@ -100,7 +101,7 @@ export async function POST(
       await db.insert(investorPitch).values({
         scoutId,
         pitchId,
-        investorId,
+        investorId: userId,
         note,
         lastActionTakenOn: new Date(),
       });

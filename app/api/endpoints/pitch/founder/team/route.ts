@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       .from(pitch)
       .where(eq(pitch.id, pitchId))
       .limit(1);
-
+    
     if (pitchExists.length === 0) {
       return NextResponse.json({ error: "Pitch not found" }, { status: 404 });
     }

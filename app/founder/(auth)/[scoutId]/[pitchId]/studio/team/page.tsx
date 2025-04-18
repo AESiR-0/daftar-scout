@@ -32,7 +32,7 @@ interface TeamMember {
 export default function TeamPage() {
   const { toast } = useToast();
   const pathname = usePathname();
-  const pitchId = pathname.split("/")[2]; // Get pitchId from context
+  const pitchId = pathname.split("/")[3]; // Get pitchId from context
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("en-US", {

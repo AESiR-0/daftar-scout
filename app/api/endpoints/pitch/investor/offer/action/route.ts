@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { offers, offerActions} from "@/backend/drizzle/models/pitch";
+import { offers, offerActions } from "@/backend/drizzle/models/pitch";
 import { pitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 
-export async function POST(
-  req: NextRequest
-) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { scoutId, pitchId, investorId, offerId, action, notes } = body;
@@ -18,15 +16,15 @@ export async function POST(
         { status: 400 }
       );
     }
-    if (!offerId || !Number.isInteger(offerId) || offerId < 1) {
+    if (!offerId || parseInt(offerId) < 1) {
       return NextResponse.json(
         { error: "offerId is required and must be a positive integer" },
         { status: 400 }
       );
     }
-    if (!action || (action !== "accepted" && action !== "rejected")) {
+    if (!action || action !== "withdrawn") {
       return NextResponse.json(
-        { error: "action is required and must be 'accepted' or 'rejected'" },
+        { error: "action is required and must be withdrawn" },
         { status: 400 }
       );
     }
@@ -117,6 +115,9 @@ export async function POST(
     );
   } catch (error) {
     console.error("Error recording offer action:", error);
-    return NextResponse.json({ error: "Failed to record offer action" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to record offer action" },
+      { status: 500 }
+    );
   }
 }

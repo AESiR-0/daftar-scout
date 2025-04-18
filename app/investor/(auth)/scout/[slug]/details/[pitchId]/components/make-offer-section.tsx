@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Undo2, ChevronRight, PlusCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ProfileHoverCard } from "@/components/ui/hover-card-profile";
+import { ChevronRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { FounderProfile } from "@/components/FounderProfile";
 import formatDate from "@/lib/formatDate";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FounderProfile, FounderProfileProps } from "@/components/FounderProfile";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -46,319 +56,329 @@ interface ActionLog {
   };
 }
 
-// Generate random scout names and user names for logs
-const scoutNames = ["Women's Fund", "Pitchbook", "YC 2025", "GUSEC Spring 2025"];
-const randomUsers = ["Alex Johnson", "Emily Smith", "Michael Brown", "Sophia Wilson", "Daniel Lee"];
-
-// Function to generate a random user name
-const getRandomUser = () => randomUsers[0];
-
-// Dummy Offer Data with Logs and Randomized Scouts
-const dummyOffers: Offer[] = [
-  {
-    id: "1",
-    scoutName: scoutNames[0],
-    collaboration: ["IIM A", "Nitin Kamath", "Ravikewal Ramani"],
-    status: "pending",
-    type: "sent",
-    date: formatDate(new Date().toISOString()),
-    responses: [
-      {
-        action: "Offer Sent",
-        reason: "Initial proposal",
-        timestamp: formatDate(new Date().toISOString()),
-        user: {
-          founder: {
-            name: getRandomUser(),
-            age: "25",
-            email: "john.doe@example.com",
-            phone: "1234567890",
-            gender: "Male",
-            location: "New York, NY",
-            language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg",
-            designation: "Founder & CEO"
-          }
-        },
-      },
-    ],
-  },
-  {
-    id: "2",
-    scoutName: scoutNames[1],
-    collaboration: ["IIM B", "John Doe", "Jane Smith"],
-    status: "completed",
-    type: "accepted",
-    date: formatDate(new Date().toISOString()),
-    responses: [
-      {
-        action: "accepted",
-        reason: "Accepted proposal",
-        timestamp: formatDate(new Date().toISOString()),
-        user: {
-          founder: {
-            name: getRandomUser(),
-            age: "25",
-            email: "john.doe@example.com",
-            phone: "1234567890",
-            gender: "Male",
-            location: "New York, NY",
-            language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg",
-            designation: "Founder & CEO"
-          }
-        },
-      },
-    ],
-  },
-  {
-    id: "3",
-    scoutName: scoutNames[2],
-    collaboration: ["IIM C", "Alice Brown", "Bob Wilson"],
-    status: "declined",
-    type: "withdrawn",
-    date: formatDate(new Date().toISOString()),
-    responses: [
-      {
-        action: "declined",
-        reason: "Declined proposal",
-        timestamp: formatDate(new Date().toISOString()),
-        user: {
-          founder: {
-            name: getRandomUser(),
-            age: "25",
-            email: "john.doe@example.com",
-            phone: "1234567890",
-            gender: "Male",
-            location: "New York, NY",
-            language: ["English", "Spanish"],
-            imageUrl: "https://example.com/john-doe.jpg",
-            designation: "Founder & CEO"
-          }
-        },
-      },
-    ],
-  },
-];
-
-export function MakeOfferSection() {
-  const [offers, setOffers] = useState<Offer[]>(dummyOffers);
+export function MakeOfferSection({
+  scoutId,
+  pitchId,
+  investorId,
+}: {
+  scoutId: string;
+  pitchId: string;
+  investorId: string | null;
+}) {
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const { toast } = useToast();
-  const [historyFilter, setHistoryFilter] = useState<"all" | "pending" | "completed" | "declined" | "withdrawn">("all");
+  const [historyFilter, setHistoryFilter] = useState<
+    "all" | "pending" | "completed" | "declined" | "withdrawn"
+  >("all");
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newOffer, setNewOffer] = useState({
     scoutName: "",
     collaboration: "",
-    description: ""
+    description: "",
   });
-  const [showActionDialog, setShowActionDialog] = useState(false);
   const [offerMessage, setOfferMessage] = useState("");
 
-  // Add this check for pending offers
-  const hasPendingOffer = offers.some(o => o.status === "pending");
-
-  const handleStatusUpdate = (id: string, type: "accepted" | "withdrawn", status: "completed" | "declined") => {
-    setOffers(prev =>
-      prev.map(offer => {
-        if (offer.id === id) {
-          const newLog: ActionLog = {
-            action: status === "completed" ? "accepted" : "declined",
-            reason: status === "completed" ? "Offer accepted" : "Offer declined",
-            timestamp: formatDate(new Date().toISOString()),
-            user: {
-              founder: {
-                name: getRandomUser(),
-                age: "25",
-                email: "john.doe@example.com",
-                phone: "1234567890",
-                gender: "Male",
-                location: "New York, NY",
-                language: ["English", "Spanish"],
-                imageUrl: "https://example.com/john-doe.jpg",
-                designation: "Founder & CEO"
-              }
-            },
-          };
-          return {
-            ...offer,
-            status,
-            type,
-            acceptedBy: status === "completed" ? getRandomUser() : undefined,
-            responses: [newLog, ...(offer.responses || [])]
-          };
+  // Fetch offers on mount
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const response = await fetch(
+          `/api/endpoints/pitch/investor/offer?scoutId=${scoutId}&pitchId=${pitchId}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch offers");
         }
-        return offer;
-      })
-    );
-    setSelectedOffer(null);
-
-    toast({
-      title: `Offer ${status === "completed" ? "Accepted" : "Declined"}`,
-      description: `The offer from ${offers.find(o => o.id === id)?.scoutName} has been ${status === "completed" ? "accepted" : "declined"
-        }.`,
-      variant: type === "accepted" ? "success" : "destructive",
-    });
-  };
-
-  const handleWithdraw = (id: string) => {
-    setOffers(prev =>
-      prev.map(offer => {
-        if (offer.id === id) {
-          const newLog: ActionLog = {
-            action: "withdrawn",
-            reason: "Offer withdrawn",
-            timestamp: formatDate(new Date().toISOString()),
-            user: {
-              founder: {
-                name: getRandomUser(),
-                age: "25",
-                email: "john.doe@example.com",
-                phone: "1234567890",
-                gender: "Male",
-                location: "New York, NY",
-                language: ["English", "Spanish"],
-                imageUrl: "https://example.com/john-doe.jpg",
-                designation: "Founder & CEO"
-              }
+        const data = await response.json();
+        // Map API response to Offer interface
+        const mappedOffers: Offer[] = data.map((offer: any) => ({
+          id: offer.id.toString(),
+          scoutName: "Scout Name", // Replace with actual scout name if available from API
+          collaboration: ["Collaboration Partner"], // Replace with actual data if available
+          status:
+            offer.offerStatus === "accepted" ? "completed" : offer.offerStatus,
+          type:
+            offer.offerStatus === "accepted"
+              ? "accepted"
+              : offer.offerStatus === "withdrawn"
+              ? "withdrawn"
+              : "sent",
+          date: formatDate(offer.offeredAt),
+          responses: [
+            {
+              action:
+                offer.offerStatus === "pending"
+                  ? "Offer Sent"
+                  : offer.offerStatus,
+              reason: offer.offerDescription,
+              timestamp: formatDate(offer.offeredAt),
+              user: {
+                founder: {
+                  name: "Investor Name", // Replace with actual investor name if available
+                  age: "30",
+                  designation: "Investor",
+                  email: "investor@example.com",
+                  phone: "1234567890",
+                  gender: "Unknown",
+                  location: "Unknown",
+                  language: ["English"],
+                },
+              },
             },
-          };
-          return {
-            ...offer,
-            status: "withdrawn",
-            type: "withdrawn",
-            acceptedBy: undefined,
-            responses: [newLog, ...(offer.responses || [])]
-          };
-        }
-        return offer;
-      })
-    );
+          ],
+        }));
+        setOffers(mappedOffers);
+      } catch (error) {
+        console.error("Error fetching offers:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch offers",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchOffers();
+  }, [scoutId, pitchId, toast]);
 
-    toast({
-      title: "Offer Withdrawn",
-      description: "The offer has been successfully withdrawn.",
-      variant: "default",
-    });
-  };
+  // Check for pending offers
+  const hasPendingOffer = offers.some((o) => o.status === "pending");
 
-  // Modify handleCreateOffer to check for pending offers
-  const handleCreateOffer = () => {
+  const handleCreateOffer = async () => {
     if (hasPendingOffer) {
       toast({
         title: "Cannot Create Offer",
-        description: "You already have a pending offer. Please withdraw it before creating a new one.",
+        description:
+          "You already have a pending offer. Please withdraw it before creating a new one.",
         variant: "destructive",
       });
       return;
     }
 
-    const collaborationArray = newOffer.collaboration
-      .split(",")
-      .map(item => item.trim())
-      .filter(Boolean);
-
-    const newOfferData: Offer = {
-      id: (offers.length + 1).toString(),
-      scoutName: newOffer.scoutName,
-      collaboration: collaborationArray,
-      status: "pending",
-      type: "sent",
-      date: formatDate(new Date().toISOString()),
-      responses: [
-        {
-          action: "Offer Sent",
-          reason: newOffer.description,
-          timestamp: formatDate(new Date().toISOString()),
-          user: {
-            founder: {
-              name: getRandomUser(),
-              age: "25",
-              email: "john.doe@example.com",
-              phone: "1234567890",
-              gender: "Male",
-              location: "New York, NY",
-              language: ["English", "Spanish"],
-              imageUrl: "https://example.com/john-doe.jpg",
-              designation: "Founder & CEO"
-            }
-          },
+    try {
+      const response = await fetch("/api/endpoints/pitch/investor/offer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ],
-    };
+        body: JSON.stringify({
+          scoutId,
+          pitchId,
+          investorId,
+          offerDescription: offerMessage,
+          offerStatus: "pending",
+        }),
+      });
 
-    setOffers(prev => [newOfferData, ...prev]);
-    setShowCreateModal(false);
-    setNewOffer({ scoutName: "", collaboration: "", description: "" });
+      if (!response.ok) {
+        throw new Error("Failed to create offer");
+      }
 
-    toast({
-      title: "Offer Sent",
-      description: "Your offer has been sent to the founder.",
-    });
+      const { offer } = await response.json();
+      const newOfferData: Offer = {
+        id: offer.id.toString(),
+        scoutName: newOffer.scoutName || "Scout Name",
+        collaboration: newOffer.collaboration
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean) || ["Collaboration Partner"],
+        status: "pending",
+        type: "sent",
+        date: formatDate(offer.offeredAt),
+        responses: [
+          {
+            action: "Offer Sent",
+            reason: newOffer.description,
+            timestamp: formatDate(offer.offeredAt),
+            user: {
+              founder: {
+                name: "Investor Name",
+                age: "30",
+                designation: "Investor",
+                email: "investor@example.com",
+                phone: "1234567890",
+                gender: "Unknown",
+                location: "Unknown",
+                language: ["English"],
+              },
+            },
+          },
+        ],
+      };
+
+      setOffers((prev) => [newOfferData, ...prev]);
+      setShowCreateModal(false);
+      setNewOffer({ scoutName: "", collaboration: "", description: "" });
+
+      toast({
+        title: "Offer Sent",
+        description: "Your offer has been sent to the founder.",
+      });
+    } catch (error) {
+      console.error("Error creating offer:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create offer",
+        variant: "destructive",
+      });
+    }
   };
 
-  const pendingOffers = offers.filter(o => o.status === "pending");
-  const logOffers = offers.filter(o => {
-    if (historyFilter === "all") return true;
-    if (historyFilter === "pending") return o.status === "pending";
-    if (historyFilter === "withdrawn") return o.type === "withdrawn";
-    return o.status === historyFilter;
-  });
+  const handleAction = async (
+    offerId: string,
+    action: "accepted" | "declined" | "withdrawn",
+    notes?: string
+  ) => {
+    try {
+      const response = await fetch(
+        "/api/endpoints/pitch/investor/offer/action",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            scoutId,
+            pitchId,
+            investorId,
+            offerId,  
+            action,
+            notes,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${action} offer`);
+      }
+
+      setOffers((prev) =>
+        prev.map((offer) => {
+          if (offer.id === offerId) {
+            const newStatus =
+              action === "accepted"
+                ? "completed"
+                : action === "declined"
+                ? "declined"
+                : "withdrawn";
+            const newType =
+              action === "accepted"
+                ? "accepted"
+                : action === "withdrawn"
+                ? "withdrawn"
+                : "sent";
+            const newLog: ActionLog = {
+              action,
+              reason:
+                notes ||
+                `${action.charAt(0).toUpperCase() + action.slice(1)} offer`,
+              timestamp: formatDate(new Date().toISOString()),
+              user: {
+                founder: {
+                  name: "Investor Name",
+                  age: "30",
+                  designation: "Investor",
+                  email: "investor@example.com",
+                  phone: "1234567890",
+                  gender: "Unknown",
+                  location: "Unknown",
+                  language: ["English"],
+                },
+              },
+            };
+            return {
+              ...offer,
+              status: newStatus,
+              type: newType,
+              responses: [newLog, ...(offer.responses || [])],
+            };
+          }
+          return offer;
+        })
+      );
+
+      toast({
+        title: `Offer ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+        description: `The offer has been ${action}.`,
+        variant: action === "accepted" ? "success" : "destructive",
+      });
+    } catch (error) {
+      console.error(`Error ${action} offer:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to ${action} offer`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRejectPitch = async () => {
+    try {
+      const response = await fetch(
+        "/api/endpoints/pitch/investor/offer/reject",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            scoutId,
+            pitchId,
+            investorId,
+            reason: offerMessage,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to reject pitch");
+      }
+
+      setOfferMessage("");
+      toast({
+        title: "Pitch Declined",
+        description: "The pitch has been declined.",
+        variant: "destructive",
+      });
+    } catch (error) {
+      console.error("Error rejecting pitch:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reject pitch",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSendOffer = async () => {
+    await handleCreateOffer();
+  };
+
+  const handleDeclineOffer = async () => {
+    if (selectedOffer) {
+      await handleAction(selectedOffer.id, "declined", offerMessage);
+      setSelectedOffer(null);
+    }
+  };
 
   const handleViewOffer = (offer: Offer) => {
     setSelectedOffer(offer);
     setShowDetailsModal(true);
   };
 
-  const handleDeclineOffer = (message: string) => {
-    setShowActionDialog(true);
-    setOfferMessage(message);
-  };
-
-  const handleSendOffer = (message: string) => {
-    const newOffer: Offer = {
-      id: Date.now().toString(),
-      scoutName: "Your Scout Name",
-      collaboration: ["Your Collaboration Partners"],
-      status: "pending",
-      type: "sent",
-      date: formatDate(new Date().toISOString()),
-      responses: [
-        {
-          action: "Offer Sent",
-          reason: message,
-          timestamp: formatDate(new Date().toISOString()),
-          user: {
-            founder: {
-              name: "Your Name",
-              age: "25",
-              designation: "Scout",
-              email: "scout@example.com",
-              phone: "1234567890",
-              gender: "Male",
-              location: "Location",
-              language: ["English"],
-            }
-          }
-        }
-      ]
-    };
-
-    setOffers(prev => [newOffer, ...prev]);
-    setOfferMessage("");
-    toast({
-      title: "Offer Sent",
-      description: "Your offer has been sent to the founder.",
-    });
-  };
+  const logOffers = offers.filter((o) => {
+    if (historyFilter === "all") return true;
+    if (historyFilter === "pending") return o.status === "pending";
+    if (historyFilter === "withdrawn") return o.type === "withdrawn";
+    return o.status === historyFilter;
+  });
 
   return (
     <div className="flex p-0 mt-10 gap-6">
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
           {/* New Offer Input */}
-          <div className="">
+          <div>
             <Textarea
               placeholder="Write your offer message here..."
               value={offerMessage}
@@ -367,16 +387,16 @@ export function MakeOfferSection() {
             />
             <div className="mt-4 flex gap-2 justify-start">
               <Button
-                onClick={() => handleSendOffer(offerMessage)}
+                onClick={handleSendOffer}
                 disabled={!offerMessage.trim()}
                 variant="outline"
                 className="rounded-[0.35rem] bg-blue-500"
               >
                 Send Offer
               </Button>
-
-              <Button variant="destructive" 
-                onClick={() => handleDeclineOffer(offerMessage)}
+              <Button
+                variant="destructive"
+                onClick={handleRejectPitch}
                 disabled={!offerMessage.trim()}
                 className="rounded-[0.35rem]"
               >
@@ -388,95 +408,118 @@ export function MakeOfferSection() {
           {/* Offer History */}
           <div>
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">History</h2>
-                <Select
-                  value={historyFilter}
-                  onValueChange={(value: "all" | "pending" | "completed" | "declined" | "withdrawn") => setHistoryFilter(value)}
-                >
-                  <SelectTrigger className="w-[180px] bg-muted/50">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="completed">Accepted</SelectItem>
-                    <SelectItem value="declined">Declined</SelectItem>
-                    <SelectItem value="withdrawn">Withdrawn</SelectItem>
-                  </SelectContent>
-                </Select>
+              <h2 className="text-lg font-semibold">History</h2>
+              <Select
+                value={historyFilter}
+                onValueChange={(
+                  value:
+                    | "all"
+                    | "pending"
+                    | "completed"
+                    | "declined"
+                    | "withdrawn"
+                ) => setHistoryFilter(value)}
+              >
+                <SelectTrigger className="w-[180px] bg-muted/50">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="completed">Accepted</SelectItem>
+                  <SelectItem value="declined">Declined</SelectItem>
+                  <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Card className="border rounded-[0.35rem] bg-[#1a1a1a]">
               <ScrollArea className="w-full h-[400px]">
-                <div className={cn(
-                  "divide-y divide-border",
-                  offers.length > 3 && "overflow-auto max-h-[400px]"
-                )}>
-                {offers.map((offer) => (
-                  <div key={offer.id} className="p-4">
-                    {/* Scout Message */}
-                    <div className="flex flex-col gap-2">
-                      <div className="bg-muted/5 rounded-[0.35rem] p-4">
-                        <p className="text-sm text-muted-foreground">
-                          {offer.responses?.[0].reason}
-                        </p>
-                        <time className="text-xs text-muted-foreground self-end">
-                          {offer.date}
-                        </time>
+                <div
+                  className={cn(
+                    "divide-y divide-border",
+                    offers.length > 3 && "overflow-auto max-h-[400px]"
+                  )}
+                >
+                  {logOffers.map((offer) => (
+                    <div key={offer.id} className="p-4">
+                      {/* Scout Message */}
+                      <div className="flex flex-col gap-2">
+                        <div className="bg-muted/5 rounded-[0.35rem] p-4">
+                          <p className="text-sm text-muted-foreground">
+                            {offer.responses?.[0].reason}
+                          </p>
+                          <time className="text-xs text-muted-foreground self-end">
+                            {offer.date}
+                          </time>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Team Responses */}
-                    {offer.responses && offer.responses.length > 1 && (
-                      <div className="mt-6 space-y-4">
-                        {offer.responses
-                          .filter(response => response.action !== "Offer Sent")
-                          .map((response, index) => (
-                            <div key={index} className="flex flex-col gap-2">
-                              <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
-                                <p className="text-sm text-muted-foreground">{response.reason}</p>
-                                <div className="items-center gap-2 text-xs text-muted-foreground">
-                                  <span className="capitalize">{response.action} by</span><br/>
-                                  <FounderProfile founder={response.user.founder} />
+                      {/* Team Responses */}
+                      {offer.responses && offer.responses.length > 1 && (
+                        <div className="mt-6 space-y-4">
+                          {offer.responses
+                            .filter(
+                              (response) => response.action !== "Offer Sent"
+                            )
+                            .map((response, index) => (
+                              <div key={index} className="flex flex-col gap-2">
+                                <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
+                                  <p className="text-sm text-muted-foreground">
+                                    {response.reason}
+                                  </p>
+                                  <div className="items-center gap-2 text-xs text-muted-foreground">
+                                    <span className="capitalize">
+                                      {response.action} by
+                                    </span>
+                                    <br />
+                                    <FounderProfile
+                                      founder={response.user.founder}
+                                    />
+                                  </div>
+                                  <time className="text-xs text-muted-foreground self-end">
+                                    {response.timestamp}
+                                  </time>
                                 </div>
-                                <time className="text-xs text-muted-foreground self-end">
-                                  {response.timestamp}
-                                </time>
                               </div>
-                            </div>
-                          ))}
-                      </div>
-                    )}
+                            ))}
+                        </div>
+                      )}
 
-                    {/* Action Buttons */}
-                    {offer.status === "pending" ? (
-                      <div className="flex gap-2 mt-4">
-                        <Button 
-                          variant="outline"
-                          className="rounded-[0.35rem]"
-                          onClick={() => handleWithdraw(offer.id)}
-                        >
-                          Withdraw
-                        </Button>
-                        
-                      </div>
-                    ) : (
-                      <div className="flex justify-start mt-4">
-                        <Button 
-                          variant="outline"
-                          className="rounded-[0.35rem]"
-                          onClick={() => handleWithdraw(offer.id)}
-                        >
-                          Withdraw
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {offers.length === 0 && (
-                  <p className="text-muted-foreground px-4 py-4">No history</p>
-                )}
-              </div>
+                      {/* Action Buttons */}
+                      {offer.status === "pending" && (
+                        <div className="flex gap-2 mt-4">
+                          {/* <Button
+                            variant="outline"
+                            className="rounded-[0.35rem]"
+                            onClick={() => handleAction(offer.id, "accepted")}
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            className="rounded-[0.35rem]"
+                            onClick={() => handleAction(offer.id, "declined")}
+                          >
+                            Decline
+                          </Button> */}
+                          <Button
+                            variant="outline"
+                            className="rounded-[0.35rem]"
+                            onClick={() => handleAction(offer.id, "withdrawn")}
+                          >
+                            Withdraw
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {logOffers.length === 0 && (
+                    <p className="text-muted-foreground px-4 py-4">
+                      No history
+                    </p>
+                  )}
+                </div>
               </ScrollArea>
             </Card>
           </div>
@@ -494,14 +537,18 @@ export function MakeOfferSection() {
               <div className="space-y-2">
                 <h3 className="font-semibold">Scout Information</h3>
                 <p className="text-lg">{selectedOffer.scoutName}</p>
-                <p className="text-sm text-muted-foreground">Submitted on {selectedOffer.date}</p>
+                <p className="text-sm text-muted-foreground">
+                  Submitted on {selectedOffer.date}
+                </p>
               </div>
 
               <div className="space-y-2">
                 <h3 className="font-semibold">Collaboration Partners</h3>
                 <ul className="list-disc list-inside">
                   {selectedOffer.collaboration.map((partner, index) => (
-                    <li key={index} className="text-sm">{partner}</li>
+                    <li key={index} className="text-sm">
+                      {partner}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -510,8 +557,13 @@ export function MakeOfferSection() {
                 <div className="space-y-2">
                   {selectedOffer.responses?.map((log, index) => (
                     <div key={index} className="text-sm">
-                      <span className="text-muted-foreground">{log.timestamp}</span>
-                      <p>{log.action} by <FounderProfile founder={log.user.founder} /></p>
+                      <span className="text-muted-foreground">
+                        {log.timestamp}
+                      </span>
+                      <p>
+                        {log.action} by{" "}
+                        <FounderProfile founder={log.user.founder} />
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -529,28 +581,54 @@ export function MakeOfferSection() {
 
           <div className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="scoutName">Scout Name</Label>
+              <Input
+                id="scoutName"
+                value={newOffer.scoutName}
+                onChange={(e) =>
+                  setNewOffer((prev) => ({
+                    ...prev,
+                    scoutName: e.target.value,
+                  }))
+                }
+                placeholder="Enter scout name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="collaboration">Collaboration Partners</Label>
+              <Input
+                id="collaboration"
+                value={newOffer.collaboration}
+                onChange={(e) =>
+                  setNewOffer((prev) => ({
+                    ...prev,
+                    collaboration: e.target.value,
+                  }))
+                }
+                placeholder="Enter collaboration partners (comma-separated)"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 value={newOffer.description}
-                onChange={(e) => setNewOffer(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setNewOffer((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 placeholder="Enter offer description"
                 rows={4}
               />
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => setShowCreateModal(false)}
-              >
+              <Button variant="ghost" onClick={() => setShowCreateModal(false)}>
                 Cancel
               </Button>
-              <Button
-                onClick={handleCreateOffer}
-              >
-                Create Offer
-              </Button>
+              <Button onClick={handleCreateOffer}>Create Offer</Button>
             </div>
           </div>
         </DialogContent>
@@ -562,13 +640,10 @@ export function MakeOfferSection() {
 function OfferCard({
   offer,
   onView,
-  onWithdraw,
 }: {
   offer: Offer;
   onView: (offer: Offer) => void;
-  onWithdraw?: () => void;
 }) {
-  // Helper function to get status text and user
   const getStatusInfo = () => {
     const lastLog = offer.responses?.[0];
     if (!lastLog?.user?.founder) return null;
@@ -577,17 +652,17 @@ function OfferCard({
       case "completed":
         return {
           text: "Accepted by: ",
-          user: lastLog.user.founder
+          user: lastLog.user.founder,
         };
       case "declined":
         return {
           text: "Declined by: ",
-          user: lastLog.user.founder
+          user: lastLog.user.founder,
         };
       case "withdrawn":
         return {
           text: "Withdrawn by: ",
-          user: lastLog.user.founder
+          user: lastLog.user.founder,
         };
       default:
         return null;
@@ -602,9 +677,10 @@ function OfferCard({
         <div className="flex-1">
           <time className="text-xs text-muted-foreground">{offer.date}</time>
           <p className="text-lg font-medium">{offer.scoutName}</p>
-          <p className="text-sm text-muted-foreground">Collaboration: {offer.collaboration.join(", ")}</p>
+          <p className="text-sm text-muted-foreground">
+            Collaboration: {offer.collaboration.join(", ")}
+          </p>
 
-          {/* Status Information */}
           {offer.status !== "pending" && statusInfo && (
             <p className="text-sm text-muted-foreground mt-1">
               {statusInfo.text}
@@ -623,28 +699,6 @@ function OfferCard({
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
-      </div>
-
-      <div className="flex w-full items-center gap-2 mt-2">
-        {offer.status === "pending" && (
-          <Button 
-            className="w-full bg-muted hover:bg-muted/50" 
-            variant="ghost" 
-            onClick={onWithdraw}
-          >
-            Withdraw
-          </Button>
-        )}
-
-        {offer.status === "completed" && (
-          <Button 
-            className="w-full px-20 bg-muted text-white" 
-            variant="ghost" 
-            onClick={onWithdraw}
-          >
-            Withdraw
-          </Button>
-        )}
       </div>
     </div>
   );

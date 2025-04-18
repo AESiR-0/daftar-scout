@@ -3,15 +3,14 @@ import { db } from "@/backend/database";
 import { offers, pitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 
-export async function GET(
-  req: NextRequest
-) {
+export async function GET(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { scoutId, pitchId } = await body;
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId") || null;
+    const pitchId = searchParams.get("pitchId") || null;
 
     // Validate parameters
-    if (!scoutId || !pitchId ) {
+    if (!scoutId || !pitchId) { 
       return NextResponse.json(
         { error: "scoutId, pitchId, and investorId are required" },
         { status: 400 }
@@ -43,25 +42,23 @@ export async function GET(
         offerStatus: offers.offerStatus,
       })
       .from(offers)
-      .where(
-        and(
-          eq(offers.pitchId, pitchId)
-        )
-      );
+      .where(and(eq(offers.pitchId, pitchId)));
 
     return NextResponse.json(investorOffers, { status: 200 });
   } catch (error) {
     console.error("Error fetching investor offers:", error);
-    return NextResponse.json({ error: "Failed to fetch offers" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch offers" },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(
-  req: NextRequest
-) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { scoutId, pitchId, investorId, offerDescription, offerStatus } = await body;
+    const { scoutId, pitchId, investorId, offerDescription, offerStatus } =
+      await body;
 
     // Validate parameters
     if (!scoutId || !pitchId || !investorId) {
@@ -126,6 +123,9 @@ export async function POST(
     );
   } catch (error) {
     console.error("Error creating investor offer:", error);
-    return NextResponse.json({ error: "Failed to create offer" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create offer" },
+      { status: 500 }
+    );
   }
 }

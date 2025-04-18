@@ -12,18 +12,19 @@ import { usePathname } from "next/navigation";
 interface InvestorsNoteProps {
   scoutId: string;
   pitchId: string;
-  investorId: string;
+  userId: string | null;
 }
 
 export function InvestorsNote({
   scoutId,
   pitchId,
-  investorId,
+  userId,
 }: InvestorsNoteProps) {
   const { toast } = useToast();
   const [note, setNote] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  console.log("user id", userId);
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -32,6 +33,12 @@ export function InvestorsNote({
       attributes: {
         class:
           "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[200px] px-3 py-2",
+      },
+      handleDOMEvents: {
+        blur: () => {
+          handleSave();
+          return false;
+        },
       },
     },
     onUpdate: ({ editor }) => {
@@ -45,7 +52,7 @@ export function InvestorsNote({
       try {
         setLoading(true);
         const response = await fetch(
-          `/api/endpoints/pitch/investor/note?scoutId=${scoutId}&pitchId=${pitchId}&investorId=${investorId}`,
+          `/api/endpoints/pitch/investor/note?scoutId=${scoutId}&pitchId=${pitchId}&investorId=${userId}`,
           {
             method: "GET",
             headers: {
@@ -78,7 +85,7 @@ export function InvestorsNote({
     };
 
     fetchNote();
-  }, [scoutId, pitchId, investorId, editor, toast]);
+  }, [scoutId, pitchId, userId, editor, toast]);
 
   // Handle saving the note
   const handleSave = async () => {
@@ -94,7 +101,7 @@ export function InvestorsNote({
         body: JSON.stringify({
           scoutId,
           pitchId,
-          investorId,
+          userId,
           note: editor.getHTML(),
         }),
       });
@@ -132,7 +139,7 @@ export function InvestorsNote({
   return (
     <Card className="border-none bg-[#0e0e0e]">
       <CardHeader>
-        <CardTitle>Investor Note</CardTitle>
+        <CardTitle></CardTitle>
       </CardHeader>
       <CardContent>
         <div className="border h-[400px] rounded-xl overflow-hidden">
@@ -141,7 +148,7 @@ export function InvestorsNote({
             className="w-full h-full bg-[#1a1a1a] rounded-xl"
           />
         </div>
-        <div className="mt-4 flex justify-end">
+        {/* <div className="mt-4 flex justify-end">
           <Button
             onClick={handleSave}
             disabled={isSaving || !editor}
@@ -149,7 +156,7 @@ export function InvestorsNote({
           >
             {isSaving ? "Saving..." : "Save Note"}
           </Button>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );
