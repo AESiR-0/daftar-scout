@@ -9,7 +9,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import dynamic from "next/dynamic";
 import { useToast } from "@/hooks/use-toast";
-import { usePitch } from "@/contexts/PitchContext"; // Import the context hook
+import { usePitch } from "@/contexts/PitchContext";
 
 const stages = [
   "Idea",
@@ -35,7 +35,7 @@ interface Location {
   city: string;
 }
 
-const locationPattern = /^([^/]+)\/([^/]+)\/([^/]+)$/;
+const locationPattern = /^(.*?)(?:[\/,\-\s]+)(.*?)(?:[\/,\-\s]+)(.*?)$/;
 
 function debounce(fn: Function, delay: number) {
   let timeout: ReturnType<typeof setTimeout>;
@@ -120,19 +120,19 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
 
   const handleLocationInput = async (value: string) => {
     setLocationInput(value);
-    debounceLocation(value); // Debounce the location change
+    debounceLocation(value);
   };
 
-  // Use the debounced function for the location input
   const debounceLocation = useCallback(
     debounce(async (value: string) => {
       const match = value.match(locationPattern);
       if (match) {
-        const [_, country, state, city] = match;
+        const [, city, state, country] = match;
+
         setLocation({
-          country: country.trim(),
-          state: state.trim(),
           city: city.trim(),
+          state: state.trim(),
+          country: country.trim(),
         });
 
         try {
@@ -151,7 +151,7 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
           console.error("Error fetching coordinates:", error);
         }
       }
-    }, 500), // Debounce delay of 500ms
+    }, 500),
     []
   );
 
@@ -220,7 +220,7 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
           <div className="space-y-4">
             <Label>Pin Your Location</Label>
             <Input
-              placeholder="Country/State/City or Place your URL"
+              placeholder="City/State/Country (e.g., San Francisco/California/USA)"
               value={locationInput}
               onChange={(e) => handleLocationInput(e.target.value)}
             />
@@ -290,7 +290,7 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
             disabled={isLoading || !pitchName.trim()}
             className="w-full"
           >
-            {isLoading && "Saving..."}
+            {isLoading ? "Saving..." : "Submit"}
           </Button>
         </form>
       </CardContent>

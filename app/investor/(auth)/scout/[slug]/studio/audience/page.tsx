@@ -116,12 +116,7 @@ const stages = [
 const genders = [
   { value: "male", label: "Male Only Team" },
   { value: "female", label: "Female Only Team" },
-  { value: "trans", label: "Trans Only" },
-  { value: "at-least-one", label: "At Least One" },
-  { value: "at-least-one-male", label: "At least one Male" },
-  { value: "at-least-one-female", label: "At least one Female" },
-  { value: "at-least-one-transgender", label: "At least one Transgender" },
-  { value: "open-for-all", label: "Open For All" },
+  { value: "others", label: "Others" },
 ];
 
 // Zod Schema
@@ -134,6 +129,18 @@ const AudienceSchema = z.object({
   targetAudAgeStart: z.number().optional().default(18),
   targetAudAgeEnd: z.number().optional().default(65),
 });
+
+// Regex for city-state-country with flexible separators
+const locationPattern = /^(.*?)(?:[\/,\-\s]+)(.*?)(?:[\/,\-\s]+)(.*?)$/;
+
+// Debounce function
+function debounce(fn: Function, delay: number) {
+  let timeout: ReturnType<typeof setTimeout>;
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
 
 export default function AudiencePage() {
   const pathname = usePathname();
@@ -192,6 +199,38 @@ export default function AudiencePage() {
         parsed.targetAudAgeStart || 18,
         parsed.targetAudAgeEnd || 65,
       ]);
+
+      // Parse location if present
+      if (parsed.targetAudLocation) {
+        const match = parsed.targetAudLocation.match(locationPattern);
+        if (match) {
+          const [, city, state, country] = match;
+          setLocation({
+            city: city.trim(),
+            state: state.trim(),
+            country: country.trim(),
+          });
+
+          // Fetch coordinates
+          const query = `${city}, ${state}, ${country}`;
+          try {
+            const geoResponse = await fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+                query
+              )}`
+            );
+            const geoData = await geoResponse.json();
+            if (geoData && geoData[0]) {
+              setCoordinates([
+                parseFloat(geoData[0].lat),
+                parseFloat(geoData[0].lon),
+              ]);
+            }
+          } catch (error) {
+            console.error("Error fetching coordinates:", error);
+          }
+        }
+      }
     } catch (err) {
       console.error("Error fetching data:", err);
     }
@@ -200,6 +239,43 @@ export default function AudiencePage() {
   useEffect(() => {
     fetchInitialData();
   }, []);
+
+  const handleLocationInput = async (value: string) => {
+    setTargetAudLocation(value);
+    debounceLocation(value);
+  };
+
+  const debounceLocation = useCallback(
+    debounce(async (value: string) => {
+      const match = value.match(locationPattern);
+      if (match) {
+        const [, city, state, country] = match;
+
+        setLocation({
+          city: city.trim(),
+          state: state.trim(),
+          country: country.trim(),
+        });
+
+        try {
+          const query = `${city}, ${state}, ${country}`;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+              query
+            )}`
+          );
+          const data = await response.json();
+
+          if (data && data[0]) {
+            setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+          }
+        } catch (error) {
+          console.error("Error fetching coordinates:", error);
+        }
+      }
+    }, 500),
+    []
+  );
 
   const autoSave = useCallback(() => {
     const saveData = async () => {
@@ -273,9 +349,9 @@ export default function AudiencePage() {
         <div className="space-y-4">
           <Label>Pin Location</Label>
           <Input
-            placeholder="e.g. India-Maharashtra-Mumbai or Mumbai-Maharashtra-India"
+            placeholder="City/State/Country (e.g., Mumbai/Maharashtra/India)"
             value={targetAudLocation}
-            onChange={(e) => setTargetAudLocation(e.target.value)}
+            onChange={(e) => handleLocationInput(e.target.value)}
           />
           <div className="w-full h-[400px] rounded-lg overflow-hidden border">
             <MapComponent coordinates={coordinates} />
@@ -296,7 +372,7 @@ export default function AudiencePage() {
                 <div>
                   <Label>Community</Label>
                   <Combobox
-                    options={communitiesData.map((item) => item.value)}
+                    options={communitiesData.map((community) => community.value)}
                     value={tempScoutCommunity}
                     onSelect={(value) => setTempScoutCommunity(value)}
                     placeholder="Select a community"
@@ -318,7 +394,7 @@ export default function AudiencePage() {
                   <div className="flex-1">
                     <Label>Gender</Label>
                     <Combobox
-                      options={genders.map((item) => item.value)}
+                      options={genders.map((gender) => gender.value)}
                       value={tempTargetedGender}
                       onSelect={(value) => setTempTargetedGender(value)}
                       placeholder="Select a gender"
@@ -328,7 +404,7 @@ export default function AudiencePage() {
                 <div>
                   <Label>Stage</Label>
                   <Combobox
-                    options={stages.map((item) => item.value)}
+                    options={stages.map((stage) => stage.value)}
                     value={tempScoutStage}
                     onSelect={(value) => setTempScoutStage(value)}
                     placeholder="Select a stage"
@@ -337,7 +413,7 @@ export default function AudiencePage() {
                 <div>
                   <Label>Sector</Label>
                   <Combobox
-                    options={sectors.map((item) => item.value)}
+                    options={sectors.map((sector) => sector.value)}
                     value={tempScoutSector}
                     onSelect={(value) => setTempScoutSector(value)}
                     placeholder="Select a sector"
