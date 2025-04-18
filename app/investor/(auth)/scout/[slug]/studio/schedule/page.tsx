@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, AlertCircle, Check } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
@@ -54,6 +54,7 @@ export default function SchedulePage() {
 
     if (scoutId) fetchSchedule();
   }, [scoutId]);
+
   const handleLaunchDateSelect = (date: Date | undefined) => {
     setLaunchDate(date);
     if (date && lastPitchDate && date > lastPitchDate) {
@@ -100,6 +101,13 @@ export default function SchedulePage() {
       setLoading(false);
     }
   };
+
+  // Compute schedule issues
+  const issues = [
+    !lastPitchDate && "Last pitch date not selected",
+    !launchDate && "Program launch date not selected",
+    dateError,
+  ].filter(Boolean) as string[];
 
   return (
     <div className="container mx-auto px-5 mt-4">
@@ -191,22 +199,46 @@ export default function SchedulePage() {
           </Card>
         </div>
 
-        {/* Right Column (Optional): Can keep actions, status, etc. */}
+        {/* Right Column: Schedule Issues */}
         <div className="space-y-6">
-          <Card className="border-none bg-[#0e0e0e]">
-            <CardContent className="p-6">
+          <Card className="border-none bg-[#0e0e0e] shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                Schedule Issues
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 pt-0">
               <div className="space-y-4">
-                <h4 className="text-sm text-muted-foreground">
-                  Schedule Issues
-                </h4>
-                <ul className="space-y-1 text-xs text-white">
-                  {!lastPitchDate && <li>• Last pitch date not selected</li>}
-                  {launchDate &&
-                    lastPitchDate &&
-                    launchDate > lastPitchDate && (
-                      <li>• Launch date must be before last pitch date</li>
-                    )}
-                </ul>
+                {issues.length > 0 ? (
+                  <>
+                    <ul className="space-y-3">
+                      {issues.map((issue, i) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 p-3 bg-muted/50 rounded-md hover:bg-muted/70 transition-colors cursor-pointer"
+                        >
+                          <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-foreground">
+                            {issue}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-muted-foreground">
+                      Please resolve these issues before scheduling the Scout.
+                    </p>
+                  </>
+                ) : (
+                  <div className="text-center py-6">
+                    <Check className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                    <p className="text-sm text-foreground">
+                      No schedule issues
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Ready to schedule the Scout.
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -24,6 +24,10 @@ import {
   Pencil,
   X,
   Calendar as CalendarIcon,
+  Key,
+  Lock,
+  FileText,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -824,20 +828,20 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
       case "privacy":
         return (
-          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
-            <div className="space-y-6">
+          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+            <ScrollArea className="space-y-6 min-h-[500px]">
               {privacySections.map((section) => (
                 <div key={section.title} className="space-y-2">
                   <div className="flex items-center gap-2">
                     <section.icon className="h-4 w-4" />
                     <h4 className="font-medium">{section.title}</h4>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {section.content}
                   </p>
                 </div>
               ))}
-            </div>
+            </ScrollArea>
           </Card>
         );
 
@@ -916,27 +920,120 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
 const privacySections = [
   {
-    title: "Data Collection",
+    title: "Our Privacy Pledge",
+    icon: Key,
+    content: `Hey Beta Users,
+
+We totally get that privacy is super important to you, and we want you to know that we’re doing everything we can to keep your data safe. Here’s how we handle your information:
+
+- Your data belongs to you. We won’t sell, share, or rent your data to anyone. It’s yours, and we’ll only use it to make your experience with Daftar OS better.
+- We won’t snoop. We don’t look at your data unless it’s necessary to help you or fix a problem. Your ideas and work are yours, and we respect that.
+- We only keep your data as long as needed. If you stop using Daftar OS, we’ll keep your data for up to 10 years, just in case you need it later. After that, we’ll delete or anonymize it to make sure it’s completely safe.
+- We use your data to improve, but we don’t share anything personal. We might use some data to help us improve features, but it’s always anonymous. Your personal information won’t be shared or exposed.
+- We keep it safe. We use strong encryption to protect your data while it’s being sent and stored. Your information is always secure.
+- We’re always here if you have questions. If you want to know more about how we handle your data, just ask! We believe in being open with you.
+- You’re in control. If you want to update, access, or delete your data, just let us know. We’ll make it happen.
+
+Once our beta phase ends, we’ll have a more structured privacy policy, but for now, we just want to know that your privacy is important to us.
+
+Thanks for being part of Daftar OS`,
+  },
+  {
+    title: "Introduction",
+    icon: FileText,
+    content: `At Daftar, we take your privacy seriously. As part of our commitment to transparency and security, this Privacy Policy outlines how we collect, process, and protect your data. As we are still in beta, our practices and software are evolving. By using Daftar, you agree to the terms described below.
+
+Daftar is in beta, which means we are continually improving the software to provide the best experience.
+
+We use Google authentication solely to verify your identity and store only the necessary data for user sessions. We do not explore or access any additional details from your Google account. Your privacy and security are our priority, and we are committed to only using the authentication data needed for your login experience.
+
+Additionally, we host our software on Vercel to provide a scalable and secure environment for our users. As part of our ongoing development, user interactions with the software may be logged for analysis and optimization purposes.
+
+However, we ensure that this data is handled by Google's Privacy Policy and Vercel's Privacy Practices, adhering to industry standards for data protection.`,
+  },
+  {
+    title: "Data We Collect",
     icon: Database,
-    content:
-      "We collect information that you provide directly to us, including your name, email address, and any other information you choose to provide.",
+    content: `Authentication Data:
+When you sign in to Daftar using Google Sign-In, we only collect essential information necessary for authentication, including your email address and name. We do not store any sensitive data such as passwords. This data is processed in line with Google’s Privacy Policy, and your interactions with Google are governed by their terms.
+
+IP Address & Session Data:
+We collect IP address and session data to monitor usage and ensure a secure user experience. This data is stored temporarily and does not contain personal or sensitive details. Our software does not delve deeper into collecting personally identifiable information beyond what's necessary for authentication.
+
+Usage Data:
+We also gather data about how you interact with Daftar, such as pages viewed, features used, and timestamps. This information is anonymized and stored for service improvement and performance monitoring.`,
   },
   {
-    title: "Use of Information",
+    title: "How We Use Your Data",
     icon: Settings,
-    content:
-      "We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect our platform.",
+    content: `Authentication & Access Control:
+We use your Google authentication data solely to manage your login process and maintain session security. This process ensures that you can securely access Daftar without us storing sensitive login information.
+
+Data Logging for Service Improvement:
+We collect session data (such as your IP address) for diagnostics, troubleshooting, and performance optimization. This helps us ensure that Daftar functions properly during the beta phase and provides you with a stable experience.`,
   },
   {
-    title: "Data Sharing",
+    title: "Data Storage & Security",
+    icon: Lock,
+    content: `As part of our commitment to security, Daftar is hosted on Vercel, which provides a secure cloud infrastructure. Vercel ensures that data is stored in an encrypted environment using industry-standard encryption methods.
+
+Data Encryption:
+All data, including your session data, is encrypted in transit using TLS 1.2 or higher, and at rest using AES-256 encryption.
+
+Access Control:
+Strict access control policies are in place to ensure that only authorized personnel can access the system. We rely on role-based access control (RBAC) to manage this.
+
+Regular Security Audits:
+We conduct regular security audits and apply security patches to ensure that the software remains secure and protected against emerging threats.`,
+  },
+  {
+    title: "Third-Party Services",
     icon: Share2,
-    content:
-      "We do not share your personal information with third parties except as described in this policy.",
+    content: `Google:
+Your authentication data is processed by Google through OAuth 2.0. Google’s privacy policies govern how your data is handled during authentication. We don’t store or process any further sensitive data through Google beyond what is required for the authentication process.
+
+Vercel:
+Daftar is hosted on Vercel, a trusted platform that provides cloud hosting services. While we utilize Vercel for hosting, Vercel's policies govern how your data is stored and processed. We ensure that Vercel follows industry standards for data protection and privacy.
+
+Supabase:
+We use Supabase as our backend infrastructure for storing user data and session information. Supabase provides a scalable and secure database and authentication service. Supabase processes your data in accordance with its own privacy policies, and we ensure that Supabase complies with industry-standard data protection measures. Supabase also uses encryption both in transit and at rest to protect your data.`,
   },
   {
-    title: "Security",
+    title: "Data Retention",
+    icon: Database,
+    content: `We retain your data only as long as necessary to provide the services you have requested. If you choose to delete your account, your data will be removed from our systems after a period of 30 days, unless retention is required for audit, compliance, or legal obligations.
+
+During the beta phase, some data may be retained for debugging and platform improvement purposes. This includes session data (such as your IP address) and other non-personally identifiable information.
+
+Logs will be retained for no more than 100 days for debugging and performance analysis.`,
+  },
+  {
+    title: "Your Rights Over Your Data",
+    icon: Users,
+    content: `As a user, you have all the rights regarding your data. You maintain ownership of your data at all times. Daftar acts as a data processor and processes your data only for the purposes specified in this Privacy Policy.`,
+  },
+  {
+    title: "Cookies & Tracking",
+    icon: FileText,
+    content: `We may use cookies and session tracking technologies for the purpose of improving your user experience. These technologies help us remember your preferences and enhance software usability.`,
+  },
+  {
+    title: "Security Measures",
     icon: Shield,
-    content:
-      "We take reasonable measures to help protect your personal information from loss, theft, misuse, and unauthorized access.",
+    content: `We employ standard data protection practices, including encryption, access controls, and regular security audits to safeguard your data. In the event of a data security breach, we will notify you promptly within 72 working hours by applicable laws. However, we are not liable for any losses or damages arising from such incidents.`,
+  },
+  {
+    title: "Changes to This Policy",
+    icon: Pencil,
+    content: `Since Daftar is currently in beta, this policy may be updated frequently as we improve the software. Any significant changes to this policy will be communicated to you via email or through the software.`,
+  },
+  {
+    title: "Grievance Redressal",
+    icon: MessageSquarePlus,
+    content: `If you have any grievances or concerns about your data or this Privacy Policy, please contact us at the support tab in your profile. We will address your concerns within a reasonable time frame, in compliance with Indian data protection laws.
+
+Contact Us: If you have any questions or concerns about this Privacy Policy or how we handle your data, please contact us through the support tab in your profile.
+
+Tech Team Daftar OS`,
   },
 ];

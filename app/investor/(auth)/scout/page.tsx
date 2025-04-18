@@ -10,6 +10,7 @@ import { InsightsDialog } from "@/components/dialogs/insights-dialog";
 import MeetingsPage from "@/app/founder/(auth)/meetings/page";
 import { CreateScoutDialog } from "@/components/dialogs/create-scout-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Scout {
   id: string;
@@ -174,6 +175,7 @@ export default function ScoutPage() {
               key={status}
               className="bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
             >
+              <ScrollArea className="h-[calc(100vh-12rem)]">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <h2 className="font-semibold capitalize text-foreground">
@@ -225,6 +227,7 @@ export default function ScoutPage() {
                   </div>
                 )}
               </div>
+              </ScrollArea>
             </div>
           ))}
         </div>
