@@ -149,7 +149,7 @@ export function TeamAnalysisSection() {
                         variant={nps === i ? "default" : "outline"}
                         onClick={() => setNps(i)}
                         className={cn(
-                          "w-8 h-8 p-0",
+                          "w-8 h-8 p-0 rounded-[0.35rem]",
                           nps === i && "bg-blue-600 hover:bg-blue-700"
                         )}
                       >
@@ -166,9 +166,9 @@ export function TeamAnalysisSection() {
                       onClick={() => setBelief("yes")}
                       className={
                         belief === "yes"
-                          ? "bg-green-600 hover:bg-green-700"
-                          : ""
-                      }
+                          ? "bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
+                          : "rounded-[0.35rem]"
+                      } 
                     >
                       Yes
                     </Button>
@@ -176,7 +176,7 @@ export function TeamAnalysisSection() {
                       variant={belief === "no" ? "default" : "outline"}
                       onClick={() => setBelief("no")}
                       className={
-                        belief === "no" ? "bg-red-600 hover:bg-red-700" : ""
+                        belief === "no" ? "bg-red-600 hover:bg-red-700 rounded-[0.35rem]" : "rounded-[0.35rem]"
                       }
                     >
                       No

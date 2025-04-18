@@ -22,9 +22,6 @@ export function InvestorsNote({ note }: InvestorsNoteProps) {
 
   return (
     <Card className="border-none bg-[#0e0e0e]">
-      <CardHeader>
-
-      </CardHeader>
       <CardContent>
         <div className="border h-[450px] rounded-xl">
           <EditorContent editor={editor} className="w-full h-full bg-[#1a1a1a] rounded-xl" />
