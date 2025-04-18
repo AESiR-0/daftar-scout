@@ -63,25 +63,25 @@ interface DeletionApproval {
   date?: string
 }
 
-type DaftarTab = "details" | "team" | "delete" | "privacy"
+type DaftarTab = "details" | "team" | "delete"
 
-const privacySections = [
-  {
-    title: "Data Collection",
-    icon: Lock,
-    content: "We collect information you provide directly to us when you create your Daftar, including your name, contact information, and preferences."
-  },
-  {
-    title: "Data Usage",
-    icon: Share2,
-    content: "We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect our platform."
-  },
-  {
-    title: "Security",
-    icon: Shield,
-    content: "We take reasonable measures to help protect your personal information from loss, theft, misuse, and unauthorized access."
-  }
-]
+// const privacySections = [
+//   {
+//     title: "Data Collection",
+//     icon: Lock,
+//     content: "We collect information you provide directly to us when you create your Daftar, including your name, contact information, and preferences."
+//   },
+//   {
+//     title: "Data Usage",
+//     icon: Share2,
+//     content: "We use the information we collect to provide, maintain, and improve our services, to develop new features, and to protect our platform."
+//   },
+//   {
+//     title: "Security",
+//     icon: Shield,
+//     content: "We take reasonable measures to help protect your personal information from loss, theft, misuse, and unauthorized access."
+//   }
+// ]
 
 interface DaftarDialogProps {
   open: boolean
@@ -152,7 +152,7 @@ const tabs: { id: DaftarTab; label: string; icon: any }[] = [
   { id: "details", label: "Details", icon: UserCircle },
   { id: "team", label: "Team", icon: Users },
   // { id: "billing", label: "Billing", icon: CreditCard },
-  { id: "privacy", label: "Privacy Policy", icon: Shield },
+  // { id: "privacy", label: "Privacy Policy", icon: Shield },
   { id: "delete", label: "Delete Daftar", icon: Trash2 }
 ]
 
@@ -672,22 +672,22 @@ export function DaftarDialog({
         //     </Card>
         //   );
 
-      case "privacy":
-        return (
-          <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
-            <div className="space-y-6">
-              {privacySections.map((section) => (
-                <div key={section.title} className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <section.icon className="h-4 w-4" />
-                    <h4 className="font-medium">{section.title}</h4>
-              </div>
-                  <p className="text-sm text-muted-foreground">{section.content}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )
+      // case "privacy":
+      //   return (
+      //     <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
+      //       <div className="space-y-6">
+      //         {privacySections.map((section) => (
+      //           <div key={section.title} className="space-y-2">
+      //             <div className="flex items-center gap-2">
+      //               <section.icon className="h-4 w-4" />
+      //               <h4 className="font-medium">{section.title}</h4>
+      //         </div>
+      //             <p className="text-sm text-muted-foreground">{section.content}</p>
+      //           </div>
+      //         ))}
+      //       </div>
+      //     </Card>
+      //   )
 
       case "delete":
         return (

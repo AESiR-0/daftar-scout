@@ -91,7 +91,7 @@ export function CreateScoutDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader hidden={true}>
-          <DialogTitle>New Scout</DialogTitle>
+          <DialogTitle hidden>New Scout</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">

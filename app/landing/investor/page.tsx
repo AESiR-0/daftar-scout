@@ -167,10 +167,7 @@ export default function InvestorPage() {
         {/* Hero Section */}
         <div className="space-y-6 text-center">
           <h1 className="text-7xl font-light tracking-tight">
-            Simplifying
-          </h1>
-          <h1 className="text-7xl font-light tracking-tight">
-            Startup Scouting
+          Startup Scouting, Simplified
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Feel the 'why' behind a founder's problem statement in the language they are comfortable to speak, 
@@ -196,7 +193,7 @@ export default function InvestorPage() {
         {/* Bottom Section */}
         <div className="space-y-6 text-center">
           <h2 className="text-4xl font-light">
-            Scout The Next Big Startup At An Early Stage Or Miss Out Again.
+            Be the first to scout the next big startup
           </h2>
         </div>
 

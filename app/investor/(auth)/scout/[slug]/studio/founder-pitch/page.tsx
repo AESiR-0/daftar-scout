@@ -217,8 +217,8 @@ export default function InvestorStudioPage() {
   return (
     <div className="min-h-screen px-8 text-white">
       <div className="container mx-auto py-8">
-        <Card className="bg-[#1a1a1a] border-gray-700 shadow-lg">
-          <CardContent className="p-6 space-y-6">
+        <Card className="bg-[#1a1a1a] border-gray-700 shadow-lg rounded-[0.35rem]">
+          <CardContent className="p-6 space-y-6 ">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center space-x-2">
@@ -259,7 +259,7 @@ export default function InvestorStudioPage() {
                   </DialogHeader>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
                     <div className="space-y-4">
-                      <div className="aspect-video bg-[#0e0e0e] rounded-lg overflow-hidden">
+                      <div className="aspect-video bg-[#0e0e0e] rounded-[0.35rem] overflow-hidden">
                         {selectedQuestion.videoUrl ? (
                           <video
                             src={selectedQuestion.videoUrl}

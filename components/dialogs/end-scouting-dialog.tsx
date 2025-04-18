@@ -59,7 +59,7 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[30rem]">
         <DialogHeader hidden={true}>
-          <DialogTitle>End Scouting?</DialogTitle>
+          <DialogTitle hidden>End Scouting?</DialogTitle>
           <DialogDescription className="space-y-2">
             <p>Are you sure you want to end the scouting process?<br/><br/>All applications on hold will be marked as rejected, inbox applications will be declined, and all sent invites will be cancelled. However, scheduled meetings can still take place.</p>
           </DialogDescription>
