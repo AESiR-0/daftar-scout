@@ -230,7 +230,7 @@ export function NotificationDialog({
                       key={notification.id}
                       className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                     >
-                      <div className="p-4 space-y-2">
+                      <div className="p-4 space-y-4">
                         <h4 className="text-sm font-medium">
                           {notification.payload.daftar_id
                             ? `Scout for Daftar ${notification.payload.daftar_id}`
