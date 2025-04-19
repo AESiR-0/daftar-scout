@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,7 +13,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProfileHoverCard } from "@/components/ui/hover-card-profile";
 import formatDate from "@/lib/formatDate";
 import { useToast } from "@/hooks/use-toast";
@@ -25,23 +25,20 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
+// Interface for the Document, aligned with API response
 interface Document {
   id: string;
-  name: string;
-  uploadedBy: string;
-  daftar: string;
-  scoutName: string;
-  uploadedAt: string;
+  name: string; // Maps to docName from API
+  uploadedBy: string; // Maps to uploadedBy user ID or name
+  daftar: string; // Placeholder, replace with actual data
+  scoutName?: string; // For received documents from scouts
+  uploadedAt: string; // Maps to createdAt from API
   type: "private" | "received" | "sent";
-  size: string;
-  logs?: {
-    action: string;
-    timestamp: string;
-    user: string;
-  }[];
-  isHidden?: boolean;
+  size: string; // Calculated on client or from API
+  isHidden?: boolean; // Maps to isPrivate from API
 }
 
+// Interface for Activity Log (local-only)
 interface ActivityLog {
   id: string;
   action: string;
@@ -50,38 +47,87 @@ interface ActivityLog {
   timestamp: string;
 }
 
-interface UserProfile {
-  name: string;
-  designation: string;
-  email: string;
-  phone: string;
-  languages: string[];
-  daftar: string;
-}
-
-const dummyActivity: ActivityLog[] = [];
-
 export default function DocumentsSection({
-  documents,
-  onUpload,
-  onDelete,
+  pitchId,
+  scoutId,
 }: {
-  documents: Document[];
-  onUpload: (file: File) => void;
-  onDelete: (docId: string) => void;
+  pitchId: string;
+  scoutId: string;
 }) {
   const { toast } = useToast();
   const [documentsList, setDocumentsList] = useState<Document[]>([]);
-
-  const [recentActivity, setRecentActivity] =
-    useState<ActivityLog[]>(dummyActivity);
-
+  const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([]);
   const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">(
     "private"
   );
-
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch documents from API
+  const fetchDocuments = async () => {
+    try {
+      setIsLoading(true);
+      const params = new URLSearchParams({ scoutId, pitchId });
+      const response = await fetch(
+        `/api/endpoints/pitch/investor/documents?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Include cookies for auth
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch documents");
+      }
+
+      const { sent, received } = data;
+
+      // Map API response to Document interface
+      const sentDocs: Document[] = sent.map((doc: any) => ({
+        id: doc.id,
+        name: doc.docName,
+        uploadedBy: doc.uploadedBy, // Replace with user name if API provides it
+        daftar: "Tech Innovation Fund", // Replace with actual daftar data
+        uploadedAt: formatDate(doc.createdAt),
+        type: doc.isPrivate ? "private" : "sent",
+        size: "Unknown", // Calculate or get from API
+        isHidden: doc.isPrivate,
+      }));
+
+      const receivedDocs: Document[] = received.map((doc: any) => ({
+        id: doc.id,
+        name: doc.docName || doc.name, // Handle scoutDocuments vs pitchDocs
+        uploadedBy: doc.uploadedBy || "Scout", // Replace with user/scout name
+        daftar: "Tech Innovation Fund", // Replace with actual daftar data
+        scoutName: doc.scoutId ? "AI Fund" : undefined, // Replace with scout name
+        uploadedAt: formatDate(doc.createdAt),
+        type: "received",
+        size: "Unknown", // Calculate or get from API
+        isHidden: doc.isPrivate,
+      }));
+
+      setDocumentsList([...sentDocs, ...receivedDocs]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch documents",
+        variant: "destructive",
+      });
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch documents on mount and when activeTab changes
+  useEffect(() => {
+    fetchDocuments();
+  }, [activeTab, pitchId, scoutId]);
 
   const privateCount = documentsList.filter(
     (doc) => doc.type === "private"
@@ -120,19 +166,49 @@ export default function DocumentsSection({
     input.click();
   };
 
-  const handleUploadConfirm = (type: "private" | "sent") => {
-    if (selectedFiles) {
-      Array.from(selectedFiles).forEach((file) => {
+  const handleUploadConfirm = async (type: "private" | "sent") => {
+    if (!selectedFiles) return;
+
+    try {
+      setIsLoading(true);
+      for (const file of Array.from(selectedFiles)) {
+        // Simulate file upload to a storage service (e.g., S3) to get docUrl
+        const docUrl = `https://storage.example.com/${file.name}`; // Replace with actual upload logic
+        const docType = file.type || file.name.split(".").pop() || "unknown";
+
+        // Call POST API to save document metadata
+        const response = await fetch(
+          "/api/endpoints/pitch/investor/documents",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              pitchId,
+              docName: file.name,
+              docType,
+              docUrl,
+              isPrivate: type === "private",
+            }),
+            credentials: "include", // Include cookies for auth
+          }
+        );
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to upload document");
+        }
+
         const newDoc: Document = {
-          id: Math.random().toString(36).substr(2, 9),
+          id: data[0].id,
           name: file.name,
-          uploadedBy: "John Smith",
-          daftar: "Tech Innovation Fund",
+          uploadedBy: "John Smith", // Replace with actual user data
+          daftar: "Tech Innovation Fund", // Replace with actual daftar data
           uploadedAt: formatDate(new Date().toISOString()),
-          type: type,
+          type: type === "private" ? "private" : "sent",
           size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-          isHidden: false,
-          scoutName: "AI Fund",
+          isHidden: type === "private",
         };
 
         setDocumentsList((prev) => [...prev, newDoc]);
@@ -146,13 +222,23 @@ export default function DocumentsSection({
           title: "File uploaded",
           description: `Successfully uploaded ${file.name}`,
         });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload document",
+        variant: "destructive",
       });
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+      setIsUploadModalOpen(false);
+      setSelectedFiles(null);
     }
-    setIsUploadModalOpen(false);
-    setSelectedFiles(null);
   };
 
   const handleDownload = (doc: Document) => {
+    // Simulate download (replace with actual download logic)
     toast({
       title: "Downloading file",
       description: `Started downloading ${doc.name}`,
@@ -161,11 +247,12 @@ export default function DocumentsSection({
       action: "Downloaded",
       documentName: doc.name,
       user: "John Smith",
-      timestamp: formatDate("2024-03-19T10:15:00"),
+      timestamp: formatDate(new Date().toISOString()),
     });
   };
 
   const handleView = (doc: Document) => {
+    // Simulate view (replace with actual view logic)
     toast({
       title: "Opening document",
       description: `Opening ${doc.name} for viewing`,
@@ -174,11 +261,12 @@ export default function DocumentsSection({
       action: "Viewed",
       documentName: doc.name,
       user: "John Smith",
-      timestamp: formatDate("2024-03-19T10:15:00"),
+      timestamp: formatDate(new Date().toISOString()),
     });
   };
 
-  const handleDelete = (docId: string) => {
+  const handleDelete = async (docId: string) => {
+    // Note: No DELETE endpoint provided, so this is local-only
     const doc = documentsList.find((d) => d.id === docId);
     if (doc) {
       setDocumentsList((prev) => prev.filter((d) => d.id !== docId));
@@ -190,12 +278,13 @@ export default function DocumentsSection({
         action: "Deleted",
         documentName: doc.name,
         user: "John Smith",
-        timestamp: formatDate("2024-03-19T10:15:00"),
+        timestamp: formatDate(new Date().toISOString()),
       });
     }
   };
 
   const handleToggleVisibility = (docId: string) => {
+    // Note: No PATCH endpoint provided, so this is local-only
     setDocumentsList((prev) =>
       prev.map((doc) => {
         if (doc.id === docId) {
@@ -204,7 +293,7 @@ export default function DocumentsSection({
             action: newVisibility ? "Hidden" : "Unhidden",
             documentName: doc.name,
             user: "John Smith",
-            timestamp: formatDate("2024-03-19T10:15:00"),
+            timestamp: formatDate(new Date().toISOString()),
           });
           toast({
             title: newVisibility ? "Document hidden" : "Document visible",
@@ -224,6 +313,7 @@ export default function DocumentsSection({
       <div className="flex p-0 mt-10 gap-6">
         <Card className="border-none bg-[#0e0e0e] flex-1">
           <CardContent className="space-y-6">
+            {isLoading && <div>Loading documents...</div>}
             <Tabs
               defaultValue="private"
               onValueChange={(value: string) =>
@@ -262,6 +352,7 @@ export default function DocumentsSection({
                   variant="outline"
                   className="rounded-[0.35rem]"
                   onClick={handleUpload}
+                  disabled={isLoading}
                 >
                   Upload
                 </Button>
@@ -318,6 +409,7 @@ export default function DocumentsSection({
               variant="outline"
               className="flex py-2 flex-col items-center justify-center h-24 space-y-1"
               onClick={() => handleUploadConfirm("private")}
+              disabled={isLoading}
             >
               <EyeOff className="h-6 w-6" />
               <span>Keep Private</span>
@@ -330,6 +422,7 @@ export default function DocumentsSection({
               variant="outline"
               className="flex py-2 flex-col items-center justify-center h-24 space-y-1"
               onClick={() => handleUploadConfirm("sent")}
+              disabled={isLoading}
             >
               <Upload className="h-6 w-6" />
               <span>Send to Investors</span>
@@ -379,7 +472,7 @@ function DocumentsList({
       case "received":
         return (
           <>
-            <span>From Scout: {doc.scoutName}</span>
+            <span>From Scout: {doc.scoutName || "Unknown"}</span>
             <div>{formatDate(doc.uploadedAt)}</div>
           </>
         );
@@ -396,19 +489,11 @@ function DocumentsList({
     }
   };
 
-  if (!documents) {
-    return (
-      <div className="text-center py-8 text-sm text-muted-foreground">
-        No documents found
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
-      {documents.map((doc) => (
+      {documents.map((doc, index) => (
         <div
-          key={doc.id}
+          key={index}
           className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${
             doc.isHidden ? "opacity-50" : ""
           }`}

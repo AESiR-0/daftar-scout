@@ -193,7 +193,8 @@ export default function DocumentsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             size: file.size,
-            docType: file.name,
+            docType: file.type,
+            docName: file.name,
             scoutId,
             daftarId,
             url,

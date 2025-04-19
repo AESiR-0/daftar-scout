@@ -60,6 +60,7 @@ export const daftarScouts = pgTable("daftar_scouts", {
 
 export const scoutDocuments = pgTable("scout_documents", {
   docId: uuid("doc_id").defaultRandom().primaryKey(),
+  docName: text("doc_name").notNull().default(""),
   docUrl: text("doc_url").notNull(),
   docType: text("doc_type"),
   size: integer("size"), // size in bytes or kb, you can convert accordingly

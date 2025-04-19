@@ -71,6 +71,13 @@
       "when": 1744920598579,
       "tag": "0009_omniscient_menace",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1745081560282,
+      "tag": "0010_breezy_black_crow",
+      "breakpoints": true
     }
   ]
 }

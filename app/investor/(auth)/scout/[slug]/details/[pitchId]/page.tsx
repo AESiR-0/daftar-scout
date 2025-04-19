@@ -594,11 +594,7 @@ export default function PitchDetailsPage() {
           <InvestorsNote scoutId={scoutId} pitchId={pitchId} userId={userId} />
         )}
         {activeSection === "documents" && (
-          <DocumentsSection
-            documents={pitchDetails.fields.documentation}
-            onUpload={handleUploadDocument}
-            onDelete={handleDeleteDocument}
-          />
+          <DocumentsSection pitchId={pitchId} scoutId={scoutId} />
         )}
         {activeSection === "founders-team" && (
           <div className="space-y-6 mt-4">

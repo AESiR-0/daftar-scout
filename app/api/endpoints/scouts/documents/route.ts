@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { size, docType, scoutId, daftarId, url, isPrivate } =
+    const { size, docType, scoutId, daftarId, url, docName, isPrivate } =
       await req.json();
 
     // 1. Get user by email
@@ -148,6 +148,7 @@ export async function POST(req: Request) {
       );
     }
     await db.insert(scoutDocuments).values({
+      docName,
       scoutId,
       daftarId,
       docUrl: url,
