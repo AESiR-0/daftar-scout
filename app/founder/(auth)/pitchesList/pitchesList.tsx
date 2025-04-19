@@ -32,7 +32,7 @@ export default function PitchesList({ pitchBoard }: PitchesListProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (pitchBoard) return; // Don’t fetch if pitchBoard is already provided
+    if (pitchBoard) return; // Don't fetch if pitchBoard is already provided
 
     async function fetchPitches() {
       try {
