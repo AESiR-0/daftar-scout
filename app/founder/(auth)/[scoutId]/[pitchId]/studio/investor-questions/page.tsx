@@ -6,7 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { usePathname } from "next/navigation";
 import { Upload, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadInvestorsPitchVideo } from "@/lib/actions/video";
+import {
+  uploadAnswersPitchVideo,
+  uploadInvestorsPitchVideo,
+} from "@/lib/actions/video";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
 import { usePitch } from "@/contexts/PitchContext"; // Assuming scoutId is part of PitchContext
@@ -23,7 +26,8 @@ interface Question {
 
 export default function InvestorQuestionsPage() {
   const pathname = usePathname();
-  const scoutId = pathname.split("/")[3];
+  const scoutId = pathname.split("/")[2];
+  const pitchId = pathname.split("/")[3];
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
     null
@@ -32,8 +36,6 @@ export default function InvestorQuestionsPage() {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const path = usePathname();
-  const mode = path.includes("edit") ? "edit" : "create";
   const { toast } = useToast();
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function InvestorQuestionsPage() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `/api/endpoints/pitch/founder/questions?scoutId=${scoutId}`,
+        `/api/endpoints/pitch/founder/questions?scoutId=${scoutId}&pitchId=${pitchId}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -53,15 +55,14 @@ export default function InvestorQuestionsPage() {
       if (!response.ok) throw new Error("Failed to fetch questions");
       const data = await response.json();
 
-      // Map API data to Question interface
       const fetchedQuestions: Question[] = data.map((q: any) => ({
         id: q.id,
         question: q.scoutQuestion,
-        videoUrl: q.scoutAnswerSampleUrl || "",
+        videoUrl: q.answerUrl || "", // ✅ uses founder answer or sample fallback
         scoutId: q.scoutId,
-        language: q.language || "English",
+        language: q.answerLanguage || "English",
         isCustom: q.isCustom,
-        isSample: q.isSample,
+        isSample: !q.answerUrl, // ✅ true if it’s just a sample
       }));
 
       setQuestions(fetchedQuestions);
@@ -95,7 +96,7 @@ export default function InvestorQuestionsPage() {
     questionId: number
   ) => {
     const file = fileInputRef.current?.files?.[0];
-    if (!file) {
+    if (!file || !selectedQuestion) {
       toast({
         title: "Error",
         description: "Please select a video to upload",
@@ -105,19 +106,33 @@ export default function InvestorQuestionsPage() {
     }
 
     try {
-      const url = await uploadInvestorsPitchVideo(file, scoutId);
+      const url = await uploadAnswersPitchVideo(file, pitchId, scoutId);
       setPreviewUrl(url);
-      
+
+      // ✅ POST to backend
+      const postRes = await fetch("/api/endpoints/pitch/founder/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pitchId,
+          questionId: selectedQuestion.id,
+          pitchAnswerUrl: url,
+          answerLanguage: language,
+        }),
+      });
+
+      if (!postRes.ok) throw new Error("Failed to save answer");
+
       toast({
         title: "Video uploaded successfully",
-        description: "Your video has been uploaded successfully",
+        description: "Your video answer has been saved.",
         variant: "success",
       });
     } catch (error) {
       console.error("Error uploading video:", error);
       toast({
         title: "Error uploading video",
-        description: "There was an error uploading your video",
+        description: "There was an error uploading or saving your video.",
         variant: "destructive",
       });
     }

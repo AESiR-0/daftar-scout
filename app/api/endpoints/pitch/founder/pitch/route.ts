@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
 import { pitch } from "@/backend/drizzle/models/pitch";
+import { users } from "@/backend/drizzle/models/users";
 import { pitchTeam } from "@/backend/drizzle/models/pitch"; // Assuming pitchTeam model is defined
 import { and, eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
-    const pitchId = req.headers.get("pitch_id");
-
+    const { searchParams } = new URL(req.url);
+    const pitchId = searchParams.get("pitchId");
     // Validate pitchId
     if (!pitchId) {
       return NextResponse.json(
@@ -37,10 +38,13 @@ export async function GET(req: NextRequest) {
       .select({
         id: pitchTeam.id,
         userId: pitchTeam.userId,
+        userName: users.name,
+        userLastName: users.lastName,
         designation: pitchTeam.designation,
         hasApproved: pitchTeam.hasApproved,
       })
       .from(pitchTeam)
+      .innerJoin(users, eq(pitchTeam.userId, users.id))
       .where(eq(pitchTeam.pitchId, pitchId));
 
     // Combine pitch and team details

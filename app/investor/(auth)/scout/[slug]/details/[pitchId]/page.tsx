@@ -495,6 +495,8 @@ export default function PitchDetailsPage() {
     }, {} as Record<string, number>);
 
     const languageCount = teamMembers.reduce((acc, member) => {
+      if (!member.language) return acc;
+      if (member.language.length === 0) return acc;
       member.language.forEach((lang) => {
         acc[lang] = (acc[lang] || 0) + 1;
       });

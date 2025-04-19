@@ -17,10 +17,11 @@ import { usePitch } from "@/contexts/PitchContext";
 
 interface ApprovalRequest {
   id: string;
-  username: string;
+  userName: string;
+  userLastName: string;
   designation: string;
   date: string;
-  status: "approved" | "pending";
+  hasApproved: boolean;
   profile: {
     name: string;
     age: string;
@@ -33,98 +34,74 @@ interface ApprovalRequest {
   };
 }
 
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "approved":
-      return <Check className="h-5 w-5 text-green-500" />;
-    case "pending":
-      return <Clock className="h-5 w-5 text-yellow-500" />;
-    default:
-      return <MinusCircle className="h-5 w-5 text-muted-foreground" />;
-  }
+const getStatusIcon = (status: boolean) => {
+  if (status) return <Check className="h-5 w-5 text-green-500" />;
+  return <Clock className="h-5 w-5 text-yellow-500" />;
 };
 
-const initialApprovalRequests: ApprovalRequest[] = [
-  {
-    id: "1",
-    username: "John Smith",
-    designation: "Co-Founder & CTO",
-    date: formatDate("2024-03-20T14:30:00"),
-    status: "approved",
-    profile: {
-      name: "John Smith",
-      age: "30",
-      gender: "Male",
-      email: "john.smith@example.com",
-      phone: "1234567890",
-      location: "New York, NY",
-      language: ["English", "Tamil"],
-      designation: "Co-Founder & CTO",
-    },
-  },
-  {
-    id: "2",
-    username: "Sarah Johnson",
-    designation: "Product Lead",
-    date: formatDate("2024-03-19T10:15:00"),
-    status: "pending",
-    profile: {
-      name: "Sarah Johnson",
-      age: "28",
-      gender: "Female",
-      email: "sarah.johnson@example.com",
-      designation: "Product Lead",
-      phone: "0987654321",
-      language: ["English", "Spanish"],
-      location: "San Francisco, CA",
-    },
-  },
-  {
-    id: "3",
-    username: "Michael Chen",
-    designation: "Technical Advisor",
-    date: formatDate("2024-03-18T16:45:00"),
-    status: "approved",
-    profile: {
-      name: "Michael Chen",
-      age: "35",
-      gender: "Male",
-      email: "michael.chen@example.com",
-      phone: "0987654321",
-      designation: "Technical Advisor",
-      language: ["English", "Chinese"],
-      location: "San Francisco, CA",
-    },
-  },
-];
-
 export default function PitchPage() {
+  const [userId, setUserId] = useState("");
   const pathname = usePathname();
   const { toast } = useToast();
-  const { pitchId } = usePitch(); // Get pitchId from context
+  const [isLoading, setIsLoading] = useState(true);
+  const pitchId = pathname.split("/")[3];
   const [specificAsks, setSpecificAsks] = useState("");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>(
-    initialApprovalRequests
-  );
+  const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>([
+    {
+      id: "",
+      userName: "",
+      userLastName: "",
+      designation: " ",
+      date: formatDate("2024-03-18T16:45:00"),
+      hasApproved: true,
+      profile: {
+        name: "",
+        age: " ",
+        gender: " ",
+        email: " ",
+        phone: "",
+        designation: " ",
+        language: [""],
+        location: "",
+      },
+    },
+  ]);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentUserId] = useState("1"); // Demo: John Smith as current user
+  const [currentUserId] = useState("1"); // Demo: John Smith as current userName
 
   useEffect(() => {
     if (pitchId) {
       fetchTeamDetails();
     }
+    fetchUserId(); // Fetch user ID on component mount
   }, [pitchId]);
+
+  const fetchUserId = async () => {
+    try {
+      const response = await fetch("/api/endpoints/users/getId"); // Adjust the endpoint as needed
+      if (!response.ok) throw new Error("Failed to fetch user ID");
+      const data = await response.json();
+      setUserId(data.id); // Assuming the response contains the userId
+    } catch (error) {
+      console.error("Error fetching user ID:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load user ID",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchTeamDetails = async () => {
     try {
       const response = await fetch(
-        `/api/endpoints/pitch/founder/team?pitchId=${pitchId}`
+        `/api/endpoints/pitch/founder/pitch?pitchId=${pitchId}`
       );
       if (!response.ok) throw new Error("Failed to fetch team details");
       const data = await response.json();
-      setApprovalRequests(data); // Assuming the team data is in the response
+      setApprovalRequests(data.team); // Assuming the team data is in the response
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching team details:", error);
       toast({
@@ -153,6 +130,7 @@ export default function PitchPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
+          userId,
           askForInvestor: specificAsks,
           status: termsAccepted ? "pending" : "draft", // Update status based on terms
         }),
@@ -187,10 +165,7 @@ export default function PitchPage() {
       req.id === requestId
         ? {
             ...req,
-            status:
-              req.status === "approved"
-                ? ("pending" as "pending")
-                : ("approved" as "approved"),
+            status: req.hasApproved,
             date: formatDate(new Date().toISOString()),
           }
         : req
@@ -204,7 +179,7 @@ export default function PitchPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         pitchId,
-        userId: requestId, // Assuming requestId is the user's ID
+        userNameId: requestId, // Assuming requestId is the userName's ID
         hasApproved: true,
       }),
     });
@@ -267,8 +242,10 @@ export default function PitchPage() {
   };
 
   const totalMembers = approvalRequests.length;
+  console.log(approvalRequests);
+
   const approvedCount = approvalRequests.filter(
-    (req) => req.status === "approved"
+    (req) => req.hasApproved === true
   ).length;
 
   return (
@@ -282,7 +259,6 @@ export default function PitchPage() {
             <Textarea
               value={specificAsks}
               onChange={(e) => setSpecificAsks(e.target.value)}
-              onBlur={savePitchDetails} // Save on blur
               className="min-h-[100px] bg-muted/50 resize-none rounded-xl"
             />
           </div>
@@ -295,7 +271,6 @@ export default function PitchPage() {
               className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
               onCheckedChange={(checked: boolean) => {
                 setTermsAccepted(checked);
-                savePitchDetails(); // Save status change
               }}
             />
             <label
@@ -316,19 +291,22 @@ export default function PitchPage() {
             </div>
 
             <div>
-              {approvalRequests.map((member) => (
+              {approvalRequests.map((member, index) => (
                 <div
                   key={member.id}
                   className="flex items-center justify-between p-4 border rounded-lg bg-background"
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback>{member.username[0]}</AvatarFallback>
+                      <AvatarFallback>{index + 1}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-medium">{member.username}</p>
+                      <p className="text-sm font-medium">
+                        {member.userName} {member.userLastName}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {member.designation}
+                        {member.designation[0].toUpperCase()}
+                        {member.designation.slice(1)}
                       </p>
                     </div>
                   </div>
@@ -336,7 +314,7 @@ export default function PitchPage() {
                     className="flex items-center cursor-pointer"
                     onClick={() => handleApprovalToggle(member.id)}
                   >
-                    {getStatusIcon(member.status)}
+                    {getStatusIcon(member.hasApproved)}
                   </div>
                 </div>
               ))}
@@ -353,7 +331,7 @@ export default function PitchPage() {
           onClick={handlePitchSubmission}
           disabled={isLoading || !termsAccepted || approvedCount < totalMembers}
         >
-          {isLoading ? "Submitting..." : "Pitch Now"}
+          Pitch Now
         </Button>
 
         <Card className="p-4 border bg-muted/10">

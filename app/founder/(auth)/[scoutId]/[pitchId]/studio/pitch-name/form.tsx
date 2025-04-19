@@ -1,24 +1,15 @@
+"use client";
+
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import dynamic from "next/dynamic";
 import { useToast } from "@/hooks/use-toast";
-import { usePitch } from "@/contexts/PitchContext";
-
-const stages = [
-  "Idea",
-  "Prototyping To MVP",
-  "Product-Market Fit",
-  "Early Traction",
-  "Growth",
-];
-const sectors = ["AI", "Healthcare", "Blockchain", "Fintech", "E-commerce"];
+import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 const MapComponent = dynamic(() => import("@/components/map"), {
   ssr: false,
@@ -29,13 +20,27 @@ const MapComponent = dynamic(() => import("@/components/map"), {
   ),
 });
 
+const stages = [
+  "Idea",
+  "Prototyping To MVP",
+  "Product-Market Fit",
+  "Early Traction",
+  "Growth",
+];
+const sectors = [
+  "AI",
+  "Accounting Technology",
+  "Beauty Tech",
+  "Fintech",
+  "E-commerce",
+];
+const locationPattern = /^(.*?)[\/,\-\s]+(.*?)[\/,\-\s]+(.*?)$/;
+
 interface Location {
   country: string;
   state: string;
   city: string;
 }
-
-const locationPattern = /^(.*?)(?:[\/,\-\s]+)(.*?)(?:[\/,\-\s]+)(.*?)$/;
 
 function debounce(fn: Function, delay: number) {
   let timeout: ReturnType<typeof setTimeout>;
@@ -45,71 +50,56 @@ function debounce(fn: Function, delay: number) {
   };
 }
 
-export default function PitchNameForm({ pitchId }: { pitchId: string }) {
+export default function PitchNameForm() {
   const { toast } = useToast();
-
+  const pathname = usePathname();
+  const scoutId = pathname.split("/")[2];
+  const pitchId = pathname.split("/")[3];
   const [pitchName, setPitchName] = useState("");
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
   const [demoLink, setDemoLink] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [generatedPitchId, setGeneratedPitchId] = useState<string | null>(null);
-
+  const [locationInput, setLocationInput] = useState("");
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [location, setLocation] = useState<Location>({
     country: "",
     state: "",
     city: "",
   });
-  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
-  const [locationInput, setLocationInput] = useState("");
-
-  useEffect(() => {
-    fetchPitchDetails();
-  }, []);
 
   const fetchPitchDetails = async () => {
     try {
       const response = await fetch(
-        `/api/endpoints/pitch/founder/details?pitchId=${pitchId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        `/api/endpoints/pitch/founder/details?pitchId=${pitchId}`
       );
-      if (response.status !== 200)
-        throw new Error("Failed to fetch pitch details");
+      if (response.status !== 200) throw new Error("Failed to fetch pitch");
       const data = await response.json();
 
       setPitchName(data.pitchName || "");
-      setLocation({
-        country: data.location ? data.location.split("/")[0] : "",
-        state: data.location ? data.location.split("/")[1] : "",
-        city: data.location ? data.location.split("/")[2] : "",
-      });
-      setLocationInput(data.location || "");
       setDemoLink(data.demoLink || "");
       setSelectedStage(data.stage || null);
       setSelectedSectors(data.focusSectors || []);
 
       if (data.location) {
-        const query = data.location.split("/").reverse().join(", ");
-        const geoResponse = await fetch(
+        setLocationInput(data.location);
+        const [country, state, city] = data.location.split("/").reverse();
+        setLocation({ country, state, city });
+
+        const geoRes = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            query
+            `${city}, ${state}, ${country}`
           )}`
         );
-        const geoData = await geoResponse.json();
-        if (geoData && geoData[0]) {
+        const geoData = await geoRes.json();
+        if (geoData?.[0]) {
           setCoordinates([
             parseFloat(geoData[0].lat),
             parseFloat(geoData[0].lon),
           ]);
         }
       }
-    } catch (error) {
-      console.error("Error fetching pitch details:", error);
+    } catch (err) {
+      console.error(err);
       toast({
         title: "Error",
         description: "Failed to load pitch details",
@@ -118,17 +108,15 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
     }
   };
 
-  const handleLocationInput = async (value: string) => {
-    setLocationInput(value);
-    debounceLocation(value);
-  };
+  useEffect(() => {
+    fetchPitchDetails();
+  }, []);
 
   const debounceLocation = useCallback(
     debounce(async (value: string) => {
       const match = value.match(locationPattern);
       if (match) {
         const [, city, state, country] = match;
-
         setLocation({
           city: city.trim(),
           state: state.trim(),
@@ -137,82 +125,79 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
 
         try {
           const query = `${city}, ${state}, ${country}`;
-          const response = await fetch(
+          const geoRes = await fetch(
             `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
               query
             )}`
           );
-          const data = await response.json();
-
-          if (data && data[0]) {
-            setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+          const geoData = await geoRes.json();
+          if (geoData?.[0]) {
+            setCoordinates([
+              parseFloat(geoData[0].lat),
+              parseFloat(geoData[0].lon),
+            ]);
           }
-        } catch (error) {
-          console.error("Error fetching coordinates:", error);
+        } catch (err) {
+          console.error("Error fetching coordinates", err);
         }
       }
     }, 500),
     []
   );
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handleLocationInput = (value: string) => {
+    setLocationInput(value);
+    debounceLocation(value);
+  };
 
+  const autoSave = useCallback(async () => {
     const pitchData = {
       pitchName,
       location: locationInput || null,
       demoLink: demoLink || null,
       stage: selectedStage || null,
       focusSectors: selectedSectors,
+      pitchId,
+      scoutId,
     };
+    console.log("Auto-saving pitch data:", pitchData);
 
     try {
-      const url = "/api/endpoints/pitch/founder/details";
-
-      const response = await fetch(url, {
+      const response = await fetch("/api/endpoints/pitch/founder/details", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pitchData),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save pitch");
+        const err = await response.json();
+        throw new Error(err.error || "Failed to save");
       }
-
-      const result = await response.json();
-      const newPitchId = result.pitchId;
-      setGeneratedPitchId(newPitchId);
-
-      toast({
-        title: "Success",
-        description: `${result.message} (Pitch ID: ${newPitchId})`,
-      });
-    } catch (error: any) {
-      console.error("Error submitting pitch:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save pitch",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (err: any) {
+      console.error("Auto-save failed:", err.message);
     }
-  };
+  }, [
+    pitchName,
+    locationInput,
+    demoLink,
+    selectedStage,
+    selectedSectors,
+    pitchId,
+  ]);
 
   return (
     <Card className="w-full border-none bg-[#0e0e0e] mx-auto">
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="space-y-6">
           <div className="space-y-2">
             <Label>Pitch Name</Label>
             <Input
               type="text"
-              placeholder="Enter your pitch name (max 100 characters)"
               value={pitchName}
               maxLength={100}
               onChange={(e) => setPitchName(e.target.value)}
+              onBlur={autoSave}
+              placeholder="Enter your pitch name (max 100 characters)"
               className="rounded w-full"
             />
           </div>
@@ -223,6 +208,7 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
               placeholder="City/State/Country (e.g., San Francisco/California/USA)"
               value={locationInput}
               onChange={(e) => handleLocationInput(e.target.value)}
+              onBlur={autoSave}
             />
             <div className="w-full h-[400px] rounded-lg overflow-hidden border">
               <MapComponent coordinates={coordinates} />
@@ -234,9 +220,10 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
               <Label>Demo Link</Label>
               <Input
                 type="text"
-                placeholder="Enter your demo link"
                 value={demoLink}
                 onChange={(e) => setDemoLink(e.target.value)}
+                onBlur={autoSave}
+                placeholder="Enter your demo link"
               />
             </div>
             <div className="flex-1 space-y-2">
@@ -244,7 +231,10 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
               <Combobox
                 options={stages}
                 value={selectedStage}
-                onSelect={(value) => setSelectedStage(value)}
+                onSelect={(value) => {
+                  setSelectedStage(value);
+                  autoSave();
+                }}
                 placeholder="Select Stage"
               />
             </div>
@@ -256,42 +246,37 @@ export default function PitchNameForm({ pitchId }: { pitchId: string }) {
               options={sectors}
               onSelect={(value) => {
                 if (!selectedSectors.includes(value)) {
+                  console.log("Selected sector:", value);
                   setSelectedSectors([...selectedSectors, value]);
+                  autoSave();
                 }
+                console.log("Selected sector:", value);
+                setSelectedSectors((prev) => prev.filter((s) => s !== value));
+                setSelectedSectors([...selectedSectors, value]);
+                console.log("Selected sectors:", selectedSectors);
+
+                autoSave();
               }}
               placeholder="Add sectors"
             />
             <div className="flex flex-wrap gap-2 mt-3">
-              {selectedSectors.map((sector) => (
+              {selectedSectors.map((sector, index) => (
                 <Badge
-                  key={sector}
+                  key={index}
                   variant="secondary"
                   className="text-xs cursor-pointer hover:bg-muted"
-                  onClick={() =>
+                  onClick={() => {
                     setSelectedSectors((prev) =>
                       prev.filter((s) => s !== sector)
-                    )
-                  }
+                    );
+                    autoSave();
+                  }}
                 >
                   {sector} <X className="h-3 w-3 ml-1" />
                 </Badge>
               ))}
             </div>
           </div>
-
-          {generatedPitchId && (
-            <p className="text-sm text-muted-foreground">
-              Generated Pitch ID: {generatedPitchId}
-            </p>
-          )}
-
-          <Button
-            type="submit"
-            disabled={isLoading || !pitchName.trim()}
-            className="w-full"
-          >
-            {isLoading ? "Saving..." : "Submit"}
-          </Button>
         </form>
       </CardContent>
     </Card>

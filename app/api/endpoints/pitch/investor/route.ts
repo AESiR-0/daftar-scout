@@ -144,6 +144,26 @@ export async function GET(req: NextRequest) {
       .from(investorPitch)
       .innerJoin(users, eq(investorPitch.investorId, users.id))
       .where(eq(investorPitch.pitchId, pitchId));
+    // Fetch preferred languages for all team members
+    const userIds = teamMembers.map((member) => member.userId);
+
+    const filteredUserIds = userIds.filter((id): id is string => id !== null);
+
+    const userLangData = await db
+      .select({
+        userId: userLanguages.userId,
+        language: languages.language_name,
+      })
+      .from(userLanguages)
+      .innerJoin(languages, eq(userLanguages.languageId, languages.id))
+      .where(inArray(userLanguages.userId, filteredUserIds));
+
+    // Build a map of userId to list of language names
+    const languageMap: Record<string, string[]> = {};
+    userLangData.forEach(({ userId, language }) => {
+      if (!languageMap[userId]) languageMap[userId] = [];
+      languageMap[userId].push(language);
+    });
 
     // Combine data
     const response = {
@@ -169,7 +189,9 @@ export async function GET(req: NextRequest) {
         location: member.location || "Unknown",
         imageUrl: member.image,
         designation: member.designation,
+        languages: languageMap[member?.userId || ""] || [], // 👈 add this line
       })),
+
       fields: {
         investorsNote: investorAnalysis[0]?.note || "",
         documentation: documents.map((doc) => ({
