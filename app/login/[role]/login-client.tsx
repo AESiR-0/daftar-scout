@@ -33,7 +33,7 @@ export function LoginClient({ role }: { role: string }) {
         <p className="text-xl text-muted-foreground">
           {role === "investor"
             ? "Connecting you to the new startup economy by simplifying startup scouting"
-            : "Pitch your startup story in 120 seconds"}
+            : "Pitch your startup story in 2.5 minutes"}
         </p>
 
         {/* <video className="w-full rounded-lg border shadow-sm" controls>
