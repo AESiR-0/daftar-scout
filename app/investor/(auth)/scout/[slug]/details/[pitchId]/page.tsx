@@ -601,6 +601,10 @@ export default function PitchDetailsPage() {
             <Card className="border-none bg-[#0e0e0e]">
               <CardContent>
                 <div className="grid grid-cols-2 gap-8">
+                  <div>
+                  <h3 className="text-lg font-medium mb-4">
+                          Team Members ({pitchDetails.teamMembers.length})
+                        </h3>
                   <div className=" grid grid-cols-2 gap-5 ">
                     {pitchDetails.teamMembers.map((member) => {
                       const transformedMember: TeamMember = {
@@ -624,16 +628,11 @@ export default function PitchDetailsPage() {
                       );
                     })}
                   </div>
+                  </div>
                   {/* agregate data */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4 mt-[2.75rem]">
                     <div className=" space-y-6">
                       <div>
-                        <h3 className="text-lg font-medium mb-4">
-                          Team Members ({pitchDetails.teamMembers.length}) |{" "}
-                          <span className="text-muted-foreground">
-                            Average Age: {averageAge.toFixed(1)}
-                          </span>
-                        </h3>
                         <div className="space-y-6">
                           <Card className="border-none bg-[#1a1a1a] p-4">
                             <h4 className="text-sm font-medium mb-2">
@@ -646,7 +645,10 @@ export default function PitchDetailsPage() {
                         </div>
                       </div>
                     </div>
-                    <div className=" mt-[4.5rem]">
+                    <div className="">
+                    <Card  className="border-none bg-[#1a1a1a] p-4 mb-2">
+                            Average Age: {averageAge.toFixed(1)}
+                          </Card>
                       <Card className="border-none bg-[#1a1a1a] p-4">
                         <h4 className="text-sm font-medium mb-4">
                           Preferred Languages to Connect with Investors

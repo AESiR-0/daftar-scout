@@ -264,22 +264,22 @@ export default function PitchPage() {
           </div>
 
           {/* Team Approvals Section */}
-          <div className="flex items-center mt-4 px-1 space-x-2 mb-4">
+          <div className="flex items-start mt-4 px-1 space-x-2 mb-4">
             <Checkbox
               id="terms"
               checked={termsAccepted}
-              className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+              className="h-5 w-5 border-2 mt-1 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
               onCheckedChange={(checked: boolean) => {
                 setTermsAccepted(checked);
               }}
             />
             <label
               htmlFor="terms"
-              className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="text-sm text-muted-foreground leading-1 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              I confirm that this pitch is ready for team approval and
-              submission and We have sound-checked and double checked the
-              videos.
+              I have checked the message and the pitch. It does not include nudity, bad language, false claims, scams or fraud, copying someone else's work, threats, hate, offensive content, illegal activity, bullying, fake videos, or wrong information.
+If any of these are found, your data can be removed, and legal action may be taken by investors or authorities as per your country’s rules.
+By sharing this, you accept full responsibility for your content and agree to keep it honest and respectful.
             </label>
           </div>
 
@@ -325,7 +325,7 @@ export default function PitchPage() {
       </div>
 
       {/* Right Section: Action & Errors */}
-      <div className="w-1/3 pl-6 space-y-6">
+      <div className="w-1/3 pl-6 pt-1 space-y-6">
         <Button
           className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
           size="lg"
