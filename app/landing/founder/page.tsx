@@ -6,6 +6,7 @@ import { useState } from "react"
 
 export default function FounderPage() {
   const [selectedQuestion, setSelectedQuestion] = useState("problem")
+  const [selectedLanguage, setSelectedLanguage] = useState("Hindi")
 
   const questions = [
     { id: "problem", title: "Introduce yourself", question: "Introduce yourself" },
@@ -16,6 +17,21 @@ export default function FounderPage() {
     { id: "help", title: "What challenges are you facing, and what support do you need", question: "What challenges are you facing, and what support do you need" },
   ]
 
+  const languages = [
+    "Hindi",
+    "Kannada",
+    "Bengali",
+    "Pahadi",
+    "Nepali",
+    "Assamese",
+    "Gujarati",
+    "English",
+    "Sindhi",
+    "Punjabi",
+    "Urdu",
+    "Odia",
+  ]
+
   return (
     <div className="flex flex-col items-center h-full px-4 py-12">
       {/* Main Content */}
@@ -23,10 +39,10 @@ export default function FounderPage() {
         {/* Hero Section */}
         <div className="space-y-6 text-center">
           <h1 className="text-7xl font-light tracking-tight">
-          Startup Pitching, Simplified
+            Startup Pitching, Simplified
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-          Pitch your startup idea to investors in 2.5 mins, in the language <br/> you are most comfortable with
+            Pitch your startup idea to investors in 2.5 mins, in the language <br/> you are most comfortable with
           </p>
         </div>
 
@@ -45,104 +61,62 @@ export default function FounderPage() {
           <div className="absolute z-[-10] -bottom-10 left-20 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl" />
         </div>
         <div className="text-left">
-        <h1 className="text-3xl font-semibold">Sample Startup Pitches</h1>
+          <h1 className="text-3xl font-semibold">Sample Startup Pitches</h1>
         
-        {/* 3 Column Layout */}
-        <div className="grid grid-cols-12 gap-6 mt-10">
-          {/* Language Column */}
-          <div className="col-span-2 space-y-4">
-            <h3 className="text-lg font-semibold">Languages</h3>
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Hindi</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Hindi</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Kanada</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Bengali</span>
-              </div>
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Pahadi</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Napleese</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Assamese</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Gujarati</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">English</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">English</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Sindhi</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Punjabi</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Urdu</span>
-              </div> 
-              <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-muted cursor-pointer">
-                <span className="text-sm">Odia</span>
-              </div> 
-              </div>
-          </div>
-
-          {/* Video Preview Column */}
-          <div className="col-span-6">
-            <Card className="overflow-hidden border-0 h-[700px] bg-muted/50">
-              <div className="aspect-[9/16] relative">
-                <div className="absolute inset-0 flex items-center justify-center h-full w-full">
-                  <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="white"
-                      className="w-8 h-8"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+          {/* 3 Column Layout */}
+          <div className="grid grid-cols-12 gap-6 mt-10">
+            {/* Language Column */}
+            <div className="col-span-2 space-y-4">
+              <h3 className="text-lg font-semibold">Languages</h3>
+              <div className="space-y-2">
+                {languages.map((language) => (
+                  <div
+                    key={language}
+                    className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                      selectedLanguage === language ? 'text-blue-600' : 'hover:bg-muted'
+                    }`}
+                    onClick={() => setSelectedLanguage(language)}
+                  >
+                    <span className="text-sm">{language}</span>
                   </div>
-                </div>
+                ))}
               </div>
-            </Card>
-          </div>
+            </div>
 
-          {/* Questions Column */}
-          <div className="col-span-4 space-y-4">
-            <h3 className="text-lg font-semibold">Investor's Questions</h3>
-            <div className="space-y-2">
-              {questions.map((q) => (
-                <div
-                  key={q.id}
-                  className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                    selectedQuestion === q.id ? 'text-blue-600' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setSelectedQuestion(q.id)}
-                >
-                  <span className="text-sm">{q.title}</span>
+            {/* Video Preview Column */}
+            <div className="col-span-6">
+              <Card className="overflow-hidden border-0 bg-muted/50">
+                <div className="aspect-[9/16] max-h-[700px] w-full flex items-center justify-center">
+                  <video
+                    src="/videos/sample-pitch.mp4" // Placeholder; replace with actual video
+                    poster="/assets/video-poster.jpg" // Optional poster image
+                    controls
+                    className="w-full h-full object-cover rounded-[0.35rem]"
+                  />
                 </div>
-              ))}
+              </Card>
+            </div>
+
+            {/* Questions Column */}
+            <div className="col-span-4 space-y-4">
+              <h3 className="text-lg font-semibold">Investor's Questions</h3>
+              <div className="space-y-2">
+                {questions.map((q) => (
+                  <div
+                    key={q.id}
+                    className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                      selectedQuestion === q.id ? 'text-blue-600' : 'hover:bg-muted'
+                    }`}
+                    onClick={() => setSelectedQuestion(q.id)}
+                  >
+                    <span className="text-sm">{q.title}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-        </div>
-        
       </div>
     </div>
   )
-} 
+}

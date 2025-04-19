@@ -53,7 +53,7 @@ export function Combobox({ options, value, onSelect, placeholder = "Select optio
                     <CommandEmpty >
                         <span className="text-muted-foreground">No option found.</span>
                     </CommandEmpty>
-                    <ScrollArea className="max-h-[200px]">
+                    <ScrollArea className=" -h-[200px]">
                         <CommandGroup className="bg-[#0e0e0e]">
                             <CommandList>
                                 {options.map((option) => (

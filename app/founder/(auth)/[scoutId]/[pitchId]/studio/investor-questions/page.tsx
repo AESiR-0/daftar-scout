@@ -12,7 +12,7 @@ import {
 } from "@/lib/actions/video";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
-import { usePitch } from "@/contexts/PitchContext"; // Assuming scoutId is part of PitchContext
+import { usePitch } from "@/contexts/PitchContext";
 
 interface Question {
   id: number;
@@ -29,9 +29,7 @@ export default function InvestorQuestionsPage() {
   const scoutId = pathname.split("/")[2];
   const pitchId = pathname.split("/")[3];
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
-    null
-  );
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [language, setLanguage] = useState("English");
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -58,11 +56,11 @@ export default function InvestorQuestionsPage() {
       const fetchedQuestions: Question[] = data.map((q: any) => ({
         id: q.id,
         question: q.scoutQuestion,
-        videoUrl: q.answerUrl || "", // ✅ uses founder answer or sample fallback
+        videoUrl: q.answerUrl || "",
         scoutId: q.scoutId,
         language: q.answerLanguage || "English",
         isCustom: q.isCustom,
-        isSample: !q.answerUrl, // ✅ true if it’s just a sample
+        isSample: !q.answerUrl,
       }));
 
       setQuestions(fetchedQuestions);
@@ -109,7 +107,6 @@ export default function InvestorQuestionsPage() {
       const url = await uploadAnswersPitchVideo(file, pitchId, scoutId);
       setPreviewUrl(url);
 
-      // ✅ POST to backend
       const postRes = await fetch("/api/endpoints/pitch/founder/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -242,21 +239,26 @@ export default function InvestorQuestionsPage() {
               </div>
             </div>
             <div className="w-1/2">
-              <ScrollArea className="h-[calc(100vh-16rem)]">
-                <div className="space-y-2 mt-4 pr-4">
-                  {questions.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleQuestionSelect(item)}
-                      className={`px-1 rounded-[0.35rem] py-1 cursor-pointer hover:underline transition-colors ${
-                        selectedQuestion?.id === item.id ? "bg-muted/50" : ""
-                      }`}
-                    >
-                      <h3 className="text-sm font-medium">{item.question}</h3>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Investor's Questions</h3>
+                <ScrollArea className="h-[calc(100vh-16rem)]">
+                  <div className="space-y-2">
+                    {questions.map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => handleQuestionSelect(item)}
+                        className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                          selectedQuestion?.id === item.id
+                            ? "text-blue-600"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <span className="text-sm">{item.question}</span>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
             </div>
           </div>
         )}

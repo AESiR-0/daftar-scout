@@ -28,51 +28,49 @@ const questionsData = {
   defaultQuestions: [
     {
       id: 1,
-      question: "Introduce yourself",
+      question: "Introduce yourself and the problem you are solving",
       videoUrl: "/videos/problem.mp4",
       previewImage:
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 2,
-      question: "How did you come up with the idea",
+      question: "What are you building",
       videoUrl: "/videos/market.mp4",
       previewImage:
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 3,
-      question:
-        "What is the problem are you solving, and why is it really important for you to solve it",
-      videoUrl: "videos/solution.mp4",
+      question: "Why do you really want to solve the problem",
+      videoUrl: "/videos/solution.mp4",
       previewImage:
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 4,
-      question: "Who are your customers, and why would they pay for it",
+      question: "Who are your customers, and how are they dealing with this problem today",
       videoUrl: "/videos/customer.mp4",
       previewImage:
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 5,
-      question:
-        "How much have you worked on your startup, and where do you see it in 3 years",
+      question: "Why will your customers switch from competitors to your product",
       videoUrl: "/videos/business.mp4",
       previewImage:
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 6,
-      question: "What challenges are you facing, and what support do you need",
+      question: "How will you make money",
       videoUrl: "/videos/team.mp4",
       previewImage:
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 7,
-      question: "Why should investors believe in your vision?",
+      question: "What is the growth here (development, traction, or revenue), and challenges you are facing",
       videoUrl: "/videos/vision.mp4",
       previewImage:
         "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
@@ -84,9 +82,7 @@ export default function InvestorStudioPage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
   const { toast } = useToast();
-  const [selectedOption, setSelectedOption] = useState<
-    "sample" | "custom" | null
-  >(null);
+  const [selectedOption, setSelectedOption] = useState<"sample" | "custom">("sample");
   const [customQuestions, setCustomQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question>(
     questionsData.defaultQuestions[0]
@@ -127,25 +123,10 @@ export default function InvestorStudioPage() {
 
     fetchQuestions();
   }, [scoutId]);
-  const [disabled, setDisabled] = useState(true);
-  useEffect(() => {
-    if (selectedOption === "custom") {
-      let count = 0;
-      customQuestions.forEach((q) => {
-        if (q.question === "") {
-          count++;
-        }
-      });
-      if (count === 0) {
-        console.log("All questions filled", count);
-        setDisabled(false);
-      }
-    }
-  }, [customQuestions]);
 
   const handleOptionChange = (option: "sample" | "custom") => {
     if (selectedOption === option) {
-      setSelectedOption(null);
+      setSelectedOption("sample"); // Default to sample if unchecking current option
     } else {
       setSelectedOption(option);
       if (option === "custom" && customQuestions.length === 0) {
@@ -166,12 +147,7 @@ export default function InvestorStudioPage() {
       selectedOption === "custom" &&
       customQuestions.every((q) => q.question.trim() === "")
     ) {
-      toast({
-        title: "No questions entered",
-        description: "Please enter at least one custom question",
-        variant: "destructive",
-      });
-      return;
+      return; // Skip save if all custom questions are empty
     }
 
     const payload: Partial<Question>[] =
@@ -198,10 +174,10 @@ export default function InvestorStudioPage() {
       });
 
       if (res.status === 200 || res.status === 201) {
-        toast({
-          title: "Questions saved",
-          description: "Your screening questions have been updated",
-        });
+        // toast({
+        //   title: "Questions saved",
+        //   description: "Your screening questions have been updated",
+        // });
       } else {
         toast({
           title: "Error saving questions",
@@ -213,6 +189,11 @@ export default function InvestorStudioPage() {
       console.error("Error saving questions:", error);
     }
   };
+
+  // Auto-save when selectedOption or customQuestions change
+  useEffect(() => {
+    handleSaveQuestions();
+  }, [selectedOption, customQuestions]);
 
   return (
     <div className="min-h-screen px-8 text-white">
@@ -248,12 +229,12 @@ export default function InvestorStudioPage() {
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
-                    className="bg-[#2a2a2a] hover:bg-gray-600 border-gray-600 text-white"
+                    className="bg-[#2a2a2a] hover:bg-gray-600 rounded-[0.35rem] border-gray-600 text-white"
                   >
-                    See Sample Questions
+                    Sample Pitch
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl bg-[#1a1a1a] border-gray-700 text-white">
+                <DialogContent className="max-w-5xl bg-[#1a1a1a] border-gray-700 text-white">
                   <DialogHeader>
                     <DialogTitle>Sample Screening Questions</DialogTitle>
                   </DialogHeader>
@@ -280,9 +261,9 @@ export default function InvestorStudioPage() {
                         {questionsData.defaultQuestions.map((question) => (
                           <div
                             key={question.id}
-                            className={`p-3 rounded-md cursor-pointer hover:bg-gray-700 transition-colors ${
+                            className={`px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors ${
                               selectedQuestion.id === question.id
-                                ? "bg-gray-700"
+                                ? "text-blue-600"
                                 : ""
                             }`}
                             onClick={() => setSelectedQuestion(question)}
@@ -307,13 +288,6 @@ export default function InvestorStudioPage() {
                       ? "Sample Questions"
                       : "Custom Questions"}
                   </h3>
-                  <Button
-                    onClick={handleSaveQuestions}
-                    disabled={disabled}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    Save Questions
-                  </Button>
                 </div>
                 <div className="space-y-4">
                   {selectedOption === "sample"

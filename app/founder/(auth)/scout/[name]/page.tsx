@@ -98,18 +98,15 @@ export default function Page() {
   return (
     <>
       <div className="space-y-6 container mx-auto px-10 py-8">
-        <ScrollArea className="h-[calc(100vh-8rem)]">
-          <div className="space-y-6 flex">
-            <div className="flex-1">
-              <div className="flex justify-center">
-                <div className="relative aspect-video h-[24rem]">
+          <div className="flex gap-6">
+            <Card className="flex-1 p-4">
+                <div className="relative aspect-video w-full">
                   <video
                     src={transformedScout.videoUrl}
                     controls
                     className="w-full h-full object-cover rounded-[0.35rem]"
                   />
                 </div>
-              </div>
 
               <div className="mt-8">
                 <div className="flex items-center justify-between">
@@ -141,11 +138,11 @@ export default function Page() {
                   </p>
                 </div>
               </div>
-            </div>
+            </Card>
 
-            <div className="w-[400px] pl-6">
+            <div className="w-[400px]">
               <Tabs defaultValue="details" className="space-y-4">
-                <TabsList className="grid grid-cols-3 gap-2 bg-[#0e0e0e] p-2 rounded-[0.35rem]">
+                <TabsList className="grid grid-cols-3 gap-2 bg-[#0e0e0e] px-2 rounded-[0.35rem]">
                   <TabsTrigger
                     value="details"
                     className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50"
@@ -257,7 +254,6 @@ export default function Page() {
               </Tabs>
             </div>
           </div>
-        </ScrollArea>
       </div>
 
       <SelectDaftarDialog
