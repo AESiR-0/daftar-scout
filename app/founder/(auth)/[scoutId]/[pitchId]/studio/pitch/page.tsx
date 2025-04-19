@@ -278,7 +278,8 @@ export default function PitchPage() {
               className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               I confirm that this pitch is ready for team approval and
-              submission
+              submission and We have sound-checked and double checked the
+              videos.
             </label>
           </div>
 
