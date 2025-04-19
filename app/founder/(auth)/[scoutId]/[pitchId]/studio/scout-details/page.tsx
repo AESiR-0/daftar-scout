@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,6 +10,7 @@ import { ShareButton } from "@/components/share-button";
 import { SelectDaftarDialog } from "@/components/dialogs/create-pitch-dialog";
 import { InvestorProfile } from "@/components/InvestorProfile";
 import { StudioCard } from "../components/layout/studio-card";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Types
 interface Faq {
@@ -22,14 +24,13 @@ interface Update {
 }
 
 interface Collaboration {
-  daftarName?: string;
-  name: string;
+  daftarName: string;
   structure: string;
   website: string;
   location: string;
   onDaftarSince: string;
   bigPicture: string;
-  image: string;
+  image?: string;
 }
 
 interface ScoutDetails {
@@ -45,7 +46,7 @@ interface ScoutData {
   scout: ScoutDetails;
   faqs: Faq[];
   updates: Update[];
-  collaboration: Collaboration[]; // Note: changed to array
+  collaboration: Collaboration[];
   lastDayToPitch: string;
 }
 
@@ -100,7 +101,7 @@ export default function Page() {
     fetchScoutDetails();
   }, [name]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="text-white p-10">Loading...</div>;
   if (error || !scoutData) return <ErrorPage />;
 
   const {
@@ -115,145 +116,171 @@ export default function Page() {
     <StudioCard>
       <div className="space-y-6 container mx-auto px-10 py-8">
         <ScrollArea className="h-[calc(100vh-8rem)]">
-          <div className="space-y-6 w-full flex">
+          <div className="space-y-6 flex">
             {/* Video Section */}
-            <div>
-              <div className="flex justify-center">
-                <div className="relative aspect-video h-[24rem]">
+            <div className="flex-1">
+            <Card className="flex-1 p-4">
+                <div className="relative aspect-video w-full">
                   <video
                     src={scout.videoUrl}
                     controls
                     className="w-full h-full object-cover rounded-[0.35rem]"
                   />
                 </div>
-              </div>
 
-              {/* Title and Actions Section */}
               <div className="mt-8">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold">{scout.title}</h1>
+                  <h1 className="text-2xl font-bold text-white">
+                    {scout.title}
+                  </h1>
                   <div className="flex text-md items-center gap-4">
                     <ShareButton
                       title={scout.title}
                       description={scout.description}
                     />
+                    <Button
+                      className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"
+                      onClick={() => setShowDaftarDialog(true)}
+                    >
+                      Pitch Now
+                    </Button>
                   </div>
                 </div>
 
-                {/* Collaboration Section */}
                 <div className="mt-2 space-y-2">
-                  <p className="text-sm font-semibold">Collaboration:</p>
-                  {Array.isArray(collaboration) && collaboration.length > 0 ? (
-                    collaboration.map((collab, index) => (
-                      <InvestorProfile
-                        key={index}
-                        investor={{
-                          ...collab,
-                          daftarName: collab.name,
-                        }}
-                      />
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground text-sm">
-                      No collaboration data available.
-                    </p>
-                  )}
+                  <div className="text-sm text-muted-foreground">
+                    Collaboration:{" "}
+                    {collaboration.length > 0 ? (
+                      <InvestorProfile investor={collaboration[0]} />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No collaboration available.</p>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground font-bold">
+                    Last date for pitch:{" "}
+                    {new Date(lastDayToPitch).toDateString()}
+                  </p>
                 </div>
-
-                <p className="text-xs text-muted-foreground font-bold">
-                  Last date for pitch: {lastDayToPitch}
-                </p>
               </div>
+            </Card>
             </div>
-          </div>
 
-          <div className="ml-6 pl-3 h-full">
             {/* Tabs Section */}
-            <Tabs defaultValue="details" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="faqs" className="flex items-center gap-1">
-                  FAQs
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
-                    {faqs.length}
-                  </span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="updates"
-                  className="flex items-center gap-1"
-                >
-                  Updates
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
-                    {updates.length}
-                  </span>
-                </TabsTrigger>
-              </TabsList>
+            <div className="w-[400px] pl-6">
+              <Tabs defaultValue="details" className="space-y-4">
+                <TabsList className="grid grid-cols-3 gap-2 bg-[#0e0e0e] p-2 rounded-[0.35rem]">
+                  <TabsTrigger
+                    value="details"
+                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50"
+                  >
+                    Details
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="faqs"
+                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50 flex items-center gap-1"
+                  >
+                    FAQs
+                    <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
+                      {faqs.length}
+                    </span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="updates"
+                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50 flex items-center gap-1"
+                  >
+                    Updates
+                    <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
+                      {updates.length}
+                    </span>
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="details" className="border-l-4 px-5 py-5">
-                <div className="p-2 pt-0 space-y-3">
-                  {scout.details &&
-                    Object.entries(scout.details).map(([key, value]) => (
-                      <div key={key} className="rounded-[0.35rem]">
-                        <p className="text-sm text-muted-foreground">
-                          {key}: <span className="font-medium">{value}</span>
-                        </p>
-                      </div>
-                    ))}
-                </div>
-              </TabsContent>
+                <TabsContent value="details">
+                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                    <div className="grid grid-cols-1 gap-4">
+                      {scout.details &&
+                        Object.entries(scout.details).map(([key, value]) => (
+                          <div
+                            key={key}
+                            className="flex justify-between items-center py-2 border-b border-muted/20 last:border-b-0"
+                          >
+                            <span className="text-sm font-medium text-white">
+                              {key}
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              {value}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  </Card>
+                </TabsContent>
 
-              <TabsContent value="faqs" className="border-l-4 px-5 py-5">
-                <div className="space-y-4">
-                  {faqs.length > 0 ? (
-                    faqs.map((faq, index) => (
-                      <div key={index} className="space-y-2">
-                        <h3 className="text-muted-foreground font-semibold">
-                          {faq.faqQuestion}
-                        </h3>
+                <TabsContent value="faqs">
+                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                    <div className="space-y-4">
+                      {faqs.length > 0 ? (
+                        faqs.map((faq, index) => (
+                          <div key={index} className="space-y-2">
+                            <h3 className="text-sm font-semibold text-white">
+                              {faq.faqQuestion}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {faq.faqAnswer}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
                         <p className="text-sm text-muted-foreground">
-                          {faq.faqAnswer}
+                          No FAQs available.
                         </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No FAQs available.
-                    </p>
-                  )}
-                </div>
-              </TabsContent>
+                      )}
+                    </div>
+                  </Card>
+                </TabsContent>
 
-              <TabsContent value="updates" className="border-l-4 px-5 py-5">
-                <div className="space-y-2">
-                  {updates.length > 0 ? (
-                    updates.map((update, index) => (
-                      <div
-                        key={index}
-                        className="p-4 pb-0 pt-0 rounded-[0.35rem]"
-                      >
+                <TabsContent value="updates">
+                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                    <div className="space-y-6">
+                      {updates.length > 0 ? (
+                        updates.map((update, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-4 relative"
+                          >
+                            <div className="flex flex-col items-center">
+                              <div className="w-3 h-3 bg-blue-500 rounded-full" />
+                              {index < updates.length - 1 && (
+                                <div className="w-0.5 bg-muted/50 flex-1 mt-2" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(update.updateDate).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  }
+                                )}
+                              </p>
+                              <p className="text-sm text-white mt-1">
+                                {update.updateInfo}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
                         <p className="text-sm text-muted-foreground">
-                          {new Date(update.updateDate).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            }
-                          )}
+                          No updates available.
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          {update.updateInfo}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No updates available.
-                    </p>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
+                      )}
+                    </div>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </ScrollArea>
       </div>

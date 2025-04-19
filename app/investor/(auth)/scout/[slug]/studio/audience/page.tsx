@@ -125,7 +125,7 @@ const AudienceSchema = z.object({
   scoutCommunity: z.string().optional().default(""),
   targetedGender: z.string().optional().default(""),
   scoutStage: z.string().optional().default(""),
-  scoutSector: z.string().optional().default(""),
+  scoutSector: z.array(z.string()).optional().default([]),
   targetAudAgeStart: z.number().optional().default(18),
   targetAudAgeEnd: z.number().optional().default(65),
 });
@@ -156,7 +156,7 @@ export default function AudiencePage() {
   const [scoutCommunity, setScoutCommunity] = useState<string>("auto-rickshaw");
   const [targetedGender, setTargetedGender] = useState<string>("");
   const [scoutStage, setScoutStage] = useState<string>("");
-  const [scoutSector, setScoutSector] = useState<string>("");
+  const [scoutSector, setScoutSector] = useState<string[]>([]);
   const [targetAudAgeStart, setTargetAudAgeStart] = useState<number>(18);
   const [targetAudAgeEnd, setTargetAudAgeEnd] = useState<number>(65);
 
@@ -168,7 +168,7 @@ export default function AudiencePage() {
   const [tempTargetedGender, setTempTargetedGender] =
     useState<string>(targetedGender);
   const [tempScoutStage, setTempScoutStage] = useState<string>(scoutStage);
-  const [tempScoutSector, setTempScoutSector] = useState<string>(scoutSector);
+  const [tempScoutSector, setTempScoutSector] = useState<string[]>(scoutSector);
   const [tempAgeRange, setTempAgeRange] = useState<[number, number]>([
     targetAudAgeStart,
     targetAudAgeEnd,
@@ -190,7 +190,7 @@ export default function AudiencePage() {
       setScoutCommunity(parsed.scoutCommunity || "");
       setTargetedGender(parsed.targetedGender || "");
       setScoutStage(parsed.scoutStage || "");
-      setScoutSector(parsed.scoutSector || "");
+      setScoutSector(parsed.scoutSector || []);
       setTargetAudAgeStart(parsed.targetAudAgeStart || 18);
       setTargetAudAgeEnd(parsed.targetAudAgeEnd || 65);
 
@@ -198,7 +198,7 @@ export default function AudiencePage() {
       setTempScoutCommunity(parsed.scoutCommunity || "");
       setTempTargetedGender(parsed.targetedGender || "");
       setTempScoutStage(parsed.scoutStage || "");
-      setTempScoutSector(parsed.scoutSector || "");
+      setTempScoutSector(parsed.scoutSector || []);
       setTempAgeRange([
         parsed.targetAudAgeStart || 18,
         parsed.targetAudAgeEnd || 65,
@@ -344,11 +344,20 @@ export default function AudiencePage() {
     setOpenFilters(false);
   };
 
+  // Handle multi-select for sectors
+  const handleSectorSelect = (value: string) => {
+    setTempScoutSector((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
+
   const clearFilters = () => {
     setTempScoutCommunity("");
     setTempTargetedGender("");
     setTempScoutStage("");
-    setTempScoutSector("");
+    setTempScoutSector([]);
     setTempAgeRange([18, 65]);
   };
 
@@ -373,7 +382,7 @@ export default function AudiencePage() {
         <div>
           <Dialog open={openFilters} onOpenChange={setOpenFilters}>
             <DialogTrigger asChild>
-              <Button variant="outline">Edit Audience Filters</Button>
+              <Button variant="outline" className="rounded-[0.35rem">Edit Audience Filters</Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
@@ -381,14 +390,13 @@ export default function AudiencePage() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div>
-                  <Label>Community</Label>
                   <Combobox
                     options={communitiesData.map(
                       (community) => community.value
                     )}
                     value={tempScoutCommunity}
                     onSelect={(value) => setTempScoutCommunity(value)}
-                    placeholder="Select a community"
+                    placeholder="Select a Community"
                   />
                 </div>
                 <div className="flex gap-4">
@@ -405,31 +413,28 @@ export default function AudiencePage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <Label>Gender</Label>
                     <Combobox
                       options={genders.map((gender) => gender.value)}
                       value={tempTargetedGender}
                       onSelect={(value) => setTempTargetedGender(value)}
-                      placeholder="Select a gender"
+                      placeholder="Select a Gender"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label>Stage</Label>
                   <Combobox
                     options={stages.map((stage) => stage.value)}
                     value={tempScoutStage}
                     onSelect={(value) => setTempScoutStage(value)}
-                    placeholder="Select a stage"
+                    placeholder="Select a Stage"
                   />
                 </div>
                 <div>
-                  <Label>Sector</Label>
                   <Combobox
                     options={sectors.map((sector) => sector.value)}
-                    value={tempScoutSector}
-                    onSelect={(value) => setTempScoutSector(value)}
-                    placeholder="Select a sector"
+                    value={tempScoutSector.join(", ")}
+                    onSelect={(value) => handleSectorSelect(value)}
+                    placeholder="Select Sectors"
                   />
                 </div>
               </div>
@@ -437,7 +442,7 @@ export default function AudiencePage() {
                 <Button variant="outline" onClick={clearFilters}>
                   Clear Filters
                 </Button>
-                <Button onClick={applyFilters}>Apply</Button>
+                <Button variant="outline" className="bg-blue-500" onClick={applyFilters}>Apply</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
