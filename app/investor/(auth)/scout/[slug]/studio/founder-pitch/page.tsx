@@ -88,6 +88,27 @@ export default function InvestorStudioPage() {
     questionsData.defaultQuestions[0]
   );
   const [questionsOpen, setQuestionsOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
+
+  // Sample languages and questions for the new dialog section
+  const languages = [
+    "Hindi",
+    "Kannada",
+    "Bengali",
+    "Pahadi",
+    "Nepali",
+    "Assamese",
+    "Gujarati",
+    "English",
+    "Sindhi",
+    "Punjabi",
+    "Urdu",
+    "Odia",
+  ]
+  const questions = questionsData.defaultQuestions.map((q) => ({
+    id: q.id,
+    title: q.question,
+  }));
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -234,46 +255,59 @@ export default function InvestorStudioPage() {
                     Sample Pitch
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-5xl bg-[#1a1a1a] border-gray-700 text-white">
+                <DialogContent className="max-w-5xl max-h-[90%] bg-[#1a1a1a] border-gray-700 text-white">
                   <DialogHeader>
                     <DialogTitle>Sample Screening Questions</DialogTitle>
                   </DialogHeader>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
-                    <div className="space-y-4">
-                      <div className="aspect-video bg-[#0e0e0e] rounded-[0.35rem] overflow-hidden">
-                        {selectedQuestion.videoUrl ? (
-                          <video
-                            src={selectedQuestion.videoUrl}
-                            poster={selectedQuestion.previewImage}
-                            className="w-full h-full object-cover"
-                            controls
-                          />
-                        ) : (
-                          <div className="h-full flex items-center justify-center text-gray-400">
-                            Select a question to view sample response
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-400">Sample Response</p>
-                    </div>
-                    <div className="space-y-2">
-                      <ScrollArea className="h-[300px] pr-4">
-                        {questionsData.defaultQuestions.map((question) => (
+                  <div className="grid grid-cols-12 gap-6 mt-10">
+                    {/* Language Column */}
+                    <div className="col-span-2 space-y-4">
+                      <h3 className="text-lg font-semibold">Languages</h3>
+                      <div className="space-y-2">
+                        {languages.map((language) => (
                           <div
-                            key={question.id}
-                            className={`px-3 py-2 rounded-md cursor-pointer hover:bg-muted transition-colors ${
-                              selectedQuestion.id === question.id
-                                ? "text-blue-600"
-                                : ""
+                            key={language}
+                            className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                              selectedLanguage === language ? 'text-blue-600' : 'hover:bg-muted'
                             }`}
-                            onClick={() => setSelectedQuestion(question)}
+                            onClick={() => setSelectedLanguage(language)}
                           >
-                            <p className="text-sm font-medium">
-                              {question.question}
-                            </p>
+                            <span className="text-sm">{language}</span>
                           </div>
                         ))}
-                      </ScrollArea>
+                      </div>
+                    </div>
+
+                    {/* Video Preview Column */}
+                    <div className="col-span-6">
+                      <Card className="overflow-hidden border-0 bg-muted/50">
+                        <div className="aspect-[9/16] max-h-[500px] w-full flex items-center justify-center">
+                          <video
+                            src="/videos/sample-pitch.mp4"
+                            poster="/assets/video-poster.jpg"
+                            controls
+                            className="w-full h-full object-cover rounded-[0.35rem]"
+                          />
+                        </div>
+                      </Card>
+                    </div>
+
+                    {/* Questions Column */}
+                    <div className="col-span-4 space-y-4">
+                      <h3 className="text-lg font-semibold">Investor's Questions</h3>
+                      <div className="space-y-2">
+                        {questions.map((q) => (
+                          <div
+                            key={q.id}
+                            className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                              selectedQuestion.id === q.id ? 'text-blue-600' : 'hover:bg-muted'
+                            }`}
+                            onClick={() => setSelectedQuestion(questionsData.defaultQuestions.find(q2 => q2.id === q.id)!)}
+                          >
+                            <span className="text-sm">{q.title}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </DialogContent>

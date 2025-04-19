@@ -7,6 +7,13 @@ import { usePathname } from "next/navigation";
 import { Upload, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   uploadAnswersPitchVideo,
   uploadInvestorsPitchVideo,
 } from "@/lib/actions/video";
@@ -33,8 +40,63 @@ export default function InvestorQuestionsPage() {
   const [language, setLanguage] = useState("English");
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [questionsOpen, setQuestionsOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Sample languages and questions for the dialog
+  const languages = [
+    "Hindi",
+    "Kannada",
+    "Bengali",
+    "Pahadi",
+    "Nepali",
+    "Assamese",
+    "Gujarati",
+    "English",
+    "Sindhi",
+    "Punjabi",
+    "Urdu",
+    "Odia",
+  ]
+  const sampleQuestions = [
+    {
+      id: 1,
+      question: "Introduce yourself and the problem you are solving",
+      videoUrl: "/videos/problem.mp4",
+    },
+    {
+      id: 2,
+      question: "What are you building",
+      videoUrl: "/videos/market.mp4",
+    },
+    {
+      id: 3,
+      question: "Why do you really want to solve the problem",
+      videoUrl: "/videos/solution.mp4",
+    },
+    {
+      id: 4,
+      question: "Who are your customers, and how are they dealing with this problem today",
+      videoUrl: "/videos/customer.mp4",
+    },
+    {
+      id: 5,
+      question: "Why will your customers switch from competitors to your product",
+      videoUrl: "/videos/business.mp4",
+    },
+    {
+      id: 6,
+      question: "How will you make money",
+      videoUrl: "/videos/team.mp4",
+    },
+    {
+      id: 7,
+      question: "What is the growth here (development, traction, or revenue), and challenges you are facing",
+      videoUrl: "/videos/vision.mp4",
+    },
+  ];
 
   useEffect(() => {
     fetchQuestions();
@@ -151,6 +213,74 @@ export default function InvestorQuestionsPage() {
   return (
     <Card className="w-full border-none mt-10 px-4 bg-[#0e0e0e] container mx-auto">
       <CardContent className="border-none">
+        <div className="flex justify-end mb-4">
+          <Dialog open={questionsOpen} onOpenChange={setQuestionsOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="bg-[#2a2a2a] hover:bg-gray-600 rounded-[0.35rem] border-gray-600 text-white"
+              >
+                Sample Pitch
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-5xl max-h-[90%] bg-[#1a1a1a] border-gray-700 text-white">
+              <DialogHeader>
+                <DialogTitle>Sample Screening Questions</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-12 gap-6 mt-10">
+                {/* Language Column */}
+                <div className="col-span-2 space-y-4">
+                  <h3 className="text-lg font-semibold">Languages</h3>
+                  <div className="space-y-2">
+                    {languages.map((language) => (
+                      <div
+                        key={language}
+                        className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                          selectedLanguage === language ? 'text-blue-600' : 'hover:bg-muted'
+                        }`}
+                        onClick={() => setSelectedLanguage(language)}
+                      >
+                        <span className="text-sm">{language}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Video Preview Column */}
+                <div className="col-span-6">
+                  <Card className="overflow-hidden border-0 bg-muted/50">
+                    <div className="aspect-[9/16] max-h-[500px] w-full flex items-center justify-center">
+                      <video
+                        src={selectedQuestion?.videoUrl || "/videos/sample-pitch.mp4"}
+                        poster="/assets/video-poster.jpg"
+                        controls
+                        className="w-full h-full object-cover rounded-[0.35rem]"
+                      />
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Questions Column */}
+                <div className="col-span-4 space-y-4">
+                  <h3 className="text-lg font-semibold">Investor's Questions</h3>
+                  <div className="space-y-2">
+                    {sampleQuestions.map((q) => (
+                      <div
+                        key={q.id}
+                        className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                          selectedQuestion?.id === q.id ? 'text-blue-600' : 'hover:bg-muted'
+                        }`}
+                        onClick={() => handleQuestionSelect(q)}
+                      >
+                        <span className="text-sm">{q.question}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
         {isLoading ? (
           <p className="text-muted-foreground">Loading questions...</p>
         ) : questions.length === 0 ? (
