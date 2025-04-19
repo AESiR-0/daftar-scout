@@ -306,7 +306,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
 
       toast({
         title: "Feature request submitted",
-        description: "Thank you for your feedback. We'll review your request shortly.",
+        description:
+          "Thank you for your feedback. We'll review your request shortly.",
       });
 
       const featureEntry: FeatureEntry = {
@@ -509,7 +510,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                             variant="outline"
                             className={cn(
                               "w-full justify-start text-left font-normal rounded-[0.35rem] bg-[#1a1a1a]",
-                              !profileData.dateOfBirth && "text-muted-foreground"
+                              !profileData.dateOfBirth &&
+                                "text-muted-foreground"
                             )}
                             disabled={isLoading}
                           >
@@ -535,7 +537,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                                   prev
                                     ? {
                                         ...prev,
-                                        dateOfBirth: date.toISOString().split("T")[0],
+                                        dateOfBirth: date
+                                          .toISOString()
+                                          .split("T")[0],
                                       }
                                     : prev
                                 );
@@ -577,7 +581,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                                 "French",
                                 "German",
                               ]
-                                .filter((lang) => !profileData.languages.includes(lang))
+                                .filter(
+                                  (lang) =>
+                                    !profileData.languages.includes(lang)
+                                )
                                 .map((lang) => (
                                   <SelectItem key={lang} value={lang}>
                                     {lang}
@@ -640,7 +647,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     {profileData.gender || "Not specified"}
                   </p>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Date of Birth:</span>{" "}
+                    <span className="text-muted-foreground">
+                      Date of Birth:
+                    </span>{" "}
                     {profileData.dateOfBirth
                       ? new Date(profileData.dateOfBirth).toLocaleDateString()
                       : "Not specified"}
@@ -696,7 +705,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
             <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <h4 className="text-[14px] font-medium mb-4">History</h4>
               {isLoadingSupport ? (
-                <p className="text-muted-foreground">Loading support requests...</p>
+                <p className="text-muted-foreground">
+                  Loading support requests...
+                </p>
               ) : supportHistory.length === 0 ? (
                 <p className="text-muted-foreground">No support requests yet</p>
               ) : (
@@ -802,7 +813,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
             <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
               <h4 className="text-[14px] font-medium mb-4">History</h4>
               {isLoadingFeatures ? (
-                <p className="text-muted-foreground">Loading feature requests...</p>
+                <p className="text-muted-foreground">
+                  Loading feature requests...
+                </p>
               ) : featureHistory.length === 0 ? (
                 <p className="text-muted-foreground">No feature request shared</p>
               ) : (
@@ -846,24 +859,24 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
             </ScrollArea>
           </Card>
         );
-        case "pledge":
-          return (
-            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
-              <ScrollArea className="min-h-[500px]">
-                {pledge.map((section) => (
-                  <div key={section.title} className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <section.icon className="h-4 w-4" />
-                      <h4 className="font-medium">{section.title}</h4>
-                    </div>
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                      {section.content}
-                    </p>
+      case "pledge":
+        return (
+          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+            <ScrollArea className="min-h-[500px]">
+              {pledge.map((section) => (
+                <div key={section.title} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <section.icon className="h-4 w-4" />
+                    <h4 className="font-medium">{section.title}</h4>
                   </div>
-                ))}
-              </ScrollArea>
-            </Card>
-          );
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">
+                    {section.content}
+                  </p>
+                </div>
+              ))}
+            </ScrollArea>
+          </Card>
+        );
       case "delete":
         return (
           <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
@@ -943,30 +956,29 @@ const pledge = [
     icon: Key,
     content: `Hey Beta Users,
 
-We totally get that privacy is super important to you, and we want you to know that we’re doing everything we can to keep your data safe. Here’s how we handle your information:
+We totally get that privacy is super important to you, and we want you to know that we're doing everything we can to keep your data safe. Here's how we handle your information:
 
-Your data belongs to you. We won’t sell, share, or rent your data to anyone. It’s yours, and we’ll only use it to make your experience with Daftar OS better.
+Your data belongs to you. We won't sell, share, or rent your data to anyone. It's yours, and we'll only use it to make your experience with Daftar OS better.
 
-We won’t snoop. We don’t look at your data unless it’s necessary to help you or fix a problem. Your ideas and work are yours, and we respect that.
+We won't snoop. We don't look at your data unless it's necessary to help you or fix a problem. Your ideas and work are yours, and we respect that.
 
-We only keep your data as long as needed. If you stop using Daftar OS, we’ll keep your data for up to 10 years, just in case you need it later. After that, we’ll delete or anonymize it to make sure it’s completely safe.
+We only keep your data as long as needed. If you stop using Daftar OS, we'll keep your data for up to 10 years, just in case you need it later. After that, we'll delete or anonymize it to make sure it's completely safe.
 
-We use your data to improve, but we don’t share anything personal. We might use some data to help us improve features, but it’s always anonymous. Your personal information won’t be shared or exposed.
+We use your data to improve, but we don't share anything personal. We might use some data to help us improve features, but it's always anonymous. Your personal information won't be shared or exposed.
 
-We keep it safe. We use strong encryption to protect your data while it’s being sent and stored. Your information is always secure.
+We keep it safe. We use strong encryption to protect your data while it's being sent and stored. Your information is always secure.
 
-We’re always here if you have questions. If you want to know more about how we handle your data, just ask! We believe in being open with you.
+We're always here if you have questions. If you want to know more about how we handle your data, just ask! We believe in being open with you.
 
-You’re in control. If you want to update, access, or delete your data, just let us know. We’ll make it happen.
+You're in control. If you want to update, access, or delete your data, just let us know. We'll make it happen.
 
-Once our beta phase ends, we’ll have a more structured privacy policy, but for now, we just want to know that your privacy is important to us.
+Once our beta phase ends, we'll have a more structured privacy policy, but for now, we just want to know that your privacy is important to us.
 
 Thanks for being part of Daftar OS`,
   },
-]
+];
 
 const privacySections = [
-  
   {
     title: "Introduction",
     icon: FileText,
@@ -984,7 +996,7 @@ However, we ensure that this data is handled by Google's Privacy Policy and Verc
     title: "Data We Collect",
     icon: Database,
     content: `Authentication Data:
-When you sign in to Daftar using Google Sign-In, we only collect essential information necessary for authentication, including your email address and name. We do not store any sensitive data such as passwords. This data is processed in line with Google’s Privacy Policy, and your interactions with Google are governed by their terms.
+When you sign in to Daftar using Google Sign-In, we only collect essential information necessary for authentication, including your email address and name. We do not store any sensitive data such as passwords. This data is processed in line with Google's Privacy Policy, and your interactions with Google are governed by their terms.
 
 IP Address & Session Data:
 We collect IP address and session data to monitor usage and ensure a secure user experience. This data is stored temporarily and does not contain personal or sensitive details. Our software does not delve deeper into collecting personally identifiable information beyond what's necessary for authentication.
@@ -1019,7 +1031,7 @@ We conduct regular security audits and apply security patches to ensure that the
     title: "Third-Party Services",
     icon: Share2,
     content: `Google:
-Your authentication data is processed by Google through OAuth 2.0. Google’s privacy policies govern how your data is handled during authentication. We don’t store or process any further sensitive data through Google beyond what is required for the authentication process.
+Your authentication data is processed by Google through OAuth 2.0. Google's privacy policies govern how your data is handled during authentication. We don't store or process any further sensitive data through Google beyond what is required for the authentication process.
 
 Vercel:
 Daftar is hosted on Vercel, a trusted platform that provides cloud hosting services. While we utilize Vercel for hosting, Vercel's policies govern how your data is stored and processed. We ensure that Vercel follows industry standards for data protection and privacy.

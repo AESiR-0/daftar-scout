@@ -277,9 +277,14 @@ export default function PitchPage() {
               htmlFor="terms"
               className="text-sm text-muted-foreground leading-1 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              I have checked the message and the pitch. It does not include nudity, bad language, false claims, scams or fraud, copying someone else's work, threats, hate, offensive content, illegal activity, bullying, fake videos, or wrong information.
-If any of these are found, your data can be removed, and legal action may be taken by investors or authorities as per your country’s rules.
-By sharing this, you accept full responsibility for your content and agree to keep it honest and respectful.
+              I have checked the message and the pitch. It does not include
+              nudity, bad language, false claims, scams or fraud, copying
+              someone else's work, threats, hate, offensive content, illegal
+              activity, bullying, fake videos, or wrong information. If any of
+              these are found, your data can be removed, and legal action may be
+              taken by investors or authorities as per your country's rules. By
+              sharing this, you accept full responsibility for your content and
+              agree to keep it honest and respectful.
             </label>
           </div>
 
