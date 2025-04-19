@@ -88,6 +88,7 @@ type ProfileTab =
   | "feedback"
   | "feature"
   | "privacy"
+  | "pledge"
   | "delete"
   | "logout";
 
