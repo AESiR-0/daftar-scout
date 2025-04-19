@@ -240,7 +240,7 @@ export function NotificationDialog({
                           {notification.payload.action ||
                             "Scout request for collaboration"}
                         </p>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           <p className="text-xs text-muted-foreground">
                             Daftar:{" "}
                             {notification.payload.daftar_id || "Unknown Daftar"}

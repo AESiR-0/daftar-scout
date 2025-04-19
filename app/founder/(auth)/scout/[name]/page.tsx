@@ -99,7 +99,7 @@ export default function Page() {
     <>
       <div className="space-y-6 container mx-auto px-10 py-8">
           <div className="flex gap-6">
-            <Card className="flex-1 p-4">
+            <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
                 <div className="relative aspect-video w-full">
                   <video
                     src={transformedScout.videoUrl}
@@ -176,7 +176,7 @@ export default function Page() {
                         ([key, value]) => (
                           <div
                             key={key}
-                            className="flex justify-between items-center py-2 border-b border-muted/20 last:border-b-0"
+                            className="flex gap-10 items-center py-2 border-b border-muted/20 last:border-b-0"
                           >
                             <span className="text-sm font-medium text-white">
                               {key}

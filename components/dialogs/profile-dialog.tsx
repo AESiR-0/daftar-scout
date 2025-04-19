@@ -115,6 +115,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     { id: "feedback", label: "Feedback" },
     { id: "feature", label: "Feature Request" },
     { id: "privacy", label: "Privacy Policy" },
+    { id: "pledge", label: "Pledge" },
     { id: "delete", label: "Delete Account" },
     { id: "logout", label: "Logout" },
   ];
@@ -829,10 +830,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       case "privacy":
         return (
           <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
-            <ScrollArea className="space-y-6 min-h-[500px]">
+            <ScrollArea className="min-h-[500px]">
               {privacySections.map((section) => (
-                <div key={section.title} className="space-y-2">
-                  <div className="flex items-center gap-2">
+                <div key={section.title}>
+                  <div className="flex items-center gap-2 mt-4">
                     <section.icon className="h-4 w-4" />
                     <h4 className="font-medium">{section.title}</h4>
                   </div>
@@ -844,7 +845,24 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
             </ScrollArea>
           </Card>
         );
-
+        case "pledge":
+          return (
+            <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+              <ScrollArea className="min-h-[500px]">
+                {pledge.map((section) => (
+                  <div key={section.title} className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <section.icon className="h-4 w-4" />
+                      <h4 className="font-medium">{section.title}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground whitespace-pre-line">
+                      {section.content}
+                    </p>
+                  </div>
+                ))}
+              </ScrollArea>
+            </Card>
+          );
       case "delete":
         return (
           <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
@@ -918,7 +936,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   );
 }
 
-const privacySections = [
+const pledge = [
   {
     title: "Our Privacy Pledge",
     icon: Key,
@@ -926,18 +944,28 @@ const privacySections = [
 
 We totally get that privacy is super important to you, and we want you to know that we’re doing everything we can to keep your data safe. Here’s how we handle your information:
 
-- Your data belongs to you. We won’t sell, share, or rent your data to anyone. It’s yours, and we’ll only use it to make your experience with Daftar OS better.
-- We won’t snoop. We don’t look at your data unless it’s necessary to help you or fix a problem. Your ideas and work are yours, and we respect that.
-- We only keep your data as long as needed. If you stop using Daftar OS, we’ll keep your data for up to 10 years, just in case you need it later. After that, we’ll delete or anonymize it to make sure it’s completely safe.
-- We use your data to improve, but we don’t share anything personal. We might use some data to help us improve features, but it’s always anonymous. Your personal information won’t be shared or exposed.
-- We keep it safe. We use strong encryption to protect your data while it’s being sent and stored. Your information is always secure.
-- We’re always here if you have questions. If you want to know more about how we handle your data, just ask! We believe in being open with you.
-- You’re in control. If you want to update, access, or delete your data, just let us know. We’ll make it happen.
+Your data belongs to you. We won’t sell, share, or rent your data to anyone. It’s yours, and we’ll only use it to make your experience with Daftar OS better.
+
+We won’t snoop. We don’t look at your data unless it’s necessary to help you or fix a problem. Your ideas and work are yours, and we respect that.
+
+We only keep your data as long as needed. If you stop using Daftar OS, we’ll keep your data for up to 10 years, just in case you need it later. After that, we’ll delete or anonymize it to make sure it’s completely safe.
+
+We use your data to improve, but we don’t share anything personal. We might use some data to help us improve features, but it’s always anonymous. Your personal information won’t be shared or exposed.
+
+We keep it safe. We use strong encryption to protect your data while it’s being sent and stored. Your information is always secure.
+
+We’re always here if you have questions. If you want to know more about how we handle your data, just ask! We believe in being open with you.
+
+You’re in control. If you want to update, access, or delete your data, just let us know. We’ll make it happen.
 
 Once our beta phase ends, we’ll have a more structured privacy policy, but for now, we just want to know that your privacy is important to us.
 
 Thanks for being part of Daftar OS`,
   },
+]
+
+const privacySections = [
+  
   {
     title: "Introduction",
     icon: FileText,
