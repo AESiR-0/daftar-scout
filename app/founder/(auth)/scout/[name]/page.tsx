@@ -194,20 +194,26 @@ export default function Page() {
                 <TabsContent value="faqs">
                   <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
                     <Accordion type="single" collapsible className="space-y-2">
-                      {transformedScout.faqs.map((faq: any, index: number) => (
-                        <AccordionItem
-                          key={index}
-                          value={`faq-${index}`}
-                          className="border-b border-muted/20 last:border-b-0"
-                        >
-                          <AccordionTrigger className="text-sm font-medium text-white hover:no-underline py-3">
-                            {faq.question}
-                          </AccordionTrigger>
-                          <AccordionContent className="text-sm text-muted-foreground pt-2">
-                            {faq.answer}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
+                      {transformedScout.faqs.length > 0 ? (
+                        transformedScout.faqs.map((faq: any, index: number) => (
+                          <AccordionItem
+                            key={index}
+                            value={`faq-${index}`}
+                            className="border-b border-muted/20 last:border-b-0"
+                          >
+                            <AccordionTrigger className="text-sm font-medium text-white hover:no-underline py-3">
+                              {faq.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-sm text-muted-foreground pt-2">
+                              {faq.answer}
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))
+                      ) : (
+                        <div className="text-sm text-muted-foreground">
+                          No FAQs shared by the investor
+                        </div>
+                      )}
                     </Accordion>
                   </Card>
                 </TabsContent>
@@ -215,7 +221,8 @@ export default function Page() {
                 <TabsContent value="updates">
                   <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
                     <div className="space-y-6 relative">
-                      {transformedScout.updates.map(
+                    {transformedScout.updates.length > 0 ? (
+                      transformedScout.updates.map(
                         (
                           update: { date: string; content: string },
                           index: number
@@ -247,7 +254,13 @@ export default function Page() {
                             </div>
                           </div>
                         )
-                      )}
+                      )
+                    ) : (
+                      <div className="text-sm text-muted-foreground">
+                        No Updates Yet. If investors share any information, we’ll notify you.
+                      </div>
+                    )}
+                  
                     </div>
                   </Card>
                 </TabsContent>

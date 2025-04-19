@@ -26,7 +26,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Offer interface
 interface Offer {
   id: string;
   scoutName: string;
@@ -80,7 +79,6 @@ export function MakeOfferSection({
   });
   const [offerMessage, setOfferMessage] = useState("");
 
-  // Fetch offers on mount
   useEffect(() => {
     const fetchOffers = async () => {
       try {
@@ -91,11 +89,10 @@ export function MakeOfferSection({
           throw new Error("Failed to fetch offers");
         }
         const data = await response.json();
-        // Map API response to Offer interface
         const mappedOffers: Offer[] = data.map((offer: any) => ({
           id: offer.id.toString(),
-          scoutName: "Scout Name", // Replace with actual scout name if available from API
-          collaboration: ["Collaboration Partner"], // Replace with actual data if available
+          scoutName: "Scout Name",
+          collaboration: ["Collaboration Partner"],
           status:
             offer.offerStatus === "accepted" ? "completed" : offer.offerStatus,
           type:
@@ -115,7 +112,7 @@ export function MakeOfferSection({
               timestamp: formatDate(offer.offeredAt),
               user: {
                 founder: {
-                  name: "Investor Name", // Replace with actual investor name if available
+                  name: "Investor Name",
                   age: "30",
                   designation: "Investor",
                   email: "investor@example.com",
@@ -141,7 +138,6 @@ export function MakeOfferSection({
     fetchOffers();
   }, [scoutId, pitchId, toast]);
 
-  // Check for pending offers
   const hasPendingOffer = offers.some((o) => o.status === "pending");
 
   const handleCreateOffer = async () => {
@@ -241,7 +237,7 @@ export function MakeOfferSection({
             scoutId,
             pitchId,
             investorId,
-            offerId,  
+            offerId,
             action,
             notes,
           }),
@@ -377,7 +373,6 @@ export function MakeOfferSection({
     <div className="flex p-0 mt-10 gap-6">
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
-          {/* New Offer Input */}
           <div>
             <Textarea
               placeholder="Write your offer message here..."
@@ -405,7 +400,6 @@ export function MakeOfferSection({
             </div>
           </div>
 
-          {/* Offer History */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">History</h2>
@@ -441,83 +435,67 @@ export function MakeOfferSection({
                     offers.length > 3 && "overflow-auto max-h-[400px]"
                   )}
                 >
-                  {logOffers.map((offer) => (
-                    <div key={offer.id} className="p-4">
-                      {/* Scout Message */}
-                      <div className="flex flex-col gap-2">
-                        <div className="bg-muted/5 rounded-[0.35rem] p-4">
-                          <p className="text-sm text-muted-foreground">
-                            {offer.responses?.[0].reason}
-                          </p>
-                          <time className="text-xs text-muted-foreground self-end">
-                            {offer.date}
-                          </time>
-                        </div>
-                      </div>
-
-                      {/* Team Responses */}
-                      {offer.responses && offer.responses.length > 1 && (
-                        <div className="mt-6 space-y-4">
-                          {offer.responses
-                            .filter(
-                              (response) => response.action !== "Offer Sent"
-                            )
-                            .map((response, index) => (
-                              <div key={index} className="flex flex-col gap-2">
-                                <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
-                                  <p className="text-sm text-muted-foreground">
-                                    {response.reason}
-                                  </p>
-                                  <div className="items-center gap-2 text-xs text-muted-foreground">
-                                    <span className="capitalize">
-                                      {response.action} by
-                                    </span>
-                                    <br />
-                                    <FounderProfile
-                                      founder={response.user.founder}
-                                    />
-                                  </div>
-                                  <time className="text-xs text-muted-foreground self-end">
-                                    {response.timestamp}
-                                  </time>
-                                </div>
-                              </div>
-                            ))}
-                        </div>
-                      )}
-
-                      {/* Action Buttons */}
-                      {offer.status === "pending" && (
-                        <div className="flex gap-2 mt-4">
-                          {/* <Button
-                            variant="outline"
-                            className="rounded-[0.35rem]"
-                            onClick={() => handleAction(offer.id, "accepted")}
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            className="rounded-[0.35rem]"
-                            onClick={() => handleAction(offer.id, "declined")}
-                          >
-                            Decline
-                          </Button> */}
-                          <Button
-                            variant="outline"
-                            className="rounded-[0.35rem]"
-                            onClick={() => handleAction(offer.id, "withdrawn")}
-                          >
-                            Withdraw
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  {logOffers.length === 0 && (
+                  {logOffers.length === 0 ? (
                     <p className="text-muted-foreground px-4 py-4">
-                      No history
+                      No offer shared
                     </p>
+                  ) : (
+                    logOffers.map((offer) => (
+                      <div key={offer.id} className="p-4">
+                        <div className="flex flex-col gap-2">
+                          <div className="bg-muted/5 rounded-[0.35rem] p-4">
+                            <p className="text-sm text-muted-foreground">
+                              {offer.responses?.[0].reason}
+                            </p>
+                            <time className="text-xs text-muted-foreground self-end">
+                              {offer.date}
+                            </time>
+                          </div>
+                        </div>
+
+                        {offer.responses && offer.responses.length > 1 && (
+                          <div className="mt-6 space-y-4">
+                            {offer.responses
+                              .filter(
+                                (response) => response.action !== "Offer Sent"
+                              )
+                              .map((response, index) => (
+                                <div key={index} className="flex flex-col gap-2">
+                                  <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
+                                    <p className="text-sm text-muted-foreground">
+                                      {response.reason}
+                                    </p>
+                                    <div className="items-center gap-2 text-xs text-muted-foreground">
+                                      <span className="capitalize">
+                                        {response.action} by
+                                      </span>
+                                      <br />
+                                      <FounderProfile
+                                        founder={response.user.founder}
+                                      />
+                                    </div>
+                                    <time className="text-xs text-muted-foreground self-end">
+                                      {response.timestamp}
+                                    </time>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+
+                        {offer.status === "pending" && (
+                          <div className="flex gap-2 mt-4">
+                            <Button
+                              variant="outline"
+                              className="rounded-[0.35rem]"
+                              onClick={() => handleAction(offer.id, "withdrawn")}
+                            >
+                              Withdraw
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))
                   )}
                 </div>
               </ScrollArea>

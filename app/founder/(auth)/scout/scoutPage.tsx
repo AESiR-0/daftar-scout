@@ -26,7 +26,7 @@ export default function IncubationPage({ scouts }: { scouts: Scout[] }) {
   if (filteredScouts.length === 0) {
     return (
       <div className="flex items-center justify-center h-[40vh]">
-        <p className="text-lg text-muted-foreground">No scouts are live yet</p>
+        <p className="text-lg text-muted-foreground">Hey, investors aren't looking at startups at the moment, but they're building a new scout. Keep checking Daftar for more opportunities</p>
       </div>
     );
   }

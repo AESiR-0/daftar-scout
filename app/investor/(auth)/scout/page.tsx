@@ -28,6 +28,13 @@ interface ScoutStatus {
   Closed: Scout[];
 }
 
+const emptyStateMessages: Record<string, string> = {
+  Planning: "No scout is currently being planned.",
+  scheduled: "There are no scouts on the schedule.",
+  Active: "You have no active scouts at this time.",
+  Closed: "You have not closed any scout.",
+};
+
 export default function ScoutPage() {
   const router = useRouter();
   const { searchQuery, filterValue } = useSearch();
@@ -176,57 +183,57 @@ export default function ScoutPage() {
               className="bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
             >
               <ScrollArea className="h-[calc(100vh-12rem)]">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <h2 className="font-semibold capitalize text-foreground">
-                    {status}
-                  </h2>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs bg-muted text-muted-foreground"
-                  >
-                    {scouts.length}
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="space-y-5">
-                {scouts.map((scout: any) => (
-                  <Link
-                    key={scout.id}
-                    href={`/investor/scout/${scout.id
-                      .toLowerCase()
-                      .replace(/ /g, "-")}`}
-                  >
-                    <div className="p-4 m-2 rounded-[0.35rem] hover:border-muted-foreground hover:border bg-background transition-colors">
-                      <h3 className="font-medium text-sm text-foreground">
-                        {scout.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Collaboration :{" "}
-                        <span className="font-medium">
-                          {scout.collaborator.map(
-                            (collaboration: string, num: number) =>
-                              `${collaboration} ${
-                                scout.collaborator.length === 1
-                                  ? ""
-                                  : num == scout.collaborator.length - 1
-                                  ? "and"
-                                  : ", "
-                              } `
-                          )}
-                        </span>
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-
-                {scouts.length === 0 && (
-                  <div className="text-center py-8 text-sm text-muted-foreground bg-background/5 rounded-[0.35rem] border border-border">
-                    No scout in {status}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-semibold capitalize text-foreground">
+                      {status}
+                    </h2>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-muted text-muted-foreground"
+                    >
+                      {scouts.length}
+                    </Badge>
                   </div>
-                )}
-              </div>
+                </div>
+
+                <div className="space-y-5">
+                  {scouts.length === 0 ? (
+                    <div className="text-center py-8 text-sm text-muted-foreground bg-background/5 rounded-[0.35rem] border border-border">
+                      {emptyStateMessages[status]}
+                    </div>
+                  ) : (
+                    scouts.map((scout: any) => (
+                      <Link
+                        key={scout.id}
+                        href={`/investor/scout/${scout.id
+                          .toLowerCase()
+                          .replace(/ /g, "-")}`}
+                      >
+                        <div className="p-4 m-2 rounded-[0.35rem] hover:border-muted-foreground hover:border bg-background transition-colors">
+                          <h3 className="font-medium text-sm text-foreground">
+                            {scout.title}
+                          </h3>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Collaboration :{" "}
+                            <span className="font-medium">
+                              {scout.collaborator.map(
+                                (collaboration: string, num: number) =>
+                                  `${collaboration} ${
+                                    scout.collaborator.length === 1
+                                      ? ""
+                                      : num == scout.collaborator.length - 1
+                                      ? "and"
+                                      : ", "
+                                  } `
+                              )}
+                            </span>
+                          </p>
+                        </div>
+                      </Link>
+                    ))
+                  )}
+                </div>
               </ScrollArea>
             </div>
           ))}

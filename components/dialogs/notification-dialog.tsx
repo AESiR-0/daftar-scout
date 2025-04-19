@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import formatDate from "@/lib/formatDate";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase/createClient"; // Adjust the import path as necessary
+import { supabase } from "@/lib/supabase/createClient";
 
 export type NotificationType =
   | "news"
@@ -46,8 +46,15 @@ type Notification = {
   created_at: string;
 };
 
-// UI-specific tab type (replacing NotificationTab)
 type UITab = "updates" | "alerts" | "news" | "scout-requests" | "scout-links";
+
+const emptyStateMessages: Record<UITab, string> = {
+  "scout-requests": "If a Daftar requests to collaborate with you, you’ll see the notification here.",
+  "scout-links": "Once your Daftar creates a scout and it goes live, you’ll receive a unique scout application link right here.\nFeel free to share this link with founders in your social network — anyone you think could be a great fit. Founders can use it to view your scout and apply directly.\n\nTeam Daftar",
+  updates: "Looks empty here for now.",
+  alerts: "Looks empty here for now.",
+  news: "When a startup gets selected at Daftar, we’ll share the news here.",
+};
 
 export function NotificationDialog({
   open,
@@ -146,7 +153,6 @@ export function NotificationDialog({
       )
       .subscribe();
 
-    // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(subscription);
     };
@@ -184,8 +190,8 @@ export function NotificationDialog({
       ...prev,
       [requestId]: {
         action,
-        by: "John Smith", // Replace with actual user
-        designation: "Investment Director", // Replace with actual designation
+        by: "John Smith",
+        designation: "Investment Director",
         timestamp: formatDate(new Date().toLocaleString()),
       },
     }));
@@ -218,132 +224,143 @@ export function NotificationDialog({
           </div>
         </div>
 
-        {/* Content Area */}
         <div className="flex-1 p-6 bg-[#0e0e0e] pt-10">
           <ScrollArea className="h-[500px]">
             {activeTab === "scout-requests" ? (
               <div className="space-y-4">
-                {notifications
-                  .filter((n) => n.type === "request")
-                  .map((notification) => (
-                    <Card
-                      key={notification.id}
-                      className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
-                    >
-                      <div className="p-4 space-y-4">
-                        <h4 className="text-sm font-medium">
-                          {notification.payload.daftar_id
-                            ? `Scout for Daftar ${notification.payload.daftar_id}`
-                            : "Unknown Scout"}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {notification.payload.action ||
-                            "Scout request for collaboration"}
-                        </p>
-                        <div className="space-y-1">
+                {notifications.filter((n) => n.type === "request").length > 0 ? (
+                  notifications
+                    .filter((n) => n.type === "request")
+                    .map((notification) => (
+                      <Card
+                        key={notification.id}
+                        className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
+                      >
+                        <div className="p-4 space-y-4">
+                          <h4 className="text-sm font-medium">
+                            {notification.payload.daftar_id
+                              ? `Scout for Daftar ${notification.payload.daftar_id}`
+                              : "Unknown Scout"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {notification.payload.action ||
+                              "Scout request for collaboration"}
+                          </p>
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">
+                              Daftar:{" "}
+                              {notification.payload.daftar_id || "Unknown Daftar"}
+                            </p>
+                            <time className="text-xs text-muted-foreground block">
+                              Requested on {formatDate(notification.created_at)}
+                            </time>
+                          </div>
+
+                          {requestStatuses[notification.id] ? (
+                            <div className="text-xs text-muted-foreground border-t pt-2">
+                              <p>
+                                {requestStatuses[notification.id].action ===
+                                "accepted"
+                                  ? "Accepted"
+                                  : "Declined"}{" "}
+                                by {requestStatuses[notification.id].by}
+                              </p>
+                              <p>
+                                {formatDate(
+                                  requestStatuses[notification.id].timestamp
+                                )}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="rounded-[0.35rem]"
+                                onClick={() =>
+                                  handleAction(notification.id, "accepted")
+                                }
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="rounded-[0.35rem]"
+                                onClick={() =>
+                                  handleAction(notification.id, "declined")
+                                }
+                              >
+                                Decline
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center">
+                    {emptyStateMessages["scout-requests"]}
+                  </p>
+                )}
+              </div>
+            ) : activeTab === "scout-links" ? (
+              <div className="space-y-4">
+                {notifications.filter((n) => n.type === "scout_link").length >
+                0 ? (
+                  notifications
+                    .filter((n) => n.type === "scout_link")
+                    .map((notification) => (
+                      <Card
+                        key={notification.id}
+                        className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
+                      >
+                        <div className="p-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-medium">
+                              {notification.payload.daftar_id
+                                ? `Scout Link : ${notification.payload.scout_id}`
+                                : "Unknown Scout"}
+                            </h4>
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             Daftar:{" "}
                             {notification.payload.daftar_id || "Unknown Daftar"}
                           </p>
-                          <time className="text-xs text-muted-foreground block">
-                            Requested on {formatDate(notification.created_at)}
-                          </time>
-                        </div>
-
-                        {requestStatuses[notification.id] ? (
-                          <div className="text-xs text-muted-foreground border-t pt-2">
-                            <p>
-                              {requestStatuses[notification.id].action ===
-                              "accepted"
-                                ? "Accepted"
-                                : "Declined"}{" "}
-                              by {requestStatuses[notification.id].by}
-                            </p>
-                            <p>
-                              {formatDate(
-                                requestStatuses[notification.id].timestamp
-                              )}
-                            </p>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>
+                              Created on {formatDate(notification.created_at)}
+                            </span>
+                            <span>0 collaborators</span>
                           </div>
-                        ) : (
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 mt-2">
                             <Button
-                              size="sm"
                               variant="outline"
-                              className="rounded-[0.35rem]"
-                              onClick={() =>
-                                handleAction(notification.id, "accepted")
-                              }
-                            >
-                              Accept
-                            </Button>
-                            <Button
                               size="sm"
-                              variant="outline"
-                              className="rounded-[0.35rem]"
-                              onClick={() =>
-                                handleAction(notification.id, "declined")
-                              }
+                              className="text-xs rounded-[0.35rem]"
+                              onClick={() => {
+                                const link =
+                                  notification.payload.url ||
+                                  `https://daftar.com/scout/${notification.id}`;
+                                navigator.clipboard.writeText(link);
+                                toast({
+                                  title: "Link copied",
+                                  description:
+                                    "Scout link has been copied to clipboard",
+                                });
+                              }}
                             >
-                              Decline
+                              Copy Link
                             </Button>
                           </div>
-                        )}
-                      </div>
-                    </Card>
-                  ))}
-              </div>
-            ) : activeTab === "scout-links" ? (
-              <div className="space-y-4">
-                {notifications
-                  .filter((n) => n.type === "scout_link")
-                  .map((notification) => (
-                    <Card
-                      key={notification.id}
-                      className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
-                    >
-                      <div className="p-4 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-medium">
-                            {notification.payload.daftar_id
-                              ? `Scout Link : ${notification.payload.scout_id}`
-                              : "Unknown Scout"}
-                          </h4>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          Daftar:{" "}
-                          {notification.payload.daftar_id || "Unknown Daftar"}
-                        </p>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>
-                            Created on {formatDate(notification.created_at)}
-                          </span>
-                          <span>0 collaborators</span>{" "}
-                          {/* No collaborator info in payload */}
-                        </div>
-                        <div className="flex gap-2 mt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs rounded-[0.35rem]"
-                            onClick={() => {
-                              const link =
-                                notification.payload.url ||
-                                `https://daftar.com/scout/${notification.id}`;
-                              navigator.clipboard.writeText(link);
-                              toast({
-                                title: "Link copied",
-                                description:
-                                  "Scout link has been copied to clipboard",
-                              });
-                            }}
-                          >
-                            Copy Link
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center whitespace-pre-line">
+                    {emptyStateMessages["scout-links"]}
+                  </p>
+                )}
               </div>
             ) : (
               <div className="space-y-4">
@@ -375,7 +392,7 @@ export function NotificationDialog({
                     ))
                 ) : (
                   <p className="text-sm text-muted-foreground text-center">
-                    No {activeTab} to show
+                    {emptyStateMessages[activeTab]}
                   </p>
                 )}
               </div>
