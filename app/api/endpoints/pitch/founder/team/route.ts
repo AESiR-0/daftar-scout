@@ -3,6 +3,7 @@ import { db } from "@/backend/database";
 import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { and, eq, or } from "drizzle-orm";
 import { auth } from "@/auth";
+import { createNotification } from "@/lib/notifications/insert";
 import { users } from "@/backend/drizzle/models/users";
 
 // GET: Fetch team members for a pitch by pitchId from request body
@@ -70,51 +71,48 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: Add a team member to a pitch
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
     const { user } = session;
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-    if (!user?.email) {
+    if (!user || !user.email) {
       return NextResponse.json(
-        { error: "Invalid user email" },
+        { error: "Invalid user session" },
         { status: 400 }
       );
     }
 
     const body = await req.json();
     const { pitchId, email, designation } = body;
+
+    if (!pitchId || !email) {
+      return NextResponse.json(
+        { error: "pitchId and email are required" },
+        { status: 400 }
+      );
+    }
+
     const userExist = await db
       .select()
       .from(users)
       .where(and(eq(users.email, email), eq(users.role, "founder")))
       .limit(1);
-    console.log(userExist, email);
 
-    if (userExist.length <= 0)
+    if (userExist.length === 0) {
       return NextResponse.json(
         { error: "User does not exist" },
-        { status: 500 }
-      );
-    const userId = userExist[0].id; // Get the userId from the session
-
-    // Validate required fields
-    if (!pitchId || !userId) {
-      return NextResponse.json(
-        { error: "pitchId and userId are required" },
-        { status: 400 }
+        { status: 404 }
       );
     }
 
-    // Check if the pitch exists
+    const userId = userExist[0].id;
+
     const pitchExists = await db
-      .select()
+      .select({ name: pitch.pitchName })
       .from(pitch)
       .where(eq(pitch.id, pitchId))
       .limit(1);
@@ -123,15 +121,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Pitch not found" }, { status: 404 });
     }
 
-    // Insert the new team member
+    const { name: pitchName } = pitchExists[0];
+
     const newTeamMember = await db
       .insert(pitchTeam)
       .values({
         userId,
         pitchId,
-        designation: designation || "Team Member", // Default if not provided
+        designation: designation || "Team Member",
       })
       .returning();
+
+    // Notification for invited user
+    await createNotification({
+      type: "updates",
+      title: "Pitch Invitation",
+      description: `You are invited to the ${pitchName}`,
+      targeted_users: [userId],
+      role: "founder",
+    });
 
     return NextResponse.json(
       {
@@ -143,7 +151,6 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("Error adding team member:", error);
 
-    // Handle foreign key violation (e.g., invalid userId or pitchId)
     if (error.code === "23503") {
       return NextResponse.json(
         {
@@ -155,7 +162,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Handle duplicate entry (if userId+pitchId is unique)
     if (error.code === "23505") {
       return NextResponse.json(
         { error: "This user is already a team member for this pitch" },
