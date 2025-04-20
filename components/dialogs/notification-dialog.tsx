@@ -124,7 +124,6 @@ export function NotificationDialog({
             (notif.role === "both" || notif.role === role)
         );
         console.log("Filtered Notifications:", filteredNotifications);
-
         setNotifications(filteredNotifications);
       }
     };

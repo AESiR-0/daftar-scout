@@ -6,6 +6,8 @@ import { AgeRange } from "./components/age-range";
 import { Combobox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import { z } from "zod";
@@ -30,79 +32,42 @@ const MapComponent = dynamic(() => import("@/components/map"), {
 });
 
 // Constants
-const communitiesData = [
-  { label: "Auto - rickshaw drivers", value: "auto-rickshaw" },
-  { label: "Black Lives Matter activists", value: "black-lives" },
-  { label: "Coastal cleanup crews", value: "coastal" },
-  {
-    label: "Criminals seeking to change their lives positively",
-    value: "criminals",
-  },
-  { label: "Delivery gig workers", value: "delivery" },
-  { label: "Doctors in tech", value: "doctors" },
-  { label: "Eco - friendly fashion designers", value: "eco-friendly" },
-  { label: "Engineers", value: "engineers" },
-  { label: "Failed startup founders", value: "failed" },
-  { label: "Farmers", value: "farmers" },
-  { label: "Government school students", value: "government" },
-  { label: "Homeless", value: "homeless" },
-  { label: "Influencers with 1 million followers", value: "influencers" },
-  { label: "LGBTQ +", value: "lgbtq" },
-  { label: "Management students", value: "management" },
-  { label: "McKinsey consultants", value: "mckinsey" },
-  { label: "Migrants", value: "migrants" },
-  { label: "News and media", value: "news" },
-  { label: "People of Andaman & Lakshadweep", value: "andaman" },
-  { label: "People of Ladakh", value: "ladakh" },
-  { label: "People with disabilities", value: "disabled" },
-  { label: "People with special home remedies", value: "home-remedies" },
-  { label: "Refugees", value: "refugees" },
-  { label: "Residents of old age homes", value: "old-age" },
-  { label: "Retired professionals", value: "retired" },
-  { label: "Second - time founders", value: "second-time" },
-  { label: "Sewage cleaners", value: "sewage" },
-  { label: "Social impact founders", value: "social-impact" },
-  { label: "Special Forces and Armed Forces", value: "special-forces" },
-  { label: "Street food vendors", value: "street-food" },
-  { label: "Ukrainian war refugees", value: "ukrainian" },
-  { label: "Under 25 founders", value: "under-25" },
-  { label: "Urban waste management workers", value: "waste-management" },
-  { label: "War Soldiers", value: "war-soldiers" },
-  { label: "Women", value: "women" },
-];
-
-const sectors = [
-  { value: "accounting", label: "Accounting Technology" },
-  { value: "agriculture", label: "Agriculture Technology" },
-  { value: "ai", label: "AI (Artificial Intelligence)" },
-  { value: "aging", label: "Aging and Elderly Care Tech" },
-  { value: "amazon", label: "Amazon Delivery Services" },
-  { value: "augmented", label: "Augmented Reality" },
-  { value: "automated", label: "Automated Bookkeeping" },
-  { value: "automation", label: "Automation" },
-  { value: "beauty", label: "Beauty Tech" },
-  { value: "biotechnology", label: "Biotechnology" },
-  { value: "blockchain", label: "Blockchain" },
-  { value: "b2b", label: "B2B Platforms" },
-  { value: "b2c", label: "B2C Platforms" },
-  { value: "catering", label: "Catering Technology" },
-  { value: "cloud", label: "Cloud Computing" },
-  { value: "content", label: "Content Creation" },
-  { value: "cybersecurity", label: "Cybersecurity" },
-  { value: "digital", label: "Digital Marketing" },
-  { value: "education", label: "E-learning Platforms" },
-  { value: "gaming", label: "Gaming" },
-  { value: "healthcare", label: "Healthcare" },
-  { value: "investment", label: "Investment Platforms" },
-  { value: "legaltech", label: "LegalTech" },
-  { value: "machine-learning", label: "Machine Learning (ML)" },
-  { value: "mobile", label: "Mobile Apps" },
-  { value: "real-estate", label: "Real Estate" },
-  { value: "robotics", label: "Robotics" },
-  { value: "saas", label: "SaaS (Software as a Service)" },
-  { value: "social-impact", label: "Social Impact" },
-  { value: "telemedicine", label: "Telemedicine" },
-  { value: "transportation", label: "Transportation" },
+const communities = [
+  { value: "Auto-rickshaw drivers", label: "Auto-rickshaw drivers" },
+  { value: "Black Lives Matter activists", label: "Black Lives Matter activists" },
+  { value: "Coastal cleanup crews", label: "Coastal cleanup crews" },
+  { value: "Criminals seeking to change their lives positively", label: "Criminals seeking to change their lives positively" },
+  { value: "Delivery gig workers", label: "Delivery gig workers" },
+  { value: "Doctors in tech", label: "Doctors in tech" },
+  { value: "Eco-friendly fashion designers", label: "Eco-friendly fashion designers" },
+  { value: "Engineers", label: "Engineers" },
+  { value: "Failed startup founders", label: "Failed startup founders" },
+  { value: "Farmers", label: "Farmers" },
+  { value: "Government school students", label: "Government school students" },
+  { value: "Homeless", label: "Homeless" },
+  { value: "Influencers with 1 million followers", label: "Influencers with 1 million followers" },
+  { value: "LGBTQ+", label: "LGBTQ+" },
+  { value: "Management students", label: "Management students" },
+  { value: "McKinsey consultants", label: "McKinsey consultants" },
+  { value: "Migrants", label: "Migrants" },
+  { value: "News and media", label: "News and media" },
+  { value: "People of Andaman & Lakshadweep", label: "People of Andaman & Lakshadweep" },
+  { value: "People of Ladakh", label: "People of Ladakh" },
+  { value: "People with disabilities", label: "People with disabilities" },
+  { value: "People with special home remedies", label: "People with special home remedies" },
+  { value: "Refugees", label: "Refugees" },
+  { value: "Residents of old age homes", label: "Residents of old age homes" },
+  { value: "Retired professionals", label: "Retired professionals" },
+  { value: "Second-time founders", label: "Second-time founders" },
+  { value: "Sewage cleaners", label: "Sewage cleaners" },
+  { value: "Social impact founders", label: "Social impact founders" },
+  { value: "Special Forces and Armed Forces", label: "Special Forces and Armed Forces" },
+  { value: "Street food vendors", label: "Street food vendors" },
+  { value: "Ukrainian war refugees", label: "Ukrainian war refugees" },
+  { value: "Under 25 founders", label: "Under 25 founders" },
+  { value: "Urban waste management workers", label: "Urban waste management workers" },
+  { value: "War Soldiers", label: "War Soldiers" },
+  { value: "Women", label: "Women" },
 ];
 
 const stages = [
@@ -116,7 +81,10 @@ const stages = [
 const genders = [
   { value: "male", label: "Male Only Team" },
   { value: "female", label: "Female Only Team" },
-  { value: "others", label: "Others" },
+  { value: "Transgender", label: "Transgender" },
+  { value: "Atleast one Male", label: "Atleast one Male" },
+  { value: "Atleast one Female", label: "Atleast one Female" },
+  { value: "Open to All", label: "Open to All" },
 ];
 
 // Zod Schema
@@ -153,7 +121,7 @@ export default function AudiencePage() {
   });
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
-  const [scoutCommunity, setScoutCommunity] = useState<string>("auto-rickshaw");
+  const [scoutCommunity, setScoutCommunity] = useState<string>("");
   const [targetedGender, setTargetedGender] = useState<string>("");
   const [scoutStage, setScoutStage] = useState<string>("");
   const [scoutSector, setScoutSector] = useState<string[]>([]);
@@ -161,6 +129,7 @@ export default function AudiencePage() {
   const [targetAudAgeEnd, setTargetAudAgeEnd] = useState<number>(65);
 
   const [openFilters, setOpenFilters] = useState(false);
+  const [sectors, setSectors] = useState<{ value: string; label: string }[]>([]);
 
   // Temporary state for dialog
   const [tempScoutCommunity, setTempScoutCommunity] =
@@ -174,6 +143,24 @@ export default function AudiencePage() {
     targetAudAgeEnd,
   ]);
 
+  // Fetch sectors data
+  const fetchSectorsData = async () => {
+    try {
+      const res = await fetch("/api/endpoints/focus-sectors");
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
+      }
+      const { data } = await res.json();
+      const formattedSectors = data.map((sector: string) => ({
+        value: sector,
+        label: sector,
+      }));
+      setSectors(formattedSectors);
+    } catch (error) {
+      console.error("Error fetching sectors data:", error);
+    }
+  };
+
   // Fetch initial data
   const fetchInitialData = async () => {
     try {
@@ -185,7 +172,6 @@ export default function AudiencePage() {
       }
       const data = await res.json();
       const parsed = AudienceSchema.parse(data.data);
-      console.log("Parsed data:", parsed, "data", data);
       setTargetAudLocation(parsed.targetAudLocation || "");
       setScoutCommunity(parsed.scoutCommunity || "");
       setTargetedGender(parsed.targetedGender || "");
@@ -241,6 +227,7 @@ export default function AudiencePage() {
   };
 
   useEffect(() => {
+    fetchSectorsData();
     fetchInitialData();
   }, [scoutId]);
 
@@ -372,6 +359,7 @@ export default function AudiencePage() {
             value={targetAudLocation}
             onChange={(e) => handleLocationInput(e.target.value)}
             onBlur={handleLocationBlur}
+            className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
           />
           <div className="w-full h-[400px] rounded-lg overflow-hidden border">
             <MapComponent coordinates={coordinates} />
@@ -382,18 +370,19 @@ export default function AudiencePage() {
         <div>
           <Dialog open={openFilters} onOpenChange={setOpenFilters}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="rounded-[0.35rem">Edit Audience Filters</Button>
+              <Button variant="outline" className="rounded-[0.35rem]">
+                Edit Audience Filters
+              </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md bg-[#1a1a1a] text-white border-none rounded-[0.35rem]">
               <DialogHeader>
                 <DialogTitle>Audience Filters</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div>
+                  <Label>Community</Label>
                   <Combobox
-                    options={communitiesData.map(
-                      (community) => community.value
-                    )}
+                    options={communities.map((community) => community.value)}
                     value={tempScoutCommunity}
                     onSelect={(value) => setTempScoutCommunity(value)}
                     placeholder="Select a Community"
@@ -401,6 +390,7 @@ export default function AudiencePage() {
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-1">
+                    <Label>Age Range</Label>
                     <AgeRange
                       minAge={tempAgeRange[0].toString()}
                       maxAge={tempAgeRange[1].toString()}
@@ -413,6 +403,7 @@ export default function AudiencePage() {
                     />
                   </div>
                   <div className="flex-1">
+                    <Label>Gender</Label>
                     <Combobox
                       options={genders.map((gender) => gender.value)}
                       value={tempTargetedGender}
@@ -422,6 +413,7 @@ export default function AudiencePage() {
                   </div>
                 </div>
                 <div>
+                  <Label>Stage</Label>
                   <Combobox
                     options={stages.map((stage) => stage.value)}
                     value={tempScoutStage}
@@ -429,20 +421,41 @@ export default function AudiencePage() {
                     placeholder="Select a Stage"
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
+                  <Label>Focus Sectors (Multiple Select)</Label>
                   <Combobox
                     options={sectors.map((sector) => sector.value)}
-                    value={tempScoutSector.join(", ")}
-                    onSelect={(value) => handleSectorSelect(value)}
-                    placeholder="Select Sectors"
+                    onSelect={handleSectorSelect}
+                    placeholder="Add sectors"
                   />
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {tempScoutSector.map((sector, index) => (
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="text-xs cursor-pointer hover:bg-muted bg-[#2a2a2a] text-white rounded-[0.35rem]"
+                        onClick={() => handleSectorSelect(sector)}
+                      >
+                        {sector} <X className="h-3 w-3 ml-1" />
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={clearFilters}>
+                <Button
+                  variant="outline"
+                  className="rounded-[0.35rem]"
+                  onClick={clearFilters}
+                >
                   Clear Filters
                 </Button>
-                <Button variant="outline" className="bg-blue-500" onClick={applyFilters}>Apply</Button>
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
+                  onClick={applyFilters}
+                >
+                  Apply
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
