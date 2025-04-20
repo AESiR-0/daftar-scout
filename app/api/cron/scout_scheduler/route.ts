@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { scouts } from "@/backend/drizzle/models/scouts";
+import { scouts, daftarScouts } from "@/backend/drizzle/models/scouts";
+import { daftarInvestors } from "@/backend/drizzle/models/daftar";
 import { and, eq, lte } from "drizzle-orm";
 
 export async function GET() {

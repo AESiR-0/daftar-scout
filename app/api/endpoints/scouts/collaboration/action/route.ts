@@ -3,7 +3,7 @@ import { daftarScouts } from "@/backend/drizzle/models/scouts";
 import { scouts } from "@/backend/drizzle/models/scouts";
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
 import { users } from "@/backend/drizzle/models/users";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { createNotification } from "@/lib/notifications/insert";
@@ -90,12 +90,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Update collaboration request
-  const updated = await db
+  await db
     .update(daftarScouts)
     .set({
       isPending: false,
-      // Optionally, you could add a status field to daftarScouts if you want to track accept/reject explicitly
     })
     .where(eq(daftarScouts.id, collaboration[0].id));
 
@@ -121,11 +119,18 @@ export async function POST(req: NextRequest) {
   const relatedInvestors = await db
     .select({ investorId: daftarInvestors.investorId })
     .from(daftarInvestors)
-    .where(daftarInvestors.daftarId.in(uniqueDaftarIds));
+    .where(
+      inArray(
+        daftarInvestors.daftarId,
+        uniqueDaftarIds.filter(
+          (id): id is string => id !== null && id !== undefined
+        )
+      )
+    );
 
   const targetedInvestorIds = Array.from(
     new Set(relatedInvestors.map((i) => i.investorId))
-  );
+  ).filter((id): id is string => id !== null);
 
   await createNotification({
     type: "updates",
