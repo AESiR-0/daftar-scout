@@ -36,13 +36,19 @@ interface ActivityLog {
   timestamp: string;
 }
 
+const emptyStateMessages: Record<string, string> = {
+  private: "No file uploaded. Documents will only be visible to your team.",
+  received: "The Received folder is empty for now.",
+  sent: "The Sent folder is empty for now.",
+};
+
 export default function DocumentsPage() {
   const pathname = usePathname();
   const pitchId = pathname.split("/")[3];
-  const scoutId = pathname.split("/")[2]; // Fixed typo: pathaname -> pathname
+  const scoutId = pathname.split("/")[2];
   const { toast } = useToast();
   const [documentsList, setDocumentsList] = useState<Document[]>([]);
-  const [activeTab, setActiveTab] = useState<"received" | "sent">("received");
+  const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("received");
 
   // Fetch documents on mount
   useEffect(() => {
@@ -61,11 +67,11 @@ export default function DocumentsPage() {
           id: doc.id,
           name: doc.docType,
           uploadedBy: doc.uploadedBy || "N/A",
-          daftar: "Unknown", // Not provided by API, placeholder
-          scoutName: "Unknown", // Not provided by API, placeholder
+          daftar: "Unknown",
+          scoutName: "Unknown",
           uploadedAt: formatDate(doc.uploadedAt || new Date().toISOString()),
           type: "sent",
-          size: "Unknown", // Not provided by API, placeholder
+          size: "Unknown",
           isHidden: doc.isPrivate || false,
           logs: [
             {
@@ -76,20 +82,42 @@ export default function DocumentsPage() {
           ],
         }));
 
-        // Map received documents (scoutDocs and investorPitchDocs)
+        // Map received documents
         const receivedDocs: Document[] = received.map((doc: any) => ({
           id: doc.id,
-          name: doc.docType, // Handle scoutDocuments vs pitchDocs
+          name: doc.docType,
           uploadedBy: doc.uploadedBy || "N/A",
-          daftar: "Unknown", // Not provided by API, placeholder
-          scoutName: "Unknown", // Not provided by API, placeholder
+          daftar: "Unknown",
+          scoutName: "Unknown",
           uploadedAt: formatDate(doc.uploadedAt || new Date().toISOString()),
           type: "received",
-          size: "Unknown", // Not provided by API, placeholder
+          size: "Unknown",
           isHidden: doc.isPrivate || false,
         }));
 
-        setDocumentsList([...sentDocs, ...receivedDocs]);
+        // Map private documents (assuming private documents are those marked isPrivate)
+        const privateDocs: Document[] = [...sent, ...received]
+          .filter((doc: any) => doc.isPrivate)
+          .map((doc: any) => ({
+            id: doc.id,
+            name: doc.docType,
+            uploadedBy: doc.uploadedBy || "N/A",
+            daftar: "Unknown",
+            scoutName: "Unknown",
+            uploadedAt: formatDate(doc.uploadedAt || new Date().toISOString()),
+            type: "private",
+            size: "Unknown",
+            isHidden: true,
+            logs: doc.type === "sent" ? [
+              {
+                action: "Uploaded",
+                timestamp: formatDate(doc.uploadedAt || new Date().toISOString()),
+                user: doc.uploadedBy || "N/A",
+              },
+            ] : [],
+          }));
+
+        setDocumentsList([...sentDocs, ...receivedDocs, ...privateDocs]);
       } catch (error) {
         console.error("Error fetching documents:", error);
         toast({
@@ -120,7 +148,6 @@ export default function DocumentsPage() {
             const formData = new FormData();
             formData.append("file", file);
 
-            // Simulate file upload to get docUrl (replace with actual file upload logic)
             const docUrl = await uploadFounderPitchDocument(
               file,
               pitchId,
@@ -136,7 +163,7 @@ export default function DocumentsPage() {
                   docName: file.name,
                   docType: file.type || file.name.split(".").pop(),
                   docUrl,
-                  isPrivate: false,
+                  isPrivate: activeTab === "private",
                 }),
               }
             );
@@ -156,7 +183,7 @@ export default function DocumentsPage() {
               uploadedAt: formatDate(
                 insertedDoc.uploadedAt || new Date().toISOString()
               ),
-              type: "sent",
+              type: activeTab === "private" ? "private" : "sent",
               size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
               isHidden: insertedDoc.isPrivate || false,
               logs: [
@@ -174,7 +201,7 @@ export default function DocumentsPage() {
           setDocumentsList((prev) => [...newDocs, ...prev]);
           toast({
             title: "Upload successful",
-            description: `${files.length} file(s) uploaded to Sent`,
+            description: `${files.length} file(s) uploaded to ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`,
           });
         } catch (error: any) {
           console.error("Error uploading documents:", error);
@@ -195,7 +222,6 @@ export default function DocumentsPage() {
       title: "Downloading file",
       description: `Started downloading ${doc.name}`,
     });
-    // Placeholder: Implement actual download logic
     window.open(`https://example.com/uploads/${doc.name}`, "_blank");
   };
 
@@ -204,13 +230,11 @@ export default function DocumentsPage() {
       title: "Opening document",
       description: `Opening ${doc.name} for viewing`,
     });
-    // Placeholder: Implement actual view logic
     window.open(`https://example.com/uploads/${doc.name}`, "_blank");
   };
 
   const handleDelete = async (docId: string) => {
     try {
-      // Placeholder: Implement actual DELETE endpoint
       const response = await fetch(`/api/endpoints/pitch/delete/${docId}`, {
         method: "DELETE",
       });
@@ -238,7 +262,6 @@ export default function DocumentsPage() {
 
   const handleToggleVisibility = async (docId: string) => {
     try {
-      // Placeholder: Implement actual PATCH endpoint to toggle isPrivate
       const doc = documentsList.find((d) => d.id === docId);
       if (!doc) return;
 
@@ -255,18 +278,18 @@ export default function DocumentsPage() {
       }
 
       setDocumentsList((prev) =>
-        prev.map((doc) => {
-          if (doc.id === docId) {
-            const newVisibility = !doc.isHidden;
+        prev.map((d) => {
+          if (d.id === docId) {
+            const newVisibility = !d.isHidden;
             toast({
               title: newVisibility ? "Document hidden" : "Document visible",
-              description: `${doc.name} is now ${
+              description: `${d.name} is now ${
                 newVisibility ? "hidden" : "visible"
               }`,
             });
-            return { ...doc, isHidden: newVisibility };
+            return { ...d, isHidden: newVisibility, type: newVisibility ? "private" : d.type };
           }
-          return doc;
+          return d;
         })
       );
     } catch (error: any) {
@@ -294,6 +317,12 @@ export default function DocumentsPage() {
             <div className="flex items-center justify-between mb-6">
               <TabsList>
                 <TabsTrigger
+                  value="private"
+                  className="flex items-center gap-2"
+                >
+                  Private
+                </TabsTrigger>
+                <TabsTrigger
                   value="received"
                   className="flex items-center gap-2"
                 >
@@ -309,6 +338,18 @@ export default function DocumentsPage() {
               </Button>
             </div>
 
+            <TabsContent value="private">
+              <DocumentsList
+                documents={filteredDocuments}
+                canDelete={true}
+                onDownload={handleDownload}
+                onView={handleView}
+                onDelete={handleDelete}
+                onToggleVisibility={handleToggleVisibility}
+                emptyMessage={emptyStateMessages.private}
+              />
+            </TabsContent>
+
             <TabsContent value="received">
               <DocumentsList
                 documents={filteredDocuments}
@@ -317,17 +358,19 @@ export default function DocumentsPage() {
                 onView={handleView}
                 onDelete={handleDelete}
                 onToggleVisibility={handleToggleVisibility}
+                emptyMessage={emptyStateMessages.received}
               />
             </TabsContent>
 
             <TabsContent value="sent">
               <DocumentsList
                 documents={filteredDocuments}
-                canDelete={false}
+                canDelete={true}
                 onDownload={handleDownload}
                 onView={handleView}
                 onDelete={handleDelete}
                 onToggleVisibility={handleToggleVisibility}
+                emptyMessage={emptyStateMessages.sent}
               />
             </TabsContent>
           </Tabs>
@@ -360,6 +403,7 @@ function DocumentsList({
   onView,
   onDelete,
   onToggleVisibility,
+  emptyMessage,
 }: {
   documents: Document[];
   canDelete?: boolean;
@@ -367,11 +411,12 @@ function DocumentsList({
   onView: (doc: Document) => void;
   onDelete: (docId: string) => void;
   onToggleVisibility: (docId: string) => void;
+  emptyMessage: string;
 }) {
   if (documents.length === 0) {
     return (
       <div className="text-center py-8 text-sm text-muted-foreground">
-        No documents found
+        {emptyMessage}
       </div>
     );
   }

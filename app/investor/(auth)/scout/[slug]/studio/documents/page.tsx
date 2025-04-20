@@ -55,6 +55,12 @@ interface ApiDocument {
   daftarName: string | null;
 }
 
+const emptyStateMessages: Record<string, string> = {
+  private: "No file uploaded. Documents will only be visible to your team.",
+  received: "The Received folder is empty for now.",
+  sent: "The Sent folder is empty for now.",
+};
+
 export default function DocumentsPage() {
   const { toast } = useToast();
   const daftarId = useDaftar().selectedDaftar;
@@ -181,13 +187,8 @@ export default function DocumentsPage() {
 
     try {
       for (const file of Array.from(selectedFiles)) {
-        console.log("Uploading file:", file, selectedFiles);
+        const url = await uploadInvestorPitchDocument(file, scoutId);
 
-        // Simulate file upload and get a URL (mocking Supabase Storage)
-        const url = await uploadInvestorPitchDocument(file, scoutId); // Upload to Supabase Storage
-        console.log(url);
-
-        // Save document metadata via POST /api/scout-documents
         const response = await fetch("/api/endpoints/scouts/documents", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -207,10 +208,10 @@ export default function DocumentsPage() {
         }
 
         const newDoc: Document = {
-          id: Math.random().toString(36).substr(2, 9), // Temporary ID
+          id: Math.random().toString(36).substr(2, 9),
           name: file.name,
-          uploadedBy: "Current User", // Replace with actual user name from session
-          daftar: "Unknown Daftar", // Updated on next fetch
+          uploadedBy: "Current User",
+          daftar: "Unknown Daftar",
           scoutName: "Scout",
           uploadedAt: formatDate(new Date().toISOString()),
           type,
@@ -251,8 +252,7 @@ export default function DocumentsPage() {
   };
 
   const handleDownload = (doc: Document) => {
-    // Simulate download (use docUrl if stored)
-    window.open(doc.url, "_blank"); // Placeholder, replace with docUrl
+    window.open(doc.url, "_blank");
     toast({
       title: "Downloading file",
       description: `Started downloading ${doc.name}`,
@@ -266,8 +266,7 @@ export default function DocumentsPage() {
   };
 
   const handleView = (doc: Document) => {
-    // Simulate view (use docUrl if stored)
-    window.open(doc.url, "_blank"); // Placeholder, replace with docUrl
+    window.open(doc.url, "_blank");
     toast({
       title: "Opening document",
       description: `Opening ${doc.name} for viewing`,
@@ -374,6 +373,7 @@ export default function DocumentsPage() {
                   onView={handleView}
                   onDelete={handleDelete}
                   onToggleVisibility={handleToggleVisibility}
+                  emptyMessage={emptyStateMessages.private}
                 />
               </TabsContent>
 
@@ -385,6 +385,7 @@ export default function DocumentsPage() {
                   onView={handleView}
                   onDelete={handleDelete}
                   onToggleVisibility={handleToggleVisibility}
+                  emptyMessage={emptyStateMessages.received}
                 />
               </TabsContent>
 
@@ -396,6 +397,7 @@ export default function DocumentsPage() {
                   onView={handleView}
                   onDelete={handleDelete}
                   onToggleVisibility={handleToggleVisibility}
+                  emptyMessage={emptyStateMessages.sent}
                 />
               </TabsContent>
             </Tabs>
@@ -450,6 +452,7 @@ function DocumentsList({
   onView,
   onDelete,
   onToggleVisibility,
+  emptyMessage,
 }: {
   documents?: Document[];
   canDelete?: boolean;
@@ -457,11 +460,12 @@ function DocumentsList({
   onView: (doc: Document) => void;
   onDelete: (docId: string) => void;
   onToggleVisibility: (docId: string) => void;
+  emptyMessage?: string;
 }) {
-  if (!documents) {
+  if (!documents || documents.length === 0) {
     return (
       <div className="text-center py-8 text-sm text-muted-foreground">
-        No documents found
+        {emptyMessage || "No documents found"}
       </div>
     );
   }

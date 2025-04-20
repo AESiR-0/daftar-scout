@@ -102,7 +102,7 @@ export default function DetailsPage() {
                     description: e.target.value,
                   }))
                 }
-                placeholder="Describe your vision"
+                placeholder="Use this space to explain why you're scouting this startup and what specific value you're hoping it adds to your portfolio. This helps your team understand your thinking and stay focused while scouting."
               ></textarea>
             </div>
           </div>

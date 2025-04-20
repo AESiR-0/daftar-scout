@@ -101,6 +101,8 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
           </div>
           <div className="flex-1 p-4">
             <EditorContent
+              placeholder="Your journal, your pace.
+A quiet spot to hyper-focus and structure your thoughts."
               editor={editor}
               className="h-full prose max-w-none"
             />

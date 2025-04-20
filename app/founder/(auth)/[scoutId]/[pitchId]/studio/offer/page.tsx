@@ -266,9 +266,8 @@ export default function OffersPage() {
                 <p className="text-muted-foreground">Loading offers...</p>
               )}
               {!isLoading && pendingOffers.length === 0 && (
-                <p className="text-muted-foreground px-4 py-4">
-                  No pending offers
-                </p>
+                <p className="text-muted-foreground px-4 py-4">"Looks empty for now.
+Offers from investors will be shared here."</p>
               )}
               {!isLoading &&
                 pendingOffers.map((offer) => (

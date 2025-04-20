@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearch } from "@/lib/context/search-context";
 import { CreateDaftarDialog } from "@/components/dialogs/create-daftar-dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
 
 type Pitch = {
   id: string;
@@ -27,6 +28,25 @@ const founderStatusOrder = [
   "Withdrawn",
   "Deleted",
 ];
+
+const emptyStateMessages: Record<string, { title: string; description: string }> = {
+  Inbox: {
+    title: "Your Inbox Is Empty",
+    description: "Once an investor reaches out, their offer will appear here.",
+  },
+  Accepted: {
+    title: "No Pitch Accepted Yet",
+    description: "Once either you or the investor accepts the offer, it will show up here.",
+  },
+  Declined: {
+    title: "No Pitch Declined Yet",
+    description: "If you or the investor declines an offer, it will appear here.",
+  },
+  Withdrawn: {
+    title: "No Pitch Withdrawn Yet",
+    description: "When a pitch is withdrawn by you or the investor, it’ll show up here.",
+  },
+};
 
 type PitchBoardPageProps = {
   pitches: Pitch[];
@@ -99,32 +119,42 @@ export default function PitchBoardPage({ pitches }: PitchBoardPageProps) {
                   </div>
 
                   <ScrollArea className="h-[calc(100vh-16rem)]">
-                    <div className="space-y-3">
-                      {statusPitches.map((pitch) => (
-                        <Link
-                          key={pitch.id}
-                          href={`/founder/${pitch.scoutId}/${pitch.id}/studio`}
-                        >
-                          <div className="p-4 rounded-[0.35rem] mb-2 bg-background border hover:bg-muted hover:border-muted transition-all duration-200 ease-in-out cursor-pointer">
-                            <div className="space-y-3">
-                              <div>
-                                <h4 className="font-medium text-sm">
-                                  {pitch.pitchName}
-                                </h4>
-                                <div className="flex flex-col gap-1 mt-1">
-                                  {/* <p className="text-xs text-muted-foreground mb-2">
-                                    Collaboration: {pitch.}
-                                  </p> */}
-                                  <p className="text-xs font-medium">
-                                    Pitch Location: {pitch.location}
-                                  </p>
+                    {statusPitches.length === 0 && emptyStateMessages[status] ? (
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <Card className="w-full p-4 bg-muted/50  rounded-[0.35rem]">
+                        <h4 className="text-md text-muted-foreground">
+                          {emptyStateMessages[status].title}
+                        </h4>
+                        <p className="text-xs text-left text-muted-foreground mt-2">
+                          {emptyStateMessages[status].description}
+                        </p>
+                        </Card>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {statusPitches.map((pitch) => (
+                          <Link
+                            key={pitch.id}
+                            href={`/founder/${pitch.scoutId}/${pitch.id}/studio`}
+                          >
+                            <div className="p-4 rounded-[0.35rem] mb-2 bg-background border hover:bg-muted hover:border-muted transition-all duration-200 ease-in-out cursor-pointer">
+                              <div className="space-y-3">
+                                <div>
+                                  <h4 className="font-medium text-sm">
+                                    {pitch.pitchName}
+                                  </h4>
+                                  <div className="flex flex-col gap-1 mt-1">
+                                    <p className="text-xs font-medium">
+                                      Pitch Location: {pitch.location}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </ScrollArea>
                 </div>
               );

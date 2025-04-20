@@ -47,6 +47,7 @@ export function ScoutSidebar({
   const pathname = usePathname();
   const isStudio = pathname.includes("studio");
   const scoutId = pathname.split("/")[3];
+
   useEffect(() => {
     if (pathname.includes("planning") || pathname.includes("scheduled")) {
       setIsShowScroll(false);
@@ -84,7 +85,7 @@ export function ScoutSidebar({
     };
 
     fetchData();
-  }, []);
+  }, [scoutId]);
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
@@ -126,7 +127,7 @@ export function ScoutSidebar({
 
   if (isScheduling) {
     return (
-      <div className="w-[16rem]  p-4  h-full">
+      <div className="w-[16rem] p-4 h-full">
         <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
           <div className="border-b shrink-0">
             <div className="border-b px-4 py-4">
@@ -159,7 +160,7 @@ export function ScoutSidebar({
             <Button
               variant="link"
               size="sm"
-              className="w-full px-0 py-0  text-white justify-start"
+              className="w-full px-0 py-0 text-white justify-start"
               onClick={() => setUpdatesOpen(true)}
             >
               Updates
@@ -174,7 +175,7 @@ export function ScoutSidebar({
                 <div key={index}>
                   <Button
                     variant="ghost"
-                    className="w-full px-2 justify-between font-normal "
+                    className="w-full px-2 justify-between font-normal"
                     onClick={() => toggleSection(section.id)}
                   >
                     <div className="flex items-center gap-2">
@@ -192,27 +193,33 @@ export function ScoutSidebar({
 
                   {expandedSections.includes(section.id) && (
                     <div key={section.id} className="mx-4 space-y-2 mt-2">
-                      {section.pitches.map((pitch, index) => (
-                        <Link
-                          key={index}
-                          href={`/investor/scout/${scoutId}/details/${pitch.pitchId}`}
-                        >
-                          <Card className="hover:bg-muted/50 mt-1 transition-colors">
-                            <CardContent className="p-4 space-y-2">
-                              <h3 className="font-medium text-sm">
-                                {pitch.pitchName}
-                              </h3>
-                              <div className="text-xs text-muted-foreground">
-                                <p>NPS Score: {pitch.averageNPS}</p>
-                                <p>
-                                  Interested Team Members:{" "}
-                                  {pitch.interestedCount}
-                                </p>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </Link>
-                      ))}
+                      {section.pitches.length === 0 ? (
+                        <div className="text-center py-4 text-sm text-muted-foreground">
+                          Looks empty for now
+                        </div>
+                      ) : (
+                        section.pitches.map((pitch, index) => (
+                          <Link
+                            key={index}
+                            href={`/investor/scout/${scoutId}/details/${pitch.pitchId}`}
+                          >
+                            <Card className="hover:bg-muted/50 mt-1 transition-colors">
+                              <CardContent className="p-4 space-y-2">
+                                <h3 className="font-medium text-sm">
+                                  {pitch.pitchName}
+                                </h3>
+                                <div className="text-xs text-muted-foreground">
+                                  <p>NPS Score: {pitch.averageNPS}</p>
+                                  <p>
+                                    Interested Team Members:{" "}
+                                    {pitch.interestedCount}
+                                  </p>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        ))
+                      )}
                     </div>
                   )}
                 </div>

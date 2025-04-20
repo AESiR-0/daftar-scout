@@ -145,6 +145,7 @@ export function InvestorsNote({
         <div className="border h-[400px] rounded-xl overflow-hidden">
           <EditorContent
             editor={editor}
+            placeholder="Use this space to write down anything important about the startup—opportunities, concerns, questions, or insights. Share what stands out, what feels risky, or what we should do next. This helps the team make faster and smarter investment decisions."
             className="w-full h-full bg-[#1a1a1a] rounded-xl"
           />
         </div>

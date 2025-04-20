@@ -68,7 +68,7 @@ export default function PitchesList({ pitchBoard }: PitchesListProps) {
   if (pitches.length === 0) {
     return (
       <div className="flex items-center justify-center h-[40vh]">
-        <p className="text-lg text-muted-foreground">No pitches available</p>
+        <p className="text-lg text-muted-foreground">You haven’t pitched yet. Click the Scout button to pitch your startup to investors.</p>
       </div>
     );
   }

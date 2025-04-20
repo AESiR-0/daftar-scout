@@ -817,7 +817,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   Loading feature requests...
                 </p>
               ) : featureHistory.length === 0 ? (
-                <p className="text-muted-foreground">No feature requests yet</p>
+                <p className="text-muted-foreground">No feature request shared</p>
               ) : (
                 <div className="space-y-4">
                   {featureHistory.map((feature) => (
