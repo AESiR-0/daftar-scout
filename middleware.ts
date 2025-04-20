@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { db } from "@/backend/database";
-import { users } from "@/backend/drizzle/models/users";
-import { eq } from "drizzle-orm";
 
 export async function middleware(req: NextRequest) {
-  // 1. Check for mobile devices
   const userAgent = req.headers.get("user-agent") || "";
-  const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-    userAgent.toLowerCase()
-  );
+  const isMobile =
+    /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+      userAgent.toLowerCase()
+    );
 
   if (isMobile) {
     return new Response(

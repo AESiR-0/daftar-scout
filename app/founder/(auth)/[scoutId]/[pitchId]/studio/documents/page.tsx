@@ -48,7 +48,9 @@ export default function DocumentsPage() {
   const scoutId = pathname.split("/")[2];
   const { toast } = useToast();
   const [documentsList, setDocumentsList] = useState<Document[]>([]);
-  const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("received");
+  const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">(
+    "received"
+  );
 
   // Fetch documents on mount
   useEffect(() => {
@@ -108,13 +110,18 @@ export default function DocumentsPage() {
             type: "private",
             size: "Unknown",
             isHidden: true,
-            logs: doc.type === "sent" ? [
-              {
-                action: "Uploaded",
-                timestamp: formatDate(doc.uploadedAt || new Date().toISOString()),
-                user: doc.uploadedBy || "N/A",
-              },
-            ] : [],
+            logs:
+              doc.type === "sent"
+                ? [
+                    {
+                      action: "Uploaded",
+                      timestamp: formatDate(
+                        doc.uploadedAt || new Date().toISOString()
+                      ),
+                      user: doc.uploadedBy || "N/A",
+                    },
+                  ]
+                : [],
           }));
 
         setDocumentsList([...sentDocs, ...receivedDocs, ...privateDocs]);
@@ -201,7 +208,9 @@ export default function DocumentsPage() {
           setDocumentsList((prev) => [...newDocs, ...prev]);
           toast({
             title: "Upload successful",
-            description: `${files.length} file(s) uploaded to ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`,
+            description: `${files.length} file(s) uploaded to ${
+              activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
+            }`,
           });
         } catch (error: any) {
           console.error("Error uploading documents:", error);
@@ -287,7 +296,11 @@ export default function DocumentsPage() {
                 newVisibility ? "hidden" : "visible"
               }`,
             });
-            return { ...d, isHidden: newVisibility, type: newVisibility ? "private" : d.type };
+            return {
+              ...d,
+              isHidden: newVisibility,
+              type: newVisibility ? "private" : d.type,
+            };
           }
           return d;
         })
@@ -312,7 +325,9 @@ export default function DocumentsPage() {
         <CardContent className="space-y-6">
           <Tabs
             defaultValue="received"
-            onValueChange={(value) => setActiveTab(value as typeof activeTab)}
+            onValueChange={(value: string) =>
+              setActiveTab(value as typeof activeTab)
+            }
           >
             <div className="flex items-center justify-between mb-6">
               <TabsList>
