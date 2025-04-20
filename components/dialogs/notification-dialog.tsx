@@ -232,17 +232,16 @@ export function NotificationDialog({
                     >
                       <div className="p-4 space-y-4">
                         <h4 className="text-sm font-medium">
-                          {notification.payload.daftar_id
-                            ? `Scout for Daftar ${notification.payload.daftar_id}`
-                            : "Unknown Scout"}
+                          Scout request for collaboration
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          {notification.payload.action ||
-                            "Scout request for collaboration"}
+                          {notification.payload.scout_id
+                            ? `Scout : ${notification.payload.scout_id}`
+                            : "Unknown Scout"}{" "}
                         </p>
                         <div className="space-y-1">
                           <p className="text-xs text-muted-foreground">
-                            Daftar:{" "}
+                            Daftar:
                             {notification.payload.daftar_id || "Unknown Daftar"}
                           </p>
                           <time className="text-xs text-muted-foreground block">

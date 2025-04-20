@@ -1,23 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { offers, offerActions } from "@/backend/drizzle/models/pitch";
-import { eq, and } from "drizzle-orm";
+import { auth } from "@/auth";
+import {
+  offers,
+  offerActions,
+  pitchTeam,
+  pitch,
+  pitchFocusSectors,
+  focusSectors,
+} from "@/backend/drizzle/models/pitch";
+import { users } from "@/backend/drizzle/models/users";
+import { eq, and, inArray } from "drizzle-orm";
+import { createNotification } from "@/lib/notifications/insert";
 
-export async function GET(
-  req: NextRequest
-) {
+export async function GET(req: NextRequest) {
   try {
-    const pitchId = req.headers.get("pitch_id");
+    const { searchParams } = new URL(req.url);
+    const pitchId = searchParams.get("pitchId");
 
-    // Validate path parameter
+    // Fetch offers for the pitch
     if (!pitchId) {
       return NextResponse.json(
-        { error: "pitch_id is required" },
+        { error: "pitchId is required" },
         { status: 400 }
       );
     }
 
-    // Fetch offers for the pitch
     const pitchOffers = await db
       .select({
         id: offers.id,
@@ -34,16 +42,39 @@ export async function GET(
     return NextResponse.json(pitchOffers, { status: 200 });
   } catch (error) {
     console.error("Error fetching offers:", error);
-    return NextResponse.json({ error: "Failed to fetch offers" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch offers" },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(
-  req: NextRequest
-) {
+export async function POST(req: NextRequest) {
   try {
-    const postBody = await req.json();
-    const { pitchId } = postBody;
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { user } = session;
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    if (!user?.email) {
+      return NextResponse.json(
+        { error: "Invalid user email" },
+        { status: 400 }
+      );
+    }
+    const userId = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, user.email));
+    if (!userId.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    const actionTakenBy = userId[0].id;
+    const body = await req.json();
+    const { offerId, action, notes, pitchId } = body;
 
     // Validate path parameter
     if (!pitchId) {
@@ -54,8 +85,6 @@ export async function POST(
     }
 
     // Parse request body
-    const body = await req.json();
-    const { offerId, action, notes, actionTakenBy } = body;
 
     // Manual validation
     if (!offerId || !Number.isInteger(offerId) || offerId < 1) {
@@ -120,6 +149,37 @@ export async function POST(
       });
     }
 
+    if (action === "accepted" || action === "Accepted") {
+      const userInPitch = await db
+        .select({ id: pitchTeam.userId })
+        .from(pitchTeam)
+        .where(eq(pitchTeam.pitchId, pitchId));
+
+      const userIds = userInPitch
+        .map((user) => user.id)
+        .filter((id) => id !== null);
+      const userNameAge = await db
+        .select({ name: users.name, lastName: users.lastName, age: users.dob })
+        .from(users)
+        .where(inArray(users.id, userIds));
+      const userNameAgeArray = userNameAge.map((user) => {
+        const age = user.age ? parseInt(user.age, 10) : 0;
+        return `${user.name} ${user.lastName} (${age} yrs)`;
+      });
+      const pitchDetails = await db
+        .select({ location: pitch.location, stage: pitch.stage })
+        .from(pitch)
+        .where(eq(pitch.id, pitchId));
+      if (pitchDetails.length === 0) {
+        return NextResponse.json({ error: "Pitch not found" }, { status: 404 });
+      }
+      await createNotification({
+        type: "news",
+        title: ` Congratulations to ${userNameAgeArray} from ${pitchDetails[0].location}.`,
+        description: `Their pitch is now backed by Daftar, disrupting the [Sector] at the ${pitchDetails[0].stage}. Team Daftar OS is excited to see the incredible value they'll bring to their stakeholders.`,
+      });
+    }
+
     // Update offer status in offers table
     await db
       .update(offers)
@@ -130,13 +190,56 @@ export async function POST(
           : offerCheck[0].offerDescription,
       })
       .where(eq(offers.id, offerId));
+    if (action === "accepted" || action === "Accepted") {
+      const userInPitch = await db
+        .select({ id: pitchTeam.userId })
+        .from(pitchTeam)
+        .where(eq(pitchTeam.pitchId, pitchId));
 
+      const userIds = userInPitch
+        .map((user) => user.id)
+        .filter((id) => id !== null);
+      const userNameAge = await db
+        .select({ name: users.name, lastName: users.lastName, age: users.dob })
+        .from(users)
+        .where(inArray(users.id, userIds));
+      const userNameAgeArray = userNameAge.map((user) => {
+        const age = user.age ? parseInt(user.age, 10) : 0;
+        return `${user.name} ${user.lastName} (${age} yrs)`;
+      });
+      const pitchDetails = await db
+        .select({ location: pitch.location, stage: pitch.stage })
+        .from(pitch)
+        .where(eq(pitch.id, pitchId));
+
+      const sectorList = await db
+        .select({ sectorName: focusSectors.sectorName })
+        .from(pitchFocusSectors)
+        .innerJoin(
+          focusSectors,
+          eq(pitchFocusSectors.focusSectorId, focusSectors.id)
+        )
+        .where(eq(pitchFocusSectors.pitchId, pitchId));
+
+      await createNotification({
+        type: "news",
+        title: ` Congratulations to ${userNameAgeArray} from ${pitchDetails[0].location}.`,
+        description: `Their pitch is now backed by Daftar, disrupting the ${sectorList
+          .map((sector) => sector.sectorName)
+          .join(", ")} sector(s) at the ${
+          pitchDetails[0].stage
+        }. Team Daftar OS is excited to see the incredible value they'll bring to their stakeholders.`,
+      });
+    }
     return NextResponse.json(
       { status: "success", message: "Offer action taken successfully" },
       { status: 200 }
     );
   } catch (error) {
     console.error("Error processing offer action:", error);
-    return NextResponse.json({ error: "Failed to process offer action" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to process offer action" },
+      { status: 500 }
+    );
   }
 }

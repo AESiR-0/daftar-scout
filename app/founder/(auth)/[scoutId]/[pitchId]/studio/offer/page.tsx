@@ -13,10 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FounderProfile, FounderProfileProps } from "@/components/FounderProfile";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  FounderProfile,
+  FounderProfileProps,
+} from "@/components/FounderProfile";
 import { Textarea } from "@/components/ui/textarea";
 import { usePitch } from "@/contexts/PitchContext";
+import { usePathname } from "next/navigation";
 
 interface Offer {
   id: string;
@@ -36,7 +45,8 @@ interface ActionLog {
 }
 
 export default function OffersPage() {
-  const { pitchId } = usePitch(); // Get pitchId from context
+  const pathname = usePathname();
+  const pitchId = pathname.split("/")[3]; // Extract pitchId from URL
   const [offers, setOffers] = useState<Offer[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const { toast } = useToast();
@@ -72,13 +82,9 @@ export default function OffersPage() {
   const fetchOffers = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/offers", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(pitchId && { "pitch-id": pitchId }),
-        },
-      });
+      const response = await fetch(
+        `/api/endpoints/pitch/founder/offer?pitchId=${pitchId}`
+      );
       if (!response.ok) throw new Error("Failed to fetch offers");
       const data = await response.json();
 
@@ -88,7 +94,10 @@ export default function OffersPage() {
         pitchId: offer.pitch_id,
         scoutName: offer.investor_id, // Replace with actual investor name if available
         collaboration: offer.offer_desc,
-        status: offer.status === "accepted" || offer.status === "rejected" ? offer.status : "pending",
+        status:
+          offer.status === "accepted" || offer.status === "rejected"
+            ? offer.status
+            : "pending",
         date: formatDate(offer.offer_sent_at),
         responses: [
           {
@@ -120,12 +129,12 @@ export default function OffersPage() {
   ) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/offers", {
+      const response = await fetch("/api/endpoints/pitch/founder/offer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
-          offerId: id,
+          offerId: 2,
           action,
           notes: reason,
           actionTakenBy: currentUser.founder.email, // Replace with auth user ID
@@ -253,9 +262,13 @@ export default function OffersPage() {
                 pendingOffers.length > 2 && "overflow-auto max-h-[300px] pr-4"
               )}
             >
-              {isLoading && <p className="text-muted-foreground">Loading offers...</p>}
+              {isLoading && (
+                <p className="text-muted-foreground">Loading offers...</p>
+              )}
               {!isLoading && pendingOffers.length === 0 && (
-                <p className="text-muted-foreground px-4 py-4">No pending offers</p>
+                <p className="text-muted-foreground px-4 py-4">
+                  No pending offers
+                </p>
               )}
               {!isLoading &&
                 pendingOffers.map((offer) => (
@@ -263,8 +276,12 @@ export default function OffersPage() {
                     key={offer.id}
                     offer={offer}
                     onView={handleViewOffer}
-                    onAccept={(reason) => handleStatusUpdate(offer.id, "accepted", reason)}
-                    onDecline={(reason) => handleStatusUpdate(offer.id, "rejected", reason)}
+                    onAccept={(reason) =>
+                      handleStatusUpdate(offer.id, "accepted", reason)
+                    }
+                    onDecline={(reason) =>
+                      handleStatusUpdate(offer.id, "rejected", reason)
+                    }
                     onWithdraw={(reason) => handleWithdraw(offer.id, reason)}
                   />
                 ))}
@@ -276,9 +293,9 @@ export default function OffersPage() {
               <h2 className="text-lg font-semibold">History</h2>
               <Select
                 value={historyFilter}
-                onValueChange={(value: "all" | "accepted" | "rejected" | "withdrawn") =>
-                  setHistoryFilter(value)
-                }
+                onValueChange={(
+                  value: "all" | "accepted" | "rejected" | "withdrawn"
+                ) => setHistoryFilter(value)}
               >
                 <SelectTrigger className="w-[180px] bg-muted/50">
                   <SelectValue placeholder="Filter by status" />
@@ -318,14 +335,22 @@ export default function OffersPage() {
                     {offer.responses && offer.responses.length > 0 && (
                       <div className="mt-6 space-y-4">
                         {offer.responses
-                          .filter((response) => response.action !== "Offer Received")
+                          .filter(
+                            (response) => response.action !== "Offer Received"
+                          )
                           .map((response, index) => (
                             <div key={index} className="flex flex-col gap-2">
                               <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
-                                <p className="text-sm text-muted-foreground">{response.reason}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {response.reason}
+                                </p>
                                 <div className="items-center gap-2 text-xs text-muted-foreground">
-                                  <span className="capitalize">{response.action} by</span>
-                                  <FounderProfile founder={response.user.founder} />
+                                  <span className="capitalize">
+                                    {response.action} by
+                                  </span>
+                                  <FounderProfile
+                                    founder={response.user.founder}
+                                  />
                                 </div>
                                 <time className="text-xs text-muted-foreground self-end">
                                   {response.timestamp}
@@ -370,7 +395,9 @@ export default function OffersPage() {
               <div className="space-y-2">
                 <h3 className="font-semibold">Scout Information</h3>
                 <p className="text-lg">{selectedOffer.scoutName}</p>
-                <p className="text-sm text-muted-foreground">Submitted on {selectedOffer.date}</p>
+                <p className="text-sm text-muted-foreground">
+                  Submitted on {selectedOffer.date}
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -382,11 +409,16 @@ export default function OffersPage() {
                 <h3 className="font-semibold">Responses</h3>
                 {selectedOffer.responses?.map((response, index) => (
                   <div key={index} className="text-sm">
-                    <span className="text-muted-foreground">{response.timestamp}</span>
+                    <span className="text-muted-foreground">
+                      {response.timestamp}
+                    </span>
                     <p>
-                      {response.action} by <FounderProfile founder={response.user.founder} />
+                      {response.action} by{" "}
+                      <FounderProfile founder={response.user.founder} />
                     </p>
-                    {response.reason && <p className="text-muted-foreground">{response.reason}</p>}
+                    {response.reason && (
+                      <p className="text-muted-foreground">{response.reason}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -424,7 +456,9 @@ function OfferCard({
   onWithdraw: (reason: string) => void;
 }) {
   const [showActionDialog, setShowActionDialog] = useState(false);
-  const [currentAction, setCurrentAction] = useState<"decline" | "withdraw" | null>(null);
+  const [currentAction, setCurrentAction] = useState<
+    "decline" | "withdraw" | null
+  >(null);
 
   const handleAction = (action: "accept" | "decline" | "withdraw") => {
     if (action === "accept") {
@@ -468,9 +502,13 @@ function OfferCard({
                     <span className="capitalize">{response.action} by</span>
                     <FounderProfile founder={response.user.founder} />
                   </div>
-                  <p className="text-sm text-muted-foreground">{response.reason}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {response.reason}
+                  </p>
                 </div>
-                <time className="text-xs text-muted-foreground">{response.timestamp}</time>
+                <time className="text-xs text-muted-foreground">
+                  {response.timestamp}
+                </time>
               </div>
             ))}
         </div>
@@ -517,7 +555,9 @@ function OfferCard({
         <ActionDialog
           open={showActionDialog}
           onOpenChange={setShowActionDialog}
-          title={`${currentAction.charAt(0).toUpperCase()}${currentAction.slice(1)} Offer`}
+          title={`${currentAction.charAt(0).toUpperCase()}${currentAction.slice(
+            1
+          )} Offer`}
           action={currentAction}
           onConfirm={handleConfirmAction}
         />

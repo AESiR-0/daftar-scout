@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { offers, pitch } from "@/backend/drizzle/models/pitch";
+import { offers, pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
+import { createNotification } from "@/lib/notifications/insert";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function GET(req: NextRequest) {
     const pitchId = searchParams.get("pitchId") || null;
 
     // Validate parameters
-    if (!scoutId || !pitchId) { 
+    if (!scoutId || !pitchId) {
       return NextResponse.json(
         { error: "scoutId, pitchId, and investorId are required" },
         { status: 400 }
@@ -86,7 +87,12 @@ export async function POST(req: NextRequest) {
       .from(pitch)
       .where(and(eq(pitch.id, pitchId), eq(pitch.scoutId, scoutId)))
       .limit(1);
+    const usersList = await db
+      .select({ id: pitchTeam.pitchId })
+      .from(pitchTeam)
+      .where(eq(pitchTeam.pitchId, pitchId));
 
+    const userIds = usersList.map((u) => u.id);
     if (pitchCheck.length === 0) {
       return NextResponse.json(
         { error: "Pitch not found for this scoutId and pitchId" },
@@ -112,7 +118,12 @@ export async function POST(req: NextRequest) {
         offeredAt: offers.offeredAt,
         offerStatus: offers.offerStatus,
       });
-
+    await createNotification({
+      type: "updates",
+      title: "New Offer received",
+      description: `You have received a new offer for your pitch "${pitchCheck[0].pitchName}"`,
+      targeted_users: userIds.filter((id): id is string => id !== null),
+    });
     return NextResponse.json(
       {
         status: "success",
