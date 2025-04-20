@@ -9,6 +9,7 @@ import formatDate from "@/lib/formatDate";
 import { X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { InvestorProfile } from "@/components/InvestorProfile";
+import { usePathname } from "next/navigation";
 
 type CollaborationStatus = "Pending" | "Accepted" | "Declined";
 
@@ -30,8 +31,8 @@ export default function CollaborationPage() {
   const { toast } = useToast();
   const [daftarId, setDaftarId] = useState("");
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-
-  const scoutId = "scout_123"; // Replace with dynamic value if needed
+  const pathname = usePathname();
+  const scoutId = pathname.split("/")[3]; // Replace with dynamic value if needed
 
   useEffect(() => {
     const fetchCollaborators = async () => {
