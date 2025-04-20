@@ -116,6 +116,7 @@ export function NotificationDialog({
               notif.targeted_users.includes(userId)) &&
             (notif.role === "both" || notif.role === role)
         );
+        console.log("Filtered Notifications:", filteredNotifications);
         setNotifications(filteredNotifications);
       }
     };

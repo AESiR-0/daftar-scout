@@ -5,8 +5,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
-  title: "Pitch Your Startup in 120 Seconds - Daftar",
-  description: "Share your story in 120 seconds and connect with investors who want to back you at the idea or MVP stage.",
+  title: "Pitch Your Startup in 2.5min - Daftar",
+  description: "Share your story in 2.5min and connect with investors who want to back you at the idea or MVP stage.",
 };
 
 export default function RootLayout({
