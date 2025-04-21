@@ -53,7 +53,7 @@ const emptyStateMessages: Record<UITab, string> = {
   "scout-requests":
     "If a Daftar requests to collaborate with you, you’ll see the notification here.",
   "scout-links":
-    "Once your Daftar creates a scout and it goes live, you’ll receive a unique scout application link right here.\nFeel free to share this link with founders in your social network — anyone you think could be a great fit. Founders can use it to view your scout and apply directly.\n\nTeam Daftar",
+    "Once your Daftar creates a scout and it goes live, you’ll receive a unique scout application link right here.\n\nFeel free to share this link with founders in your social network anyone you think could be a great fit. Founders can use it to view your scout and apply directly.\n\nTeam Daftar",
   updates: "Looks empty here for now.",
   alerts: "Looks empty here for now.",
   news: "When a startup gets selected at Daftar, we’ll share the news here.",
@@ -285,16 +285,21 @@ export function NotificationDialog({
                         className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                       >
                         <div className="p-4 space-y-4">
-                          <h4 className="text-sm font-medium">
-                            {notification.payload.daftar_id
-                              ? `Scout for Daftar ${notification.payload.daftar_id}`
-                              : "Unknown Scout"}
-                          </h4>
+                          <div className="space-y-2">
+                            <h1>Collaboration</h1>
+                          </div>
+
                           <p className="text-sm text-muted-foreground">
-                            {notification.payload.action ||
-                              "Scout request for collaboration"}
+                            {notification.payload.action === "pending"
+                              ? ""
+                              : notification.payload.action}
                           </p>
                           <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">
+                              {notification.payload.daftar_id
+                                ? `Scout for Daftar ${notification.payload.daftar_id}`
+                                : "Scout : Unknown"}
+                            </p>
                             <p className="text-xs text-muted-foreground">
                               Daftar:{" "}
                               {notification.payload.daftar_id ||
@@ -348,7 +353,7 @@ export function NotificationDialog({
                       </Card>
                     ))
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center">
+                  <p className="text-sm text-muted-foreground mt-5 text-left ">
                     {emptyStateMessages["scout-requests"]}
                   </p>
                 )}
@@ -406,7 +411,7 @@ export function NotificationDialog({
                       </Card>
                     ))
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center whitespace-pre-line">
+                  <p className="text-sm text-muted-foreground mt-5 text-left whitespace-pre-line">
                     {emptyStateMessages["scout-links"]}
                   </p>
                 )}

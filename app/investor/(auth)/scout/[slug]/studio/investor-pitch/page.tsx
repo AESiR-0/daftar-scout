@@ -158,7 +158,7 @@ export default function InvestorPitchPage() {
       <CardContent className="pt-6">
         <div className="grid grid-cols-3 gap-8">
           {/* Left Section: Video Upload */}
-          <div className="col-span-2">
+          <div className="col-span-2 ">
             <div className="space-y-4">
               {showSample ? (
                 <div className="border-2 flex flex-col border-dashed border-gray-700 rounded-lg p-6">
