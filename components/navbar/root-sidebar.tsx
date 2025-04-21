@@ -53,8 +53,7 @@ export function RootSidebar() {
                     "my-4"
                   )}
                 >
-                  <item.icon className="h-6 w-6" />
-                  <span className="text-[10px] ml-2">{item.title}</span>
+                  <span className="text-[14px]">{item.title}</span>
                 </button>
               ))}
             </nav>
