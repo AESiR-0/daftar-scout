@@ -175,7 +175,7 @@ export default function InvestorPage() {
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-3.5rem)] px-4 py-12">
       {/* Main Content */}
-      <div className="max-w-6xl w-full space-y-16">
+      <div className="max-w-6xl w-full mt-10 space-y-28">
         {/* Hero Section */}
         <div className="space-y-6 text-center">
           <h1 className="text-7xl font-light tracking-tight">
