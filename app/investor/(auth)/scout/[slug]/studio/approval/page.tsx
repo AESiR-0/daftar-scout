@@ -129,7 +129,7 @@ export default function ApprovalPage() {
                         id="terms"
                         checked={termsAccepted}
                         className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={(checked: boolean) =>
                           setTermsAccepted(checked as boolean)
                         }
                       />
@@ -233,10 +233,7 @@ export default function ApprovalPage() {
                     </>
                   ) : (
                     <div className="text-center py-6">
-                      <Check className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                      <p className="text-sm text-foreground">
-                        No issues found
-                      </p>
+                      <p className="text-sm text-foreground">No issues found</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         Everything looks good for approval.
                       </p>

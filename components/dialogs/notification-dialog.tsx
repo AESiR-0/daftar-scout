@@ -12,9 +12,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import formatDate from "@/lib/formatDate";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase/createClient";
+import { useDaftar } from "@/lib/context/daftar-context";
 
 export type NotificationType =
   | "news"
@@ -49,8 +50,10 @@ type Notification = {
 type UITab = "updates" | "alerts" | "news" | "scout-requests" | "scout-links";
 
 const emptyStateMessages: Record<UITab, string> = {
-  "scout-requests": "If a Daftar requests to collaborate with you, you’ll see the notification here.",
-  "scout-links": "Once your Daftar creates a scout and it goes live, you’ll receive a unique scout application link right here.\nFeel free to share this link with founders in your social network — anyone you think could be a great fit. Founders can use it to view your scout and apply directly.\n\nTeam Daftar",
+  "scout-requests":
+    "If a Daftar requests to collaborate with you, you’ll see the notification here.",
+  "scout-links":
+    "Once your Daftar creates a scout and it goes live, you’ll receive a unique scout application link right here.\nFeel free to share this link with founders in your social network — anyone you think could be a great fit. Founders can use it to view your scout and apply directly.\n\nTeam Daftar",
   updates: "Looks empty here for now.",
   alerts: "Looks empty here for now.",
   news: "When a startup gets selected at Daftar, we’ll share the news here.",
@@ -71,7 +74,11 @@ export function NotificationDialog({
     role === "investor" ? "scout-requests" : "updates"
   );
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const router = useRouter();
+
+  const pathname = usePathname();
+  const scoutId =
+    role == "investor" ? pathname.split("/")[3] : pathname.split("/"[2]);
+  const daftarId = role == "investor" ? useDaftar().selectedDaftar : "";
 
   // Get available tabs based on role
   const availableTabs =
@@ -137,10 +144,6 @@ export function NotificationDialog({
         },
         (payload) => {
           const notif = payload.new as Notification;
-          toast({
-            title: `New notification: ${notif.title || notif.type}`,
-            variant: "default",
-          });
           const isTargeted =
             notif.targeted_users.length === 0 ||
             notif.targeted_users.includes(userId);
@@ -149,6 +152,10 @@ export function NotificationDialog({
 
           if (isTargeted && roleMatches) {
             setNotifications((prev) => [...prev, notif]);
+            toast({
+              title: `New notification: ${notif.title || notif.type}`,
+              variant: "default",
+            });
           }
         }
       )
@@ -186,16 +193,55 @@ export function NotificationDialog({
     };
   }>({});
 
-  const handleAction = (requestId: string, action: "accepted" | "declined") => {
-    setRequestStatuses((prev) => ({
-      ...prev,
-      [requestId]: {
-        action,
-        by: "John Smith",
-        designation: "Investment Director",
-        timestamp: formatDate(new Date().toLocaleString()),
+  const handleAction = async (
+    requestId: string,
+    action: "accept" | "reject"
+  ) => {
+    const notification = notifications.find((n) => n.id === requestId);
+    if (!notification) return;
+
+    const res = await fetch("/api/endpoints/scouts/collaboration/action", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    }));
+      body: JSON.stringify({
+        daftarId,
+        scoutId,
+        action,
+        userId,
+      }),
+    });
+
+    if (res.status === 200) {
+      const data = await res.json();
+      const user = data.user;
+
+      toast({
+        title: `Request ${action}`,
+        description: `${action === "accept" ? "Accepted" : "Rejected"} by ${
+          user.firstName
+        } ${user.lastName}`,
+      });
+
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === requestId
+            ? {
+                ...n,
+                status: action, // or a separate field like n.actionStatus
+                handledBy: user,
+              }
+            : n
+        )
+      );
+    } else {
+      toast({
+        title: "Failed",
+        description: `Unable to ${action} the request.`,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -229,12 +275,13 @@ export function NotificationDialog({
           <ScrollArea className="h-[500px]">
             {activeTab === "scout-requests" ? (
               <div className="space-y-4">
-                {notifications.filter((n) => n.type === "request").length > 0 ? (
+                {notifications.filter((n) => n.type === "request").length >
+                0 ? (
                   notifications
                     .filter((n) => n.type === "request")
-                    .map((notification) => (
+                    .map((notification, idx) => (
                       <Card
-                        key={notification.id}
+                        key={idx}
                         className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                       >
                         <div className="p-4 space-y-4">
@@ -250,7 +297,8 @@ export function NotificationDialog({
                           <div className="space-y-1">
                             <p className="text-xs text-muted-foreground">
                               Daftar:{" "}
-                              {notification.payload.daftar_id || "Unknown Daftar"}
+                              {notification.payload.daftar_id ||
+                                "Unknown Daftar"}
                             </p>
                             <time className="text-xs text-muted-foreground block">
                               Requested on {formatDate(notification.created_at)}
@@ -279,7 +327,7 @@ export function NotificationDialog({
                                 variant="outline"
                                 className="rounded-[0.35rem]"
                                 onClick={() =>
-                                  handleAction(notification.id, "accepted")
+                                  handleAction(notification.id, "accept")
                                 }
                               >
                                 Accept
@@ -289,7 +337,7 @@ export function NotificationDialog({
                                 variant="outline"
                                 className="rounded-[0.35rem]"
                                 onClick={() =>
-                                  handleAction(notification.id, "declined")
+                                  handleAction(notification.id, "reject")
                                 }
                               >
                                 Decline
@@ -311,9 +359,9 @@ export function NotificationDialog({
                 0 ? (
                   notifications
                     .filter((n) => n.type === "scout_link")
-                    .map((notification) => (
+                    .map((notification, idx) => (
                       <Card
-                        key={notification.id}
+                        key={idx}
                         className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                       >
                         <div className="p-4 space-y-2">
@@ -369,9 +417,9 @@ export function NotificationDialog({
                   .length > 0 ? (
                   notifications
                     .filter((n) => getUITab(n.type) === activeTab)
-                    .map((notification) => (
+                    .map((notification, idx) => (
                       <Card
-                        key={notification.id}
+                        key={idx}
                         className={cn(
                           "border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                         )}

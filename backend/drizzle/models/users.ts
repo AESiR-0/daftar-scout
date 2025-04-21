@@ -31,7 +31,8 @@ export const users = pgTable("users", {
   number: varchar("number", { length: 20 }), // Nullable
   createdAt: timestamp("created_at").defaultNow().notNull(),
   isActive: boolean("is_active").default(true).notNull(),
-  deletedOn: timestamp("deleted_on"), // Nullable
+  isArchived: boolean("is_archived").default(false).notNull(),
+  archivedOn: timestamp("deleted_on"), // Nullable
   journal: text("journal"),
 });
 

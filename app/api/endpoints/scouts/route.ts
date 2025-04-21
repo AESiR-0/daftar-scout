@@ -65,7 +65,6 @@ export async function GET(req: NextRequest) {
         .select({
           id: scouts.scoutId,
           title: scouts.scoutName,
-          createdAt: scouts.scoutCreatedAt,
           status: scouts.status,
           scheduledDate: scouts.lastDayToPitch,
           postedBy: scouts.daftarId,
@@ -98,7 +97,6 @@ export async function GET(req: NextRequest) {
         .select({
           id: scouts.scoutId,
           title: scouts.scoutName,
-          createdAt: scouts.scoutCreatedAt,
           status: scouts.status,
           scheduledDate: scouts.lastDayToPitch,
           postedBy: scouts.daftarId,
@@ -176,8 +174,7 @@ export async function POST(req: NextRequest) {
       .values({
         scoutId,
         scoutName,
-        scoutCreatedAt: new Date(),
-        daftarId: daftarId || null,
+        daftarId: daftarId,
       })
       .returning();
 

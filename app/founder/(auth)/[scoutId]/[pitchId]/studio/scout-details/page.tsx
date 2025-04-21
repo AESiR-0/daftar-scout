@@ -119,8 +119,8 @@ export default function Page() {
           <div className="space-y-6 flex">
             {/* Video Section */}
             <div className="flex-1">
-            <Card className="flex-1 p-4">
-                <div className="relative aspect-video w-full">
+              <Card className="flex-1 p-4">
+                <div className="relative  aspect-[9/16]  w-full">
                   <video
                     src={scout.videoUrl}
                     controls
@@ -128,41 +128,43 @@ export default function Page() {
                   />
                 </div>
 
-              <div className="mt-8">
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-white">
-                    {scout.title}
-                  </h1>
-                  <div className="flex text-md items-center gap-4">
-                    <ShareButton
-                      title={scout.title}
-                      description={scout.description}
-                    />
-                    <Button
-                      className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"
-                      onClick={() => setShowDaftarDialog(true)}
-                    >
-                      Pitch Now
-                    </Button>
+                <div className="mt-8">
+                  <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-bold text-white">
+                      {scout.title}
+                    </h1>
+                    <div className="flex text-md items-center gap-4">
+                      <ShareButton
+                        title={scout.title}
+                        description={scout.description}
+                      />
+                      <Button
+                        className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"
+                        onClick={() => setShowDaftarDialog(true)}
+                      >
+                        Pitch Now
+                      </Button>
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-2 space-y-2">
-                  <div className="text-sm text-muted-foreground">
-                    Collaboration:{" "}
-                    {collaboration.length > 0 ? (
-                      <InvestorProfile investor={collaboration[0]} />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No collaboration available.</p>
-                    )}
+                  <div className="mt-2 space-y-2">
+                    <div className="text-sm text-muted-foreground">
+                      Collaboration:{" "}
+                      {collaboration.length > 0 ? (
+                        <InvestorProfile investor={collaboration[0]} />
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          No collaboration available.
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground font-bold">
+                      Last date for pitch:{" "}
+                      {new Date(lastDayToPitch).toDateString()}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground font-bold">
-                    Last date for pitch:{" "}
-                    {new Date(lastDayToPitch).toDateString()}
-                  </p>
                 </div>
-              </div>
-            </Card>
+              </Card>
             </div>
 
             {/* Tabs Section */}

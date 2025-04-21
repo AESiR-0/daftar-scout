@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,6 +59,7 @@ export default function DeletePage() {
   const [currentUserApproved, setCurrentUserApproved] = useState<
     boolean | null
   >(null);
+  const [isArchived, setIsArchived] = useState(false);
 
   // Fetch team approvals from /api/endpoints/scouts/delete
   useEffect(() => {
@@ -94,6 +95,15 @@ export default function DeletePage() {
 
         setApprovals(mappedApprovals);
         setCurrentUserApproved(currentUserApprovalStatus);
+
+        // Check if scout is archived
+        const scoutResponse = await fetch(
+          `/api/endpoints/scouts?scoutId=${scoutId}`
+        );
+        if (scoutResponse.ok) {
+          const scoutData = await scoutResponse.json();
+          setIsArchived(scoutData.data.isArchived || false);
+        }
       } catch (error) {
         console.error("Error fetching approvals:", error);
         toast({
@@ -113,7 +123,7 @@ export default function DeletePage() {
     if (!userConsent) return;
 
     try {
-      // Send approval to POST /api/scout-documents
+      // Send approval to POST /api/endpoints/scouts/delete
       const response = await fetch("/api/endpoints/scouts/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -127,6 +137,8 @@ export default function DeletePage() {
         throw new Error(`HTTP error ${response.status}`);
       }
 
+      const { data } = await response.json();
+
       // Update local state
       setApprovals((prev) =>
         prev.map((member) =>
@@ -137,9 +149,13 @@ export default function DeletePage() {
       );
       setCurrentUserApproved(true);
       setDeleteClicked(true);
+      setIsArchived(data?.isArchived || false);
+
       toast({
         title: "Approval submitted",
-        description: "Your approval for scout deletion has been recorded",
+        description: data?.isArchived
+          ? "Scout has been archived as all approvals are received."
+          : "Your approval for scout deletion has been recorded.",
       });
     } catch (error) {
       console.error("Error submitting approval:", error);
@@ -176,6 +192,7 @@ export default function DeletePage() {
                   setUserConsent(checked as boolean)
                 }
                 className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+                disabled={isArchived || currentUserApproved === true}
               />
               <label
                 htmlFor="user-consent"
@@ -189,13 +206,13 @@ export default function DeletePage() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={!userConsent || deleteClicked}
+              disabled={!userConsent || deleteClicked || isArchived}
               className="w-[12%] bg-muted rounded-[0.35rem] hover:bg-muted/50"
             >
               Delete
             </Button>
 
-            {deleteClicked && (
+            {(deleteClicked || approvals.length > 0) && (
               <>
                 {/* Team Approvals Section */}
                 <div className="space-y-4 mt-4">
@@ -236,10 +253,19 @@ export default function DeletePage() {
                     ))}
                     <div className="pt-4">
                       <span className="text-xs text-muted-foreground">
-                        <strong>Deleted Scout On</strong> <br />{" "}
+                        <strong>Deletion Requested On</strong> <br />{" "}
                         {formatDate(deletionDate)}
                       </span>
                     </div>
+                    {isArchived && (
+                      <div className="pt-2">
+                        <span className="text-xs text-green-500">
+                          <strong>Scout Archived</strong> <br /> All approvals
+                          received, scout archived on{" "}
+                          {formatDate(new Date().toISOString())}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>

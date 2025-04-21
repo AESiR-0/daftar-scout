@@ -22,7 +22,7 @@ function ErrorPage() {
     <div className="flex flex-col items-center justify-center min-h-screen gap-4">
       <h1 className="text-2xl font-bold text-white">Scout Not Found</h1>
       <Link
-        href="/founder/scout"
+        href="/founder/pitch"
         className="px-4 py-2 bg-muted hover:bg-muted/50 text-white rounded transition-colors"
       >
         Go Back
@@ -98,129 +98,129 @@ export default function Page() {
   return (
     <>
       <div className="space-y-6 container mx-auto px-10 py-8">
-          <div className="flex gap-6">
-            <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
-                <div className="relative aspect-video w-full">
-                  <video
-                    src={transformedScout.videoUrl}
-                    controls
-                    className="w-full h-full object-cover rounded-[0.35rem]"
+        <div className="flex gap-6">
+          <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
+            <div className="relative  aspect-[9/16]  w-full">
+              <video
+                src={transformedScout.videoUrl}
+                controls
+                className="w-full h-full object-cover rounded-[0.35rem]"
+              />
+            </div>
+
+            <div className="mt-8">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white">
+                  {transformedScout.title}
+                </h1>
+                <div className="flex text-md items-center gap-4">
+                  <ShareButton
+                    title={transformedScout.title}
+                    description={transformedScout.description}
                   />
-                </div>
-
-              <div className="mt-8">
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold text-white">
-                    {transformedScout.title}
-                  </h1>
-                  <div className="flex text-md items-center gap-4">
-                    <ShareButton
-                      title={transformedScout.title}
-                      description={transformedScout.description}
-                    />
-                    <Button
-                      className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"
-                      onClick={() => setShowDaftarDialog(true)}
-                    >
-                      Pitch Now
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="mt-2 space-y-2">
-                  <div className="text-sm text-muted-foreground">
-                    Collaboration:{" "}
-                    <InvestorProfile investor={collaborationDetails} />
-                  </div>
-                  <p className="text-xs text-muted-foreground font-bold">
-                    Last date for pitch:{" "}
-                    {new Date(transformedScout.lastPitchDate).toDateString()}
-                  </p>
+                  <Button
+                    className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"
+                    onClick={() => setShowDaftarDialog(true)}
+                  >
+                    Pitch Now
+                  </Button>
                 </div>
               </div>
-            </Card>
 
-            <div className="w-[400px]">
-              <Tabs defaultValue="details" className="space-y-4">
-                <TabsList className="grid grid-cols-3 gap-2 bg-[#0e0e0e] px-2 rounded-[0.35rem]">
-                  <TabsTrigger
-                    value="details"
-                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50"
-                  >
-                    Details
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="faqs"
-                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50 flex items-center gap-1"
-                  >
-                    FAQs
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
-                      {transformedScout.faqs.length}
-                    </span>
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="updates"
-                    className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50 flex items-center gap-1"
-                  >
-                    Updates
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
-                      {transformedScout.updates.length}
-                    </span>
-                  </TabsTrigger>
-                </TabsList>
+              <div className="mt-2 space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  Collaboration:{" "}
+                  <InvestorProfile investor={collaborationDetails} />
+                </div>
+                <p className="text-xs text-muted-foreground font-bold">
+                  Last date for pitch:{" "}
+                  {new Date(transformedScout.lastPitchDate).toDateString()}
+                </p>
+              </div>
+            </div>
+          </Card>
 
-                <TabsContent value="details">
-                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
-                    <div className="grid grid-cols-1 gap-4">
-                      {Object.entries(transformedScout.details).map(
-                        ([key, value]) => (
-                          <div
-                            key={key}
-                            className="flex gap-10 items-center py-2 border-b border-muted/20 last:border-b-0"
-                          >
-                            <span className="text-sm font-medium text-white">
-                              {key}
-                            </span>
-                            <span className="text-sm text-muted-foreground">
-                              {value}
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </Card>
-                </TabsContent>
+          <div className="w-[400px]">
+            <Tabs defaultValue="details" className="space-y-4">
+              <TabsList className="grid grid-cols-3 gap-2 bg-[#0e0e0e] px-2 rounded-[0.35rem]">
+                <TabsTrigger
+                  value="details"
+                  className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50"
+                >
+                  Details
+                </TabsTrigger>
+                <TabsTrigger
+                  value="faqs"
+                  className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50 flex items-center gap-1"
+                >
+                  FAQs
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
+                    {transformedScout.faqs.length}
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="updates"
+                  className="rounded-[0.35rem] py-2 text-sm data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-white hover:bg-muted/50 flex items-center gap-1"
+                >
+                  Updates
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded-[0.35rem]">
+                    {transformedScout.updates.length}
+                  </span>
+                </TabsTrigger>
+              </TabsList>
 
-                <TabsContent value="faqs">
-                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
-                    <Accordion type="single" collapsible className="space-y-2">
-                      {transformedScout.faqs.length > 0 ? (
-                        transformedScout.faqs.map((faq: any, index: number) => (
-                          <AccordionItem
-                            key={index}
-                            value={`faq-${index}`}
-                            className="border-b border-muted/20 last:border-b-0"
-                          >
-                            <AccordionTrigger className="text-sm font-medium text-white hover:no-underline py-3">
-                              {faq.question}
-                            </AccordionTrigger>
-                            <AccordionContent className="text-sm text-muted-foreground pt-2">
-                              {faq.answer}
-                            </AccordionContent>
-                          </AccordionItem>
-                        ))
-                      ) : (
-                        <div className="text-sm text-muted-foreground">
-                          No FAQs shared by the investor
+              <TabsContent value="details">
+                <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                  <div className="grid grid-cols-1 gap-4">
+                    {Object.entries(transformedScout.details).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          className="flex gap-10 items-center py-2 border-b border-muted/20 last:border-b-0"
+                        >
+                          <span className="text-sm font-medium text-white">
+                            {key}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {value}
+                          </span>
                         </div>
-                      )}
-                    </Accordion>
-                  </Card>
-                </TabsContent>
+                      )
+                    )}
+                  </div>
+                </Card>
+              </TabsContent>
 
-                <TabsContent value="updates">
-                  <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
-                    <div className="space-y-6 relative">
+              <TabsContent value="faqs">
+                <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                  <Accordion type="single" collapsible className="space-y-2">
+                    {transformedScout.faqs.length > 0 ? (
+                      transformedScout.faqs.map((faq: any, index: number) => (
+                        <AccordionItem
+                          key={index}
+                          value={`faq-${index}`}
+                          className="border-b border-muted/20 last:border-b-0"
+                        >
+                          <AccordionTrigger className="text-sm font-medium text-white hover:no-underline py-3">
+                            {faq.question}
+                          </AccordionTrigger>
+                          <AccordionContent className="text-sm text-muted-foreground pt-2">
+                            {faq.answer}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))
+                    ) : (
+                      <div className="text-sm text-muted-foreground">
+                        No FAQs shared by the investor
+                      </div>
+                    )}
+                  </Accordion>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="updates">
+                <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+                  <div className="space-y-6 relative">
                     {transformedScout.updates.length > 0 ? (
                       transformedScout.updates.map(
                         (
@@ -257,16 +257,16 @@ export default function Page() {
                       )
                     ) : (
                       <div className="text-sm text-muted-foreground">
-                        No Updates Yet. If investors share any information, we’ll notify you.
+                        No Updates Yet. If investors share any information,
+                        we’ll notify you.
                       </div>
                     )}
-                  
-                    </div>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </div>
+                  </div>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
+        </div>
       </div>
 
       <SelectDaftarDialog

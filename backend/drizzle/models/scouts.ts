@@ -7,6 +7,7 @@ import {
   serial,
   uuid,
   date,
+  jsonb,
   timestamp,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
@@ -24,8 +25,6 @@ export const scouts = pgTable("scouts", {
   targetedGender: text("targeted_gender"),
   scoutCommunity: text("scout_community"),
   scoutStage: text("scout_stage"),
-  scoutSector: text("scout_sector"),
-  scoutCreatedAt: timestamp("scout_created_at").defaultNow(),
   investorPitch: text("investor_pitch"),
   isApprovedByAll: boolean("is_approved_by_all").default(false),
   isArchived: boolean("is_archived").default(false),
@@ -54,7 +53,7 @@ export const daftarScouts = pgTable("daftar_scouts", {
     () => scouts.scoutId
   ),
   daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id),
-  isPending: boolean("is_pending"),
+  isPending: boolean("is_pending").notNull().default(true),
   addedAt: timestamp("added_at").defaultNow(),
 });
 

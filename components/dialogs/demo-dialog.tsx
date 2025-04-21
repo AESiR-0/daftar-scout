@@ -1,8 +1,5 @@
 "use client";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -22,7 +19,7 @@ export function VideoDialog({ open, onOpenChange }: VideoDialogProps) {
       <DialogContent className="max-w-[40rem] max-h-[80vh] p-0 border-none">
         <Card className="bg-[#0e0e0e] border-none rounded-lg overflow-hidden">
           {/* Video Player */}
-          <div className="aspect-video bg-black">
+          <div className=" aspect-[9/16]  bg-black">
             <video
               className="w-full h-full object-cover"
               controls

@@ -1,10 +1,13 @@
 import { NextResponse, NextRequest } from "next/server";
 import { db } from "@/backend/database";
-import { scoutDelete } from "@/backend/drizzle/models/scouts";
-import { eq, and } from "drizzle-orm";
+import {
+  scoutDelete,
+  scouts,
+  daftarScouts,
+} from "@/backend/drizzle/models/scouts";
 import { users } from "@/backend/drizzle/models/users";
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
-import { daftarScouts } from "@/backend/drizzle/models/scouts";
+import { eq, and } from "drizzle-orm";
 import { auth } from "@/auth";
 
 export async function GET(req: NextRequest) {
@@ -78,11 +81,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { scoutId, isAgreed, agreedAt } = body;
+    const { scoutId, isAgreed } = body;
 
-    if (!scoutId) {
+    if (!scoutId || isAgreed === undefined) {
       return NextResponse.json(
-        { error: "scoutId is required" },
+        { error: "scoutId and isAgreed are required" },
         { status: 400 }
       );
     }
@@ -141,13 +144,15 @@ export async function POST(req: NextRequest) {
         )
       );
 
+    const agreedAt = isAgreed ? new Date() : null;
+
     if (existingApproval.length > 0) {
       // Update existing approval
       await db
         .update(scoutDelete)
         .set({
-          isAgreed: isAgreed ?? false,
-          agreedAt: agreedAt || null,
+          isAgreed,
+          agreedAt,
         })
         .where(
           and(
@@ -160,13 +165,53 @@ export async function POST(req: NextRequest) {
       await db.insert(scoutDelete).values({
         scoutId,
         investorId,
-        isAgreed: isAgreed ?? false,
-        agreedAt: agreedAt || null,
+        isAgreed,
+        agreedAt,
       });
     }
 
+    // Check if all daftar members have approved
+    const daftarMembers = await db
+      .select({ investorId: daftarInvestors.investorId })
+      .from(daftarInvestors)
+      .where(eq(daftarInvestors.daftarId, daftarId ?? ""));
+
+    const allInvestorIds = daftarMembers.map((member) => member.investorId);
+
+    const approved = await db
+      .select({ investorId: scoutDelete.investorId })
+      .from(scoutDelete)
+      .where(
+        and(eq(scoutDelete.scoutId, scoutId), eq(scoutDelete.isAgreed, true))
+      );
+
+    const approvedIds = approved.map((item) => item.investorId);
+
+    const deleteIsAgreedByAll = allInvestorIds.every((id) =>
+      approvedIds.includes(id)
+    );
+
+    // Update scout if all approved
+    let updatedScout = null;
+    if (deleteIsAgreedByAll) {
+      updatedScout = await db
+        .update(scouts)
+        .set({
+          isArchived: true,
+          deletedOn: new Date(),
+          deleteIsAgreedByAll: true,
+        })
+        .where(eq(scouts.scoutId, scoutId))
+        .returning();
+    }
+
     return NextResponse.json(
-      { message: "Approval recorded successfully" },
+      {
+        message: deleteIsAgreedByAll
+          ? "Scout archived successfully"
+          : "Approval recorded successfully",
+        data: updatedScout ? updatedScout[0] : null,
+      },
       { status: 200 }
     );
   } catch (error) {

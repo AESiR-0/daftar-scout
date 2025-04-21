@@ -167,7 +167,7 @@ export default function InvestorPitchPage() {
                       src={videoUrl || "/dummyVideo.mp4"}
                       controls
                       poster="/images/sample-pitch-thumbnail.jpg"
-                      className="w-full rounded-[0.35rem] aspect-video"
+                      className="w-full rounded-[0.35rem]  aspect-[9/16] "
                     >
                       Your browser does not support the video tag.
                     </video>
@@ -180,7 +180,7 @@ export default function InvestorPitchPage() {
                       <video
                         src={videoUrl}
                         controls
-                        className="w-full rounded-[0.35rem] aspect-video"
+                        className="w-full rounded-[0.35rem]  aspect-[9/16] "
                       />
                       <div className="flex gap-2">
                         <Button

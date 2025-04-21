@@ -61,7 +61,14 @@ export default function ScoutPage() {
         });
 
         const data = await res.json();
-
+        if (res.status != 200) {
+          toast({
+            title: "Error",
+            description: "Failed to fetch scouts.",
+            variant: "destructive",
+          });
+          return;
+        }
         const grouped: ScoutStatus = {
           Planning: [],
           scheduled: [],
@@ -222,9 +229,11 @@ export default function ScoutPage() {
                                   `${collaboration} ${
                                     scout.collaborator.length === 1
                                       ? ""
-                                      : num == scout.collaborator.length - 1
+                                      : num == scout.collaborator.length - 2
                                       ? "and"
-                                      : ", "
+                                      : num < scout.collaborator.length - 2
+                                      ? ", "
+                                      : ""
                                   } `
                               )}
                             </span>

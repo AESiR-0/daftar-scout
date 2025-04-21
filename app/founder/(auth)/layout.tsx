@@ -28,7 +28,7 @@ export default async function Layout({
     redirect("/sign-up/complete");
   }
   if (user.role !== "founder") {
-    redirect("/login");
+    redirect("/investor");
   }
   return (
     <BookmarkProvider>

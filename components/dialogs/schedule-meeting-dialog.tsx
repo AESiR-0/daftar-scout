@@ -1,52 +1,55 @@
-"use client"
-import { useState } from "react"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Calendar } from "@/components/ui/calendar"
-import { Textarea } from "@/components/ui/textarea"
+"use client";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { format } from "date-fns"
-import { Badge } from "@/components/ui/badge"
-import { CalendarIcon, X, Clock } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { ScrollArea } from "@/components/ui/scroll-area"
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { CalendarIcon, X, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ScheduleMeetingDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 // Sample data - replace with real data
 const daftars = [
   { id: "1", name: "Tech Startups" },
   { id: "2", name: "Healthcare Innovation" },
-]
+];
 
 const pitches = [
   { id: "1", name: "AI Solution Pitch" },
   { id: "2", name: "HealthTech Platform" },
-]
+];
 
 const users = [
   { id: "1", name: "John Doe" },
   { id: "2", name: "Sarah Smith" },
   { id: "3", name: "Mike Johnson" },
-]
+];
 
-export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDialogProps) {
+export function ScheduleMeetingDialog({
+  open,
+  onOpenChange,
+}: ScheduleMeetingDialogProps) {
   const [formData, setFormData] = useState({
     title: "",
     daftar: "",
@@ -58,42 +61,43 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
     period: "",
     location: "",
     locationAddress: "",
-    agenda: ""
-  })
+    agenda: "",
+  });
 
   const hours = Array.from({ length: 12 }, (_, i) => ({
-    value: String(i + 1).padStart(2, '0'),
-    label: String(i + 1)
-  }))
+    value: String(i + 1).padStart(2, "0"),
+    label: String(i + 1),
+  }));
 
   const minutes = Array.from({ length: 12 }, (_, i) => ({
-    value: String(i * 5).padStart(2, '0'),
-    label: String(i * 5).padStart(2, '0')
-  }))
+    value: String(i * 5).padStart(2, "0"),
+    label: String(i * 5).padStart(2, "0"),
+  }));
 
   const handleSubmit = () => {
-    const formattedTime = `${formData.hours}:${formData.minutes} ${formData.period}`
+    const formattedTime = `${formData.hours}:${formData.minutes} ${formData.period}`;
     console.log("Meeting scheduled:", {
       ...formData,
-      time: formattedTime
-    })
-    onOpenChange(false)
-  }
+      time: formattedTime,
+    });
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTitle>  </DialogTitle>
+      <DialogTitle> </DialogTitle>
       <DialogContent className="max-w-3xl h-[600px] p-0">
         <ScrollArea className="h-full">
           <div className="p-6 space-y-6">
-            
             <div className="grid gap-4">
               <div className="space-y-2">
                 <Label>Meeting Title</Label>
                 <Input
                   placeholder="Enter meeting title"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
                 />
               </div>
 
@@ -101,14 +105,19 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
                 <Label>Invite Daftar/Users</Label>
                 <Select
                   value={formData.attendees[0]}
-                  onValueChange={(value) => setFormData({ ...formData, attendees: [...formData.attendees, value] })}
+                  onValueChange={(value: string) =>
+                    setFormData({
+                      ...formData,
+                      attendees: [...formData.attendees, value],
+                    })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Daftar/Users" />
                   </SelectTrigger>
                   <SelectContent>
                     {users
-                      .filter(user => !formData.attendees.includes(user.id))
+                      .filter((user) => !formData.attendees.includes(user.id))
                       .map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.name}
@@ -118,7 +127,7 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
                 </Select>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.attendees.map((attendeeId) => {
-                    const user = users.find(u => u.id === attendeeId)
+                    const user = users.find((u) => u.id === attendeeId);
                     return user ? (
                       <Badge
                         key={user.id}
@@ -128,13 +137,17 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
                         {user.name}
                         <X
                           className="h-3 w-3 cursor-pointer"
-                          onClick={() => setFormData({
-                            ...formData,
-                            attendees: formData.attendees.filter(id => id !== user.id)
-                          })}
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              attendees: formData.attendees.filter(
+                                (id) => id !== user.id
+                              ),
+                            })
+                          }
                         />
                       </Badge>
-                    ) : null
+                    ) : null;
                   })}
                 </div>
               </div>
@@ -152,14 +165,18 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.date ? format(formData.date, "PPP") : "Pick a date"}
+                        {formData.date
+                          ? format(formData.date, "PPP")
+                          : "Pick a date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
                         selected={formData.date}
-                        onSelect={(date) => setFormData({ ...formData, date: date || undefined })}
+                        onSelect={(date) =>
+                          setFormData({ ...formData, date: date || undefined })
+                        }
                         initialFocus
                       />
                     </PopoverContent>
@@ -173,7 +190,9 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
                       <Clock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Select
                         value={formData.hours}
-                        onValueChange={(value) => setFormData({ ...formData, hours: value })}
+                        onValueChange={(value: any) =>
+                          setFormData({ ...formData, hours: value })
+                        }
                       >
                         <SelectTrigger className="pl-8">
                           <SelectValue placeholder="HH" />
@@ -192,7 +211,9 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
 
                     <Select
                       value={formData.minutes}
-                      onValueChange={(value) => setFormData({ ...formData, minutes: value })}
+                      onValueChange={(value: any) =>
+                        setFormData({ ...formData, minutes: value })
+                      }
                     >
                       <SelectTrigger className="w-[70px]">
                         <SelectValue placeholder="MM" />
@@ -208,7 +229,9 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
 
                     <Select
                       value={formData.period}
-                      onValueChange={(value) => setFormData({ ...formData, period: value })}
+                      onValueChange={(value: any) =>
+                        setFormData({ ...formData, period: value })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="AM/PM" />
@@ -226,11 +249,14 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
                 <Label>Location</Label>
                 <Select
                   value={formData.location}
-                  onValueChange={(value) => setFormData({
-                    ...formData,
-                    location: value,
-                    locationAddress: value === "virtual" ? "" : formData.locationAddress
-                  })}
+                  onValueChange={(value: string) =>
+                    setFormData({
+                      ...formData,
+                      location: value,
+                      locationAddress:
+                        value === "virtual" ? "" : formData.locationAddress,
+                    })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select location type" />
@@ -246,10 +272,12 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
                     <Input
                       placeholder="Enter meeting location"
                       value={formData.locationAddress}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        locationAddress: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          locationAddress: e.target.value,
+                        })
+                      }
                     />
                   </div>
                 )}
@@ -260,7 +288,9 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
                 <Textarea
                   placeholder="Enter meeting agenda"
                   value={formData.agenda}
-                  onChange={(e) => setFormData({ ...formData, agenda: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, agenda: e.target.value })
+                  }
                   className="min-h-[100px]"
                 />
               </div>
@@ -285,5 +315,5 @@ export function ScheduleMeetingDialog({ open, onOpenChange }: ScheduleMeetingDia
         </ScrollArea>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}
