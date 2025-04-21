@@ -1,36 +1,36 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card } from "@/components/ui/card"
-import Image from "next/image"
-import { cn } from "@/lib/utils"
-import { Scroll } from "lucide-react"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { Scroll } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-type StoryTab = "economy" | "case-studies"
+type StoryTab = "economy" | "case-studies";
 
 interface CaseStudy {
-  title: string
-  subtitle: string
-  content: string
-  investment: string
-  source: string
+  title: string;
+  subtitle: string;
+  content: string;
+  investment: string;
+  source: string;
 }
 
 interface EconomyStory {
-  title: string
-  content: string
-  hasVideo: boolean
-  video: string
-  image: string
+  title: string;
+  content: string;
+  hasVideo: boolean;
+  video: string;
+  image: string;
 }
 
 interface CaseStudiesStory {
-  title: string
-  studies: CaseStudy[]
+  title: string;
+  studies: CaseStudy[];
 }
 
-type Story = EconomyStory | CaseStudiesStory
+type Story = EconomyStory | CaseStudiesStory;
 
 const stories: Record<StoryTab, Story> = {
   economy: {
@@ -47,78 +47,87 @@ const stories: Record<StoryTab, Story> = {
         title: "Pitambari",
         subtitle: "India. FMCG.",
         content: `Sudhir Joshi started Pitambari in Thane, Maharashtra, with a single product: a metal polish for brass and copper utensils. Over time, Pitambari expanded into household care, Ayurveda, and FMCG products, competing with giants like Unilever and P&G. As of FY 2022, Pitambari reported revenues of approximately $40 million.`,
-        investment: "A $50K investment for 5% could be worth $10–$20 million today.",
-        source: "Source"
+        investment:
+          "A $50K investment for 5% could be worth $10–$20 million today.",
+        source: "Source",
       },
       {
         title: "Cycle Agarbatti",
         subtitle: "India. Consumer Goods.",
         content: `N. Ranga Rao started Cycle Agarbatti in Mysuru, Karnataka, focusing on quality and strategic marketing. Today, Cycle Agarbatti is India's leading agarbatti brand, selling in over 75 countries and valued at $251 million.`,
-        investment: "A $50K investment for 5% could be worth $20–$50 million today.",
-        source: "Source"
+        investment:
+          "A $50K investment for 5% could be worth $20–$50 million today.",
+        source: "Source",
       },
       {
         title: "Pet Saffa",
         subtitle: "India. Healthcare.",
         content: `Aimil Pharmaceuticals launched Pet Saffa in Delhi as a small Ayurvedic digestive brand. With the right product and product availability, i.e., distribution, today, Pet Saffa is a market leader, valued at $50 million–$100 million.`,
-        investment: "A $50K investment for 5% could be worth $5–$10 million today.",
-        source: "Source"
+        investment:
+          "A $50K investment for 5% could be worth $5–$10 million today.",
+        source: "Source",
       },
       {
         title: "Tally Solutions",
         subtitle: "India. Technology.",
         content: `Bharat Goenka started Tally Solutions in Bengaluru, Karnataka, with a simple idea: to help small businesses manage accounts easily. Today, Tally Solutions is India's top accounting software, used by over 7 million businesses and valued between $500 million and $1 billion.`,
-        investment: "A $50K investment for 5% could be worth $50–$100 million today.",
-        source: "Source"
+        investment:
+          "A $50K investment for 5% could be worth $50–$100 million today.",
+        source: "Source",
       },
       {
         title: "Nirma",
         subtitle: "India. FMCG.",
         content: `Karsanbhai Patel started Nirma in Ahmedabad, Gujarat, literally selling detergent door-to-door. Today, Nirma is valued between $1 billion and $2 billion.`,
-        investment: "A $50K investment for 5% could be worth $100–$200 million today.",
-        source: "Source"
+        investment:
+          "A $50K investment for 5% could be worth $100–$200 million today.",
+        source: "Source",
       },
       {
         title: "Amrutanjan Healthcare",
         subtitle: "India. Healthcare.",
         content: `Kasinathuni Nageswara Rao created Amrutanjan Healthcare in Chennai, Tamil Nadu, selling a pain balm that worked. Today, Amrutanjan Healthcare is a major player in healthcare, with a market capitalization of $270 million.`,
-        investment: "A $50K investment for 5% could be worth $27 million today.",
-        source: "Source"
+        investment:
+          "A $50K investment for 5% could be worth $27 million today.",
+        source: "Source",
       },
       {
         title: "Rajdhani Besan",
         subtitle: "India. Food & Beverages.",
         content: `Raj Kumar Gupta started Rajdhani Besan in Delhi, selling flour and pulses locally in an unstructured market. Today, Rajdhani Besan is a major brand valued between $100 million and $200 million.`,
-        investment: "A $50K investment for 5% could be worth $10–$20 million today.",
-        source: "Source"
+        investment:
+          "A $50K investment for 5% could be worth $10–$20 million today.",
+        source: "Source",
       },
       {
         title: "Jaipur Rugs",
         subtitle: "India. Textiles & Handicrafts.",
         content: `Nand Kishore Chaudhary started Jaipur Rugs in Rajasthan with a handful of small-town weavers. Today, Jaipur Rugs connects 40,000 artisans to global markets and is valued at approximately $200 million.`,
-        investment: "A $50K investment for 5% could be worth $10–$20 million today.",
-        source: "Source"
+        investment:
+          "A $50K investment for 5% could be worth $10–$20 million today.",
+        source: "Source",
       },
       {
         title: "Arvind Mills",
         subtitle: "India. Fashion & Textiles.",
         content: `Narottam Lalbhai started Arvind Mills in Ahmedabad, Gujarat, built the world's biggest denim factory, and supplied brands like Levi's, Gap, and Tommy Hilfiger. Today, Arvind Mills is valued at $1 billion.`,
-        investment: "A $50K investment for 5% could be worth $100 million today.",
-        source: "Source"
-      }
-    ]
-  }
-}
+        investment:
+          "A $50K investment for 5% could be worth $100 million today.",
+        source: "Source",
+      },
+    ],
+  },
+};
 
 export default function InvestorPage() {
-  const [activeStory, setActiveStory] = useState<StoryTab>("economy")
+  const [activeStory, setActiveStory] = useState<StoryTab>("economy");
 
   const renderContent = () => {
-    const story = stories[activeStory]
-    
+    const story = stories[activeStory];
+
     if (activeStory === "economy") {
       return (
-        <div className="aspect-video max-h-[65vh] bg-muted rounded-sm overflow-hidden mx-auto">
+        <div className=" aspect-[9/16]  max-h-[65vh] bg-muted rounded-sm overflow-hidden mx-auto">
           <video
             className="w-full h-full object-cover rounded-sm"
             controls
@@ -127,14 +136,17 @@ export default function InvestorPage() {
             <source src="/assets/torricke-barton.mp4" type="video/mp4" />
           </video>
         </div>
-      )
+      );
     }
 
-    const caseStudiesStory = story as CaseStudiesStory
+    const caseStudiesStory = story as CaseStudiesStory;
     return (
       <div className="space-y-12">
         {caseStudiesStory.studies.map((study: CaseStudy, index: number) => (
-          <article key={index} className="space-y-2 border-b border-black/20 pb-8">
+          <article
+            key={index}
+            className="space-y-2 border-b border-black/20 pb-8"
+          >
             <h2 className="text-2xl font-serif font-bold leading-tight">
               {study.title}
             </h2>
@@ -157,8 +169,8 @@ export default function InvestorPage() {
           </article>
         ))}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="flex flex-col items-center min-h-[calc(100vh-3.5rem)] px-4 py-12">
@@ -167,11 +179,11 @@ export default function InvestorPage() {
         {/* Hero Section */}
         <div className="space-y-6 text-center">
           <h1 className="text-7xl font-light tracking-tight">
-          Startup Scouting, Simplified
+            Startup Scouting, Simplified
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Feel the 'why' behind a founder's problem statement in the language they are comfortable to speak, 
-            coz a pitch deck isn't enough
+            Feel the 'why' behind a founder's problem statement in the language
+            they are comfortable to speak, coz a pitch deck isn't enough
           </p>
         </div>
 
@@ -209,8 +221,8 @@ export default function InvestorPage() {
                     onClick={() => setActiveStory(key as StoryTab)}
                     className={cn(
                       "text-left w-full py-1 transition-colors text-sm font-serif border-b border-black/20",
-                      activeStory === key 
-                        ? "text-black font-bold" 
+                      activeStory === key
+                        ? "text-black font-bold"
                         : "text-black/70 hover:text-black"
                     )}
                   >
@@ -220,15 +232,14 @@ export default function InvestorPage() {
               </div>
             </div>
 
-            {/* Right Column - Content */}
-            <div className="col-span-3 border-l border-black pl-8">
-              <ScrollArea className="h-[calc(100vh-12rem)] overflow-hidden">
-              {renderContent()}
+            <div className="col-span-3 border-l border-black ">
+              <ScrollArea className="h-[calc(100vh-12rem)] pl-8 px-12 overflow-hidden">
+                {renderContent()}
               </ScrollArea>
             </div>
           </div>
         </Card>
       </div>
     </div>
-  )
-} 
+  );
+}

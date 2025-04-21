@@ -100,7 +100,7 @@ export default function Page() {
       <div className="space-y-6 container mx-auto px-10 py-8">
         <div className="flex gap-6">
           <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
-            <div className="relative aspect-video w-full">
+            <div className="relative  aspect-[9/16]  w-full">
               <video
                 src={transformedScout.videoUrl}
                 controls

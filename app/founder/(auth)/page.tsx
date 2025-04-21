@@ -21,7 +21,7 @@ export default function FounderIntroPage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="max-w-3xl w-full space-y-8 text-center">
         {/* Video Container */}
-        {/* <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
+        {/* <div className="relative w-full  aspect-[9/16]  rounded-lg overflow-hidden bg-muted">
           <video
             className="w-full h-full object-cover"
             src="/videos/intro.mp4"

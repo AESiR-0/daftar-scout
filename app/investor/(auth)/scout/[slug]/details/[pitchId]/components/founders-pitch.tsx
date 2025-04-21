@@ -180,11 +180,11 @@ export function FoundersPitchSection({
                   <video
                     src={selectedVideo}
                     controls
-                    className="w-full rounded-[0.35rem] aspect-video bg-muted"
+                    className="w-full rounded-[0.35rem]  aspect-[9/16]  bg-muted"
                   />
                 </div>
               ) : (
-                <div className="w-full aspect-video bg-muted rounded-[0.35rem] flex items-center justify-center">
+                <div className="w-full  aspect-[9/16]  bg-muted rounded-[0.35rem] flex items-center justify-center">
                   <p className="text-sm text-muted-foreground">
                     No video available
                   </p>

@@ -36,7 +36,9 @@ export default function InvestorQuestionsPage() {
   const scoutId = pathname.split("/")[2];
   const pitchId = pathname.split("/")[3];
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  );
   const [language, setLanguage] = useState("English");
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -59,7 +61,7 @@ export default function InvestorQuestionsPage() {
     "Punjabi",
     "Urdu",
     "Odia",
-  ]
+  ];
   const sampleQuestions = [
     {
       id: 1,
@@ -78,12 +80,14 @@ export default function InvestorQuestionsPage() {
     },
     {
       id: 4,
-      question: "Who are your customers, and how are they dealing with this problem today",
+      question:
+        "Who are your customers, and how are they dealing with this problem today",
       videoUrl: "/videos/customer.mp4",
     },
     {
       id: 5,
-      question: "Why will your customers switch from competitors to your product",
+      question:
+        "Why will your customers switch from competitors to your product",
       videoUrl: "/videos/business.mp4",
     },
     {
@@ -93,7 +97,8 @@ export default function InvestorQuestionsPage() {
     },
     {
       id: 7,
-      question: "What is the growth here (development, traction, or revenue), and challenges you are facing",
+      question:
+        "What is the growth here (development, traction, or revenue), and challenges you are facing",
       videoUrl: "/videos/vision.mp4",
     },
   ];
@@ -236,7 +241,9 @@ export default function InvestorQuestionsPage() {
                       <div
                         key={language}
                         className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                          selectedLanguage === language ? 'text-blue-600' : 'hover:bg-muted'
+                          selectedLanguage === language
+                            ? "text-blue-600"
+                            : "hover:bg-muted"
                         }`}
                         onClick={() => setSelectedLanguage(language)}
                       >
@@ -251,7 +258,10 @@ export default function InvestorQuestionsPage() {
                   <Card className="overflow-hidden border-0 bg-muted/50">
                     <div className="aspect-[9/16] max-h-[500px] w-full flex items-center justify-center">
                       <video
-                        src={selectedQuestion?.videoUrl || "/videos/sample-pitch.mp4"}
+                        src={
+                          selectedQuestion?.videoUrl ||
+                          "/videos/sample-pitch.mp4"
+                        }
                         poster="/assets/video-poster.jpg"
                         controls
                         className="w-full h-full object-cover rounded-[0.35rem]"
@@ -262,13 +272,17 @@ export default function InvestorQuestionsPage() {
 
                 {/* Questions Column */}
                 <div className="col-span-4 space-y-4">
-                  <h3 className="text-lg font-semibold">Investor's Questions</h3>
+                  <h3 className="text-lg font-semibold">
+                    Investor's Questions
+                  </h3>
                   <div className="space-y-2">
                     {sampleQuestions.map((q) => (
                       <div
                         key={q.id}
                         className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                          selectedQuestion?.id === q.id ? 'text-blue-600' : 'hover:bg-muted'
+                          selectedQuestion?.id === q.id
+                            ? "text-blue-600"
+                            : "hover:bg-muted"
                         }`}
                         onClick={() => handleQuestionSelect(q)}
                       >
@@ -295,7 +309,7 @@ export default function InvestorQuestionsPage() {
                       <video
                         src={previewUrl}
                         controls
-                        className="w-full rounded-[0.35rem] aspect-video"
+                        className="w-full rounded-[0.35rem]  aspect-[9/16] "
                       />
                       <div className="flex gap-2">
                         <Button
