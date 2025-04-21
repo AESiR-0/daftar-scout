@@ -2,14 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import { AgeRange } from "./components/age-range";
-import { Combobox } from "@/components/ui/combobox";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import L, { LatLngTuple } from "leaflet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import dynamic from "next/dynamic";
-import "leaflet/dist/leaflet.css";
 import { z } from "zod";
 import {
   Dialog,
@@ -20,52 +18,79 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import "leaflet/dist/leaflet.css";
 
-// Dynamically import map component to avoid SSR issues
-const MapComponent = dynamic(() => import("@/components/map"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[400px] bg-muted flex items-center justify-center">
-      <p className="text-sm text-muted-foreground">Loading map...</p>
-    </div>
-  ),
+// Custom Leaflet marker icon using online URLs
+const customIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 // Constants
 const communities = [
   { value: "Auto-rickshaw drivers", label: "Auto-rickshaw drivers" },
-  { value: "Black Lives Matter activists", label: "Black Lives Matter activists" },
+  {
+    value: "Black Lives Matter activists",
+    label: "Black Lives Matter activists",
+  },
   { value: "Coastal cleanup crews", label: "Coastal cleanup crews" },
-  { value: "Criminals seeking to change their lives positively", label: "Criminals seeking to change their lives positively" },
+  {
+    value: "Criminals seeking to change their lives positively",
+    label: "Criminals seeking to change their lives positively",
+  },
   { value: "Delivery gig workers", label: "Delivery gig workers" },
   { value: "Doctors in tech", label: "Doctors in tech" },
-  { value: "Eco-friendly fashion designers", label: "Eco-friendly fashion designers" },
+  {
+    value: "Eco-friendly fashion designers",
+    label: "Eco-friendly fashion designers",
+  },
   { value: "Engineers", label: "Engineers" },
   { value: "Failed startup founders", label: "Failed startup founders" },
   { value: "Farmers", label: "Farmers" },
   { value: "Government school students", label: "Government school students" },
   { value: "Homeless", label: "Homeless" },
-  { value: "Influencers with 1 million followers", label: "Influencers with 1 million followers" },
+  {
+    value: "Influencers with 1 million followers",
+    label: "Influencers with 1 million followers",
+  },
   { value: "LGBTQ+", label: "LGBTQ+" },
   { value: "Management students", label: "Management students" },
   { value: "McKinsey consultants", label: "McKinsey consultants" },
   { value: "Migrants", label: "Migrants" },
   { value: "News and media", label: "News and media" },
-  { value: "People of Andaman & Lakshadweep", label: "People of Andaman & Lakshadweep" },
+  {
+    value: "People of Andaman & Lakshadweep",
+    label: "People of Andaman & Lakshadweep",
+  },
   { value: "People of Ladakh", label: "People of Ladakh" },
   { value: "People with disabilities", label: "People with disabilities" },
-  { value: "People with special home remedies", label: "People with special home remedies" },
+  {
+    value: "People with special home remedies",
+    label: "People with special home remedies",
+  },
   { value: "Refugees", label: "Refugees" },
   { value: "Residents of old age homes", label: "Residents of old age homes" },
   { value: "Retired professionals", label: "Retired professionals" },
   { value: "Second-time founders", label: "Second-time founders" },
   { value: "Sewage cleaners", label: "Sewage cleaners" },
   { value: "Social impact founders", label: "Social impact founders" },
-  { value: "Special Forces and Armed Forces", label: "Special Forces and Armed Forces" },
+  {
+    value: "Special Forces and Armed Forces",
+    label: "Special Forces and Armed Forces",
+  },
   { value: "Street food vendors", label: "Street food vendors" },
   { value: "Ukrainian war refugees", label: "Ukrainian war refugees" },
   { value: "Under 25 founders", label: "Under 25 founders" },
-  { value: "Urban waste management workers", label: "Urban waste management workers" },
+  {
+    value: "Urban waste management workers",
+    label: "Urban waste management workers",
+  },
   { value: "War Soldiers", label: "War Soldiers" },
   { value: "Women", label: "Women" },
 ];
@@ -89,17 +114,14 @@ const genders = [
 
 // Zod Schema
 const AudienceSchema = z.object({
-  targetAudLocation: z.string().optional().default(""),
-  scoutCommunity: z.string().optional().default(""),
-  targetedGender: z.string().optional().default(""),
-  scoutStage: z.string().optional().default(""),
-  scoutSector: z.array(z.string()).optional().default([]),
-  targetAudAgeStart: z.number().optional().default(18),
-  targetAudAgeEnd: z.number().optional().default(65),
+  targetAudLocation: z.string().nullable().default(""),
+  scoutCommunity: z.string().nullable().default(""),
+  targetedGender: z.string().nullable().default(""),
+  scoutStage: z.string().nullable().default(""),
+  scoutSector: z.array(z.string()).nullable().default([]),
+  targetAudAgeStart: z.number().nullable().default(18),
+  targetAudAgeEnd: z.number().nullable().default(65),
 });
-
-// Regex for city-state-country with flexible separators
-const locationPattern = /^(.*?)(?:[\/,\-\s]+)(.*?)(?:[\/,\-\s]+)(.*?)$/;
 
 // Debounce function
 function debounce(fn: Function, delay: number) {
@@ -113,43 +135,126 @@ function debounce(fn: Function, delay: number) {
 export default function AudiencePage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
-  const [targetAudLocation, setTargetAudLocation] = useState("");
-  const [location, setLocation] = useState({
-    country: "",
-    state: "",
-    city: "",
-  });
-  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
-
+  const [targetAudLocation, setTargetAudLocation] = useState<string>("");
+  const [location, setLocation] = useState<{
+    country: string;
+    state: string;
+    city: string;
+  }>({ country: "", state: "", city: "" });
+  const [coordinates, setCoordinates] = useState<LatLngTuple | null>(null);
   const [scoutCommunity, setScoutCommunity] = useState<string>("");
   const [targetedGender, setTargetedGender] = useState<string>("");
   const [scoutStage, setScoutStage] = useState<string>("");
   const [scoutSector, setScoutSector] = useState<string[]>([]);
   const [targetAudAgeStart, setTargetAudAgeStart] = useState<number>(18);
   const [targetAudAgeEnd, setTargetAudAgeEnd] = useState<number>(65);
+  const [openFilters, setOpenFilters] = useState<boolean>(false);
+  const [sectors, setSectors] = useState<{ value: string; label: string }[]>(
+    []
+  );
+  const [tempScoutCommunity, setTempScoutCommunity] = useState<string>("");
+  const [tempTargetedGender, setTempTargetedGender] = useState<string>("");
+  const [tempScoutStage, setTempScoutStage] = useState<string>("");
+  const [tempScoutSector, setTempScoutSector] = useState<string[]>([]);
+  const [tempAgeRange, setTempAgeRange] = useState<[number, number]>([18, 65]);
 
-  const [openFilters, setOpenFilters] = useState(false);
-  const [sectors, setSectors] = useState<{ value: string; label: string }[]>([]);
+  // Combobox component
+  const Combobox = ({
+    options,
+    value,
+    onSelect,
+    placeholder,
+    multiple = false,
+  }: {
+    options: { value: string; label: string }[];
+    value: string | string[];
+    onSelect: (value: string) => void;
+    placeholder: string;
+    multiple?: boolean;
+  }) => {
+    const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState("");
 
-  // Temporary state for dialog
-  const [tempScoutCommunity, setTempScoutCommunity] =
-    useState<string>(scoutCommunity);
-  const [tempTargetedGender, setTempTargetedGender] =
-    useState<string>(targetedGender);
-  const [tempScoutStage, setTempScoutStage] = useState<string>(scoutStage);
-  const [tempScoutSector, setTempScoutSector] = useState<string[]>(scoutSector);
-  const [tempAgeRange, setTempAgeRange] = useState<[number, number]>([
-    targetAudAgeStart,
-    targetAudAgeEnd,
-  ]);
+    const filteredOptions = options.filter((option) =>
+      option.label.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const displayValue = multiple
+      ? ""
+      : options.find((opt) => opt.value === value)?.label || "";
+
+    return (
+      <div className="relative">
+        <Input
+          value={search || displayValue}
+          onChange={(e) => setSearch(e.target.value)}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 200)}
+          placeholder={placeholder}
+          className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
+        />
+        {open && (
+          <div className="absolute z-20 mt-1 w-full bg-[#1a1a1a] border border-gray-700 rounded-[0.35rem] max-h-60 overflow-auto">
+            {filteredOptions.length ? (
+              filteredOptions.map((option) => (
+                <div
+                  key={option.value}
+                  onClick={() => {
+                    onSelect(option.value);
+                    if (!multiple) {
+                      setSearch("");
+                      setOpen(false);
+                    }
+                  }}
+                  className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
+                >
+                  {option.label}
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-gray-400">No options found</div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // AgeRange component
+  const AgeRange = ({
+    minAge,
+    maxAge,
+    onMinChange,
+    onMaxChange,
+  }: {
+    minAge: string;
+    maxAge: string;
+    onMinChange: (value: string) => void;
+    onMaxChange: (value: string) => void;
+  }) => (
+    <div className="flex gap-2">
+      <Input
+        type="number"
+        value={minAge}
+        onChange={(e) => onMinChange(e.target.value)}
+        placeholder="Min"
+        className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
+      />
+      <Input
+        type="number"
+        value={maxAge}
+        onChange={(e) => onMaxChange(e.target.value)}
+        placeholder="Max"
+        className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
+      />
+    </div>
+  );
 
   // Fetch sectors data
   const fetchSectorsData = async () => {
     try {
       const res = await fetch("/api/endpoints/focus-sectors");
-      if (!res.ok) {
-        throw new Error(`HTTP error ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const { data } = await res.json();
       const formattedSectors = data.map((sector: string) => ({
         value: sector,
@@ -167,62 +272,47 @@ export default function AudiencePage() {
       const res = await fetch(
         `/api/endpoints/scouts/audience?scoutId=${scoutId}`
       );
-      if (!res.ok) {
-        throw new Error(`HTTP error ${res.status}`);
-      }
-      const data = await res.json();
-      const parsed = AudienceSchema.parse(data.data);
-      setTargetAudLocation(parsed.targetAudLocation || "");
-      setScoutCommunity(parsed.scoutCommunity || "");
-      setTargetedGender(parsed.targetedGender || "");
-      setScoutStage(parsed.scoutStage || "");
-      setScoutSector(parsed.scoutSector || []);
-      setTargetAudAgeStart(parsed.targetAudAgeStart || 18);
-      setTargetAudAgeEnd(parsed.targetAudAgeEnd || 65);
-
-      // Initialize temp state
-      setTempScoutCommunity(parsed.scoutCommunity || "");
-      setTempTargetedGender(parsed.targetedGender || "");
-      setTempScoutStage(parsed.scoutStage || "");
-      setTempScoutSector(parsed.scoutSector || []);
+      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      const { data } = await res.json();
+      const parsed = AudienceSchema.parse(data ?? {});
+      setTargetAudLocation(parsed.targetAudLocation ?? "");
+      setScoutCommunity(parsed.scoutCommunity ?? "");
+      setTargetedGender(parsed.targetedGender ?? "");
+      setScoutStage(parsed.scoutStage ?? "");
+      setScoutSector(parsed.scoutSector ?? []);
+      setTargetAudAgeStart(parsed.targetAudAgeStart ?? 18);
+      setTargetAudAgeEnd(parsed.targetAudAgeEnd ?? 65);
+      setTempScoutCommunity(parsed.scoutCommunity ?? "");
+      setTempTargetedGender(parsed.targetedGender ?? "");
+      setTempScoutStage(parsed.scoutStage ?? "");
+      setTempScoutSector(parsed.scoutSector ?? []);
       setTempAgeRange([
-        parsed.targetAudAgeStart || 18,
-        parsed.targetAudAgeEnd || 65,
+        parsed.targetAudAgeStart ?? 18,
+        parsed.targetAudAgeEnd ?? 65,
       ]);
 
-      // Parse location if present
       if (parsed.targetAudLocation) {
-        const match = parsed.targetAudLocation.match(locationPattern);
-        if (match) {
-          const [, city, state, country] = match;
-          setLocation({
-            city: city.trim(),
-            state: state.trim(),
-            country: country.trim(),
-          });
-
-          // Fetch coordinates
-          const query = `${city}, ${state}, ${country}`;
-          try {
-            const geoResponse = await fetch(
-              `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-                query
-              )}`
-            );
-            const geoData = await geoResponse.json();
-            if (geoData && geoData[0]) {
-              setCoordinates([
-                parseFloat(geoData[0].lat),
-                parseFloat(geoData[0].lon),
-              ]);
-            }
-          } catch (error) {
-            console.error("Error fetching coordinates:", error);
-          }
-        }
+        setTargetAudLocation(parsed.targetAudLocation);
+        debounceLocation(parsed.targetAudLocation);
       }
     } catch (err) {
       console.error("Error fetching data:", err);
+      const defaults = AudienceSchema.parse({});
+      setTargetAudLocation(defaults.targetAudLocation ?? "");
+      setScoutCommunity(defaults.scoutCommunity ?? "");
+      setTargetedGender(defaults.targetedGender ?? "");
+      setScoutStage(defaults.scoutStage ?? "");
+      setScoutSector(defaults.scoutSector ?? []);
+      setTargetAudAgeStart(defaults.targetAudAgeStart ?? 18);
+      setTargetAudAgeEnd(defaults.targetAudAgeEnd ?? 65);
+      setTempScoutCommunity(defaults.scoutCommunity ?? "");
+      setTempTargetedGender(defaults.targetedGender ?? "");
+      setTempScoutStage(defaults.scoutStage ?? "");
+      setTempScoutSector(defaults.scoutSector ?? []);
+      setTempAgeRange([
+        defaults.targetAudAgeStart ?? 18,
+        defaults.targetAudAgeEnd ?? 65,
+      ]);
     }
   };
 
@@ -232,38 +322,43 @@ export default function AudiencePage() {
   }, [scoutId]);
 
   // Handle location input and coordinates
-  const handleLocationInput = async (value: string) => {
+  const handleLocationInput = (value: string) => {
     setTargetAudLocation(value);
     debounceLocation(value);
   };
 
   const debounceLocation = useCallback(
     debounce(async (value: string) => {
-      const match = value.match(locationPattern);
-      if (match) {
-        const [, city, state, country] = match;
+      if (!value.trim()) {
+        setLocation({ city: "", state: "", country: "" });
+        setCoordinates(null);
+        return;
+      }
 
-        setLocation({
-          city: city.trim(),
-          state: state.trim(),
-          country: country.trim(),
-        });
+      try {
+        const query = encodeURIComponent(value.trim());
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=1`
+        );
+        const data = await response.json();
 
-        try {
-          const query = `${city}, ${state}, ${country}`;
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-              query
-            )}`
-          );
-          const data = await response.json();
-
-          if (data && data[0]) {
-            setCoordinates([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
-          }
-        } catch (error) {
-          console.error("Error fetching coordinates:", error);
+        if (data && data[0]) {
+          const { lat, lon, address } = data[0];
+          const coords: LatLngTuple = [parseFloat(lat), parseFloat(lon)];
+          setCoordinates(coords);
+          setLocation({
+            city: address.city || address.town || address.village || "",
+            state: address.state || "",
+            country: address.country || "",
+          });
+        } else {
+          setCoordinates(null);
+          setLocation({ city: "", state: "", country: "" });
         }
+      } catch (error) {
+        console.error("Error fetching coordinates:", error);
+        setCoordinates(null);
+        setLocation({ city: "", state: "", country: "" });
       }
     }, 500),
     []
@@ -278,9 +373,7 @@ export default function AudiencePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     } catch (error) {
       console.error("Error saving data:", error);
     }
@@ -351,23 +444,41 @@ export default function AudiencePage() {
   return (
     <div className="container px-10 mx-auto py-6">
       <div className="space-y-6">
-        {/* Location Input */}
         <div className="space-y-4">
           <Label>Pin Location</Label>
           <Input
-            placeholder="City/State/Country (e.g., Mumbai/Maharashtra/India)"
+            placeholder="City, State, or Country (e.g., Mumbai, Maharashtra, India)"
             value={targetAudLocation}
             onChange={(e) => handleLocationInput(e.target.value)}
             onBlur={handleLocationBlur}
-            className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
+            className="text-white rounded-[0.35rem]"
           />
           <div className="w-full h-[400px] rounded-lg overflow-hidden border">
-            <MapComponent coordinates={coordinates} />
+            {typeof window !== "undefined" ? (
+              <MapContainer
+                center={coordinates || [20, 0]}
+                zoom={coordinates ? 12 : 2}
+                style={{ height: "100%", width: "100%", zIndex: 2 }}
+                key={coordinates ? coordinates.join(",") : "default"}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                {coordinates && (
+                  <Marker position={coordinates} icon={customIcon} />
+                )}
+              </MapContainer>
+            ) : (
+              <div className="w-full h-[400px] bg-muted flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">Loading.. </p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Filters Button and Dialog */}
-        <div>
+        <div className="z-10">
           <Dialog open={openFilters} onOpenChange={setOpenFilters}>
             <DialogTrigger asChild>
               <Button variant="outline" className="rounded-[0.35rem]">
@@ -382,7 +493,7 @@ export default function AudiencePage() {
                 <div>
                   <Label>Community</Label>
                   <Combobox
-                    options={communities.map((community) => community.value)}
+                    options={communities}
                     value={tempScoutCommunity}
                     onSelect={(value) => setTempScoutCommunity(value)}
                     placeholder="Select a Community"
@@ -405,7 +516,7 @@ export default function AudiencePage() {
                   <div className="flex-1">
                     <Label>Gender</Label>
                     <Combobox
-                      options={genders.map((gender) => gender.value)}
+                      options={genders}
                       value={tempTargetedGender}
                       onSelect={(value) => setTempTargetedGender(value)}
                       placeholder="Select a Gender"
@@ -415,7 +526,7 @@ export default function AudiencePage() {
                 <div>
                   <Label>Stage</Label>
                   <Combobox
-                    options={stages.map((stage) => stage.value)}
+                    options={stages}
                     value={tempScoutStage}
                     onSelect={(value) => setTempScoutStage(value)}
                     placeholder="Select a Stage"
@@ -424,9 +535,11 @@ export default function AudiencePage() {
                 <div className="space-y-2">
                   <Label>Focus Sectors (Multiple Select)</Label>
                   <Combobox
-                    options={sectors.map((sector) => sector.value)}
+                    options={sectors}
+                    value={tempScoutSector}
                     onSelect={handleSectorSelect}
                     placeholder="Add sectors"
+                    multiple
                   />
                   <div className="flex flex-wrap gap-2 mt-3">
                     {tempScoutSector.map((sector, index) => (

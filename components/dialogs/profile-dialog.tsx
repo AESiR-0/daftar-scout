@@ -6,6 +6,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,6 +111,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const [feedbackText, setFeedbackText] = useState("");
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(false);
   const [isLoadingSupport, setIsLoadingSupport] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const tabs: { id: ProfileTab; label: string }[] = [
     { id: "account", label: "My Account" },
@@ -121,7 +124,6 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     { id: "logout", label: "Logout" },
   ];
 
-  // Fetch profile data when dialog opens
   useEffect(() => {
     if (open && session?.user?.email) {
       fetchProfileData();
@@ -373,13 +375,40 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     }
   };
 
-  const handleDeleteAccount = () => {
-    toast({
-      title: "Account deleted",
-      description: "Your account has been permanently deleted.",
-      variant: "destructive",
-    });
-    onOpenChange(false);
+  const handleDeleteAccount = async () => {
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      const response = await fetch("/api/endpoints/users/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete account");
+      }
+
+      const { message } = await response.json();
+      toast({
+        title: "Account deleted",
+        description: message,
+        variant: "destructive",
+      });
+
+      await signOut({ redirect: false });
+      setDeleteConfirmOpen(false);
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete account",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFeedbackSubmit = () => {
@@ -817,7 +846,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   Loading feature requests...
                 </p>
               ) : featureHistory.length === 0 ? (
-                <p className="text-muted-foreground">No feature request shared</p>
+                <p className="text-muted-foreground">
+                  No feature request shared
+                </p>
               ) : (
                 <div className="space-y-4">
                   {featureHistory.map((feature) => (
@@ -917,36 +948,66 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 flex gap-0">
-        <div className="w-[200px] border-r bg-[#0e0e0e]">
-          <div className="flex flex-col space-y-1 p-4">
-            <DialogHeader className="mb-4">
-              <DialogTitle>Profile</DialogTitle>
-            </DialogHeader>
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
-                  "hover:bg-muted/50",
-                  activeTab === tab.id ? "bg-muted" : "transparent"
-                )}
-              >
-                <span>{tab.label}</span>
-              </button>
-            ))}
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl p-0 flex gap-0">
+          <div className="w-[200px] border-r bg-[#0e0e0e]">
+            <div className="flex flex-col space-y-1 p-4">
+              <DialogHeader className="mb-4">
+                <DialogTitle>Profile</DialogTitle>
+              </DialogHeader>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
+                    "hover:bg-muted/50",
+                    activeTab === tab.id ? "bg-muted" : "transparent"
+                  )}
+                >
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="flex-1 p-6 bg-[#0e0e0e] pt-10">
-          <ScrollArea className="h-[500px]">
-            <div className="space-y-4">{renderContent()}</div>
-          </ScrollArea>
-        </div>
-      </DialogContent>
-    </Dialog>
+          <div className="flex-1 p-6 bg-[#0e0e0e] pt-10">
+            <ScrollArea className="h-[500px]">
+              <div className="space-y-4">{renderContent()}</div>
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-[#0e0e0e] rounded-[0.35rem]">
+          <DialogHeader>
+            <DialogTitle>Confirm Account Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete your account? This action cannot
+              be undone, and all your data will be permanently lost.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="rounded-[0.35rem]"
+              onClick={() => setDeleteConfirmOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              className="rounded-[0.35rem]"
+              onClick={confirmDeleteAccount}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

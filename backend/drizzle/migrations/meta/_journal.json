@@ -78,6 +78,20 @@
       "when": 1745081560282,
       "tag": "0010_breezy_black_crow",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1745193838680,
+      "tag": "0011_smart_the_santerians",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1745200332324,
+      "tag": "0012_striped_triathlon",
+      "breakpoints": true
     }
   ]
 }

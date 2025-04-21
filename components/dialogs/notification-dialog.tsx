@@ -78,7 +78,7 @@ export function NotificationDialog({
   const pathname = usePathname();
   const scoutId =
     role == "investor" ? pathname.split("/")[3] : pathname.split("/"[2]);
-  const daftarId = useDaftar().selectedDaftar;
+  const daftarId = role == "investor" ? useDaftar().selectedDaftar : "";
 
   // Get available tabs based on role
   const availableTabs =
@@ -279,9 +279,9 @@ export function NotificationDialog({
                 0 ? (
                   notifications
                     .filter((n) => n.type === "request")
-                    .map((notification) => (
+                    .map((notification, idx) => (
                       <Card
-                        key={notification.id}
+                        key={idx}
                         className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                       >
                         <div className="p-4 space-y-4">
@@ -359,9 +359,9 @@ export function NotificationDialog({
                 0 ? (
                   notifications
                     .filter((n) => n.type === "scout_link")
-                    .map((notification) => (
+                    .map((notification, idx) => (
                       <Card
-                        key={notification.id}
+                        key={idx}
                         className="border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                       >
                         <div className="p-4 space-y-2">
@@ -417,9 +417,9 @@ export function NotificationDialog({
                   .length > 0 ? (
                   notifications
                     .filter((n) => getUITab(n.type) === activeTab)
-                    .map((notification) => (
+                    .map((notification, idx) => (
                       <Card
-                        key={notification.id}
+                        key={idx}
                         className={cn(
                           "border-none bg-[#1a1a1a] hover:bg-muted/10 transition-colors"
                         )}

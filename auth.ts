@@ -85,7 +85,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           type: "oidc",
         });
 
-        // Redirect to complete sign-up
         return true;
       }
 
