@@ -20,7 +20,7 @@ export default function LandingPage() {
         {/* Video Section with Sarvodaya */}
         <div className="space-y-4">
           <div className="relative flex justify-center">
-            <Card className="aspect-[9/16] w-[70%] h-[50rem] overflow-hidden border-0 bg-muted/50">
+            <Card className="aspect-video w-[80%] overflow-hidden border-0 bg-muted/50">
               <video
                 className="w-full h-full object-cover"
                 controls

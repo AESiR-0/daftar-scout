@@ -127,7 +127,7 @@ export default function InvestorPage() {
 
     if (activeStory === "economy") {
       return (
-        <div className=" aspect-[9/16]  max-h-[65vh] bg-muted rounded-sm overflow-hidden mx-auto">
+        <div className=" aspect-video  max-h-[65vh] bg-muted rounded-sm overflow-hidden mx-auto">
           <video
             className="w-full h-full object-cover rounded-sm"
             controls
