@@ -9,7 +9,7 @@ export default function ScoutPage() {
       <div className="flex-1 flex h-full items-center justify-center">
         <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground">
-          Click on the Studio to scout Startups
+            Click on the Studio to scout Startups
           </p>
         </div>
       </div>
@@ -17,9 +17,7 @@ export default function ScoutPage() {
   } else if (isScheduling) {
     return (
       <div className="p-4 h-full flex items-center justify-center">
-        <p className="text-muted-foreground">
-          Your scout is scheduled.
-          </p>
+        <p className="text-muted-foreground">Your scout is scheduled.</p>
       </div>
     );
   }
