@@ -489,9 +489,9 @@ export default function AudiencePage() {
               <DialogHeader>
                 <DialogTitle>Audience Filters</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 py-4">
+              <div className="space-y-6 py-4">
                 <div>
-                  <Label>Community</Label>
+                  {/* <Label>Community</Label> */}
                   <Combobox
                     options={communities}
                     value={tempScoutCommunity}
@@ -501,7 +501,7 @@ export default function AudiencePage() {
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <Label>Age Range</Label>
+                    {/* <Label>Age Range</Label> */}
                     <AgeRange
                       minAge={tempAgeRange[0].toString()}
                       maxAge={tempAgeRange[1].toString()}
@@ -514,31 +514,31 @@ export default function AudiencePage() {
                     />
                   </div>
                   <div className="flex-1">
-                    <Label>Gender</Label>
+                    {/* <Label>Gender</Label> */}
                     <Combobox
                       options={genders}
                       value={tempTargetedGender}
                       onSelect={(value) => setTempTargetedGender(value)}
-                      placeholder="Select a Gender"
+                      placeholder="Select Gender"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label>Stage</Label>
+                  {/* <Label>Stage</Label> */}
                   <Combobox
                     options={stages}
                     value={tempScoutStage}
                     onSelect={(value) => setTempScoutStage(value)}
-                    placeholder="Select a Stage"
+                    placeholder="Select a Startup Stage"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Focus Sectors (Multiple Select)</Label>
+                  {/* <Label>Focus Sectors (Multiple Select)</Label> */}
                   <Combobox
                     options={sectors}
                     value={tempScoutSector}
                     onSelect={handleSectorSelect}
-                    placeholder="Add sectors"
+                    placeholder="Add Sectors (Multiple Select)"
                     multiple
                   />
                   <div className="flex flex-wrap gap-2 mt-3">
