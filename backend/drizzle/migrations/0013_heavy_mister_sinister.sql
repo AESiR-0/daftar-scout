@@ -1,0 +1,1 @@
+ALTER TABLE "scouts" ADD COLUMN "scout_created_at" timestamp DEFAULT now();

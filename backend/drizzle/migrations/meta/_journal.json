@@ -92,6 +92,13 @@
       "when": 1745200332324,
       "tag": "0012_striped_triathlon",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1745602058436,
+      "tag": "0013_heavy_mister_sinister",
+      "breakpoints": true
     }
   ]
 }

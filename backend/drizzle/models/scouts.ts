@@ -34,6 +34,7 @@ export const scouts = pgTable("scouts", {
   programLaunchDate: date("program_launch_date"),
   deleteIsAgreedByAll: boolean("delete_is_agreed_by_all").default(false),
   deleteRequestDate: date("delete_request_date"),
+  scoutCreatedAt: timestamp("scout_created_at").defaultNow(),
 });
 
 export const scoutQuestions = pgTable("scout_questions", {
