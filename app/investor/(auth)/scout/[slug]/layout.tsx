@@ -10,12 +10,15 @@ export default async function ScoutLayout({
   const { slug } = await params;
   console.log("Scout slug:", slug);
 
-  const res = await fetch(`/api/endpoints/scouts/getStatus?scoutId=${slug}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  const res = await fetch(
+    `${process.env.BASE_URL}/api/endpoints/scouts/getStatus?scoutId=${slug}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   if (!(res.status === 200)) {
     console.error("Failed to fetch scout status", res.status);
