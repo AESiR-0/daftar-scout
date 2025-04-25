@@ -6,7 +6,6 @@ import { scouts } from "@/backend/drizzle/models/scouts"; // Assuming scouts exi
 import { sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-
 export const GET = async () => {
   try {
     const session = await auth();
@@ -21,10 +20,10 @@ export const GET = async () => {
         status: sql<string>`
           CASE 
             WHEN ${users.isActive} = true THEN 'Active' 
-            WHEN ${users.deletedOn} IS NOT NULL AND ${users.isActive} = false THEN 'Deleted'
+            WHEN ${users.archivedOn} IS NOT NULL AND ${users.isActive} = false THEN 'Deleted'
             ELSE 'Hold Deleted Profile'
           END`,
-        declaredDate: users.deletedOn,
+        declaredDate: users.archivedOn,
       })
       .from(users);
 

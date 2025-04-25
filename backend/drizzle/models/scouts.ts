@@ -26,6 +26,7 @@ export const scouts = pgTable("scouts", {
   scoutCommunity: text("scout_community"),
   scoutStage: text("scout_stage"),
   investorPitch: text("investor_pitch"),
+  scoutSector: jsonb("scout_sector").$type<Array<string>>(), // Changed to array of strings
   isApprovedByAll: boolean("is_approved_by_all").default(false),
   isArchived: boolean("is_archived").default(false),
   deletedOn: timestamp("deleted_on"),
