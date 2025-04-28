@@ -125,7 +125,29 @@ export async function sendNotificationEmail(notification: Notification, userId: 
       throw new Error('Failed to send email');
     }
   } catch (error) {
-    console.error('Failed to send notification email:', error);
+    console.error('Error sending notification email:', error);
+  }
+}
+
+export async function sendWelcomeEmail(userEmail: string, userName: string) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/notifications/email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'welcome',
+        userEmail,
+        userName,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send welcome email');
+    }
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
   }
 }
 

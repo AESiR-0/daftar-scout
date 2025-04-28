@@ -80,26 +80,42 @@ function generateStandardNotificationEmail(
   };
 }
 
+function generateWelcomeEmail(userEmail: string, userName: string) {
+  return {
+    to: userEmail,
+    subject: 'Welcome to DaftarOS!',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Welcome to DaftarOS!</h2>
+        <p>Hello ${userName},</p>
+        <p>Thank you for joining DaftarOS. We're excited to have you on board!</p>
+        <p>Get started by exploring our platform and connecting with other members.</p>
+        <div style="margin-top: 20px;">
+          <a href="${BASE_URL}/dashboard" 
+             style="background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none;">
+            Go to Dashboard
+          </a>
+        </div>
+      </div>
+    `,
+  };
+}
+
 export async function POST(request: Request) {
   try {
-    const { notification, userId } = await request.json();
+    const { notification, userId, type, userEmail, userName } = await request.json();
 
-    // Get user's email from database
-    const user = await db
-      .select({ email: users.email })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    if (!user.length || !user[0].email) {
-      return NextResponse.json(
-        { error: 'User email not found' },
-        { status: 404 }
-      );
+    // Handle welcome email for new users
+    if (type === 'welcome') {
+      const emailOptions = generateWelcomeEmail(userEmail, userName);
+      await transporter.sendMail({
+        from: 'notifications@daftaros.com',
+        ...emailOptions,
+      });
+      return NextResponse.json({ success: true });
     }
 
-    const userEmail = user[0].email;
-
+    // Handle notification emails
     if (notification.type === "updates" && notification.payload.pitchId) {
       const acceptToken = generateActionToken(userId, notification.payload.pitchId, 'accept');
       const rejectToken = generateActionToken(userId, notification.payload.pitchId, 'reject');
