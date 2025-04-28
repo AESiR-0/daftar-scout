@@ -1,13 +1,14 @@
 import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
-import { sendEmail, generatePitchTeamInviteEmail, generateStandardNotificationEmail, generateActionToken } from "../notifications/listen";
+import { sendEmail } from "../notifications/listen";
 import { emailTemplates } from "./insert";
 
 type Notification = {
     id: string;
     type: string;
     role: string;
+    subtype?: string;
     targeted_users: string[];
     payload: {
         action?: string;
@@ -52,13 +53,14 @@ export async function sendNotificationEmail(notification: Notification, userId: 
         if (typeof typeTemplates === 'function') {
             template = typeTemplates;
         } else {
-            const subtype = notification.payload.action || 'default';
-            template = typeTemplates[subtype as keyof typeof typeTemplates] || 
+            // Try to find template using either action or subtype
+            const key = notification.payload.action || notification.subtype || 'default';
+            template = typeTemplates[key as keyof typeof typeTemplates] || 
                       (typeTemplates as any).default;
         }
 
         if (!template) {
-            console.error(`No email template found for subtype: ${notification.payload.action}`);
+            console.error(`No email template found for action/subtype: ${notification.payload.action || notification.subtype}`);
             return;
         }
 

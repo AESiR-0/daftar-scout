@@ -192,10 +192,32 @@ export const emailTemplates = {
       `,
     }),
   },
+
+  // Welcome email
+  welcome: {
+    default: (notification: any, userEmail: string) => ({
+      to: userEmail,
+      subject: 'Welcome to DaftarOS!',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Welcome to DaftarOS!</h2>
+          <p>Hello ${notification.userName},</p>
+          <p>Thank you for joining DaftarOS. We're excited to have you on board!</p>
+          <p>Get started by exploring our platform and connecting with other members.</p>
+          <div style="margin-top: 20px;">
+            <a href="${process.env.NEXT_PUBLIC_BASE_URL}/dashboard" 
+               style="background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none;">
+              Go to Dashboard
+            </a>
+          </div>
+        </div>
+      `,
+    }),
+  },
 };
 
 export async function createNotification({
-  type,
+  type = "updates",
   subtype = 'default',
   title = "",
   description = "",
@@ -209,6 +231,7 @@ export async function createNotification({
       type,
       role,
       title,
+      subtype,
       description,
       targeted_users,
       payload,
@@ -228,11 +251,10 @@ export async function createNotification({
           console.error(`No email found for user ${userId}`);
           continue;
         }
-
         // Get the appropriate email template based on notification type and subtype
-        const typeTemplates = emailTemplates[type as keyof typeof emailTemplates];
+        const typeTemplates = emailTemplates[notification.type as keyof typeof emailTemplates];
         if (!typeTemplates) {
-          console.error(`No email templates found for notification type: ${type}`);
+          console.error(`No email templates found for notification type: ${notification.type}`);
           continue;
         }
 
@@ -241,20 +263,20 @@ export async function createNotification({
         if (typeof typeTemplates === 'function') {
           template = typeTemplates;
         } else {
-          template = typeTemplates[subtype as keyof typeof typeTemplates] ||
+          // Try to find template using subtype
+          const key = notification.subtype || 'default';
+          template = typeTemplates[key as keyof typeof typeTemplates] ||
             (typeTemplates as any).default;
         }
 
         if (!template) {
-          console.error(`No email template found for subtype: ${subtype}`);
+          console.error(`No email template found for subtype: ${notification.subtype}`);
           continue;
         }
-
         if (typeof template !== 'function') {
-          console.error('Template is not a function');
+          console.error(`Template is not a function for subtype: ${notification.subtype}`);
           continue;
         }
-
         const emailData = (template as (notification: any, userEmail: string) => any)(notification, user.email);
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/notifications/email`, {
