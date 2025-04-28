@@ -60,30 +60,26 @@ function generatePitchTeamInviteEmail(
   
           <!-- Invitation Message -->
           <div style="padding: 30px;">
-            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${
-              notification.username
-            } has invited you to the team as <span style="color: #ff5a5f;">${
-      notification.designation
-    }</span></h2>
+            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${notification.username
+      } has invited you to the team as <span style="color: #ff5a5f;">${notification.designation
+      }</span></h2>
             
             <p style="color: #555555; font-size: 16px; margin-top: 20px;">
               Hey ${notification.username},
             </p>
   
             <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
-              I’m inviting you to join my pitch.
+              I'm inviting you to join my pitch.
               <br /><br />
-              I’m applying to the investor who's scouting startups. Check out their deal – I believe my startup idea can actually win here. I’m inviting you to join my team and pitch. Let’s build the next big startup together.
+              I'm applying to the investor who's scouting startups. Check out their deal – I believe my startup idea can actually win here. I'm inviting you to join my team and pitch. Let's build the next big startup together.
             </p>
   
             <!-- Video Thumbnail -->
             <div style="margin: 30px 0; text-align: center;">
-              <a href="${
-                notification.videoUrl
-              }" target="_blank" style="display: inline-block;">
-                <img src="${
-                  notification.videoThumbnail || "/path/to/thumbnail.jpg"
-                }" alt="Investor Pitch Video" style="width: 100%; max-width: 500px; border-radius: 8px;">
+              <a href="${notification.videoUrl
+      }" target="_blank" style="display: inline-block;">
+                <img src="${notification.videoThumbnail || "/path/to/thumbnail.jpg"
+      }" alt="Investor Pitch Video" style="width: 100%; max-width: 500px; border-radius: 8px;">
               </a>
             </div>
   
@@ -136,24 +132,21 @@ function generateDaftarTeamInviteEmail(
 
         <!-- Invitation Message -->
         <div style="padding: 30px;">
-          <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${
-            notification.username
-          } has invited you to the team as <span style="color: #ff5a5f;">${
-      notification.designation
-    }</span></h2>
+          <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${notification.username
+      } has invited you to the team as <span style="color: #ff5a5f;">${notification.designation
+      }</span></h2>
           
           <p style="color: #555555; font-size: 16px; margin-top: 20px;">
             Hey ${notification.username},
           </p>
 
           <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
-            I’m inviting you to join my Daftar <strong>${
-              notification.daftarName
-            }</strong>.
+            I'm inviting you to join my Daftar <strong>${notification.daftarName
+      }</strong>.
             <br /><br />
-            I’m scouting startups at Daftar OS and inviting you to join my team.
+            I'm scouting startups at Daftar OS and inviting you to join my team.
             <br /><br />
-            Btw, this software is amazing – it helps me understand a startup in just <strong>2.5 minutes</strong> without all the PPTs. Can’t wait to have you on board!
+            Btw, this software is amazing – it helps me understand a startup in just <strong>2.5 minutes</strong> without all the PPTs. Can't wait to have you on board!
           </p>
 
           <!-- CTA Button -->
@@ -207,16 +200,14 @@ function generateCollaborationInviteEmail(
           <!-- Invitation Content -->
           <div style="padding: 30px;">
             <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">
-              ${
-                notification.username
-              } has invited you to collaborate on the Scout:
+              ${notification.username
+      } has invited you to collaborate on the Scout:
               <span style="color: #ff5a5f;">${notification.scoutName}</span> 
             </h2>
   
             <p style="color: #555555; font-size: 15px; margin-top: 20px; line-height: 1.6;">
-              Published by <strong>${
-                notification.daftarName
-              }</strong> via Daftar OS.
+              Published by <strong>${notification.daftarName
+      }</strong> via Daftar OS.
             </p>
   
             <!-- CTA Button -->
@@ -257,11 +248,10 @@ function generateStandardNotificationEmail(
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>New Notification</h2>
         <p>${notification.message || ""}</p>
-        ${
-          notification.url
-            ? `<a href="${notification.url}" style="color: #2196F3;">View Details</a>`
-            : ""
-        }
+        ${notification.url
+        ? `<a href="${notification.url}" style="color: #2196F3;">View Details</a>`
+        : ""
+      }
       </div>
     `,
   };

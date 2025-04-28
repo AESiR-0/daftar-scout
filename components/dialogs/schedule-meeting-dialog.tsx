@@ -41,9 +41,9 @@ const pitches = [
 ];
 
 const users = [
-  { id: "1", name: "John Doe" },
-  { id: "2", name: "Sarah Smith" },
-  { id: "3", name: "Mike Johnson" },
+  { id: "1", name: "John Doe", email: "john@example.com" },
+  { id: "2", name: "Sarah Smith", email: "sarah@example.com" },
+  { id: "3", name: "Mike Johnson", email: "mike@example.com" },
 ];
 
 export function ScheduleMeetingDialog({
@@ -74,13 +74,45 @@ export function ScheduleMeetingDialog({
     label: String(i * 5).padStart(2, "0"),
   }));
 
-  const handleSubmit = () => {
-    const formattedTime = `${formData.hours}:${formData.minutes} ${formData.period}`;
-    console.log("Meeting scheduled:", {
-      ...formData,
-      time: formattedTime,
-    });
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    try {
+      const formattedTime = `${formData.hours}:${formData.minutes} ${formData.period}`;
+      const [hours, minutes] = formattedTime.split(":");
+      const isPM = formData.period === "PM";
+      const hour = parseInt(hours) + (isPM ? 12 : 0);
+      
+      const startTime = new Date(formData.date!);
+      startTime.setHours(hour, parseInt(minutes), 0, 0);
+      
+      const endTime = new Date(startTime);
+      endTime.setHours(endTime.getHours() + 1); // Default 1-hour meeting
+
+      const response = await fetch("/api/endpoints/calendar/create-meeting", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.agenda,
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString(),
+          attendees: formData.attendees.map(id => {
+            const user = users.find(u => u.id === id);
+            return user?.email;
+          }).filter(Boolean),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create meeting");
+      }
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error scheduling meeting:", error);
+      // You might want to show an error toast here
+    }
   };
 
   return (
