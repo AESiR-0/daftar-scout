@@ -45,6 +45,7 @@ import { signOut } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/format-date";
+import  FormatDate  from "@/lib/formatDate";
 import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -53,7 +54,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSession } from "next-auth/react";
-
 interface ProfileData {
   firstName: string;
   lastName: string;
@@ -752,7 +752,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                         </h5>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {formatDate(support.createdAt)}
+                        {FormatDate(support.createdAt)}
                       </span>
                     </div>
                   ))}
@@ -862,7 +862,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                         </h5>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {formatDate(feature.createdAt)}
+                        {FormatDate(feature.createdAt)}
                       </span>
                     </div>
                   ))}

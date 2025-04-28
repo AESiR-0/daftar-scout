@@ -17,9 +17,9 @@ export function VideoDialog({ open, onOpenChange }: VideoDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[40rem] max-h-[80vh] p-0 border-none">
-        <Card className="bg-[#0e0e0e] border-none rounded-lg overflow-hidden">
+        <Card className="bg-[#0e0e0e] border-none flex rounded-lg overflow-hidden">
           {/* Video Player */}
-          <div className=" aspect-[9/16]  bg-black">
+          <div className=" w-[300px] h-[533px]  bg-black">
             <video
               className="w-full h-full object-cover"
               controls
