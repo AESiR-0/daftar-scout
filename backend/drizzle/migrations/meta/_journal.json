@@ -99,6 +99,13 @@
       "when": 1745602058436,
       "tag": "0013_heavy_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1745852155624,
+      "tag": "0014_nifty_moon_knight",
+      "breakpoints": true
     }
   ]
 }
