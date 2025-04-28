@@ -37,10 +37,16 @@ export async function POST(req: Request) {
     }
 
     // Create Google Calendar event
-    const oauth2Client = new google.auth.OAuth2();
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.NEXTAUTH_URL
+    );
+
     oauth2Client.setCredentials({
       access_token: account.access_token,
       refresh_token: account.refresh_token,
+      expiry_date: account.expires_at ? account.expires_at * 1000 : undefined,
     });
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
@@ -57,27 +63,50 @@ export async function POST(req: Request) {
         timeZone: "UTC",
       },
       attendees: attendees.map((email: string) => ({ email })),
+      conferenceData: {
+        createRequest: {
+          requestId: `${Date.now()}-${Math.random().toString(36).substring(7)}`,
+          conferenceSolutionKey: { type: "hangoutsMeet" },
+        },
+      },
     };
 
-    const calendarEvent = await calendar.events.insert({
-      calendarId: "primary",
-      requestBody: event,
-    });
+    try {
+      const calendarEvent = await calendar.events.insert({
+        calendarId: "primary",
+        requestBody: event,
+        conferenceDataVersion: 1,
+        sendUpdates: "all", // Send email notifications to attendees
+      });
 
-    // Store in local database
-    const [meeting] = await db
-      .insert(meetings)
-      .values({
-        title,
-        description,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-        userId: user.id,
-        calendarEventId: calendarEvent.data.id!,
-      })
-      .returning();
+      if (!calendarEvent.data.id) {
+        throw new Error("Failed to create calendar event");
+      }
 
-    return NextResponse.json(meeting);
+      // Store in local database
+      const [meeting] = await db
+        .insert(meetings)
+        .values({
+          title,
+          description,
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+          userId: user.id,
+          calendarEventId: calendarEvent.data.id,
+        })
+        .returning();
+
+      return NextResponse.json({
+        ...meeting,
+        meetLink: calendarEvent.data.hangoutLink,
+      });
+    } catch (error: any) {
+      console.error("Google Calendar Error:", error.response?.data || error);
+      return NextResponse.json(
+        { error: "Failed to create Google Calendar event" },
+        { status: 400 }
+      );
+    }
   } catch (error) {
     console.error("Error creating meeting:", error);
     return NextResponse.json(

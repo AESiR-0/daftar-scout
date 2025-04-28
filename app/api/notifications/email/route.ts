@@ -48,7 +48,7 @@ function generatePitchTeamInviteEmail(
 
   return {
     to: userEmail,
-    subject: `${notification.username} invited you to join Daftar OS`,
+    subject: `${notification.pitchName} invited you to join Daftar OS`,
     html: `
       <div style="background-color: #f4f4f4; padding: 40px 20px; font-family: Arial, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
@@ -60,12 +60,12 @@ function generatePitchTeamInviteEmail(
   
           <!-- Invitation Message -->
           <div style="padding: 30px;">
-            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${notification.username
-      } has invited you to the team as <span style="color: #ff5a5f;">${notification.designation
+            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${notification.currentUsername
+      } has invited you to the team as <span style="color: #ff5a5f;">${notification.invitedUserDesignation
       }</span></h2>
             
             <p style="color: #555555; font-size: 16px; margin-top: 20px;">
-              Hey ${notification.username},
+              Hey ${notification.invitedUsername},
             </p>
   
             <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
@@ -93,8 +93,8 @@ function generatePitchTeamInviteEmail(
   
             <!-- Footer Info -->
             <div style="color: #999999; font-size: 13px; text-align: center; margin-top: 20px;">
-              ${notification.username}<br/>
-              ${notification.designation}<br/>
+              ${notification.currentUsername}<br/>
+              ${notification.currentUserDesignation}<br/>
               On Daftar Since ${notification.joinedTime || "2024"}
             </div>
           </div>
@@ -120,7 +120,7 @@ function generateDaftarTeamInviteEmail(
 
   return {
     to: userEmail,
-    subject: `${notification.username} invited you to Daftar OS`,
+    subject: `${notification.daftarName} invited you to Daftar OS`,
     html: `
     <div style="background-color: #f4f4f4; padding: 40px 20px; font-family: Arial, sans-serif;">
       <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
@@ -132,12 +132,12 @@ function generateDaftarTeamInviteEmail(
 
         <!-- Invitation Message -->
         <div style="padding: 30px;">
-          <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${notification.username
+          <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${notification.currentUsername
       } has invited you to the team as <span style="color: #ff5a5f;">${notification.designation
       }</span></h2>
           
           <p style="color: #555555; font-size: 16px; margin-top: 20px;">
-            Hey ${notification.username},
+            Hey ${notification.invitedUsername},
           </p>
 
           <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
@@ -159,8 +159,8 @@ function generateDaftarTeamInviteEmail(
 
           <!-- Footer Info -->
           <div style="color: #999999; font-size: 13px; text-align: center; margin-top: 30px;">
-            ${notification.username}<br/>
-            ${notification.designation}<br/>
+            ${notification.currentUsername}<br/>
+            ${notification.currentUserDesignation}<br/>
             ${notification.daftarName}<br/>
             On Daftar Since ${notification.joinedTime || "2024"}
           </div>
@@ -187,7 +187,7 @@ function generateCollaborationInviteEmail(
 
   return {
     to: userEmail,
-    subject: `${notification.username} invited you to collaborate on a Scout at Daftar OS`,
+    subject: `${notification.daftarName} invited you to collaborate on a Scout at Daftar OS`,
     html: `
       <div style="background-color: #f4f4f4; padding: 40px 20px; font-family: Arial, sans-serif;">
         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
@@ -200,7 +200,7 @@ function generateCollaborationInviteEmail(
           <!-- Invitation Content -->
           <div style="padding: 30px;">
             <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">
-              ${notification.username
+              ${notification.currentUsername
       } has invited you to collaborate on the Scout:
               <span style="color: #ff5a5f;">${notification.scoutName}</span> 
             </h2>
@@ -212,7 +212,7 @@ function generateCollaborationInviteEmail(
   
             <!-- CTA Button -->
             <div style="text-align: center; margin: 40px 0 20px;">
-              <a href="${openScoutUrl}" 
+              <a href="${notification.openScoutUrl}" 
                 style="background-color: #ff5a5f; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
                 Open Your Daftar
               </a>
@@ -220,8 +220,8 @@ function generateCollaborationInviteEmail(
   
             <!-- Footer Info -->
             <div style="color: #999999; font-size: 13px; text-align: center; margin-top: 30px;">
-              ${notification.username}<br/>
-              ${notification.designation}<br/>
+              ${notification.currentUsername}<br/>
+              ${notification.currentUserDesignation}<br/>
               ${notification.daftarName}<br/>
               On Daftar Since ${notification.joinedTime || "2024"}
             </div>

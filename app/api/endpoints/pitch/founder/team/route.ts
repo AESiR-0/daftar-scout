@@ -136,6 +136,7 @@ export async function POST(req: NextRequest) {
     // Notification for invited user
     const notification = await createNotification({
       type: "updates",
+      subtype: "team_join",
       title: "Pitch Invitation",
       description: `You are invited to join the pitch team for ${pitchName} as ${designation || "Team Member"}`,
       targeted_users: [userId],

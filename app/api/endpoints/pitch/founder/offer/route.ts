@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
         return `${user.name} ${user.lastName} (${age} yrs)`;
       });
       const pitchDetails = await db
-        .select({ location: pitch.location, stage: pitch.stage })
+        .select({ location: pitch.location, stage: pitch.stage, pitchName: pitch.pitchName })
         .from(pitch)
         .where(eq(pitch.id, pitchId));
       if (pitchDetails.length === 0) {
@@ -175,8 +175,14 @@ export async function POST(req: NextRequest) {
       }
       await createNotification({
         type: "news",
+        subtype: "offer_accepted",
         title: ` Congratulations to ${userNameAgeArray} from ${pitchDetails[0].location}.`,
         description: `Their pitch is now backed by Daftar, disrupting the [Sector] at the ${pitchDetails[0].stage}. Team Daftar OS is excited to see the incredible value they'll bring to their stakeholders.`,
+        payload: {
+          pitchId,
+          pitchName: pitchDetails[0].pitchName,
+          stage: pitchDetails[0].stage ?? '',
+        }
       });
     }
 
@@ -208,7 +214,7 @@ export async function POST(req: NextRequest) {
         return `${user.name} ${user.lastName} (${age} yrs)`;
       });
       const pitchDetails = await db
-        .select({ location: pitch.location, stage: pitch.stage })
+        .select({ location: pitch.location, stage: pitch.stage, pitchName: pitch.pitchName })
         .from(pitch)
         .where(eq(pitch.id, pitchId));
 
@@ -223,12 +229,18 @@ export async function POST(req: NextRequest) {
 
       await createNotification({
         type: "news",
+        subtype: "offer_accepted",
         title: ` Congratulations to ${userNameAgeArray} from ${pitchDetails[0].location}.`,
         description: `Their pitch is now backed by Daftar, disrupting the ${sectorList
           .map((sector) => sector.sectorName)
-          .join(", ")} sector(s) at the ${
-          pitchDetails[0].stage
-        }. Team Daftar OS is excited to see the incredible value they'll bring to their stakeholders.`,
+          .join(", ")} sector(s) at the ${pitchDetails[0].stage
+          }. Team Daftar OS is excited to see the incredible value they'll bring to their stakeholders.`,
+        payload: {
+          pitchId,
+          pitchName: pitchDetails[0].pitchName || "undefined",
+          stage: pitchDetails[0].stage || "undefined",
+          sector: sectorList.map(sector => sector.sectorName),
+        }
       });
     }
     return NextResponse.json(
