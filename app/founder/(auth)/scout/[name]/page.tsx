@@ -10,6 +10,7 @@ import { ShareButton } from "@/components/share-button";
 import { SelectDaftarDialog } from "@/components/dialogs/create-pitch-dialog";
 import { InvestorProfile } from "@/components/InvestorProfile";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Accordion,
   AccordionContent,
@@ -31,11 +32,12 @@ function ErrorPage() {
   );
 }
 
-export default function Page() {
+export default function ScoutDetailsPage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/").pop() || "";
   const [scoutData, setScoutData] = useState<any>(null);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showDaftarDialog, setShowDaftarDialog] = useState(false);
 
   useEffect(() => {
@@ -50,14 +52,70 @@ export default function Page() {
       } catch (err) {
         console.error(err);
         setError(true);
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchScout();
   }, [scoutId]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen space-y-6 container mx-auto px-10 py-8">
+        <div className="flex gap-6">
+          {/* Main Content Area */}
+          <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
+            <Skeleton className="w-full aspect-[9/16] rounded-[0.35rem]" />
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-8 w-1/3" />
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 rounded-md" />
+                  <Skeleton className="h-10 w-24 rounded-[0.35rem]" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/4" />
+              </div>
+            </div>
+          </Card>
+
+          {/* Sidebar with Tabs */}
+          <div className="w-[400px] space-y-4">
+            <div className="grid grid-cols-3 gap-2 bg-[#0e0e0e] px-2 rounded-[0.35rem]">
+              {Array(3)
+                .fill(0)
+                .map((_, index) => (
+                  <Skeleton
+                    key={index}
+                    className="h-8 rounded-[0.35rem]"
+                  />
+                ))}
+            </div>
+            <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
+              <div className="space-y-4">
+                {Array(3)
+                  .fill(0)
+                  .map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-10 items-center py-2 border-b border-muted/20 last:border-b-0"
+                    >
+                      <Skeleton className="h-4 w-1/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                  ))}
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <ErrorPage />;
-  if (!scoutData) return <div className="text-white p-10">Loading...</div>;
 
   const { scout, faqs, updates, collaboration, lastDayToPitch } = scoutData;
 
@@ -97,10 +155,10 @@ export default function Page() {
 
   return (
     <>
-      <div className="space-y-6 container mx-auto px-10 py-8">
+      <div className="min-h-screen space-y-6 container mx-auto px-10 py-8">
         <div className="flex gap-6">
           <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
-            <div className="relative  aspect-[9/16]  w-full">
+            <div className="relative aspect-[9/16] w-full">
               <video
                 src={transformedScout.videoUrl}
                 controls

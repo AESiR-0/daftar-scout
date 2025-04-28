@@ -1,49 +1,30 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function FounderIntroPage() {
   const router = useRouter();
-
   const [isLoading, setIsLoading] = useState(true);
 
-  if (isLoading) {
-    router.push("/founder/loading");
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-  router.push("/founder/loading");
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="max-w-3xl w-full space-y-8 text-center">
-        {/* Video Container */}
-        {/* <div className="relative w-full  aspect-[9/16]  rounded-lg overflow-hidden bg-muted">
-          <video
-            className="w-full h-full object-cover"
-            src="/videos/intro.mp4"
-            controls
-          >
-            Your browser does not support the video tag.
-          </video>
-        </div> */}
-        {/* Text Content */}
-        {/* <h1 className="text-2xl font-bold tracking-tight text-white">
-          Pitch your startup story in 120 seconds
-        </h1> */}
+  useEffect(() => {
+    // Simulate a brief loading delay before redirect
+    const timer = setTimeout(() => {
+      router.push("/founder/loading");
+      setIsLoading(false);
+    }, 500); // Adjust delay as needed (500ms is minimal but noticeable)
 
-        {/* Button */}
-        {/* <Button
-          variant="secondary"
-          size="lg"
-          className="px-8 py-6 text-md"
-          onClick={() => router.push("/founder/loading")}
-        >
-          Let&apos;s Go
-        </Button> */}
+    return () => clearTimeout(timer); // Cleanup on unmount
+  }, [router]);
+
+  return (
+    <div className="min-h-screen bg-[#0e0e0e] flex flex-col items-center justify-center p-4">
+      <div className="text-center space-y-4 max-w-md w-full">
+        <Skeleton className="h-9 w-3/4 mx-auto" />
+        <Skeleton className="h-6 w-full mx-auto" />
+        <div className="p-8 rounded-lg shadow-sm">
+          <Skeleton className="h-10 w-full" />
+        </div>
       </div>
     </div>
   );

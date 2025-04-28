@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getFounderPitches } from "@/lib/apiActions";
 import formatDate from "@/lib/formatDate";
 
-// Reusing your custom Pitch type
 type Pitch = {
   id: string;
   pitchName: string;
@@ -51,15 +51,37 @@ export default function PitchesList({ pitchBoard }: PitchesListProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[40vh]">
-        <p className="text-lg text-muted-foreground">Loading pitches...</p>
+      <div className="min-h-screen container mx-auto px-5 py-6">
+        <div className="bg-[#1a1a1a] rounded-[0.35rem] p-6">
+          <div className="space-y-4">
+            {Array(3)
+              .fill(0)
+              .map((_, index) => (
+                <div
+                  key={index}
+                  className="border-b border-border last:border-0 last:pb-0"
+                >
+                  <div className="flex items-center justify-between px-4 py-2 rounded-[0.35rem]">
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-1/3 bg-[#101010]" />
+                      <div className="space-y-1">
+                        <Skeleton className="h-3 w-1/4 bg-[#101010]" />
+                        <Skeleton className="h-3 w-1/5 bg-[#101010]" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-5 w-5" />
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-[40vh]">
+      <div className="min-h-screen flex items-center justify-center">
         <p className="text-lg text-red-500">{error}</p>
       </div>
     );
@@ -67,14 +89,17 @@ export default function PitchesList({ pitchBoard }: PitchesListProps) {
 
   if (pitches.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[40vh]">
-        <p className="text-lg text-muted-foreground">You haven’t pitched yet. Click the Scout button to pitch your startup to investors.</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-muted-foreground">
+          You haven’t pitched yet. Click the Scout button to pitch your startup to
+          investors.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-5">
+    <div className="min-h-screen container mx-auto px-5 py-6">
       <div className="bg-[#1a1a1a] rounded-[0.35rem] p-6">
         <div className="space-y-4">
           {pitches.map((pitch) => (
@@ -87,11 +112,7 @@ export default function PitchesList({ pitchBoard }: PitchesListProps) {
                   <div className="flex-1">
                     <h3 className="text-medium">{pitch.pitchName}</h3>
                     <div className="text-xs text-muted-foreground space-y-1">
-                      <div>
-                        Created At:{" "}
-                        {/* {new Date(pitch.createdAt).toLocaleDateString()} */}
-                        {formatDate(pitch.createdAt)}
-                      </div>
+                      <div>Created At: {formatDate(pitch.createdAt)}</div>
                       <div>Location: {pitch.location}</div>
                     </div>
                   </div>
