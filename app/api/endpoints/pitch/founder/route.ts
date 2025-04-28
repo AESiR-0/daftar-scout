@@ -1,13 +1,15 @@
 import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { pitch } from "@/backend/drizzle/models/pitch";
+import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
+import { users } from '@/backend/drizzle/models/users'
 import { db } from "@/backend/database";
 import { nanoid } from "nanoid";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
 
-  if (!session) {
+  if (!session || !session?.user || !session?.user?.email) {
     return NextResponse.json({ message: "Unauthenticated" }, { status: 401 });
   }
 
@@ -22,12 +24,21 @@ export async function POST(req: NextRequest) {
   }
 
   const pitchId = nanoid();
-
+  const user = await db.select({ userId: users.id }).from(users).where(eq(users.email, session.user.email))
+  if (user.length == 0)
+    return NextResponse.json({ error: "User does not exist" }, { status: 500 })
+  const { userId } = user[0]
   await db.insert(pitch).values({
     id: pitchId,
     scoutId,
     pitchName,
   });
+  await db.insert(pitchTeam).values({
+    pitchId: pitchId,
+    userId: userId,
+    designation: 'Founder',
+    hasApproved: true,
+  })
 
   return NextResponse.json({ pitchId });
 }
