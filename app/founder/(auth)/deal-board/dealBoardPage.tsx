@@ -5,6 +5,7 @@ import { useSearch } from "@/lib/context/search-context";
 import { CreateDaftarDialog } from "@/components/dialogs/create-daftar-dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Pitch = {
   id: string;
@@ -58,15 +59,22 @@ export default function PitchBoardPage({ pitches }: PitchBoardPageProps) {
   const [groupedPitches, setGroupedPitches] = useState<Record<string, Pitch[]>>(
     {}
   );
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const grouped: Record<string, Pitch[]> = {};
-    for (const pitch of pitches) {
-      const status = pitch.status ?? "Inbox";
-      if (!grouped[status]) grouped[status] = [];
-      grouped[status].push(pitch);
-    }
-    setGroupedPitches(grouped);
+    // Simulate brief loading to ensure skeleton visibility
+    const timer = setTimeout(() => {
+      const grouped: Record<string, Pitch[]> = {};
+      for (const pitch of pitches) {
+        const status = pitch.status ?? "Inbox";
+        if (!grouped[status]) grouped[status] = [];
+        grouped[status].push(pitch);
+      }
+      setGroupedPitches(grouped);
+      setLoading(false);
+    }, 500); // Adjust delay as needed (500ms ensures skeleton visibility)
+
+    return () => clearTimeout(timer); // Cleanup on unmount
   }, [pitches]);
 
   const filteredPitches = Object.entries(groupedPitches).reduce(
@@ -97,8 +105,46 @@ export default function PitchBoardPage({ pitches }: PitchBoardPageProps) {
     (arr) => arr.length > 0
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen space-y-6 mx-auto flex-col items-center justify-center px-4 py-6">
+        <ScrollArea className="w-[calc(100vw-12rem)] flex justify-center items-center rounded-[0.35rem]">
+          <div className="flex gap-6 p-1">
+            {founderStatusOrder.map((status) => (
+              <div
+                key={status}
+                className="flex-none w-[300px] bg-muted/30 rounded-[0.35rem] p-4 min-h-[calc(100vh-12rem)]"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-20 bg-background" />
+                    <Skeleton className="h-4 w-6 rounded-[0.35rem] bg-background" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {Array(2)
+                    .fill(0)
+                    .map((_, index) => (
+                      <div
+                        key={index}
+                        className="p-4 rounded-[0.35rem] bg-background border"
+                      >
+                        <Skeleton className="h-4 w-2/3 mb-2" />
+                        <Skeleton className="h-3 w-1/2" />
+                      </div>
+                    ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 mx-auto flex-col items-center justify-center px-4">
+    <div className="min-h-screen space-y-6 mx-auto flex-col items-center justify-center px-4 py-6">
       {hasPitches ? (
         <ScrollArea className="w-[calc(100vw-12rem)] flex justify-center items-center rounded-[0.35rem]">
           <div className="flex gap-6 p-1">
@@ -121,13 +167,13 @@ export default function PitchBoardPage({ pitches }: PitchBoardPageProps) {
                   <ScrollArea className="h-[calc(100vh-16rem)]">
                     {statusPitches.length === 0 && emptyStateMessages[status] ? (
                       <div className="flex flex-col items-center justify-center h-full text-center">
-                        <Card className="w-full p-4 bg-muted/50  rounded-[0.35rem]">
-                        <h4 className="text-md text-muted-foreground">
-                          {emptyStateMessages[status].title}
-                        </h4>
-                        <p className="text-xs text-left text-muted-foreground mt-2">
-                          {emptyStateMessages[status].description}
-                        </p>
+                        <Card className="w-full p-4 bg-muted/50 rounded-[0.35rem]">
+                          <h4 className="text-md text-muted-foreground">
+                            {emptyStateMessages[status].title}
+                          </h4>
+                          <p className="text-xs text-left text-muted-foreground mt-2">
+                            {emptyStateMessages[status].description}
+                          </p>
                         </Card>
                       </div>
                     ) : (
