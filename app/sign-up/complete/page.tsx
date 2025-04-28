@@ -8,7 +8,6 @@ export default async function page() {
   }
   return (
     <div className="flex flex-col items-center p-4 justify-center min-h-screen">
-      <h2 className="mt-4 text-2xl font-semibold">You are almost there!</h2>
       <UserProfileForm userMail={session?.user?.email || ""} />
     </div>
   );
