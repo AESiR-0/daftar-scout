@@ -158,7 +158,7 @@ export default function ScoutDetailsPage() {
       <div className="min-h-screen space-y-6 container mx-auto px-10 py-8">
         <div className="flex gap-6">
           <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
-            <div className="relative aspect-[9/16] w-full">
+            <div className="mx-auto relative aspect-[9/16] w-[300px] h-[533px]">
               <video
                 src={transformedScout.videoUrl}
                 controls
