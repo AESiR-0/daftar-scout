@@ -18,8 +18,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      
-      <head>
         {/* Google Analytics Script */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-QBDCP6LQ5W"
@@ -33,7 +31,6 @@ export default function RootLayout({
             gtag('config', 'G-QBDCP6LQ5W');
           `}
         </Script>
-      </head>
       <body className={`subpixel-antialiased font-poppins`}>
         <ToastProvider>
           <div className="relative flex min-h-screen bg-[#0e0e0e] flex-col">
