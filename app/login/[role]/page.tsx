@@ -11,7 +11,7 @@ export default async function Login({
   const { role } = await params;
   const session = await auth();
   if (session) {
-    return redirect(`/${role}`); // Redirect to home if already logged in
+    return redirect(`/${role}`); 
   }
 
   return (

@@ -13,7 +13,9 @@ export interface NotificationPayload {
   scout_id?: string;
   daftar_id?: string;
   action_by?: string;
+  pitchId?: string;
   action_at?: string;
   message?: string;
+  designation?: string;
   url?: string;
 }

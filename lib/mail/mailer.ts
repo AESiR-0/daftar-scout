@@ -1,9 +1,5 @@
-import { supabase } from "../supabase/createClient";
-import { NotificationPayload } from "./type";
-import { db } from "@/backend/database";
-import { users } from "@/backend/drizzle/models/users";
-import { eq } from "drizzle-orm";
 import nodemailer from 'nodemailer';
+import { NotificationType, NotificationPayload } from '../notifications/type';
 
 const SMTP2GO_USER = process.env.SMTP_USER;
 const SMTP2GO_PASSWORD = process.env.SMTP_PASS;
@@ -32,7 +28,7 @@ interface EmailOptions {
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
     await transporter.sendMail({
-      from: 'notifications@daftaros.com',
+      from: 'pratham@daftaros.com',
       to,
       subject,
       html,
@@ -96,70 +92,4 @@ export function generateStandardNotificationEmail(
       </div>
     `,
   };
-}
-
-type Notification = {
-  id: string;
-  type: string;
-  role: string;
-  targeted_users: string[];
-  payload: NotificationPayload;
-  created_at: string;
-};
-
-export async function sendNotificationEmail(notification: Notification, userId: string) {
-  try {
-    // Call the email API endpoint with full URL
-    const response = await fetch(`${BASE_URL}/api/notifications/email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        notification,
-        userId,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to send email');
-    }
-  } catch (error) {
-    console.error('Failed to send notification email:', error);
-  }
-}
-
-export function listenToNotifications({
-  userId,
-  role,
-  onNotification,
-}: {
-  userId: string;
-  role: "founder" | "investor";
-  onNotification: (notification: Notification) => void;
-}) {
-  return supabase
-    .channel("realtime:notifications")
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "notifications",
-      },
-      (payload) => {
-        const notif = payload.new as Notification;
-
-        const isTargeted =
-          notif.targeted_users.length === 0 ||
-          notif.targeted_users.includes(userId);
-
-        const roleMatches = notif.role === "both" || notif.role === role;
-
-        if (isTargeted && roleMatches) {
-          onNotification(notif);
-        }
-      }
-    )
-    .subscribe();
-}
+} 

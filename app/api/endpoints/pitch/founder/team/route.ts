@@ -5,6 +5,7 @@ import { and, eq, or } from "drizzle-orm";
 import { auth } from "@/auth";
 import { createNotification } from "@/lib/notifications/insert";
 import { users } from "@/backend/drizzle/models/users";
+import { sendNotificationEmail } from "@/lib/notifications/listen";
 
 // GET: Fetch team members for a pitch by pitchId from request body
 export async function GET(req: NextRequest) {
@@ -133,13 +134,38 @@ export async function POST(req: NextRequest) {
       .returning();
 
     // Notification for invited user
-    await createNotification({
+    const notification = await createNotification({
       type: "updates",
       title: "Pitch Invitation",
-      description: `You are invited to the ${pitchName}`,
+      description: `You are invited to join the pitch team for ${pitchName} as ${designation || "Team Member"}`,
       targeted_users: [userId],
       role: "founder",
+      payload: {
+        pitchId,
+        designation: designation || "Team Member",
+        message: `You have been invited to join the pitch team for ${pitchName} as ${designation || "Team Member"}`,
+        action: "invite",
+        action_by: user.id,
+        action_at: new Date().toISOString(),
+      }
     });
+
+    // Send email notification
+    await sendNotificationEmail({
+      type: "updates",
+      targeted_users: [userId],
+      role: "founder",
+      payload: {
+        pitchId,
+        designation: designation || "Team Member",
+        message: `You have been invited to join the pitch team for ${pitchName} as ${designation || "Team Member"}`,
+        action: "invite",
+        action_by: user.id,
+        action_at: new Date().toISOString(),
+      },
+      id: "",
+      created_at: new Date().toISOString()
+    }, userId);
 
     return NextResponse.json(
       {

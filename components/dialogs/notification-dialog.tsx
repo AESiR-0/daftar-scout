@@ -16,6 +16,10 @@ import { usePathname } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase/createClient";
 import { useDaftar } from "@/lib/context/daftar-context";
+import { sendNotificationEmail } from "@/lib/notifications/listen";
+import { db } from "@/backend/database";
+import { users } from "@/backend/drizzle/models/users";
+import { eq } from "drizzle-orm";
 
 export type NotificationType =
   | "news"
@@ -51,12 +55,12 @@ type UITab = "updates" | "alerts" | "news" | "scout-requests" | "scout-links";
 
 const emptyStateMessages: Record<UITab, string> = {
   "scout-requests":
-    "If a Daftar requests to collaborate with you, you’ll see the notification here.",
+    "If a Daftar requests to collaborate with you, you'll see the notification here.",
   "scout-links":
-    "Once your Daftar creates a scout and it goes live, you’ll receive a unique scout application link right here.\n\nFeel free to share this link with founders in your social network anyone you think could be a great fit. Founders can use it to view your scout and apply directly.\n\nTeam Daftar",
+    "Once your Daftar creates a scout and it goes live, you'll receive a unique scout application link right here.\n\nFeel free to share this link with founders in your social network anyone you think could be a great fit. Founders can use it to view your scout and apply directly.\n\nTeam Daftar",
   updates: "Looks empty here for now.",
   alerts: "Looks empty here for now.",
-  news: "When a startup gets selected at Daftar, we’ll share the news here.",
+  news: "When a startup gets selected at Daftar, we'll share the news here.",
 };
 
 export function NotificationDialog({
@@ -142,7 +146,7 @@ export function NotificationDialog({
           schema: "public",
           table: "notifications",
         },
-        (payload) => {
+        async (payload) => {
           const notif = payload.new as Notification;
           const isTargeted =
             notif.targeted_users.length === 0 ||
@@ -156,6 +160,22 @@ export function NotificationDialog({
               title: `New notification: ${notif.title || notif.type}`,
               variant: "default",
             });
+            
+            // Send email via API
+            try {
+              await fetch('/api/notifications/email', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  notification: notif,
+                  userId,
+                }),
+              });
+            } catch (error) {
+              console.error('Failed to send email:', error);
+            }
           }
         }
       )
@@ -219,19 +239,18 @@ export function NotificationDialog({
 
       toast({
         title: `Request ${action}`,
-        description: `${action === "accept" ? "Accepted" : "Rejected"} by ${
-          user.firstName
-        } ${user.lastName}`,
+        description: `${action === "accept" ? "Accepted" : "Rejected"} by ${user.firstName
+          } ${user.lastName}`,
       });
 
       setNotifications((prev) =>
         prev.map((n) =>
           n.id === requestId
             ? {
-                ...n,
-                status: action, // or a separate field like n.actionStatus
-                handledBy: user,
-              }
+              ...n,
+              status: action, // or a separate field like n.actionStatus
+              handledBy: user,
+            }
             : n
         )
       );
@@ -276,7 +295,7 @@ export function NotificationDialog({
             {activeTab === "scout-requests" ? (
               <div className="space-y-4">
                 {notifications.filter((n) => n.type === "request").length >
-                0 ? (
+                  0 ? (
                   notifications
                     .filter((n) => n.type === "request")
                     .map((notification, idx) => (
@@ -314,7 +333,7 @@ export function NotificationDialog({
                             <div className="text-xs text-muted-foreground border-t pt-2">
                               <p>
                                 {requestStatuses[notification.id].action ===
-                                "accepted"
+                                  "accepted"
                                   ? "Accepted"
                                   : "Declined"}{" "}
                                 by {requestStatuses[notification.id].by}
@@ -361,7 +380,7 @@ export function NotificationDialog({
             ) : activeTab === "scout-links" ? (
               <div className="space-y-4">
                 {notifications.filter((n) => n.type === "scout_link").length >
-                0 ? (
+                  0 ? (
                   notifications
                     .filter((n) => n.type === "scout_link")
                     .map((notification, idx) => (
