@@ -30,16 +30,17 @@ interface CreateDaftarDialogProps {
 }
 
 const daftarStructures = [
-  "Private Incubator",
-  "Government Incubator",
   "Accelerator",
   "Angel Investor",
-  "Startup Studio",
-  "Founder's Office",
   "Family Offices",
-  "Venture Capitalist",
+  "Founder Turned Investor",
+  "Government Incubator",
+  "Investment Banker",
+  "Micro Venture Capitalist",
   "Private Equity",
-  "Other",
+  "Private Incubator",
+  "Startup Studio/Builder",
+  "Venture Capitalist",
 ];
 
 const countries = [
@@ -239,8 +240,8 @@ const countries = [
   'Vietnam',
   'Yemen',
   'Zambia',
-  'Zimbabwe' 
-] 
+  'Zimbabwe'
+]
 
 export function CreateDaftarDialog({
   open,
@@ -306,7 +307,7 @@ export function CreateDaftarDialog({
           name: formData.name,
           structure: formData.structure,
           website: formData.website || null, // Only optional field
-          bigPicture: formData.vision,
+          bigPicture: formData.vision || null,
           location,
         }),
       });
@@ -363,7 +364,7 @@ export function CreateDaftarDialog({
   const isFormValid = () =>
     formData.name &&
     formData.structure &&
-    formData.vision &&
+    // formData.vision &&
     formData.address.street &&
     formData.address.city &&
     formData.address.country;
@@ -484,7 +485,7 @@ export function CreateDaftarDialog({
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label>Vision *</Label>
                   <Textarea
                     placeholder="Enter your Daftar's vision"
@@ -494,7 +495,7 @@ export function CreateDaftarDialog({
                     }
                     required
                   />
-                </div>
+                </div> */}
 
                 <div className="flex justify-center pt-4">
                   <Button

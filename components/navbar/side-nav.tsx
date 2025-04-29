@@ -56,14 +56,8 @@ export function AppSidebar({ role }: { role: string }) {
           {/* Top Section */}
           <div>
             {/* Header */}
-            <div className="space-y-4 px-4 py-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src="/public/assets/earth-globe-icon-png.webp"
-                  alt="Daftar"
-                />
-                <AvatarFallback>D</AvatarFallback>
-              </Avatar>
+            <div className="space-y-4 mt-2 px-4 py-2">
+              <span className="italic font-semibold text-slate-400"> Beta </span>
             </div>
 
             {/* Navigation */}

@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, ChevronsUpDown, Globe, User, Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { redirect } from "next/navigation";
@@ -39,25 +39,31 @@ const roleSchema = z.object({
   role: z.enum(["founder", "investor"]),
 });
 
-const createPersonalInfoSchema = (countryCode: string) => z.object({
-  name: z.string().min(1, "First name cannot be empty"),
-  lastName: z.string().min(1, "Last name cannot be empty"),
-  gender: z.enum(["Male", "Female", "Other"]).optional(),
-  number: z.string()
-    .min(1, "Phone number cannot be empty")
-    .regex(/^\d+$/, "Phone number should contain only numbers")
-    .refine((val) => {
-      // If country code is +91 (India), validate for 10 digits
-      if (countryCode === "+91") {
-        return val.length === 10;
-      }
-      return true;
-    }, {
-      message: "Indian phone numbers must be 10 digits"
+const createPersonalInfoSchema = (countryCode: string) =>
+  z.object({
+    name: z.string().min(1, "First name cannot be empty"),
+    lastName: z.string().min(1, "Last name cannot be empty"),
+    gender: z.enum(["Male", "Female", "Trans","Other",], {
+      errorMap: () => ({ message: "Please select a gender" }),
     }),
-  dob: z.string().min(1, "Date of birth cannot be empty"),
-  countryCode: z.string().min(1, "Country code cannot be empty"),
-});
+    number: z
+      .string()
+      .min(1, "Phone number cannot be empty")
+      .regex(/^\d+$/, "Phone number should contain only numbers")
+      .refine(
+        (val) => {
+          if (countryCode === "+91") {
+            return val.length === 10;
+          }
+          return true;
+        },
+        {
+          message: "Indian phone numbers must be 10 digits",
+        }
+      ),
+    dob: z.string().min(1, "Date of birth cannot be empty"),
+    countryCode: z.string().min(1, "Country code cannot be empty"),
+  });
 
 const languagesSchema = z.object({
   languages: z.array(z.string()).min(1, "Please select at least one language"),
@@ -124,22 +130,26 @@ export default function UserProfileClient({
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,idd');
-        if (!response.ok) throw new Error('Failed to fetch countries');
+        const response = await fetch(
+          "https://restcountries.com/v3.1/all?fields=name,cca2,idd"
+        );
+        if (!response.ok) throw new Error("Failed to fetch countries");
 
         const data = await response.json();
         const formattedCountries = data
-          .filter((country: any) => country.idd.root && country.idd.suffixes?.[0])
+          .filter(
+            (country: any) => country.idd.root && country.idd.suffixes?.[0]
+          )
           .map((country: any) => ({
             name: country.name.common,
             code: country.cca2,
-            dial_code: `${country.idd.root}${country.idd.suffixes[0]}`
+            dial_code: `${country.idd.root}${country.idd.suffixes[0]}`,
           }))
           .sort((a: Country, b: Country) => a.name.localeCompare(b.name));
 
         setCountries(formattedCountries);
       } catch (error) {
-        console.error('Error fetching countries:', error);
+        console.error("Error fetching countries:", error);
         setCountries([
           { name: "United States", code: "US", dial_code: "+1" },
           { name: "United Kingdom", code: "GB", dial_code: "+44" },
@@ -160,29 +170,33 @@ export default function UserProfileClient({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
+      if (
+        countryDropdownRef.current &&
+        !countryDropdownRef.current.contains(event.target as Node)
+      ) {
         setCountryDropdownOpen(false);
       }
-      if (languageDropdownRef.current && !languageDropdownRef.current.contains(event.target as Node)) {
+      if (
+        languageDropdownRef.current &&
+        !languageDropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   useEffect(() => {
-    // Set loading state to false once languageData is available
     if (languageData && languageData.length > 0) {
       setIsLanguageLoading(false);
     }
   }, [languageData]);
 
   const handleChange = (field: string, value: string) => {
-    // Prevent non-numeric input for phone number
     if (field === "number" && value && !/^\d*$/.test(value)) {
       return;
     }
@@ -201,10 +215,8 @@ export default function UserProfileClient({
       let selectedLanguages: string[];
 
       if (isLanguageSelected) {
-        // Remove the language if it's already selected
         selectedLanguages = prev.languages.filter((lang) => lang !== language);
       } else {
-        // Add the language if it's not selected
         if (prev.role === "founder" && prev.languages.length >= 3) {
           toast({
             title: "Language Limit",
@@ -246,7 +258,6 @@ export default function UserProfileClient({
       const flattenedErrors = result?.error.flatten().fieldErrors;
       const formattedErrors: Partial<Record<keyof typeof formState, string>> = {};
 
-      // Convert array of errors to single string for each field
       Object.entries(flattenedErrors || {}).forEach(([key, value]) => {
         formattedErrors[key as keyof typeof formState] = value?.[0];
       });
@@ -301,29 +312,31 @@ export default function UserProfileClient({
         return (
           <div className="flex flex-col items-center gap-8">
             <h3 className="text-2xl font-medium">Select Your Role</h3>
-            <div className="flex gap-6">
+            <div className="grid grid-cols-2 gap-4 w-full">
               <Button
                 variant={formState.role === "founder" ? "default" : "outline"}
                 onClick={() => handleChange("role", "founder")}
-                className={`w-40 h-40 flex flex-col gap-4 items-center justify-center ${formState.role === "founder" ? "border-2 border-gray-300" : ""}`}
+                className={`col-span-2 rounded-[0.35rem] ${
+                  formState.role === "founder" ? "bg-secondary" : ""
+                }`}
               >
-                <User className="w-12 h-12" />
-                <span className="text-lg">Founder</span>
+                <span className="text-lg">I'm a Founder</span>
               </Button>
               <Button
                 variant={formState.role === "investor" ? "default" : "outline"}
                 onClick={() => handleChange("role", "investor")}
-                className={`w-40 h-40 flex flex-col gap-4 items-center justify-center ${formState.role === "investor" ? "border-2 border-gray-300" : ""}`}
+                className={`col-span-2 rounded-[0.35rem] ${
+                  formState.role === "investor" ? "bg-secondary" : ""
+                }`}
               >
-                <Globe className="w-12 h-12" />
-                <span className="text-lg">Investor</span>
+                <span className="text-lg">I'm an Investor</span>
               </Button>
             </div>
           </div>
         );
       case 2:
         return (
-          <div className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
+          <div className="grid grid-cols-[1fr_1fr] gap-6">
             <div className="space-y-2">
               <Label htmlFor="name">First Name</Label>
               <Input
@@ -333,6 +346,11 @@ export default function UserProfileClient({
                 disabled={isSubmitting}
                 className="bg-[#2a2a2a] border-[#3a3a3a] text-white h-12"
               />
+              {errors.name && (
+                <p className="text-red-500 text-xs max-w-full">
+                  {errors.name}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -344,6 +362,11 @@ export default function UserProfileClient({
                 disabled={isSubmitting}
                 className="bg-[#2a2a2a] border-[#3a3a3a] text-white h-12"
               />
+              {errors.lastName && (
+                <p className="text-red-500 text-xs max-w-full">
+                  {errors.lastName}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -356,6 +379,9 @@ export default function UserProfileClient({
                 disabled={isSubmitting}
                 className="bg-[#2a2a2a] border-[#3a3a3a] text-white h-12"
               />
+              {errors.dob && (
+                <p className="text-red-500 text-xs max-w-full">{errors.dob}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -371,28 +397,44 @@ export default function UserProfileClient({
                 <SelectContent className="bg-[#2a2a2a] border-[#3a3a3a] text-white">
                   <SelectItem value="Male">Male</SelectItem>
                   <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Trans">Trans</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.gender && (
+                <p className="text-red-500 text-xs max-w-full">
+                  {errors.gender}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="countryCode">Country Code</Label>
-              <Popover open={countryDropdownOpen} onOpenChange={setCountryDropdownOpen}>
+              <Popover
+                open={countryDropdownOpen}
+                onOpenChange={setCountryDropdownOpen}
+              >
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={countryDropdownOpen}
-                    className="w-full justify-between bg-[#2a2a2a] border-[#3a3a3a] text-white h-12"
+                    className="w-full min-w-[120px] justify-between bg-[#2a2a2a] border-[#3a3a3a] text-white h-12 text-left"
+                    disabled={isSubmitting}
                   >
                     {formState.countryCode || "Select country..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0 bg-[#2a2a2a] border-[#3a3a3a] text-white">
+                <PopoverContent
+                  className="w-[300px] p-0 bg-[#2a2a2a] border-[#3a3a3a] text-white"
+                  align="start"
+                >
                   <Command>
-                    <CommandInput placeholder="Search country..." className="h-9" />
+                    <CommandInput
+                      placeholder="Search country..."
+                      className="h-9"
+                    />
                     <CommandEmpty>No country found.</CommandEmpty>
                     <CommandGroup className="max-h-[300px] overflow-auto">
                       {countries.map((country) => (
@@ -406,8 +448,11 @@ export default function UserProfileClient({
                           className="cursor-pointer"
                         >
                           <Check
-                            className={`mr-2 h-4 w-4 ${formState.countryCode === country.dial_code ? "opacity-100" : "opacity-0"
-                              }`}
+                            className={`mr-2 h-4 w-4 ${
+                              formState.countryCode === country.dial_code
+                                ? "opacity-100"
+                                : "opacity-0"
+                            }`}
                           />
                           <span className="mr-2">{country.dial_code}</span>
                           {country.name}
@@ -417,6 +462,11 @@ export default function UserProfileClient({
                   </Command>
                 </PopoverContent>
               </Popover>
+              {errors.countryCode && (
+                <p className="text-red-500 text-xs max-w-full">
+                  {errors.countryCode}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -428,24 +478,35 @@ export default function UserProfileClient({
                 disabled={isSubmitting}
                 className="bg-[#2a2a2a] border-[#3a3a3a] text-white h-12"
               />
+              {errors.number && (
+                <p className="text-red-500 text-xs max-w-full">
+                  {errors.number}
+                </p>
+              )}
             </div>
           </div>
         );
       case 3:
         return (
-          <div className="max-w-2xl mx-auto space-y-6">
-
+          <div className="space-y-6">
             <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={dropdownOpen}
-                  className="w-full justify-between bg-[#2a2a2a] border-[#3a3a3a] text-white h-12"
+                  className="w-full min-w-[120px] justify-between bg-[#2a2a2a] border-[#3a3a3a] text-white h-12 text-left"
+                  disabled={isSubmitting}
                 >
                   {formState.languages.length
                     ? formState.languages.join(", ")
-                    : isLanguageLoading ? "Loading" : "Select Preferred Languages"}
+                    : isLanguageLoading
+                    ? "Loading"
+                    : formState.role === "founder"
+                    ? "Select Preferred Languages to Connect with Investors"
+                    : formState.role === "investor"
+                    ? "Select Preferred Languages to Connect with Founders"
+                    : "Select Preferred Languages"}
                   {isLanguageLoading ? (
                     <Loader2 className="ml-2 h-4 w-4 shrink-0 opacity-50 animate-spin" />
                   ) : (
@@ -453,9 +514,15 @@ export default function UserProfileClient({
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-full p-0 bg-[#2a2a2a] border-[#3a3a3a] text-white">
+              <PopoverContent
+                className="w-[300px] p-0 bg-[#2a2a2a] border-[#3a3a3a] text-white"
+                align="start"
+              >
                 <Command>
-                  <CommandInput placeholder="Search languages..." className="h-9" />
+                  <CommandInput
+                    placeholder="Search languages..."
+                    className="h-9"
+                  />
                   <CommandEmpty>No language found.</CommandEmpty>
                   <CommandGroup className="max-h-[300px] overflow-auto">
                     {isLanguageLoading ? (
@@ -467,14 +534,26 @@ export default function UserProfileClient({
                         <CommandItem
                           key={language.id}
                           value={language.language_name}
-                          onSelect={() => handleLanguageToggle(language.language_name)}
+                          onSelect={() =>
+                            handleLanguageToggle(language.language_name)
+                          }
                           className="cursor-pointer"
-                          disabled={formState.role === "founder" &&
+                          disabled={
+                            formState.role === "founder" &&
                             formState.languages.length >= 3 &&
-                            !formState.languages.includes(language.language_name)}
+                            !formState.languages.includes(
+                              language.language_name
+                            )
+                          }
                         >
                           <Check
-                            className={`mr-2 h-4 w-4 ${formState.languages.includes(language.language_name) ? "opacity-100" : "opacity-0"}`}
+                            className={`mr-2 h-4 w-4 ${
+                              formState.languages.includes(
+                                language.language_name
+                              )
+                                ? "opacity-100"
+                                : "opacity-0"
+                            }`}
                           />
                           {language.language_name}
                         </CommandItem>
@@ -484,11 +563,11 @@ export default function UserProfileClient({
                 </Command>
               </PopoverContent>
             </Popover>
-            <div className="text-sm text-gray-400 text-center">
-              {formState.role === "founder"
-                ? "Founders can select up to 3 languages"
-                : "Investors can select unlimited languages"}
-            </div>
+            {errors.languages && (
+              <p className="text-red-500 text-xs max-w-full">
+                {errors.languages}
+              </p>
+            )}
           </div>
         );
     }
@@ -496,38 +575,33 @@ export default function UserProfileClient({
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] p-4 flex items-center justify-center">
-      <Card className="border-none w-full max-w-2xl bg-[#1a1a1a] text-white">
-        <CardHeader>
-          <CardTitle className="text-3xl font-medium text-center">
-            Complete Profile
-          </CardTitle>
-          <div className="flex justify-center gap-3 mt-8">
-            {[1, 2, 3].map((step) => (
-              <div
-                key={step}
-                className={`w-2 h-2 rounded-full ${currentStep === step ? "bg-white" : "bg-[#2a2a2a]"}`}
-              />
-            ))}
-          </div>
-        </CardHeader>
-        <CardContent className="py-8">
+      <Card className="border-none w-[32rem] bg-[#1a1a1a] text-white">
+        <CardContent className="py-8 px-8">
           {renderStep()}
-          <div className="flex justify-between mt-12 max-w-2xl mx-auto">
+          <div className="flex justify-between mt-12 w-full">
             <Button
               variant="outline"
               onClick={handleBack}
               disabled={currentStep === 1 || isSubmitting}
-              className="h-12 px-8"
+              className="rounded-[0.35rem]"
             >
               Back
             </Button>
             {currentStep < 3 ? (
-              <Button onClick={handleNext} disabled={isSubmitting} className="h-12 px-8">
+              <Button
+                onClick={handleNext}
+                disabled={isSubmitting}
+                className="rounded-[0.35rem]"
+              >
                 Next
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={isSubmitting} className="h-12 px-8">
-                {isSubmitting ? "Saving..." : "Save Changes"}
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="rounded-[0.35rem]"
+              >
+                {isSubmitting ? "Saving..." : "Complete Profile"}
               </Button>
             )}
           </div>

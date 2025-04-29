@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
     const currentUser = dbUser[0];
     const data = await req.json();
 
-    const requiredFields = ["name", "structure", "bigPicture", "location"];
+    const requiredFields = ["name", "structure", "location"];
     for (const field of requiredFields) {
       if (!data[field]) {
         return NextResponse.json(
