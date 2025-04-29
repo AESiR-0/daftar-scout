@@ -23,37 +23,21 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, X, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSession } from "next-auth/react";
 
 interface ScheduleMeetingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-// Sample data - replace with real data
-const daftars = [
-  { id: "1", name: "Tech Startups" },
-  { id: "2", name: "Healthcare Innovation" },
-];
-
-const pitches = [
-  { id: "1", name: "AI Solution Pitch" },
-  { id: "2", name: "HealthTech Platform" },
-];
-
-const users = [
-  { id: "1", name: "John Doe" },
-  { id: "2", name: "Sarah Smith" },
-  { id: "3", name: "Mike Johnson" },
-];
-
 export function ScheduleMeetingDialog({
   open,
   onOpenChange,
 }: ScheduleMeetingDialogProps) {
+  const { data: session } = useSession();
   const [formData, setFormData] = useState({
     title: "",
-    daftar: "",
-    pitch: "",
+    attendeeEmail: "",
     attendees: [] as string[],
     date: undefined as Date | undefined,
     hours: "",
@@ -74,13 +58,57 @@ export function ScheduleMeetingDialog({
     label: String(i * 5).padStart(2, "0"),
   }));
 
-  const handleSubmit = () => {
-    const formattedTime = `${formData.hours}:${formData.minutes} ${formData.period}`;
-    console.log("Meeting scheduled:", {
-      ...formData,
-      time: formattedTime,
-    });
-    onOpenChange(false);
+  const handleAddAttendee = () => {
+    if (formData.attendeeEmail && !formData.attendees.includes(formData.attendeeEmail)) {
+      setFormData({
+        ...formData,
+        attendees: [...formData.attendees, formData.attendeeEmail],
+        attendeeEmail: "",
+      });
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const formattedTime = `${formData.hours}:${formData.minutes} ${formData.period}`;
+      const [hours, minutes] = formattedTime.split(":");
+      const isPM = formData.period === "PM";
+      const hour = parseInt(hours) + (isPM ? 12 : 0);
+
+      const startTime = new Date(formData.date!);
+      startTime.setHours(hour, parseInt(minutes), 0, 0);
+
+      const endTime = new Date(startTime);
+      endTime.setHours(endTime.getHours() + 1); // Default 1-hour meeting
+
+      // Include current user's email in attendees list
+      const allAttendees = session?.user?.email
+        ? [...formData.attendees, session.user.email]
+        : formData.attendees;
+
+      const response = await fetch("/api/endpoints/calendar/create-meeting", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.agenda,
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString(),
+          attendees: allAttendees,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create meeting");
+      }
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error scheduling meeting:", error);
+      // You might want to show an error toast here
+    }
   };
 
   return (
@@ -102,53 +130,56 @@ export function ScheduleMeetingDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>Invite Daftar/Users</Label>
-                <Select
-                  value={formData.attendees[0]}
-                  onValueChange={(value: string) =>
-                    setFormData({
-                      ...formData,
-                      attendees: [...formData.attendees, value],
-                    })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Daftar/Users" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users
-                      .filter((user) => !formData.attendees.includes(user.id))
-                      .map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <Label>Add Attendees</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="Enter attendee email"
+                    value={formData.attendeeEmail}
+                    onChange={(e) =>
+                      setFormData({ ...formData, attendeeEmail: e.target.value })
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddAttendee();
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleAddAttendee}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Add
+                  </Button>
+                </div>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.attendees.map((attendeeId) => {
-                    const user = users.find((u) => u.id === attendeeId);
-                    return user ? (
-                      <Badge
-                        key={user.id}
-                        variant="secondary"
-                        className="flex items-center gap-1"
-                      >
-                        {user.name}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              attendees: formData.attendees.filter(
-                                (id) => id !== user.id
-                              ),
-                            })
-                          }
-                        />
-                      </Badge>
-                    ) : null;
-                  })}
+                  {formData.attendees.map((email) => (
+                    <Badge
+                      key={email}
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
+                      {email}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            attendees: formData.attendees.filter(
+                              (e) => e !== email
+                            ),
+                          })
+                        }
+                      />
+                    </Badge>
+                  ))}
+                  {session?.user?.email && (
+                    <Badge variant="secondary" className="flex items-center gap-1 bg-blue-100">
+                      {session.user.email} (You)
+                    </Badge>
+                  )}
                 </div>
               </div>
 

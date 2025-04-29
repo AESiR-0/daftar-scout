@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     id: pitchId,
     scoutId,
     pitchName,
+    investorStatus: "Inbox"
   });
   await db.insert(pitchTeam).values({
     pitchId: pitchId,

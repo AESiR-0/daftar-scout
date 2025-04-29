@@ -160,22 +160,6 @@ export function NotificationDialog({
               title: `New notification: ${notif.title || notif.type}`,
               variant: "default",
             });
-            
-            // Send email via API
-            try {
-              await fetch('/api/notifications/email', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  notification: notif,
-                  userId,
-                }),
-              });
-            } catch (error) {
-              console.error('Failed to send email:', error);
-            }
           }
         }
       )

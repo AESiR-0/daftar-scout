@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
   // Create notification for each user in the daftar
   await createNotification({
     type: "request",
+    subtype: "collaboration",
     role: "investor",
     title: `New Scout Collaboration Request`,
     description: `You've been invited to collaborate on scout "${scoutExists[0].scoutName}" by daftar "${daftarExists[0].name}".`,
@@ -97,6 +98,8 @@ export async function POST(req: NextRequest) {
       action_by: userId,
       action_at: new Date().toISOString(),
       action: "pending",
+      scoutName: scoutExists[0].scoutName,
+      daftarName: daftarExists[0].name,
     },
   });
 

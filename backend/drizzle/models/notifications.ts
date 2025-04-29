@@ -7,6 +7,7 @@ export const notifications = pgTable("notifications", {
   description: text("description"),
   type: text("type").notNull(),
   role: text("role").notNull(),
+  subtype: text("subtype"),
 
   targeted_users: text("targeted_users")
     .array()

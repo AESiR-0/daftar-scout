@@ -76,6 +76,7 @@ export async function PATCH(req: NextRequest) {
     if (targetUserIds.length > 0) {
       await createNotification({
         type: "updates",
+        subtype: action === "accepted" ? "team_join" : "team_leave",
         title: `Pitch Invitation ${
           action === "accepted" ? "Accepted" : "Declined"
         }`,
@@ -85,6 +86,8 @@ export async function PATCH(req: NextRequest) {
         targeted_users: targetUserIds.filter((id): id is string => id !== null),
         payload: {
           action,
+          action_by: user.id,
+          pitchName,
         },
       });
     }

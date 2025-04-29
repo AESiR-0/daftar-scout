@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,7 +22,7 @@ import {
   Share2,
   Lock,
   Pencil
-} from "lucide-react" 
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/hooks/use-toast"
@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge"
 import formatDate from "@/lib/formatDate"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "../ui/checkbox"
+import { useDaftar } from "@/lib/context/daftar-context"
 
 interface TeamMember {
   id: string
@@ -94,7 +95,8 @@ const getInitials = (name: string) => {
   return firstName?.[0] + (lastName?.[0] || '')
 }
 
-const formatPhoneNumber = (phone: string) => {
+const formatPhoneNumber = (phone?: string) => {
+  if (!phone) return '';
   // Match country code (anything from start until last 10 digits)
   const match = phone.match(/^(.+?)(\d{10})$/)
   if (match) {
@@ -162,7 +164,6 @@ interface MemberCardProps {
 }
 
 function MemberCard({ member, onRemove }: MemberCardProps) {
-  const [members, setMembers] = useState<TeamMember[]>(dummyTeamMembers)
   const [isEditing, setIsEditing] = useState(false)
   const [editDesignation, setEditDesignation] = useState("")
   const handleSaveDesignation = () => {
@@ -173,10 +174,6 @@ function MemberCard({ member, onRemove }: MemberCardProps) {
     console.log('Withdrawing from team')
   }
 
-  const handleRemoveMember = (id: string) => {
-    setMembers(members.filter(member => member.id !== id))
-  }
-
   return (
     <div className="bg-[#1a1a1a] py-6 rounded-[0.35rem]">
       <div className="flex justify-between items-start">
@@ -185,7 +182,7 @@ function MemberCard({ member, onRemove }: MemberCardProps) {
             {member.imageUrl ? (
               <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
             ) : (
-              <AvatarFallback className="rounded-[0.35rem] text-xl">{getInitials(member.firstName)}</AvatarFallback>
+              <AvatarFallback className="rounded-[0.35rem] text-xl">{getInitials(`${member.firstName} ${member.lastName}`)}</AvatarFallback>
             )}
           </Avatar>
           <div>
@@ -216,21 +213,11 @@ function MemberCard({ member, onRemove }: MemberCardProps) {
                   <p className="text-xs text-muted-foreground">{member.designation}</p>
                 )}
                 <div className="flex items-center gap-2">
-                  <span>{member.age}</span>
-                  <span>{member.gender}</span>
-                </div>
-                <div className="flex items-center gap-2">
                   <p>{member.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <p>{formatPhoneNumber(member.phone)}</p>
+                  <p>{formatDate(member.joinDate)}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <p>{member.location}</p>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Preferred languages to connect with founders: {member.language.join(', ')}
-                </p>
               </div>
             </div>
           </div>
@@ -259,7 +246,7 @@ function MemberCard({ member, onRemove }: MemberCardProps) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleRemoveMember(member.id)}
+              onClick={() => onRemove?.(member.id)}
               className="h-8 w-8"
             >
               <Trash2 className="h-4 w-4" />
@@ -308,57 +295,191 @@ export function DaftarDialog({
   onSuccess,
 }: DaftarDialogProps) {
   const { toast } = useToast()
+  const daftarId = useDaftar().selectedDaftar
   const [activeTab, setActiveTab] = useState<DaftarTab>("details")
   const [isEditing, setIsEditing] = useState(false)
-  const [members, setMembers] = useState<TeamMember[]>(dummyTeamMembers)
-  const [pendingMembers, setPendingMembers] = useState<TeamMember[]>([])
+  const [members, setMembers] = useState<TeamMember[]>([])
+  const [isLoadingTeam, setIsLoadingTeam] = useState(false)
   const [newMember, setNewMember] = useState<Partial<TeamMember>>({})
   const [showAddMember, setShowAddMember] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string>("/assets/daftar.png")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showDeletionApprovals, setShowDeletionApprovals] = useState(false)
   const [deletionApprovals, setDeletionApprovals] = useState<DeletionApproval[]>([])
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    type: "",
-  })
+  const [isLoading, setIsLoading] = useState(true)
   const [daftarData, setDaftarData] = useState({
-    name: "My Daftar",
-    structure: "Government Incubator",
-    code: "A7B2X9",
-    website: "www.example.com",
+    name: "",
+    structure: "",
+    code: "",
+    website: "",
     address: {
-      street: "Street Address",
-      city: "City",
-      state: "State",
-      country: "Country",
-      postalCode: "Postal Code"
+      street: "",
+      city: "",
+      state: "",
+      country: "",
+      postalCode: ""
     },
-
-    vision: "Building the next generation of financial infrastructure",
+    vision: "",
     joinedDate: new Date().toISOString()
   })
   const [userConsent, setUserConsent] = useState(false)
+
+  // Fetch Daftar details
+  useEffect(() => {
+    const fetchDaftarDetails = async () => {
+      try {
+        const response = await fetch(`/api/endpoints/daftar/me?daftarId=${daftarId}`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch Daftar details')
+        }
+        const data = await response.json()
+        setDaftarData({
+          name: data.name || "",
+          structure: data.structure || "",
+          code: data.id || "",
+          website: data.website || "",
+          address: {
+            street: "",
+            city: "",
+            state: "",
+            country: "",
+            postalCode: ""
+          },
+          vision: data.bigPicture || "",
+          joinedDate: data.createdAt || new Date().toISOString()
+        })
+      } catch (error) {
+        console.error('Error fetching Daftar details:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load Daftar details",
+          variant: "destructive"
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (open && daftarId) {
+      fetchDaftarDetails()
+    }
+  }, [open, daftarId, toast])
+
+  // Fetch team members
+  const fetchTeamMembers = async () => {
+    if (!daftarId) return;
+    setIsLoadingTeam(true);
+    try {
+      const response = await fetch(`/api/endpoints/daftar/team?daftarId=${daftarId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch team members');
+      }
+      const data = await response.json();
+      setMembers(data);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load team members",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingTeam(false);
+    }
+  };
+
+  // Fetch team members when tab changes to team
+  useEffect(() => {
+    if (activeTab === 'team' && open) {
+      fetchTeamMembers();
+    }
+  }, [activeTab, open, daftarId]);
+
+  const handleInviteMember = async () => {
+    if (!daftarId || !newMember.email || !newMember.designation) {
+      toast({
+        title: "Error",
+        description: "Please fill all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/endpoints/daftar/team?daftarId=${daftarId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newMember.email,
+          designation: newMember.designation,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to invite team member');
+      }
+
+      toast({
+        title: "Success",
+        description: "Team member invited successfully"
+      });
+      setNewMember({});
+      fetchTeamMembers(); // Refresh the team list
+    } catch (error) {
+      console.error('Error inviting team member:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to invite team member",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleCancelInvite = (id: string) => {
     setMembers(members.filter(member => member.id !== id))
   }
 
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`/api/endpoints/daftar/me?daftarId=${daftarId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: daftarData.name,
+          structure: daftarData.structure,
+          website: daftarData.website,
+          vision: daftarData.vision,
+        }),
+      })
 
+      if (!response.ok) {
+        throw new Error('Failed to update Daftar')
+      }
 
-  const handleSave = () => {
-    setIsEditing(false)
-    toast({
-      title: "Changes saved",
-      description: "Your daftar details have been updated successfully."
-    })
+      setIsEditing(false)
+      toast({
+        title: "Success",
+        description: "Your daftar details have been updated successfully."
+      })
+      onSuccess()
+    } catch (error) {
+      console.error('Error updating Daftar:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update Daftar details",
+        variant: "destructive"
+      })
+    }
   }
 
   const handleAddMember = () => {
     setShowAddMember(true)
   }
-
 
   const handleRemoveMember = (id: string) => {
     setMembers(members.filter(member => member.id !== id))
@@ -378,7 +499,6 @@ export function DaftarDialog({
 
   const handleApproveMember = (member: TeamMember) => {
     setMembers([...members, { ...member, status: 'active' }])
-    setPendingMembers(pendingMembers.filter(m => m.id !== member.id))
     toast({
       title: "Member approved",
       description: `${member.firstName} ${member.lastName} has been added to the team`
@@ -410,7 +530,7 @@ export function DaftarDialog({
   }
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.description || !formData.type) {
+    if (!daftarData.name || !daftarData.vision || !daftarData.structure) {
       toast({
         title: "Please fill all fields",
         variant: "destructive"
@@ -424,10 +544,100 @@ export function DaftarDialog({
     })
   }
 
+  const renderTeamContent = () => {
+    if (isLoadingTeam) {
+      return (
+        <div className="flex items-center justify-center h-40">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mb-4"></div>
+            <p className="text-sm text-muted-foreground">Loading team members...</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              placeholder="Email"
+              type="email"
+              value={newMember.email || ''}
+              onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
+            />
+            <Input
+              placeholder="Designation"
+              value={newMember.designation || ''}
+              onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
+            />
+          </div>
+          <Button
+            onClick={handleInviteMember}
+            className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
+            disabled={!newMember.email || !newMember.designation}
+          >
+            Invite
+          </Button>
+        </div>
+
+        <Tabs defaultValue="team" className="mt-6">
+          <TabsList className="">
+            <TabsTrigger value="team" className="flex-1">
+              Team ({members.filter(m => m.status === 'active').length})
+            </TabsTrigger>
+            <TabsTrigger value="pending" className="flex-1">
+              Pending ({members.filter(m => m.status === 'pending').length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="team" className="mt-4 space-y-3">
+            {members.filter(m => m.status === 'active').map((member) => (
+              <MemberCard
+                key={member.id}
+                member={member}
+                onRemove={handleRemoveMember}
+              />
+            ))}
+            {members.filter(m => m.status === 'active').length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-4">
+                No team members yet
+              </p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="pending" className="mt-4 space-y-3">
+            {members.filter(m => m.status === 'pending').map((member) => (
+              <PendingCard key={member.id} member={member} />
+            ))}
+            {members.filter(m => m.status === 'pending').length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-4">
+                No pending invitations
+              </p>
+            )}
+          </TabsContent>
+        </Tabs>
+      </Card>
+    );
+  };
+
   const renderContent = () => {
+    if (isLoading) {
+      return (
+        <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a]">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary mb-4"></div>
+              <p className="text-sm text-muted-foreground">Loading Daftar details...</p>
+            </div>
+          </div>
+        </Card>
+      )
+    }
+
     switch (activeTab) {
       case "details":
-  return (
+        return (
           <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a]">
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
@@ -435,21 +645,21 @@ export function DaftarDialog({
                   <Avatar className="h-20 w-20 rounded-[0.35rem]">
                     <AvatarImage src={avatarUrl} />
                     <AvatarFallback>D</AvatarFallback>
-                      </Avatar>
+                  </Avatar>
                   <div>
                     <h3 className="text-lg font-medium">{daftarData.name}</h3>
                     <p className="text-sm text-muted-foreground">{daftarData.structure}</p>
                     <p className="text-xs text-muted-foreground mt-1">Daftar Code: {daftarData.code}</p>
                   </div>
                 </div>
-                    <Button
+                <Button
                   variant="ghost"
                   size="icon"
-                      onClick={() => setIsEditing(!isEditing)}
-                    >
+                  onClick={() => setIsEditing(!isEditing)}
+                >
                   {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-                    </Button>
-                  </div>
+                </Button>
+              </div>
 
               {isEditing ? (
                 <div className="space-y-4">
@@ -491,8 +701,8 @@ export function DaftarDialog({
                         <Input
                           placeholder="Street Address"
                           value={daftarData.address?.street}
-                          onChange={(e) => setDaftarData(prev => ({ 
-                            ...prev, 
+                          onChange={(e) => setDaftarData(prev => ({
+                            ...prev,
                             address: { ...prev.address, street: e.target.value }
                           }))}
                         />
@@ -500,32 +710,32 @@ export function DaftarDialog({
                           <Input
                             placeholder="City"
                             value={daftarData.address?.city}
-                            onChange={(e) => setDaftarData(prev => ({ 
-                              ...prev, 
+                            onChange={(e) => setDaftarData(prev => ({
+                              ...prev,
                               address: { ...prev.address, city: e.target.value }
                             }))}
                           />
                           <Input
                             placeholder="State/Province"
                             value={daftarData.address?.state}
-                            onChange={(e) => setDaftarData(prev => ({ 
-                              ...prev, 
+                            onChange={(e) => setDaftarData(prev => ({
+                              ...prev,
                               address: { ...prev.address, state: e.target.value }
                             }))}
                           />
                           <Input
                             placeholder="Country"
                             value={daftarData.address?.country}
-                            onChange={(e) => setDaftarData(prev => ({ 
-                              ...prev, 
+                            onChange={(e) => setDaftarData(prev => ({
+                              ...prev,
                               address: { ...prev.address, country: e.target.value }
                             }))}
                           />
                           <Input
                             placeholder="Postal Code"
                             value={daftarData.address?.postalCode}
-                            onChange={(e) => setDaftarData(prev => ({ 
-                              ...prev, 
+                            onChange={(e) => setDaftarData(prev => ({
+                              ...prev,
                               address: { ...prev.address, postalCode: e.target.value }
                             }))}
                           />
@@ -541,9 +751,9 @@ export function DaftarDialog({
                     </div>
                   </div>
                   <Button onClick={handleSave} className="w-full rounded-[0.35rem]">
-                  Save Changes
-                </Button>
-              </div>
+                    Save Changes
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-sm">
@@ -561,133 +771,15 @@ export function DaftarDialog({
                   </p>
                   <div className="text-xs pt-4">
                     <span className="text-muted-foreground">On Daftar Since <br /> {formatDate(daftarData.joinedDate)}</span>
-            </div>
+                  </div>
                 </div>
               )}
-              </div>
+            </div>
           </Card>
         )
 
       case "team":
-        return (
-          <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
-            {/* Invite Form */}
-              <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                <Input
-                  placeholder="First Name"
-                  value={newMember.firstName}
-                  onChange={(e) => setNewMember({ ...newMember, firstName: e.target.value })}
-                />
-                <Input
-                  placeholder="Last Name"
-                  value={newMember.lastName}
-                  onChange={(e) => setNewMember({ ...newMember, lastName: e.target.value })}
-                />
-                        <Input
-                  placeholder="Designation"
-                  value={newMember.designation}
-                  onChange={(e) => setNewMember({ ...newMember, designation: e.target.value })}
-                />
-                
-                        <Input
-                  placeholder="Email"
-                  type="email"
-                  value={newMember.email}
-                          onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
-                        />
-                      </div>
-              <Button
-                onClick={() => {
-                  if (newMember.firstName && newMember.lastName && newMember.email && newMember.designation) {
-                    setPendingMembers([...pendingMembers, { 
-                      ...newMember as TeamMember, 
-                      id: Math.random().toString(),
-                      status: 'pending'
-                    }])
-                    setNewMember({})
-                    toast({
-                      title: "Invitation sent",
-                      description: "Team member will be added once they accept the invitation"
-                    })
-                  }
-                }}
-                className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
-                disabled={!newMember.firstName || !newMember.lastName || !newMember.email || !newMember.designation}
-              >
-                Invite
-              </Button>
-                      </div>
-
-            {/* Tabs and Members List */}
-            <Tabs defaultValue="team" className="mt-6">
-              <TabsList className="">
-                <TabsTrigger value="team" className="flex-1">
-                  Team ({members.length})
-                </TabsTrigger>
-                <TabsTrigger value="pending" className="flex-1">
-                  Pending ({pendingMembers.length})
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="team" className="mt-4 space-y-3">
-                {members.map((member) => (
-                  <MemberCard 
-                    key={member.id} 
-                    member={member} 
-                    onRemove={handleRemoveMember}
-                  />
-                ))}
-                {members.length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-4">
-                    No team members yet
-                  </p>
-                )}
-              </TabsContent>
-
-              <TabsContent value="pending" className="mt-4 space-y-3">
-                {pendingMembers.map((member) => (
-                  <PendingCard key={member.id} member={member} />
-                ))}
-                {pendingMembers.length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-4">
-                    No pending invitations
-                  </p>
-                )}
-              </TabsContent>
-            </Tabs>
-          </Card>
-        )
-
-        // case "billing":
-        //   return (
-        //     <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
-        //       <div className="p-6 space-y-4 text-center">
-        //         <CreditCard className="h-12 w-12 mx-auto text-muted-foreground" />
-        //         <h3 className="text-lg font-medium text-white">No Billing Yet!</h3>
-        //         <p className="text-sm text-muted-foreground">
-        //           Enjoy Daftar completely free for now.
-        //         </p>
-        //       </div>
-        //     </Card>
-        //   );
-
-      // case "privacy":
-      //   return (
-      //     <Card className="border-none h-[450px] overflow-y-auto rounded-[0.35rem] bg-[#1a1a1a] p-4">
-      //       <div className="space-y-6">
-      //         {privacySections.map((section) => (
-      //           <div key={section.title} className="space-y-2">
-      //             <div className="flex items-center gap-2">
-      //               <section.icon className="h-4 w-4" />
-      //               <h4 className="font-medium">{section.title}</h4>
-      //         </div>
-      //             <p className="text-sm text-muted-foreground">{section.content}</p>
-      //           </div>
-      //         ))}
-      //       </div>
-      //     </Card>
-      //   )
+        return renderTeamContent();
 
       case "delete":
         return (
@@ -710,14 +802,13 @@ export function DaftarDialog({
               </label>
             </div>
 
-              <Button
-                variant="outline"
-                className="rounded-[0.35rem]"
-                onClick={handleDeleteClick}
-              >
-                Delete
-              </Button>
-
+            <Button
+              variant="outline"
+              className="rounded-[0.35rem]"
+              onClick={handleDeleteClick}
+            >
+              Delete
+            </Button>
 
             <div className="space-y-4 mt-4">
               <div className="flex items-center justify-between">
@@ -769,7 +860,6 @@ export function DaftarDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-2 bg-background">
         <div className="flex">
-          {/* Sidebar */}
           <div className="w-[200px] border-r">
             <DialogHeader className="px-3 py-2">
               <DialogTitle>Daftar</DialogTitle>
@@ -795,11 +885,10 @@ export function DaftarDialog({
             </ScrollArea>
           </div>
 
-          {/* Content */}
           <div className="flex-1 p-6">
             <ScrollArea className="h-[450px]">
               {renderContent()}
-        </ScrollArea>
+            </ScrollArea>
           </div>
         </div>
       </DialogContent>

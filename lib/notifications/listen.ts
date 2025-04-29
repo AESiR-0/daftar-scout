@@ -4,6 +4,7 @@ import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
 import nodemailer from 'nodemailer';
+import { emailTemplates } from './insert';
 
 const SMTP2GO_USER = process.env.SMTP_USER;
 const SMTP2GO_PASSWORD = process.env.SMTP_PASS;
@@ -109,23 +110,66 @@ type Notification = {
 
 export async function sendNotificationEmail(notification: Notification, userId: string) {
   try {
-    // Call the email API endpoint with full URL
-    const response = await fetch(`${BASE_URL}/api/notifications/email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        notification,
-        userId,
-      }),
-    });
+    // Get user's email
+    const [user] = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
 
-    if (!response.ok) {
-      throw new Error('Failed to send email');
+    if (!user?.email) {
+      console.error(`No email found for user ${userId}`);
+      return;
     }
+
+    const userEmail = user.email;
+
+    // Get the appropriate email template based on notification type and subtype
+    const typeTemplates = emailTemplates[notification.type as keyof typeof emailTemplates];
+    if (!typeTemplates) {
+      console.error(`No email templates found for notification type: ${notification.type}`);
+      return;
+    }
+
+    // Handle different template structures
+    let template;
+    if (typeof typeTemplates === 'function') {
+      template = typeTemplates;
+    } else {
+      const subtype = notification.payload.action || 'default';
+      template = typeTemplates[subtype as keyof typeof typeTemplates] || 
+                (typeTemplates as any).default;
+    }
+
+    if (!template) {
+      console.error(`No email template found for subtype: ${notification.payload.action}`);
+      return;
+    }
+
+    if (typeof template !== 'function') {
+      console.error('Template is not a function');
+      return;
+    }
+
+    const emailData = (template as (notification: any, userEmail: string) => any)(notification.payload, userEmail);
+    await sendEmail(emailData);
   } catch (error) {
-    console.error('Failed to send notification email:', error);
+    console.error('Error sending notification email:', error);
+  }
+}
+
+export async function sendWelcomeEmail(userEmail: string, userName: string) {
+  try {
+    const template = emailTemplates.welcome?.default;
+    if (!template) {
+      console.error('Welcome email template not found');
+      return;
+    }
+
+    const emailData = template({ userName }, userEmail);
+    await sendEmail(emailData);
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
   }
 }
 

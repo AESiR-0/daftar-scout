@@ -1,12 +1,14 @@
 import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
-import { sendEmail, generatePitchTeamInviteEmail, generateStandardNotificationEmail, generateActionToken } from "../notifications/listen";
+import { sendEmail } from "../notifications/listen";
+import { emailTemplates } from "./insert";
 
 type Notification = {
     id: string;
     type: string;
     role: string;
+    subtype?: string;
     targeted_users: string[];
     payload: {
         action?: string;
@@ -39,28 +41,36 @@ export async function sendNotificationEmail(notification: Notification, userId: 
 
         const userEmail = user[0].email;
 
-        // Handle pitch team invite notifications
-        if (notification.type === "updates" && notification.payload.pitchId) {
-            const acceptToken = generateActionToken(userId, notification.payload.pitchId, 'accept');
-            const rejectToken = generateActionToken(userId, notification.payload.pitchId, 'reject');
-
-            const emailOptions = generatePitchTeamInviteEmail(
-                userEmail,
-                notification.payload,
-                acceptToken,
-                rejectToken
-            );
-
-            await sendEmail(emailOptions);
-        } else {
-            // Handle standard notifications
-            const emailOptions = generateStandardNotificationEmail(
-                userEmail,
-                notification.payload
-            );
-
-            await sendEmail(emailOptions);
+        // Get the appropriate email template based on notification type and subtype
+        const typeTemplates = emailTemplates[notification.type as keyof typeof emailTemplates];
+        if (!typeTemplates) {
+            console.error(`No email templates found for notification type: ${notification.type}`);
+            return;
         }
+
+        // Handle different template structures
+        let template;
+        if (typeof typeTemplates === 'function') {
+            template = typeTemplates;
+        } else {
+            // Try to find template using either action or subtype
+            const key = notification.payload.action || notification.subtype || 'default';
+            template = typeTemplates[key as keyof typeof typeTemplates] || 
+                      (typeTemplates as any).default;
+        }
+
+        if (!template) {
+            console.error(`No email template found for action/subtype: ${notification.payload.action || notification.subtype}`);
+            return;
+        }
+
+        if (typeof template !== 'function') {
+            console.error('Template is not a function');
+            return;
+        }
+
+        const emailData = (template as (notification: any, userEmail: string) => any)(notification, userEmail);
+        await sendEmail(emailData);
     } catch (error) {
         console.error('Failed to send notification email:', error);
     }
