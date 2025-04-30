@@ -11,6 +11,7 @@ import MeetingsPage from "@/app/founder/(auth)/meetings/page";
 import { CreateScoutDialog } from "@/components/dialogs/create-scout-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Scout {
   id: string;
@@ -50,6 +51,7 @@ export default function ScoutPage() {
   });
 
   const { toast } = useToast();
+
   useEffect(() => {
     const fetchScoutStatus = async () => {
       try {
@@ -61,13 +63,14 @@ export default function ScoutPage() {
         });
 
         const data = await res.json();
-        if (res.status != 200) {
+        if (res.status !== 200) {
           toast({
             title: "Error",
             description: "Failed to fetch scouts.",
             variant: "destructive",
           });
           return;
+          setLoading(false);
         }
         const grouped: ScoutStatus = {
           Planning: [],
@@ -99,6 +102,11 @@ export default function ScoutPage() {
       } catch (error) {
         setLoading(false);
         console.error("Failed to fetch scouts:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch scouts.",
+          variant: "destructive",
+        });
       }
     };
 
@@ -129,8 +137,39 @@ export default function ScoutPage() {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6 px-20 mt-4 container mx-auto bg-[#0e0e0e]">
+        {/* Skeleton for Buttons */}
+        <div className="flex items-center justify-end gap-4">
+          <Skeleton className="h-9 w-28 bg-[#2a2a2a] rounded-[0.3rem]" />
+          <Skeleton className="h-9 w-28 bg-[#2a2a2a] rounded-[0.3rem]" />
+          <Skeleton className="h-9 w-28 bg-[#2a2a2a] rounded-[0.3rem]" />
+        </div>
+        {/* Skeleton for Columns */}
+        <div className="grid grid-cols-4 gap-6">
+          {["Planning", "scheduled", "Active", "Closed"].map((status) => (
+            <div
+              key={status}
+              className="bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <Skeleton className="h-6 w-24 bg-[#2a2a2a]" />
+                <Skeleton className="h-5 w-8 bg-[#2a2a2a]" />
+              </div>
+              <div className="space-y-5">
+                <Skeleton className="h-20 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
+                <Skeleton className="h-20 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 px-20 mt-4 container mx-auto">
+    <div className="space-y-6 px-20 mt-4 container mx-auto bg-[#0e0e0e]">
       <div className="flex items-center justify-end gap-4">
         <Button
           variant="outline"
@@ -178,10 +217,6 @@ export default function ScoutPage() {
 
       {showMeetings ? (
         <MeetingsPage />
-      ) : loading ? (
-        <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)]">
-          <h2 className="text-center text-muted-foreground">Loading...</h2>
-        </div>
       ) : (
         <div className="grid grid-cols-4 gap-6">
           {Object.entries(filteredScouts).map(([status, scouts]) => (
@@ -229,7 +264,7 @@ export default function ScoutPage() {
                                   `${collaboration} ${
                                     scout.collaborator.length === 1
                                       ? ""
-                                      : num == scout.collaborator.length - 2
+                                      : num === scout.collaborator.length - 2
                                       ? "and"
                                       : num < scout.collaborator.length - 2
                                       ? ", "
