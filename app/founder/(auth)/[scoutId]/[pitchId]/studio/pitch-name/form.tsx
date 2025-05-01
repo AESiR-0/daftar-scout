@@ -10,6 +10,19 @@ import { Combobox } from "@/components/ui/combobox";
 import { useToast } from "@/hooks/use-toast";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import L, { LatLngTuple } from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Custom Leaflet marker icon using online URLs
+const customIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
 const MapComponent = dynamic(() => import("@/components/map"), {
   ssr: false,
@@ -158,7 +171,11 @@ export default function PitchNameForm() {
   const [demoLink, setDemoLink] = useState<string>("");
   const [locationInput, setLocationInput] = useState("");
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
-  const [location, setLocation] = useState<Location>({
+  const [location, setLocation] = useState<{
+    country: string;
+    state: string;
+    city: string;
+  }>({
     country: "",
     state: "",
     city: "",
@@ -209,43 +226,47 @@ export default function PitchNameForm() {
     fetchPitchDetails();
   }, []);
 
-  const debounceLocation = useCallback(
-    debounce(async (value: string) => {
-      const match = value.match(locationPattern);
-      if (match) {
-        const [, city, state, country] = match;
-        setLocation({
-          city: city.trim(),
-          state: state.trim(),
-          country: country.trim(),
-        });
-
-        try {
-          const query = `${city}, ${state}, ${country}`;
-          const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-              query
-            )}`
-          );
-          const geoData = await geoRes.json();
-          if (geoData?.[0]) {
-            setCoordinates([
-              parseFloat(geoData[0].lat),
-              parseFloat(geoData[0].lon),
-            ]);
-          }
-        } catch (err) {
-          console.error("Error fetching coordinates", err);
-        }
-      }
-    }, 500),
-    []
-  );
-
   const handleLocationInput = (value: string) => {
     setLocationInput(value);
     debounceLocation(value);
   };
+
+  const debounceLocation = useCallback(
+    debounce(async (value: string) => {
+      if (!value.trim()) {
+        setLocation({ city: "", state: "", country: "" });
+        setCoordinates(null);
+        return;
+      }
+
+      try {
+        const query = encodeURIComponent(value.trim());
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=1`
+        );
+        const data = await response.json();
+
+        if (data && data[0]) {
+          const { lat, lon, address } = data[0];
+          const coords: [number, number] = [parseFloat(lat), parseFloat(lon)];
+          setCoordinates(coords);
+          setLocation({
+            city: address.city || address.town || address.village || "",
+            state: address.state || "",
+            country: address.country || "",
+          });
+        } else {
+          setCoordinates(null);
+          setLocation({ city: "", state: "", country: "" });
+        }
+      } catch (error) {
+        console.error("Error fetching coordinates:", error);
+        setCoordinates(null);
+        setLocation({ city: "", state: "", country: "" });
+      }
+    }, 500),
+    []
+  );
 
   const autoSave = useCallback(async () => {
     const pitchData = {
