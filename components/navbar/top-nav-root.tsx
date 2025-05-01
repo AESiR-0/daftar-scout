@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth"; // Adjust to your auth library
 export function TopNavRoot() {
   const pathname = usePathname();
   const isCloud = pathname === "/landing";
+  const isPrivacy = pathname === "/privacy-policy";
   const isFounder = pathname === "/landing/founder";
   const isInvestor = pathname === "/landing/investor";
   const [demoOpen, setDemoOpen] = useState(false);
@@ -20,7 +21,7 @@ export function TopNavRoot() {
   const userRole = user?.role; // Assume role is "founder" or "investor"
 
   // Don't show nav items on cloud page
-  if (isCloud) {
+  if (isCloud || isPrivacy) {
     return (
       <div>
         <div className="flex h-14 items-center justify-between px-4">
