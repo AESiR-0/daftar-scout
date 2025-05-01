@@ -23,12 +23,22 @@ export function TopNavRoot() {
   if (isCloud) {
     return (
       <div>
-        <div className="flex h-14 items-center px-4">
+        <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center space-x-4">
             <Link href="/landing" className="font-medium text-white">
               Daftar OS Technology
             </Link>
           </div>
+          <div className="flex items-center space-x-4 mr-8">
+          <nav className="flex items-center space-x-4">
+            <Link
+              href="/privacy-policy"
+              className="text-sm font-medium text-muted-foreground hover:text-white ml-4"
+            >
+              Privacy Policy
+            </Link>
+          </nav>
+        </div>
         </div>
       </div>
     );
