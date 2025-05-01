@@ -4,8 +4,9 @@ import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { and, eq, or } from "drizzle-orm";
 import { auth } from "@/auth";
 import { createNotification } from "@/lib/notifications/insert";
-import { users } from "@/backend/drizzle/models/users";
+import { users, userLanguages, languages } from "@/backend/drizzle/models/users";
 import { sendNotificationEmail } from "@/lib/notifications/listen";
+import { inArray } from "drizzle-orm";
 
 // GET: Fetch team members for a pitch by pitchId from request body
 export async function GET(req: NextRequest) {
@@ -52,14 +53,54 @@ export async function GET(req: NextRequest) {
         userId: pitchTeam.userId,
         pitchId: pitchTeam.pitchId,
         designation: pitchTeam.designation,
+        hasApproved: pitchTeam.hasApproved,
+        firstName: users.name,
+        lastName: users.lastName,
+        email: users.email,
+        location: users.location,
+        gender: users.gender,
+        image: users.image,
+        countryCode: users.countryCode,
+        phone: users.number,
+        joinDate: users.createdAt,
       })
       .from(pitchTeam)
+      .leftJoin(users, eq(pitchTeam.userId, users.id))
       .where(eq(pitchTeam.pitchId, pitchId));
+
+    // Fetch languages for each team member
+    const userIds = teamData.map(member => member.userId);
+    const userLanguagesData = await db
+      .select({
+        userId: userLanguages.userId,
+        language: languages.language_name,
+      })
+      .from(userLanguages)
+      .leftJoin(languages, eq(userLanguages.languageId, languages.id))
+      .where(inArray(userLanguages.userId, userIds));
+
+    // Group languages by userId
+    const languagesByUser = userLanguagesData.reduce((acc, curr) => {
+      if (!acc[curr.userId]) {
+        acc[curr.userId] = [];
+      }
+      if (curr.language) {
+        acc[curr.userId].push(curr.language);
+      }
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    // Combine team data with languages
+    const enrichedTeamData = teamData.map(member => ({
+      ...member,
+      language: languagesByUser[member.userId] || [],
+      status: member.hasApproved ? "active" : "pending"
+    }));
 
     return NextResponse.json(
       {
         message: "Team members fetched successfully",
-        data: teamData,
+        data: enrichedTeamData,
       },
       { status: 200 }
     );

@@ -9,24 +9,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { usePitch } from "@/contexts/PitchContext"; // Import context hook
 import { usePathname } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TeamMember {
   id: string;
   userId: string;
   pitchId: string;
   designation: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  age?: string;
-  gender?: string;
-  location?: string;
-  language?: string[];
-  imageUrl?: string;
+  firstName: string;
+  lastName: string | null;
+  email: string;
+  gender: string | null;
+  location: string | null;
+  language: string[];
+  image: string | null;
+  countryCode: string | null;
+  phone: string | null;
+  joinDate: string;
   status: "active" | "pending";
   isCurrentUser?: boolean;
-  joinDate?: string;
-  phone?: string;
 }
 
 export default function TeamPage() {
@@ -48,7 +49,7 @@ export default function TeamPage() {
   };
 
   const formatPhoneNumber = (phone: string) => {
-    const match = phone.match(/^(.+?)(\d{10})$/);
+    const match = phone?.match(/^(.+?)(\d{10})$/);
     if (match) {
       return `${match[1]} ${match[2]}`;
     }
@@ -63,6 +64,7 @@ export default function TeamPage() {
     designation: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
     if (pitchId) {
@@ -71,6 +73,7 @@ export default function TeamPage() {
   }, [pitchId]);
 
   const fetchTeamMembers = async () => {
+    setIsFetching(true);
     try {
       const response = await fetch(
         `/api/endpoints/pitch/founder/team?pitchId=${pitchId}`,
@@ -84,19 +87,14 @@ export default function TeamPage() {
       if (!response.ok) throw new Error("Failed to fetch team members");
       const { data } = await response.json();
 
-      const enrichedMembers = data.map((member: any, index: number) => ({
+      // Get the current user's email from the session
+      const currentUserEmail = await fetch("/api/auth/session").then(res => res.json()).then(session => session?.user?.email);
+
+      const enrichedMembers = data.map((member: TeamMember) => ({
         ...member,
-        firstName: member.userId === "user_1" ? "Current" : `Team${index + 1}`,
-        lastName: member.userId === "user_1" ? "User" : "Member",
-        email: `${member.userId}@example.com`,
-        age: "28",
-        gender: "Not Specified",
-        location: "Dubai, UAE",
-        language: ["English"],
-        status: index % 2 === 0 ? "active" : "pending",
-        isCurrentUser: member.userId === "user_1",
-        joinDate: new Date().toISOString().split("T")[0],
-        phone: "+971526374859",
+        firstName: member.firstName || "Unknown",
+        lastName: member.lastName || "",
+        isCurrentUser: member.email === currentUserEmail,
       }));
 
       setMembers(enrichedMembers);
@@ -107,6 +105,8 @@ export default function TeamPage() {
         description: "Failed to load team members",
         variant: "destructive",
       });
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -203,9 +203,58 @@ export default function TeamPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editDesignation, setEditDesignation] = useState("");
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
 
-  const handleSaveDesignation = () => {
-    setIsEditing(false);
+  const handleStartEditing = (member: TeamMember) => {
+    setEditingMember(member);
+    setEditDesignation(member.designation);
+    setIsEditing(true);
+  };
+
+  const handleSaveDesignation = async () => {
+    if (!editingMember || !editDesignation.trim()) return;
+
+    try {
+      const response = await fetch("/api/endpoints/pitch/founder/team/designation", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pitchId,
+          userId: editingMember.userId,
+          designation: editDesignation.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update designation");
+      }
+
+      // Update the members list with the new designation
+      setMembers(members.map(member => 
+        member.id === editingMember.id 
+          ? { ...member, designation: editDesignation.trim() }
+          : member
+      ));
+
+      toast({
+        title: "Success",
+        description: "Designation updated successfully",
+      });
+    } catch (error: any) {
+      console.error("Error updating designation:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update designation",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditing(false);
+      setEditingMember(null);
+      setEditDesignation("");
+    }
   };
 
   const activeMembers = members.filter((m) => m.status === "active");
@@ -216,22 +265,22 @@ export default function TeamPage() {
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
           <Avatar className="h-48 w-48 rounded-[0.35rem]">
-            {member.imageUrl ? (
+            {member.image ? (
               <AvatarImage
-                src={member.imageUrl}
+                src={member.image}
                 alt={member.firstName}
                 className="rounded-[0.35rem]"
               />
             ) : (
               <AvatarFallback className="rounded-[0.35rem] text-xl">
-                {getInitials(`${member.firstName} ${member.lastName}`)}
+                {getInitials(`${member.firstName} ${member.lastName || ""}`)}
               </AvatarFallback>
             )}
           </Avatar>
           <div>
             <div className="flex items-center gap-2">
               <h4 className="text-xl font-medium">
-                {member.firstName} {member.lastName}
+                {member.firstName} {member.lastName || ""}
               </h4>
             </div>
             <div className="space-y-2 mt-2">
@@ -258,30 +307,37 @@ export default function TeamPage() {
                     {member.designation}
                   </p>
                 )}
-                {member.age && (
+                {member.gender && (
                   <div className="flex items-center gap-2">
-                    <span>{member.age}</span>
                     <span>{member.gender}</span>
                   </div>
                 )}
                 {member.email && (
                   <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
                     <p>{member.email}</p>
                   </div>
                 )}
                 {member.phone && (
                   <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
                     <p>{formatPhoneNumber(member.phone)}</p>
                   </div>
                 )}
                 {member.location && (
                   <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
                     <p>{member.location}</p>
                   </div>
                 )}
-                {member.language && (
+                {member.language && member.language.length > 0 && (
                   <p className="text-sm text-muted-foreground">
                     Preferred languages: {member.language.join(", ")}
+                  </p>
+                )}
+                {member.joinDate && (
+                  <p className="text-sm text-muted-foreground">
+                    Joined: {formatDate(member.joinDate)}
                   </p>
                 )}
               </div>
@@ -293,7 +349,7 @@ export default function TeamPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsEditing(!isEditing)}
+              onClick={() => handleStartEditing(member)}
               className="h-8 w-8"
             >
               <Pencil className="h-4 w-4" />
@@ -330,7 +386,7 @@ export default function TeamPage() {
           <div>
             <div className="flex items-center gap-2">
               <h4 className="font-medium">
-                {member.firstName} {member.lastName}
+                {member.firstName} {member.lastName || ""}
               </h4>
               {member.isCurrentUser && (
                 <span className="text-xs bg-muted px-2 py-0.5 rounded">
@@ -352,6 +408,23 @@ export default function TeamPage() {
         >
           <X className="h-4 w-4" />
         </Button>
+      </div>
+    </div>
+  );
+
+  const LoadingMemberCard = () => (
+    <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
+      <div className="flex justify-between items-start">
+        <div className="flex gap-4">
+          <Skeleton className="h-48 w-48 rounded-[0.35rem]" />
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="h-4 w-44" />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -430,17 +503,25 @@ export default function TeamPage() {
 
             <TabsContent value="Team">
               <div className="space-y-4">
-                {activeMembers.map((member) => (
-                  <MemberCard key={member.id} member={member} />
-                ))}
+                {isFetching ? (
+                  Array(3).fill(0).map((_, i) => <LoadingMemberCard key={i} />)
+                ) : (
+                  activeMembers.map((member) => (
+                    <MemberCard key={member.id} member={member} />
+                  ))
+                )}
               </div>
             </TabsContent>
 
             <TabsContent value="Pending">
               <div className="space-y-4">
-                {pendingMembers.map((member) => (
-                  <PendingCard key={member.id} member={member} />
-                ))}
+                {isFetching ? (
+                  Array(2).fill(0).map((_, i) => <LoadingMemberCard key={i} />)
+                ) : (
+                  pendingMembers.map((member) => (
+                    <PendingCard key={member.id} member={member} />
+                  ))
+                )}
               </div>
             </TabsContent>
           </Tabs>
