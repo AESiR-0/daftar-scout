@@ -336,17 +336,23 @@ export function DaftarDialog({
           throw new Error('Failed to fetch Daftar details')
         }
         const data = await response.json()
+        console.log('Daftar details response:', data)
+        
+        // Parse location string into address components
+        const locationParts = data.location ? data.location.split(',').map((part: string) => part.trim()) : []
+        const [street = "", city = "", state = "", country = "", postalCode = ""] = locationParts
+        
         setDaftarData({
           name: data.name || "",
           structure: data.structure || "",
           code: data.id || "",
           website: data.website || "",
           address: {
-            street: "",
-            city: "",
-            state: "",
-            country: "",
-            postalCode: ""
+            street,
+            city,
+            state,
+            country,
+            postalCode
           },
           vision: data.bigPicture || "",
           joinedDate: data.createdAt || new Date().toISOString()
@@ -378,6 +384,7 @@ export function DaftarDialog({
         throw new Error('Failed to fetch team members');
       }
       const data = await response.json();
+      console.log('Team members response:', data);
       setMembers(data);
     } catch (error) {
       console.error('Error fetching team members:', error);
