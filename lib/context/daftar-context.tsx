@@ -1,4 +1,5 @@
 "use client";
+
 import {
   createContext,
   useContext,
@@ -6,7 +7,8 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { CreateDaftarDialog } from "@/components/dialogs/create-daftar-dialog"; // updated import
+import { CreateDaftarDialog } from "@/components/dialogs/create-daftar-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Daftar {
   id: string;
@@ -62,7 +64,20 @@ export function DaftarProvider({ children }: { children: ReactNode }) {
   const currentDaftarData =
     daftars.find((d) => d.id === selectedDaftar) || null;
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#0e0e0e]">
+        <div className="max-w-3xl w-full space-y-8">
+          <Skeleton className="h-8 w-48 bg-[#2a2a2a] rounded-[0.35rem]" />
+          <div className="space-y-4">
+            <Skeleton className="h-16 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
+            <Skeleton className="h-16 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
+            <Skeleton className="h-16 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showDialog) {
     return (

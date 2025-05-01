@@ -1,4 +1,6 @@
 "use client";
+
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   investorStudioNavItems,
@@ -31,7 +33,7 @@ export function StudioSidebar({
   };
 
   return (
-    <div className={cn(" w-[15.5rem] h-full", className)}>
+    <div className={cn("w-[15.5rem] h-full", className)}>
       <div className="space-y-4 mx-4 my-8">
         <div className="px-3 py-2 bg-[#1a1a1a] h-[calc(100vh-8rem)] rounded-[0.35rem]">
           <div className="space-y-1">
@@ -46,7 +48,7 @@ export function StudioSidebar({
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
                     isActive
-                      ? "bg-accent text-accent-foreground"
+                      ? "bg-blue-600 text-white"
                       : "hover:bg-accent/50 text-muted-foreground",
                     item.className
                   )}
