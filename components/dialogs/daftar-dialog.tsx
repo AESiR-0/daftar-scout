@@ -38,6 +38,7 @@ import formatDate from "@/lib/formatDate"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "../ui/checkbox"
 import { useDaftar } from "@/lib/context/daftar-context"
+import { usePathname } from "next/navigation"
 
 interface TeamMember {
   id: string
@@ -295,7 +296,9 @@ export function DaftarDialog({
   onSuccess,
 }: DaftarDialogProps) {
   const { toast } = useToast()
-  const daftarId = useDaftar().selectedDaftar
+  const pathname = usePathname()
+  const role = pathname.split('/')[1]
+  const daftarId = role == "investor" ? useDaftar().selectedDaftar : ''
   const [activeTab, setActiveTab] = useState<DaftarTab>("details")
   const [isEditing, setIsEditing] = useState(false)
   const [members, setMembers] = useState<TeamMember[]>([])
