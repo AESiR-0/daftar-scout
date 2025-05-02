@@ -148,21 +148,23 @@ export default function ScoutPage() {
         </div>
         {/* Skeleton for Columns */}
         <div className="grid grid-cols-4 gap-6">
-          {["Planning", "scheduled", "Active", "Closed"].map((status) => (
-            <div
-              key={status}
-              className="bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <Skeleton className="h-6 w-24 bg-[#2a2a2a]" />
-                <Skeleton className="h-5 w-8 bg-[#2a2a2a]" />
+          {["Planning", "scheduled", "Active", "Closed"].map(
+            (status, index) => (
+              <div
+                key={index}
+                className="bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <Skeleton className="h-6 w-24 bg-[#2a2a2a]" />
+                  <Skeleton className="h-5 w-8 bg-[#2a2a2a]" />
+                </div>
+                <div className="space-y-5">
+                  <Skeleton className="h-20 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
+                  <Skeleton className="h-20 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
+                </div>
               </div>
-              <div className="space-y-5">
-                <Skeleton className="h-20 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
-                <Skeleton className="h-20 w-full bg-[#2a2a2a] rounded-[0.35rem]" />
-              </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
     );
@@ -219,9 +221,9 @@ export default function ScoutPage() {
         <MeetingsPage />
       ) : (
         <div className="grid grid-cols-4 gap-6">
-          {Object.entries(filteredScouts).map(([status, scouts]) => (
+          {Object.entries(filteredScouts).map(([status, scouts], index) => (
             <div
-              key={status}
+              key={index}
               className="bg-muted/30 rounded-lg p-4 min-h-[calc(100vh-12rem)] border border-border"
             >
               <ScrollArea className="h-[calc(100vh-12rem)]">
@@ -263,7 +265,7 @@ export default function ScoutPage() {
                                 (collaboration: string, num: number) =>
                                   `${collaboration} ${
                                     scout.collaborator.length === 1
-                                      ? ""
+                                      ? scout.collaborator[0]
                                       : num === scout.collaborator.length - 2
                                       ? "and"
                                       : num < scout.collaborator.length - 2

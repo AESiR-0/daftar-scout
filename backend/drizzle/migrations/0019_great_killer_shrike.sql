@@ -1,0 +1,1 @@
+ALTER TABLE "pitch" ADD COLUMN "is_locked" boolean DEFAULT false;

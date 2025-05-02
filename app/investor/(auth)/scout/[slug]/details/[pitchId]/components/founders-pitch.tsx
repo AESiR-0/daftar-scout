@@ -48,6 +48,7 @@ interface FoundersPitch {
   sectors: string[];
   demoLink?: string;
   stage: string;
+  ask: string;
   founderQuestions?: {
     question: string;
     answer: string;
@@ -218,15 +219,7 @@ export function FoundersPitchSection({
             <div className="flex flex-col">
               <h3 className="text-md pl-4  text-foreground">Founder's Ask</h3>
               <div className="  rounded-[0.35rem] p-4">
-                <p className="text-sm text-muted-foreground">
-                  We are seeking $500,000 in funding to accelerate our product
-                  development and expand our marketing efforts. Additionally, we
-                  are looking for strategic partnerships in the AI/ML sector to
-                  enhance our technological capabilities and market reach. Any
-                  introductions to potential partners or advisors with
-                  experience in scaling SaaS businesses would be highly
-                  appreciated.
-                </p>
+                <p className="text-sm text-muted-foreground">{pitch.ask}</p>
               </div>
             </div>
 

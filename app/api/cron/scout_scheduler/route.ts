@@ -2,48 +2,43 @@ import { NextResponse } from "next/server";
 import { db } from "@/backend/database";
 import { scouts, daftarScouts } from "@/backend/drizzle/models/scouts";
 import { daftarInvestors } from "@/backend/drizzle/models/daftar";
-import { and, eq, lte, inArray } from "drizzle-orm";
+import { and, eq, lte, inArray, not } from "drizzle-orm";
 import { createNotification } from "@/lib/notifications/insert";
-import { users } from "@/backend/drizzle/models/users";
 
 export async function GET() {
   try {
-    const today = new Date();
+    const todayDate = new Date();
+    const today = todayDate.toISOString().split("T")[0]; // YYYY-MM-DD
 
-    const updatedScouts = await db
+    // --- 1. Activate Scouts ---
+    const activatedScouts = await db
       .update(scouts)
-      .set({ status: "active" })
+      .set({ status: "active", isLocked: true })
       .where(
         and(
           eq(scouts.status, "scheduled"),
-          lte(scouts.programLaunchDate, today.toISOString().split("T")[0])
+          lte(scouts.programLaunchDate, today)
         )
       )
       .returning();
 
-    // For each activated scout, create a notification
-    for (const scout of updatedScouts) {
+    for (const scout of activatedScouts) {
       const scoutId = scout.scoutId;
 
-      // Get all daftars this scout is linked to
       const linkedDaftars = await db
         .select({ daftarId: daftarScouts.daftarId })
         .from(daftarScouts)
         .where(eq(daftarScouts.scoutId, scoutId));
 
-      const daftarIds = linkedDaftars.map((d) => d.daftarId);
+      const daftarIds = linkedDaftars
+        .map((d) => d.daftarId)
+        .filter((id): id is string => id !== null);
       if (!daftarIds.length) continue;
 
-      // Get all users (investors) from those daftars
       const investors = await db
         .select({ userId: daftarInvestors.investorId })
         .from(daftarInvestors)
-        .where(
-          inArray(
-            daftarInvestors.daftarId,
-            daftarIds.filter((id): id is string => id !== null)
-          )
-        );
+        .where(inArray(daftarInvestors.daftarId, daftarIds));
 
       const userIds = investors
         .map((i) => i.userId)
@@ -54,21 +49,30 @@ export async function GET() {
         type: "scout_link",
         title: "Scout is now live",
         description: `${scout.scoutName} just got active. Share with your friends.`,
-        role: "both", // optional if you want to scope it
+        role: "both",
         targeted_users: userIds,
         payload: {
           message: `${scout.scoutName} just got active. Share with your friends.`,
-          daftar_id: daftarIds.length
-            ? daftarIds.filter((id): id is string => id !== null).join(",")
-            : undefined,
+          daftar_id: daftarIds.join(","),
         },
       });
     }
 
+    // --- 2. Close Scouts if lastDayToPitch has passed ---
+    const closedScouts = await db
+      .update(scouts)
+      .set({ status: "closed" })
+      .where(
+        and(not(eq(scouts.status, "closed")), lte(scouts.lastDayToPitch, today))
+      )
+      .returning();
+
     return NextResponse.json({
       message: "Scout statuses updated",
-      count: updatedScouts.length,
-      updatedScouts,
+      activatedCount: activatedScouts.length,
+      closedCount: closedScouts.length,
+      activatedScouts,
+      closedScouts,
     });
   } catch (error: any) {
     console.error("Failed to update scout statuses:", error);

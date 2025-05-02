@@ -5,7 +5,7 @@ import {
   scouts,
   scoutApproved,
 } from "@/backend/drizzle/models/scouts";
-import { eq, inArray, or, not, and } from "drizzle-orm";
+import { eq, inArray, or, not, and, sql } from "drizzle-orm";
 import { auth } from "@/auth"; // Assuming you have an auth utility
 import { users } from "@/backend/drizzle/models/users"; // Assuming you have a users table
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar"; // Assuming you have an investordaftar table
@@ -70,14 +70,7 @@ export async function GET(req: NextRequest) {
           postedBy: scouts.daftarId,
         })
         .from(scouts)
-        .where(
-          or(
-            not(eq(scouts.status, "planning")),
-            not(eq(scouts.status, "Planning")),
-            not(eq(scouts.status, "scheduled")),
-            not(eq(scouts.status, "Scheduled"))
-          )
-        );
+        .where(sql`LOWER(${scouts.status}) = 'active'`);
     } else {
       const investordaftar = await db
         .select()

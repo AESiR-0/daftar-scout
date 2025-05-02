@@ -1,0 +1,1 @@
+ALTER TABLE "scouts" ADD COLUMN "is_locked" boolean DEFAULT false;

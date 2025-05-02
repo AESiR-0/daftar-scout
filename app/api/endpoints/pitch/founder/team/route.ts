@@ -4,7 +4,11 @@ import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { and, eq, or } from "drizzle-orm";
 import { auth } from "@/auth";
 import { createNotification } from "@/lib/notifications/insert";
-import { users, userLanguages, languages } from "@/backend/drizzle/models/users";
+import {
+  users,
+  userLanguages,
+  languages,
+} from "@/backend/drizzle/models/users";
 import { sendNotificationEmail } from "@/lib/notifications/listen";
 import { inArray } from "drizzle-orm";
 
@@ -69,7 +73,8 @@ export async function GET(req: NextRequest) {
       .where(eq(pitchTeam.pitchId, pitchId));
 
     // Fetch languages for each team member
-    const userIds = teamData.map(member => member.userId);
+    const userIds = teamData.map((member) => member.userId);
+    const filteredUserIds = userIds.filter((id): id is string => id !== null);
     const userLanguagesData = await db
       .select({
         userId: userLanguages.userId,
@@ -77,7 +82,7 @@ export async function GET(req: NextRequest) {
       })
       .from(userLanguages)
       .leftJoin(languages, eq(userLanguages.languageId, languages.id))
-      .where(inArray(userLanguages.userId, userIds));
+      .where(inArray(userLanguages.userId, filteredUserIds));
 
     // Group languages by userId
     const languagesByUser = userLanguagesData.reduce((acc, curr) => {
@@ -91,10 +96,10 @@ export async function GET(req: NextRequest) {
     }, {} as Record<string, string[]>);
 
     // Combine team data with languages
-    const enrichedTeamData = teamData.map(member => ({
+    const enrichedTeamData = teamData.map((member) => ({
       ...member,
-      language: languagesByUser[member.userId] || [],
-      status: member.hasApproved ? "active" : "pending"
+      language: member.userId ? languagesByUser[member.userId] || [] : [],
+      status: member.hasApproved ? "active" : "pending",
     }));
 
     return NextResponse.json(
@@ -179,35 +184,44 @@ export async function POST(req: NextRequest) {
       type: "updates",
       subtype: "team_join",
       title: "Pitch Invitation",
-      description: `You are invited to join the pitch team for ${pitchName} as ${designation || "Team Member"}`,
+      description: `You are invited to join the pitch team for ${pitchName} as ${
+        designation || "Team Member"
+      }`,
       targeted_users: [userId],
       role: "founder",
       payload: {
         pitchId,
         designation: designation || "Team Member",
-        message: `You have been invited to join the pitch team for ${pitchName} as ${designation || "Team Member"}`,
-        action: "invite",
-        action_by: user.id,
-        action_at: new Date().toISOString(),
-      }
-    });
-
-    // Send email notification
-    await sendNotificationEmail({
-      type: "updates",
-      targeted_users: [userId],
-      role: "founder",
-      payload: {
-        pitchId,
-        designation: designation || "Team Member",
-        message: `You have been invited to join the pitch team for ${pitchName} as ${designation || "Team Member"}`,
+        message: `You have been invited to join the pitch team for ${pitchName} as ${
+          designation || "Team Member"
+        }`,
         action: "invite",
         action_by: user.id,
         action_at: new Date().toISOString(),
       },
-      id: "",
-      created_at: new Date().toISOString()
-    }, userId);
+    });
+
+    // Send email notification
+    await sendNotificationEmail(
+      {
+        type: "updates",
+        targeted_users: [userId],
+        role: "founder",
+        payload: {
+          pitchId,
+          designation: designation || "Team Member",
+          message: `You have been invited to join the pitch team for ${pitchName} as ${
+            designation || "Team Member"
+          }`,
+          action: "invite",
+          action_by: user.id,
+          action_at: new Date().toISOString(),
+        },
+        id: "",
+        created_at: new Date().toISOString(),
+      },
+      userId
+    );
 
     return NextResponse.json(
       {

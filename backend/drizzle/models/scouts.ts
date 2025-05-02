@@ -36,6 +36,7 @@ export const scouts = pgTable("scouts", {
   deleteIsAgreedByAll: boolean("delete_is_agreed_by_all").default(false),
   deleteRequestDate: date("delete_request_date"),
   scoutCreatedAt: timestamp("scout_created_at").defaultNow(),
+  isLocked: boolean("is_locked").default(false),
 });
 
 export const scoutQuestions = pgTable("scout_questions", {
@@ -88,7 +89,10 @@ export const faqs = pgTable("faqs", {
 
 export const scoutApproved = pgTable("scout_approved", {
   investorId: varchar("investor_id", { length: 255 }).references(
-    () => users.id
+    () => users.id,
+    {
+      onDelete: "cascade",
+    }
   ),
   scoutId: varchar("scout_id", { length: 255 }).references(
     () => scouts.scoutId

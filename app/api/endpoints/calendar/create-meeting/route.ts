@@ -42,7 +42,8 @@ export async function POST(req: Request) {
       process.env.GOOGLE_CLIENT_SECRET,
       process.env.NEXTAUTH_URL
     );
-
+    console.log(account);
+    
     oauth2Client.setCredentials({
       access_token: account.access_token,
       refresh_token: account.refresh_token,

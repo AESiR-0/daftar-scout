@@ -7,6 +7,7 @@ import { useBookmarks } from "@/lib/context/bookmark-context";
 import { InvestorProfile } from "@/components/InvestorProfile";
 import { ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate } from "@/lib/format-date";
 
 interface Scout {
   id: string;
@@ -98,15 +99,26 @@ export default function ScoutPage({ scouts }: { scouts: Scout[] }) {
                   <div className="text-xs text-muted-foreground space-y-1">
                     <div className="flex items-center">
                       <span className="pr-1">Collaboration: </span>
-                      {scout.collaborator.map((collab, index) => (
-                        <span
-                          key={collab}
-                          onClick={(e) => e.preventDefault()}
-                        ></span>
-                      ))}
+                      {scout.collaborator.map(
+                        (collaboration: string, num: number) =>
+                          `${collaboration} ${
+                            scout.collaborator.length === 1
+                              ? scout.collaborator[0]
+                              : num === scout.collaborator.length - 2
+                              ? "and"
+                              : num < scout.collaborator.length - 2
+                              ? ", "
+                              : ""
+                          } `
+                      )}
                     </div>
-                    <div>Last Date to Pitch: {scout.scheduledDate}</div>
-                    <div>Status: {scout.status}</div>
+                    <div>
+                      Last Date to Pitch: {formatDate(scout.scheduledDate)}
+                    </div>
+                    <div>
+                      Status: {scout.status[0].toUpperCase()}
+                      {scout.status.slice(1).toLowerCase()}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-6">

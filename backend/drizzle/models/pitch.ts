@@ -29,6 +29,7 @@ export const pitch = pgTable("pitch", {
   isCompleted: boolean("is_completed").default(false),
   teamSize: integer("team_size"),
   isPaid: boolean("is_paid").default(false),
+  isLocked: boolean("is_locked").default(false),
   investorStatus: text("investor_status").default("Inbox").notNull(),
 });
 
@@ -130,7 +131,7 @@ export const pitchTeam = pgTable("pitch_team", {
   userId: text("user_id").references(() => users.id),
   designation: text("designation").notNull(),
   hasApproved: boolean("has_approved").default(false),
-  pitchId: text("pitchId").references(() => pitch.id, { onDelete: 'cascade' }),
+  pitchId: text("pitchId").references(() => pitch.id, { onDelete: "cascade" }),
 });
 
 // 🔗 Relationships
