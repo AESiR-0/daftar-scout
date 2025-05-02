@@ -20,7 +20,11 @@ export const featureRequests = pgTable("feature_requests", {
   id: serial("id").primaryKey(),
   featureName: varchar("feature_name", { length: 255 }).notNull(),
   description: text("description"),
-  userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+  userId: varchar("user_id", { length: 255 })
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   status: varchar("status", { length: 50 }).default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -28,7 +32,7 @@ export const featureRequests = pgTable("feature_requests", {
 export const featureTracking = pgTable("feature_tracking", {
   id: serial("id").primaryKey(),
   featureId: integer("feature_id")
-    .references(() => featureRequests.id)
+    .references(() => featureRequests.id, { onDelete: "cascade" })
     .notNull(),
   priority: text("priority").default("Medium"), // High, Medium, Low
   status: text("status").default("Requested"), // Requested, Under Review, Approved, etc.
@@ -42,7 +46,11 @@ export const SupportRequests = pgTable("support_requests", {
   id: serial("id").primaryKey(),
   supportName: varchar("support_name", { length: 255 }).notNull(),
   description: text("description"),
-  userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(),
+  userId: varchar("user_id", { length: 255 })
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
+    .notNull(),
   status: varchar("status", { length: 50 }).default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -50,7 +58,7 @@ export const SupportRequests = pgTable("support_requests", {
 export const postDevAnalysis = pgTable("post_dev_analysis", {
   id: serial("id").primaryKey(),
   featureId: integer("feature_id")
-    .references(() => featureRequests.id)
+    .references(() => featureRequests.id, { onDelete: "cascade" })
     .notNull(),
   userAdoptionRate: integer("user_adoption_rate").default(0),
   impact: text("impact"), // Scale, Revenue
@@ -71,14 +79,16 @@ export const featureRequestsRelations = relations(
 export const report = pgTable("report", {
   id: serial("id").primaryKey(),
   reportedBy: text("reported_by")
-    .references(() => users.id)
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
     .notNull(),
   pitchId: text("pitch_id")
-    .references(() => pitch.id)
+    .references(() => pitch.id, { onDelete: "cascade" })
     .notNull(), // Pitches being reported
   reportDescription: text("report_description"),
   scoutId: text("scout_id")
-    .references(() => scouts.scoutId)
+    .references(() => scouts.scoutId, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -88,7 +98,9 @@ export const reportType = pgTable("report_type", {
   id: serial("id").primaryKey(),
   reportType: text("report_type").notNull(), // Bug, Violation, etc.
   addedBy: text("added_by")
-    .references(() => users.id)
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
     .default("system"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -97,7 +109,7 @@ export const reportType = pgTable("report_type", {
 export const reportStatus = pgTable("report_status", {
   id: serial("id").primaryKey(),
   reportId: integer("report_id")
-    .references(() => report.id)
+    .references(() => report.id, { onDelete: "cascade" })
     .notNull(),
   status: text("status").notNull(), // Open, Under Review, Closed
 });

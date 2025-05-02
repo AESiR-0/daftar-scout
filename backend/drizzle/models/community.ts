@@ -9,8 +9,8 @@ export const communities = pgTable("communities", {
   description: text("description").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   createdBy: varchar("created_by", { length: 255 })
-    .references(() => users.id)
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
     .default("system"),
 });
-
-

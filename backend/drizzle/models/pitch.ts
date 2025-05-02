@@ -39,27 +39,36 @@ export const focusSectors = pgTable("focus_sectors", {
   sectorName: text("sector_name").notNull(),
   addedAt: timestamp("added_at").defaultNow(),
   addedBy: varchar("added_by", { length: 255 })
-    .references(() => users.id)
+    .references(() => users.id, {
+      onDelete: "cascade",
+    })
     .default("system"),
 });
 
 // 🔄 Focus Sector Relations (Many-to-Many with Pitch)
 export const pitchFocusSectors = pgTable("pitch_focus_sectors", {
   id: serial("id").primaryKey(),
-  focusSectorId: integer("focus_sector_id").references(() => focusSectors.id),
-  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
+  focusSectorId: integer("focus_sector_id").references(() => focusSectors.id, {
+    onDelete: "cascade",
+  }),
+  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id, {
+    onDelete: "cascade",
+  }),
 });
 
 // 📄 Pitch Documents
 export const pitchDocs = pgTable("pitch_docs", {
   id: uuid("id").defaultRandom().primaryKey(),
-  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
+  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id, {
+    onDelete: "cascade",
+  }),
   docName: text("doc_name").notNull(),
   docType: text("doc_type").notNull(),
   docUrl: text("doc_url").notNull(),
   isPrivate: boolean("is_private").default(false),
   uploadedBy: varchar("uploaded_by", { length: 255 }).references(
-    () => users.id
+    () => users.id,
+    { onDelete: "cascade" }
   ),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   isViewed: boolean("is_viewed").default(false),
@@ -68,20 +77,29 @@ export const pitchDocs = pgTable("pitch_docs", {
 // 💰 Offers
 export const offers = pgTable("offers", {
   id: serial("id").primaryKey(),
-  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
+  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id, {
+    onDelete: "cascade",
+  }),
   offerDescription: text("offer_description").notNull(),
-  offerBy: varchar("offer_by", { length: 255 }).references(() => users.id),
+  offerBy: varchar("offer_by", { length: 255 }).references(() => users.id, {
+    onDelete: "cascade",
+  }),
   offeredAt: timestamp("offered_at").defaultNow(),
   offerStatus: text("offer_status"),
 });
 
 // ✅ Offer Actions
 export const offerActions = pgTable("offer_actions", {
-  offerId: integer("offer_id").references(() => offers.id),
+  offerId: integer("offer_id").references(() => offers.id, {
+    onDelete: "cascade",
+  }),
   isActionTaken: boolean("is_action_taken").default(false),
   action: varchar("action", { length: 255 }),
   actionTakenBy: varchar("action_taken_by", { length: 255 }).references(
-    () => users.id
+    () => users.id,
+    {
+      onDelete: "cascade",
+    }
   ),
   actionTakenAt: timestamp("action_taken_at"),
 });
@@ -89,28 +107,41 @@ export const offerActions = pgTable("offer_actions", {
 // 🎤 founder Answers
 export const founderAnswers = pgTable("founder_answers", {
   id: serial("id").primaryKey(),
-  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
+  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id, {
+    onDelete: "cascade",
+  }),
   pitchAnswerUrl: text("pitch_answer_url").notNull(),
-  questionId: integer("question_id").references(() => scoutQuestions.id),
+  questionId: integer("question_id").references(() => scoutQuestions.id, {
+    onDelete: "cascade",
+  }),
   answerLanguage: text("answer_language"),
 });
 
 // ❌ Pitch Delete Requests
 export const pitchDelete = pgTable("pitch_delete", {
   id: serial("id").primaryKey(),
-  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
-  founderId: varchar("founder_id", { length: 255 }).references(() => users.id),
+  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id, {
+    onDelete: "cascade",
+  }),
+  founderId: varchar("founder_id", { length: 255 }).references(() => users.id, {
+    onDelete: "cascade",
+  }),
   isAgreed: boolean("is_agreed").default(false),
 });
 
 export const investorPitch = pgTable("investor_pitch", {
   id: serial("id").primaryKey(),
-  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id),
+  pitchId: varchar("pitch_id", { length: 255 }).references(() => pitch.id, {
+    onDelete: "cascade",
+  }),
   scoutId: varchar("scout_id", { length: 255 }).references(
     () => scouts.scoutId
   ),
   investorId: varchar("investor_id", { length: 255 }).references(
-    () => users.id
+    () => users.id,
+    {
+      onDelete: "cascade",
+    }
   ),
   believeRating: integer("believe_rating"), // Rating scale (e.g., 1-10)
   shouldMeet: boolean("should_meet").default(false),
@@ -128,7 +159,9 @@ export const investorPitch = pgTable("investor_pitch", {
 
 export const pitchTeam = pgTable("pitch_team", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").references(() => users.id),
+  userId: text("user_id").references(() => users.id, {
+    onDelete: "cascade",
+  }),
   designation: text("designation").notNull(),
   hasApproved: boolean("has_approved").default(false),
   pitchId: text("pitchId").references(() => pitch.id, { onDelete: "cascade" }),

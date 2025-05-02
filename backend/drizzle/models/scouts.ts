@@ -16,7 +16,9 @@ import { users } from "./users";
 
 export const scouts = pgTable("scouts", {
   scoutId: varchar("scout_id", { length: 255 }).primaryKey(),
-  daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id),
+  daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id, {
+    onDelete: "cascade",
+  }),
   scoutName: text("scout_name").notNull(),
   scoutDetails: text("scout_details"),
   targetAudLocation: text("target_aud_location"),
@@ -55,7 +57,9 @@ export const daftarScouts = pgTable("daftar_scouts", {
   scoutId: varchar("scout_id", { length: 255 }).references(
     () => scouts.scoutId
   ),
-  daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id),
+  daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id, {
+    onDelete: "cascade",
+  }),
   isPending: boolean("is_pending").notNull().default(true),
   addedAt: timestamp("added_at").defaultNow(),
 });
@@ -67,11 +71,15 @@ export const scoutDocuments = pgTable("scout_documents", {
   docType: text("doc_type"),
   size: integer("size"), // size in bytes or kb, you can convert accordingly
   scoutId: varchar("scout_id", { length: 255 }).references(
-    () => scouts.scoutId
+    () => scouts.scoutId,
+    { onDelete: "cascade" }
   ),
-  daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id),
+  daftarId: varchar("daftar_id", { length: 255 }).references(() => daftar.id, {
+    onDelete: "cascade",
+  }),
   uploadedBy: varchar("uploaded_by", { length: 255 }).references(
-    () => users.id
+    () => users.id,
+    { onDelete: "cascade" }
   ), // assuming users table
   isPrivate: boolean("is_private").default(false),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
@@ -103,7 +111,10 @@ export const scoutApproved = pgTable("scout_approved", {
 
 export const scoutDelete = pgTable("scout_delete", {
   investorId: varchar("investor_id", { length: 255 }).references(
-    () => users.id
+    () => users.id,
+    {
+      onDelete: "cascade",
+    }
   ),
   scoutId: varchar("scout_id", { length: 255 }).references(
     () => scouts.scoutId
