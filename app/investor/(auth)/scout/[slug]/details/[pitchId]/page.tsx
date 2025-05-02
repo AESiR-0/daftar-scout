@@ -53,6 +53,7 @@ interface FoundersPitch {
   location: string;
   sectors: string[];
   stage: string;
+  ask: string;
   questions: {
     id: number;
     question: string;
@@ -602,32 +603,32 @@ export default function PitchDetailsPage() {
               <CardContent>
                 <div className="grid grid-cols-2 gap-8">
                   <div>
-                  <h3 className="text-lg font-medium mb-4">
-                          Team Members ({pitchDetails.teamMembers.length})
-                        </h3>
-                  <div className=" grid grid-cols-2 gap-5 ">
-                    {pitchDetails.teamMembers.map((member) => {
-                      const transformedMember: TeamMember = {
-                        id: `${member.firstName}-${member.lastName}`,
-                        firstName: member.firstName,
-                        lastName: member.lastName,
-                        email: member.email,
-                        phone: member.phone,
-                        location: member.location,
-                        imageUrl: member.imageUrl,
-                        designation: member.designation,
-                        language: member.language,
-                        age: member.age,
-                        gender: member.gender,
-                      };
-                      return (
-                        <MemberCard
-                          key={transformedMember.id}
-                          member={transformedMember}
-                        />
-                      );
-                    })}
-                  </div>
+                    <h3 className="text-lg font-medium mb-4">
+                      Team Members ({pitchDetails.teamMembers.length})
+                    </h3>
+                    <div className=" grid grid-cols-2 gap-5 ">
+                      {pitchDetails.teamMembers.map((member) => {
+                        const transformedMember: TeamMember = {
+                          id: `${member.firstName}-${member.lastName}`,
+                          firstName: member.firstName,
+                          lastName: member.lastName,
+                          email: member.email,
+                          phone: member.phone,
+                          location: member.location,
+                          imageUrl: member.imageUrl,
+                          designation: member.designation,
+                          language: member.language,
+                          age: member.age,
+                          gender: member.gender,
+                        };
+                        return (
+                          <MemberCard
+                            key={transformedMember.id}
+                            member={transformedMember}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
                   {/* agregate data */}
                   <div className="grid grid-cols-2 gap-4 mt-[2.75rem]">
@@ -646,9 +647,9 @@ export default function PitchDetailsPage() {
                       </div>
                     </div>
                     <div className="">
-                    <Card  className="border-none bg-[#1a1a1a] p-4 mb-2">
-                            Average Age: {averageAge.toFixed(1)}
-                          </Card>
+                      <Card className="border-none bg-[#1a1a1a] p-4 mb-2">
+                        Average Age: {averageAge.toFixed(1)}
+                      </Card>
                       <Card className="border-none bg-[#1a1a1a] p-4">
                         <h4 className="text-sm font-medium mb-4">
                           Preferred Languages to Connect with Investors
