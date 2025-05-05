@@ -289,10 +289,14 @@ export default function UserProfileClient({
     if (!validateCurrentStep()) return;
 
     setIsSubmitting(true);
+    const formDataWithPhone = {
+      ...formState,
+      phoneNumber: `${formState.countryCode}${formState.number}`,
+    };
     const res = await fetch(`/api/endpoints/users/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ formData: formState, email: userMail }),
+      body: JSON.stringify({ formData: formDataWithPhone, email: userMail }),
     });
     if (res.status == 200) {
       toast({ title: "Success", description: "Profile updated successfully!" });

@@ -101,9 +101,9 @@ export default function ScoutPage({ scouts }: { scouts: Scout[] }) {
                       <span className="pr-1">Collaboration: </span>
                       {scout.collaborator.map(
                         (collaboration: string, num: number) =>
-                          `${collaboration} ${
+                          `${collaboration} ${  
                             scout.collaborator.length === 1
-                              ? scout.collaborator[0]
+                              ? ''
                               : num === scout.collaborator.length - 2
                               ? "and"
                               : num < scout.collaborator.length - 2

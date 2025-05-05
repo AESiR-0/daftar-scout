@@ -265,7 +265,7 @@ export default function ScoutPage() {
                                 (collaboration: string, num: number) =>
                                   `${collaboration} ${
                                     scout.collaborator.length === 1
-                                      ? scout.collaborator[0]
+                                      ? ''
                                       : num === scout.collaborator.length - 2
                                       ? "and"
                                       : num < scout.collaborator.length - 2
