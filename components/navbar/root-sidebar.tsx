@@ -12,12 +12,12 @@ const navItems = [
     icon: Cloud,
   },
   {
-    title: "Founder",
+    title: "Pitch to Investors",
     path: "/landing/founder",
     icon: Building2,
   },
   {
-    title: "Investor",
+    title: "Scout Startups",
     path: "/landing/investor",
     icon: Users,
   }

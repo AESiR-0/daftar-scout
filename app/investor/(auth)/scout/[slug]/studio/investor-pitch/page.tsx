@@ -161,13 +161,13 @@ export default function InvestorPitchPage() {
           <div className="col-span-2 ">
             <div className="space-y-4">
               {showSample ? (
-                <div className="border-2 flex flex-col border-dashed border-gray-700 rounded-lg p-6">
+                <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-6">
                   <div className="space-y-4 animate-in fade-in-50 duration-300">
                     <video
                       src={videoUrl || "/dummyVideo.mp4"}
                       controls
                       poster="/images/sample-pitch-thumbnail.jpg"
-                      className="w-full rounded-[0.35rem]  aspect-[9/16] "
+                      className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16] "
                     >
                       Your browser does not support the video tag.
                     </video>

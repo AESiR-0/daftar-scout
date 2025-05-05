@@ -273,6 +273,7 @@ export default function AudiencePage() {
         value: sector.sectorName,
         label: sector.sectorName,
       }));
+      console.log("Sectors data:", formattedSectors);
       setSectors(formattedSectors);
     } catch (error) {
       console.error("Error fetching sectors data:", error);

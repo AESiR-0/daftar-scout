@@ -204,8 +204,8 @@ export default function InvestorPage() {
 
         {/* Bottom Section */}
         <div className="space-y-6 text-center">
-          <h2 className="text-4xl font-light">
-            Be the first to scout the next big startup
+          <h2 className="text-3xl font-semibold">
+          The one that made it — not with decks, but with hustle and people who believed.
           </h2>
         </div>
 
