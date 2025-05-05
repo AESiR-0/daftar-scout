@@ -7,7 +7,7 @@ import L, { LatLngTuple } from "leaflet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { X, Check } from "lucide-react";
+import { X } from "lucide-react";
 import { z } from "zod";
 import {
   Dialog,
@@ -180,19 +180,17 @@ export default function AudiencePage() {
     );
 
     const displayValue = multiple
-      ? Array.isArray(value) && value.length > 0
-        ? `${value.length} selected`
-        : placeholder
-      : options.find((opt) => opt.value === value)?.label || placeholder;
+      ? ""
+      : options.find((opt) => opt.value === value)?.label || "";
 
     return (
       <div className="relative">
         <Input
-          value={search}
+          value={search || displayValue}
           onChange={(e) => setSearch(e.target.value)}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 200)}
-          placeholder={displayValue}
+          placeholder={placeholder}
           className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
         />
         {open && (
@@ -208,20 +206,9 @@ export default function AudiencePage() {
                       setOpen(false);
                     }
                   }}
-                  className={`px-4 py-2 hover:bg-gray-700 cursor-pointer text-white flex items-center justify-between ${
-                    multiple &&
-                    Array.isArray(value) &&
-                    value.includes(option.value)
-                      ? "bg-gray-700"
-                      : ""
-                  }`}
+                  className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-white"
                 >
                   {option.label}
-                  {multiple &&
-                    Array.isArray(value) &&
-                    value.includes(option.value) && (
-                      <Check className="h-4 w-4" />
-                    )}
                 </div>
               ))
             ) : (
@@ -268,12 +255,11 @@ export default function AudiencePage() {
     try {
       const res = await fetch("/api/endpoints/focus-sectors");
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const { data } = await res.json();
-      const formattedSectors = data.map((sector: { sectorName: string }) => ({
+      const data = await res.json();
+      const formattedSectors = data.map((sector: any) => ({
         value: sector.sectorName,
         label: sector.sectorName,
       }));
-      console.log("Sectors data:", formattedSectors);
       setSectors(formattedSectors);
     } catch (error) {
       console.error("Error fetching sectors data:", error);
