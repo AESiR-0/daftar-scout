@@ -6,7 +6,7 @@ export function Footer() {
   const isLandingPage = pathname?.startsWith("/landing");
 
     return (
-      <footer className="py-6 text-center">
+      <footer className="py-6 mt-10 text-center">
         <p className="text-sm text-muted-foreground">
          You are on Beta 1.0
         </p>

@@ -174,13 +174,13 @@ export default function InvestorPitchPage() {
                   </div>
                 </div>
               ) : (
-                <div className="border-2 flex flex-col border-dashed border-gray-700 rounded-lg p-6 text-center">
+                <div className="border-2 flex flex-col min-h-[533px] items-center justify-center border-dashed border-gray-700 rounded-lg p-6 text-center">
                   {videoUrl ? (
                     <div className="space-y-4">
                       <video
                         src={videoUrl}
                         controls
-                        className="w-full rounded-[0.35rem]  aspect-[9/16] "
+                        className="w-[300px] h-[533px] rounded-[0.35rem]  aspect-[9/16] "
                       />
                       <div className="flex gap-2">
                         <Button
