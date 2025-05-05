@@ -23,6 +23,17 @@ export async function PATCH(req: Request) {
 
     const formattedDob = dob ? new Date(dob).toISOString().split("T")[0] : null;
 
+    // Extract country code and number from phoneNumber
+    let countryCode = null;
+    let number = null;
+    if (phoneNumber?.startsWith("+")) {
+      const match = phoneNumber.match(/^(\+\d{1,4})(.*)$/);
+      if (match) {
+        countryCode = match[1];
+        number = match[2].trim();
+      }
+    }
+
     // Fetch the userId based on the provided email
     const user = await db
       .select({ id: users.id })
@@ -57,7 +68,7 @@ export async function PATCH(req: Request) {
     // Insert new user-language mappings
     const userLanguageMappings = validLanguageIds.map((languageId) => ({
       userId: userId,
-      languageId, // Fix: Directly assign languageId
+      languageId,
     }));
 
     if (userLanguageMappings.length > 0) {
@@ -70,7 +81,8 @@ export async function PATCH(req: Request) {
       .set({
         name: name,
         lastName: lastName,
-        number: phoneNumber,
+        countryCode: countryCode,
+        number: number,
         gender: gender,
         dob: formattedDob,
         location: location,

@@ -255,12 +255,11 @@ export default function AudiencePage() {
     try {
       const res = await fetch("/api/endpoints/focus-sectors");
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const { data } = await res.json();
-      const formattedSectors = data.map((sector: string) => ({
-        value: sector,
-        label: sector,
+      const data = await res.json();
+      const formattedSectors = data.map((sector: any) => ({
+        value: sector.sectorName,
+        label: sector.sectorName,
       }));
-      console.log("Sectors data:", formattedSectors);
       setSectors(formattedSectors);
     } catch (error) {
       console.error("Error fetching sectors data:", error);

@@ -66,7 +66,6 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const postBody = await req.json();
-    console.log("Received body:", postBody);
 
     const {
       pitchName,
