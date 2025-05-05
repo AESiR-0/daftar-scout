@@ -10,6 +10,14 @@ import {
   verificationTokens,
 } from "@/backend/drizzle/models/users";
 
+const ALLOWED_EMAILS = [
+  "workbyprat@gmail.com",
+  "pratiechellani@gmail.com",
+  "ladraunak@gmail.com",
+  "shuklarohit2105@gmail.com",
+  "daftarosbackup@gmail.com"
+];
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db, {
     usersTable: users,
@@ -38,7 +46,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     async signIn({ user, account }) {
-      if (!user.email || !account) return false; // Ensure the user has an email
+      if (!user.email || !account) return false;
+
+      // Check if the email is in the allowed list
+      if (!ALLOWED_EMAILS.includes(user.email)) {
+        throw new Error("You cannot proceed, please have some patience and wait for the launch");
+      }
 
       // Find an existing user by email
       const existingUser = await db

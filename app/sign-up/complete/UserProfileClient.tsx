@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -43,7 +43,7 @@ const createPersonalInfoSchema = (countryCode: string) =>
   z.object({
     name: z.string().min(1, "First name cannot be empty"),
     lastName: z.string().min(1, "Last name cannot be empty"),
-    gender: z.enum(["Male", "Female", "Trans","Other",], {
+    gender: z.enum(["Male", "Female", "Trans", "Other"], {
       errorMap: () => ({ message: "Please select a gender" }),
     }),
     number: z
@@ -117,6 +117,7 @@ export default function UserProfileClient({
     role: initialData.role ?? "",
     languages: initialData.languages ?? [],
   });
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -256,7 +257,8 @@ export default function UserProfileClient({
 
     if (!result?.success) {
       const flattenedErrors = result?.error.flatten().fieldErrors;
-      const formattedErrors: Partial<Record<keyof typeof formState, string>> = {};
+      const formattedErrors: Partial<Record<keyof typeof formState, string>> =
+        {};
 
       Object.entries(flattenedErrors || {}).forEach(([key, value]) => {
         formattedErrors[key as keyof typeof formState] = value?.[0];
@@ -287,22 +289,21 @@ export default function UserProfileClient({
     if (!validateCurrentStep()) return;
 
     setIsSubmitting(true);
-    try {
-      const res = await fetch(`/api/endpoints/users/`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formData: formState, email: userMail }),
-      });
+    const res = await fetch(`/api/endpoints/users/`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ formData: formState, email: userMail }),
+    });
+    if (res.status == 200) {
       toast({ title: "Success", description: "Profile updated successfully!" });
-      redirect("/investor");
-    } catch {
+      router.push(`/${formState.role}`);
+    } else {
       toast({
         title: "Error",
         description: "Something went wrong",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+      router.refresh();
     }
   };
 
@@ -347,9 +348,7 @@ export default function UserProfileClient({
                 className="bg-[#2a2a2a] border-[#3a3a3a] text-white h-12"
               />
               {errors.name && (
-                <p className="text-red-500 text-xs max-w-full">
-                  {errors.name}
-                </p>
+                <p className="text-red-500 text-xs max-w-full">{errors.name}</p>
               )}
             </div>
 
