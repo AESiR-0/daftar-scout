@@ -4,12 +4,14 @@ import { investorPitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/auth";
 import { users } from "@/backend/drizzle/models/users";
+import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const scoutId = searchParams.get("scoutId");
     const pitchId = searchParams.get("pitchId");
+
     // Validate parameters
     if (!scoutId || !pitchId) {
       return NextResponse.json(
@@ -18,12 +20,34 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Fetch the analysis
+    // Fetch all analyses for this pitch with user and daftar info
     const result = await db
       .select({
+        id: investorPitch.id,
         analysis: investorPitch.analysis,
+        believeRating: investorPitch.believeRating,
+        shouldMeet: investorPitch.shouldMeet,
+        lastActionTakenOn: investorPitch.lastActionTakenOn,
+        analyst: {
+          id: users.id,
+          name: users.name,
+          role: users.role,
+        },
+        daftar: {
+          id: daftar.id,
+          name: daftar.name,
+        }
       })
       .from(investorPitch)
+      .leftJoin(users, eq(users.id, investorPitch.investorId))
+      .leftJoin(
+        daftarInvestors,
+        and(
+          eq(daftarInvestors.investorId, investorPitch.investorId),
+          eq(daftarInvestors.status, "active")
+        )
+      )
+      .leftJoin(daftar, eq(daftar.id, daftarInvestors.daftarId))
       .where(
         and(
           eq(investorPitch.scoutId, scoutId),
@@ -31,16 +55,21 @@ export async function GET(req: NextRequest) {
         )
       );
 
-    if (result.length === 0) {
-      return NextResponse.json(
-        {
-          error: "No analysis found for this scoutId, pitchId, and investorId",
-        },
-        { status: 404 }
-      );
-    }
+    // Transform the data to match the expected format
+    const analysis = result.map(entry => ({
+      id: entry.id,
+      analyst: {
+        name: entry.analyst?.name || "N/A",
+        role: entry.analyst?.role || "N/A",
+        daftarName: entry.daftar?.name || "N/A"
+      },
+      belief: entry.shouldMeet ? "yes" : "no",
+      note: entry.analysis || "",
+      nps: entry.believeRating || 0,
+      date: entry.lastActionTakenOn?.toISOString() || new Date().toISOString()
+    }));
 
-    return NextResponse.json({ analysis: result }, { status: 200 });
+    return NextResponse.json({ analysis }, { status: 200 });
   } catch (error) {
     console.error("Error fetching investor analysis:", error);
     return NextResponse.json(

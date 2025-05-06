@@ -216,57 +216,85 @@ export default function PitchDetailsPage() {
   const [pitchDetails, setPitchDetails] = useState<PitchDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
   const pitchId = pathname.split("/")[5];
   const scoutId = pathname.split("/")[3];
-  const currentProfile: Profile = {
-    id: "current-user",
-    name: "Current User",
-    role: "Investment Analyst",
-    avatar: "/avatars/current-user.jpg",
-    daftarName: pitchDetails?.pitchName || "Tech Startup",
-  };
-
   const [userId, setUserId] = useState<string | null>(null);
-  // Fetch pitch data
-  useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const response = await fetch("/api/endpoints/users/getId", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
 
-        const data = await response.json();
-        setUserId(data.id);
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const [userIdResponse, userInfoResponse] = await Promise.all([
+          fetch("/api/endpoints/users/getId"),
+          fetch("/api/endpoints/users/me")
+        ]);
+
+        if (!userIdResponse.ok || !userInfoResponse.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const { id } = await userIdResponse.json();
+        const userInfo = await userInfoResponse.json();
+
+        setUserId(id);
+        setCurrentProfile({
+          id,
+          name: userInfo.name,
+          role: userInfo.role,
+          avatar: userInfo.avatar || "/avatars/default.jpg",
+          daftarName: userInfo.daftarName || "N/A"
+        });
       } catch (error) {
-        console.error("Error fetching user ID:", error);
+        console.error("Error fetching user data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load user information",
+          variant: "destructive",
+        });
       }
     };
-    fetchUserId();
-  }, [params]);
+
+    fetchUserData();
+  }, [toast]);
+
   useEffect(() => {
     const fetchPitch = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/endpoints/pitch/investor?pitchId=${pitchId}`,
-          {
+        const [pitchResponse, analysisResponse] = await Promise.all([
+          fetch(`/api/endpoints/pitch/investor?pitchId=${pitchId}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-          }
-        );
+          }),
+          fetch(`/api/endpoints/pitch/investor/analysis?scoutId=${scoutId}&pitchId=${pitchId}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          })
+        ]);
 
-        if (!response.ok) {
-          const errorData = await response.json();
+        if (!pitchResponse.ok) {
+          const errorData = await pitchResponse.json();
           throw new Error(errorData.error || "Failed to fetch pitch");
         }
 
-        const data: PitchDetails = await response.json();
-        console.log("Fetched pitch details:", data);
-        setPitchDetails(data);
+        const pitchData: PitchDetails = await pitchResponse.json();
+        const analysisData = analysisResponse.ok ? await analysisResponse.json() : { analysis: [] };
+
+        // Merge the data
+        const mergedData = {
+          ...pitchData,
+          fields: {
+            ...pitchData.fields,
+            teamAnalysis: analysisData.analysis || []
+          }
+        };
+
+        console.log("Fetched pitch details:", mergedData);
+        setPitchDetails(mergedData);
       } catch (err) {
         setError((err as Error).message);
         toast({
@@ -290,18 +318,20 @@ export default function PitchDetailsPage() {
     nps: number | null;
   }) => {
     try {
-      const response = await fetch("/api/analysis", {
+      const response = await fetch(`/api/endpoints/pitch/investor/analysis?scoutId=${scoutId}&pitchId=${pitchId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pitchId: params.pitchId,
-          believeRating: data.nps,
           analysis: data.note,
-          shouldMeet: data.belief === "yes",
+          believeRating: data.nps,
+          shouldMeet: data.belief === "yes"
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to submit analysis");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit analysis");
+      }
 
       const newAnalysis: TeamAnalysis = {
         id: Date.now().toString(),
@@ -330,12 +360,12 @@ export default function PitchDetailsPage() {
         variant: "success",
       });
     } catch (error) {
+      console.error("Error submitting analysis:", error);
       toast({
         title: "Error",
-        description: "Failed to submit analysis",
+        description: error instanceof Error ? error.message : "Failed to submit analysis",
         variant: "destructive",
       });
-      console.error(error);
     }
   };
 
@@ -679,22 +709,22 @@ export default function PitchDetailsPage() {
             onScheduleMeeting={() => setScheduleMeetingOpen(true)}
           />
         )}
-        {activeSection === "investors-analysis" && (
+        {activeSection === "investors-analysis" && currentProfile && (
           <TeamAnalysisSection 
             currentProfile={currentProfile}
-            teamAnalysis={pitchDetails.fields.teamAnalysis.map(analysis => ({
+            teamAnalysis={pitchDetails?.fields.teamAnalysis.map(analysis => ({
               id: analysis.id,
               analyst: {
                 name: analysis.analyst.name,
                 role: analysis.analyst.role,
-                avatar: analysis.analyst.avatar,
+                avatar: analysis.analyst.avatar || "/avatars/default.jpg",
                 daftarName: analysis.analyst.daftarName
               },
               belief: analysis.belief,
               note: analysis.note,
               nps: analysis.nps,
               date: analysis.date
-            }))}
+            })) || []}
           />
         )}
         {activeSection === "make-offer" && (

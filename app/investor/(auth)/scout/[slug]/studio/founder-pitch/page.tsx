@@ -15,6 +15,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface Question {
   id?: number;
@@ -82,6 +83,7 @@ export default function InvestorStudioPage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
   const { toast } = useToast();
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<"sample" | "custom">("sample");
   const [customQuestions, setCustomQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question>(
@@ -89,6 +91,7 @@ export default function InvestorStudioPage() {
   );
   const [questionsOpen, setQuestionsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Sample languages and questions for the new dialog section
   const languages = [
@@ -163,58 +166,82 @@ export default function InvestorStudioPage() {
     }
   };
 
-  const handleSaveQuestions = async () => {
-    if (
-      selectedOption === "custom" &&
-      customQuestions.every((q) => q.question.trim() === "")
-    ) {
-      return; // Skip save if all custom questions are empty
-    }
-
-    const payload: Partial<Question>[] =
-      selectedOption === "sample"
-        ? questionsData.defaultQuestions.map(
-            ({ id, question, videoUrl, previewImage }) => ({
-              id,
-              question,
-              videoUrl,
-              previewImage,
-              isCustom: false,
-            })
-          )
-        : customQuestions.map((q) => ({
-            question: q.question,
-            ...(q.isCustom === false ? { isCustom: false } : {}), // omit if true
-          }));
-
-    try {
-      const res = await fetch("/api/endpoints/scouts/questions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scoutId, questions: payload }),
-      });
-
-      if (res.status === 200 || res.status === 201) {
-        // toast({
-        //   title: "Questions saved",
-        //   description: "Your screening questions have been updated",
-        // });
-      } else {
+  const handleSaveQuestions = async (showToast = true) => {
+    if (!customQuestions || customQuestions.length === 0) {
+      if (showToast) {
         toast({
-          title: "Error saving questions",
-          description: `Status code: ${res.status}`,
-          variant: "destructive",
+          title: "Error",
+          description: "Please add at least one custom question",
+          variant: "error",
         });
       }
-    } catch (error) {
-      console.error("Error saving questions:", error);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Get existing questions to ensure we have the correct data
+      const getResponse = await fetch(`/api/endpoints/scouts/questions?scoutId=${scoutId}&language=${selectedLanguage}`);
+      if (!getResponse.ok) {
+        throw new Error('Failed to fetch existing questions');
+      }
+
+      const existingQuestions = await getResponse.json();
+      
+      // Update questions using PATCH
+      const response = await fetch(`/api/endpoints/scouts/questions`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          scoutId,
+          language: selectedLanguage,
+          questions: customQuestions.map(q => ({
+            scoutQuestion: q.question,
+            isCustom: true,
+            scoutAnswerSampleUrl: q.videoUrl || null
+          }))
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update questions');
+      }
+
+      if (showToast) {
+        toast({
+          title: "Success",
+          description: "Questions updated successfully",
+          variant: "success",
+        });
+      }
+      router.refresh();
+    } catch (error: any) {
+      console.error('Error updating questions:', error);
+      if (showToast) {
+        toast({
+          title: "Error",
+          description: error.message || 'Failed to update questions',
+          variant: "error",
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Auto-save when selectedOption or customQuestions change
+  // Debounce the auto-save to prevent too many requests
   useEffect(() => {
-    handleSaveQuestions();
-  }, [selectedOption, customQuestions]);
+    const timeoutId = setTimeout(() => {
+      if (selectedOption && (customQuestions.length > 0 || selectedOption === "sample")) {
+        handleSaveQuestions(false); // Pass false to prevent toast during auto-save
+      }
+    }, 1000); // Wait 1 second after changes before saving
+
+    return () => clearTimeout(timeoutId);
+  }, [selectedOption, customQuestions, selectedLanguage]);
 
   return (
     <div className="min-h-screen px-8 text-white">

@@ -11,66 +11,76 @@ import { eq, and } from "drizzle-orm";
 import { auth } from "@/auth";
 
 export async function GET(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const { searchParams } = new URL(req.url);
-  const scoutId = searchParams.get("scoutId");
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  if (!scoutId) {
-    return NextResponse.json({ error: "ScoutId not given" }, { status: 400 });
-  }
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId");
 
-  const user = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, session.user.email))
-    .limit(1);
+    if (!scoutId) {
+      return NextResponse.json({ error: "ScoutId not given" }, { status: 400 });
+    }
 
-  if (user.length === 0) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
-  const currentUserId = user[0].id;
+    // Get current user's ID
+    const user = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, session.user.email))
+      .limit(1);
 
-  const listOfUsers = await db
-    .select({
-      scoutId: scoutDelete.scoutId,
-      isAgreed: scoutDelete.isAgreed,
-      investorId: scoutDelete.investorId,
-      agreedAt: scoutDelete.agreedAt,
-      daftarName: daftar.name,
-      designation: daftarInvestors.designation,
-      user: {
-        name: users.name,
-        lastName: users.lastName,
-        email: users.email,
-        role: users.role,
-      },
-    })
-    .from(scoutDelete)
-    .leftJoin(users, eq(scoutDelete.investorId, users.id))
-    .leftJoin(daftarScouts, eq(scoutDelete.scoutId, daftarScouts.scoutId))
-    .leftJoin(daftar, eq(daftarScouts.daftarId, daftar.id))
-    .leftJoin(
-      daftarInvestors,
-      and(
-        eq(daftar.id, daftarInvestors.daftarId),
-        eq(scoutDelete.investorId, daftarInvestors.investorId)
+    if (user.length === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    const currentUserId = user[0].id;
+
+    // Get all users involved in the scout deletion process
+    const listOfUsers = await db
+      .select({
+        scoutId: scoutDelete.scoutId,
+        isAgreed: scoutDelete.isAgreed,
+        investorId: scoutDelete.investorId,
+        agreedAt: scoutDelete.agreedAt,
+        daftarName: daftar.name,
+        designation: daftarInvestors.designation,
+        user: {
+          name: users.name,
+          lastName: users.lastName,
+          email: users.email,
+          role: users.role,
+        },
+      })
+      .from(scoutDelete)
+      .leftJoin(users, eq(scoutDelete.investorId, users.id))
+      .leftJoin(daftarScouts, eq(scoutDelete.scoutId, daftarScouts.scoutId))
+      .leftJoin(daftar, eq(daftarScouts.daftarId, daftar.id))
+      .leftJoin(
+        daftarInvestors,
+        and(
+          eq(daftar.id, daftarInvestors.daftarId),
+          eq(scoutDelete.investorId, daftarInvestors.investorId)
+        )
       )
-    )
-    .where(eq(scoutDelete.scoutId, scoutId));
+      .where(eq(scoutDelete.scoutId, scoutId));
 
-  const userApproval = listOfUsers.find(
-    (entry) => entry.investorId === currentUserId
-  );
+    // Get current user's approval status
+    const currentUserApprovalStatus = listOfUsers.find(
+      (entry) => entry.investorId === currentUserId
+    ) || null;
 
-  const currentUserApprovalStatus = userApproval?.isAgreed ?? null;
-
-  return NextResponse.json({
-    listOfUsers,
-    currentUserApprovalStatus,
-  });
+    return NextResponse.json({
+      listOfUsers,
+      currentUserApprovalStatus,
+    });
+  } catch (error) {
+    console.error("GET /scout-delete error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch deletion approvals" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -133,7 +143,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upsert approval in scoutDelete table
+    // Record approval in scoutDelete table
+    const agreedAt = isAgreed ? new Date() : null;
     const existingApproval = await db
       .select()
       .from(scoutDelete)
@@ -143,8 +154,6 @@ export async function POST(req: NextRequest) {
           eq(scoutDelete.investorId, investorId)
         )
       );
-
-    const agreedAt = isAgreed ? new Date() : null;
 
     if (existingApproval.length > 0) {
       // Update existing approval
@@ -186,23 +195,20 @@ export async function POST(req: NextRequest) {
       );
 
     const approvedIds = approved.map((item) => item.investorId);
-
     const deleteIsAgreedByAll = allInvestorIds.every((id) =>
       approvedIds.includes(id)
     );
 
     // Update scout if all approved
-    let updatedScout = null;
     if (deleteIsAgreedByAll) {
-      updatedScout = await db
+      await db
         .update(scouts)
         .set({
           isArchived: true,
           deletedOn: new Date(),
           deleteIsAgreedByAll: true,
         })
-        .where(eq(scouts.scoutId, scoutId))
-        .returning();
+        .where(eq(scouts.scoutId, scoutId));
     }
 
     return NextResponse.json(
@@ -210,12 +216,12 @@ export async function POST(req: NextRequest) {
         message: deleteIsAgreedByAll
           ? "Scout archived successfully"
           : "Approval recorded successfully",
-        data: updatedScout ? updatedScout[0] : null,
+        isArchived: deleteIsAgreedByAll,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("POST /scout-documents error:", error);
+    console.error("POST /scout-delete error:", error);
     return NextResponse.json(
       { error: "Failed to record approval" },
       { status: 500 }

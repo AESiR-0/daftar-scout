@@ -4,11 +4,50 @@ import {
   daftarScouts,
   scouts,
   scoutApproved,
+  scoutQuestions,
 } from "@/backend/drizzle/models/scouts";
 import { eq, inArray, or, not, and, sql } from "drizzle-orm";
 import { auth } from "@/auth"; // Assuming you have an auth utility
 import { users } from "@/backend/drizzle/models/users"; // Assuming you have a users table
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar"; // Assuming you have an investordaftar table
+
+const defaultQuestions = [
+  {
+    question: "Introduce yourself and the problem you are solving",
+    videoUrl: "/videos/problem.mp4",
+    isCustom: false,
+  },
+  {
+    question: "What are you building",
+    videoUrl: "/videos/market.mp4",
+    isCustom: false,
+  },
+  {
+    question: "Why do you really want to solve the problem",
+    videoUrl: "/videos/solution.mp4",
+    isCustom: false,
+  },
+  {
+    question: "Who are your customers, and how are they dealing with this problem today",
+    videoUrl: "/videos/customer.mp4",
+    isCustom: false,
+  },
+  {
+    question: "Why will your customers switch from competitors to your product",
+    videoUrl: "/videos/business.mp4",
+    isCustom: false,
+  },
+  {
+    question: "How will you make money",
+    videoUrl: "/videos/team.mp4",
+    isCustom: false,
+  },
+  {
+    question: "What is the growth here (development, traction, or revenue), and challenges you are facing",
+    videoUrl: "/videos/vision.mp4",
+    isCustom: false,
+  },
+];
 
 async function generateScoutId(scoutName: string): Promise<string> {
   const prefix = scoutName.slice(0, 3).toLowerCase();
@@ -195,11 +234,23 @@ export async function POST(req: NextRequest) {
       await db.insert(scoutApproved).values(approvedInserts);
     }
 
+    // Insert default questions for English language
+    const questionsToInsert = defaultQuestions.map(q => ({
+      scoutId,
+      language: "English",
+      scoutQuestion: q.question,
+      isCustom: false,
+      scoutAnswerSampleUrl: q.videoUrl
+    }));
+
+    await db.insert(scoutQuestions).values(questionsToInsert);
+
     return NextResponse.json(
       { message: "Scout created successfully", data: newScout[0] },
       { status: 200 }
     );
   } catch (error: any) {
+    console.error("Error creating scout:", error);
     return NextResponse.json(
       { message: "Error creating scout", error: error.message },
       { status: 500 }

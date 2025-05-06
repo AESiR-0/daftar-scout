@@ -56,32 +56,38 @@ export default function DeletePage() {
   const [approvals, setApprovals] = useState<TeamMember[]>([]);
   const [userConsent, setUserConsent] = useState(false);
   const [deleteClicked, setDeleteClicked] = useState(false);
-  const [currentUserApproved, setCurrentUserApproved] = useState<
-    boolean | null
-  >(null);
+  const [currentUserApproved, setCurrentUserApproved] = useState<boolean | null>(null);
   const [isArchived, setIsArchived] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch team approvals from /api/endpoints/scouts/delete
   useEffect(() => {
     const fetchApprovals = async () => {
+      if (!scoutId) return;
+      
       try {
-        const response = await fetch(
-          `/api/endpoints/scouts/delete?scoutId=${scoutId}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-        const data = await response.json();
-        const { listOfUsers, currentUserApprovalStatus } = data;
+        setIsLoading(true);
+        const [approvalsResponse, scoutResponse] = await Promise.all([
+          fetch(`/api/endpoints/scouts/delete?scoutId=${scoutId}`),
+          fetch(`/api/endpoints/scouts?scoutId=${scoutId}`)
+        ]);
 
-        const mappedApprovals: TeamMember[] = listOfUsers.map(
+        if (!approvalsResponse.ok) {
+          throw new Error(`Failed to fetch approvals: ${approvalsResponse.status}`);
+        }
+
+        const approvalsData = await approvalsResponse.json();
+        const { listOfUsers, currentUserApprovalStatus } = approvalsData;
+
+        const mappedApprovals: TeamMember[] = (listOfUsers || []).map(
           (entry: ApiUser) => ({
             name: entry.user.name
               ? `${entry.user.name} ${entry.user.lastName || ""}`.trim()
               : "Unknown User",
             email: entry.user.email || "N/A",
             role: entry.user.role || "N/A",
-            isApproved: entry.isAgreed || false,
+            isApproved: Boolean(entry.isAgreed),
             isUser: entry.investorId === currentUserApprovalStatus?.investorId,
             designation: entry.designation || "N/A",
             daftar: entry.daftarName || "Unknown Daftar",
@@ -94,36 +100,32 @@ export default function DeletePage() {
         );
 
         setApprovals(mappedApprovals);
-        setCurrentUserApproved(currentUserApprovalStatus);
+        setCurrentUserApproved(Boolean(currentUserApprovalStatus?.isAgreed));
 
-        // Check if scout is archived
-        const scoutResponse = await fetch(
-          `/api/endpoints/scouts?scoutId=${scoutId}`
-        );
         if (scoutResponse.ok) {
           const scoutData = await scoutResponse.json();
-          setIsArchived(scoutData.data.isArchived || false);
+          setIsArchived(Boolean(scoutData?.data?.isArchived));
         }
       } catch (error) {
         console.error("Error fetching approvals:", error);
         toast({
           title: "Error",
-          description: "Failed to load team approvals",
+          description: error instanceof Error ? error.message : "Failed to load team approvals",
           variant: "destructive",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (scoutId) {
-      fetchApprovals();
-    }
+    fetchApprovals();
   }, [scoutId, toast]);
 
   const handleDelete = async () => {
-    if (!userConsent) return;
+    if (!userConsent || !scoutId) return;
 
     try {
-      // Send approval to POST /api/endpoints/scouts/delete
+      setIsSubmitting(true);
       const response = await fetch("/api/endpoints/scouts/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -134,10 +136,10 @@ export default function DeletePage() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
+        throw new Error(`Failed to submit approval: ${response.status}`);
       }
 
-      const { data } = await response.json();
+      const responseData = await response.json();
 
       // Update local state
       setApprovals((prev) =>
@@ -149,27 +151,48 @@ export default function DeletePage() {
       );
       setCurrentUserApproved(true);
       setDeleteClicked(true);
-      setIsArchived(data?.isArchived || false);
 
-      toast({
-        title: "Approval submitted",
-        description: data?.isArchived
-          ? "Scout has been archived as all approvals are received."
-          : "Your approval for scout deletion has been recorded.",
-      });
+      // Check if the scout is now archived
+      const scoutResponse = await fetch(`/api/endpoints/scouts?scoutId=${scoutId}`);
+      if (scoutResponse.ok) {
+        const scoutData = await scoutResponse.json();
+        const isNowArchived = Boolean(scoutData?.data?.isArchived);
+        setIsArchived(isNowArchived);
+
+        toast({
+          title: "Success",
+          description: isNowArchived
+            ? "Scout has been archived as all approvals are received."
+            : "Your approval for scout deletion has been recorded.",
+          variant: "success",
+        });
+      }
     } catch (error) {
       console.error("Error submitting approval:", error);
       toast({
         title: "Error",
-        description: "Failed to submit approval",
+        description: error instanceof Error ? error.message : "Failed to submit approval",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const pendingApprovals = approvals.filter(
-    (member) => !member.isApproved
-  ).length;
+  if (isLoading) {
+    return (
+      <div className="flex px-5 mt-10 container mx-auto">
+        <Card className="border-none bg-[#0e0e0e] flex-1">
+          <CardContent className="flex justify-center items-center h-[400px]">
+            <div className="flex flex-col items-center gap-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <p className="text-sm text-muted-foreground">Loading approvals...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex px-5 mt-10 container mx-auto gap-6">
@@ -206,10 +229,17 @@ export default function DeletePage() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={!userConsent || deleteClicked || isArchived}
+              disabled={!userConsent || deleteClicked || isArchived || isSubmitting}
               className="w-[12%] bg-muted rounded-[0.35rem] hover:bg-muted/50"
             >
-              Delete
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                "Delete"
+              )}
             </Button>
 
             {(deleteClicked || approvals.length > 0) && (

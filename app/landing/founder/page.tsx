@@ -9,28 +9,145 @@ export default function FounderPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("Hindi")
 
   const questions = [
-    { id: "problem", title: "Introduce yourself", question: "Introduce yourself" },
-    { id: "solution", title: "How did you come up with the idea ", question: "How did you come up with the idea " },
-    { id: "market", title: "What is the problem are you solving, and why is it really important for you to solve it", question: "What is the problem are you solving, and why is it really important for you to solve it" },
-    { id: "business", title: "Who are your customers, and why would they pay for it", question: "Who are your customers, and why would they pay for it" },
-    { id: "future", title: "How much have you worked on your startup, and where do you see it in 3 years", question: "How much have you worked on your startup, and where do you see it in 3 years" },
-    { id: "help", title: "What challenges are you facing, and what support do you need", question: "What challenges are you facing, and what support do you need" },
+    { id: "problem", title: "Introduce yourself and the problem you are solving", question: "Introduce yourself and the problem you are solving" },
+    { id: "solution", title: "What are you building", question: "What are you building" },
+    { id: "market", title: "Why do you really want to solve the problem", question: "Why do you really want to solve the problem" },
+    { id: "business", title: "Who are your customers, and how are they dealing with this problem today", question: "Who are your customers, and how are they dealing with this problem today" },
+    { id: "future", title: "Why will your customers switch from competitors to your product", question: "Why will your customers switch from competitors to your product" },
+    { id: "help", title: "How will you make money", question: "How will you make money" },
+    { id: "challenges", title: "What is the growth here (development, traction, or revenue), and challenges you are facing", question: "What is the growth here (development, traction, or revenue), and challenges you are facing" },
+
   ]
 
   const languages = [
     "Hindi",
-    "Kannada",
-    "Bengali",
-    "Pahadi",
-    "Nepali",
-    "Assamese",
-    "Gujarati",
-    "English",
+    "Savji",
     "Sindhi",
     "Punjabi",
+    "Gujarati",
+    "Assamese",
+    "Bengali",
+    "English",
+    "Pahadi",
+    "Nepali",
     "Urdu",
     "Odia",
   ]
+
+  const getVideoSource = (language: string, questionId: string) => {
+    if (language === "Assamese" && questionId === "problem") {
+      return "/videos/Q1_Assamese - BristyBorah.MOV"
+    }
+    if (language === "Assamese" && questionId === "solution") {
+      return "/videos/Q2_Assamese - BristyBorah.MOV"
+    }
+    if (language === "Assamese" && questionId === "market") {
+      return "/videos/Q3_Assamese - BristyBorah.mov"
+    }
+    if (language === "Assamese" && questionId === "business") {
+      return "/videos/Q4_Assamese - BristyBorah.mov"
+    }
+    if (language === "Assamese" && questionId === "future") {
+      return "/videos/Q5_Assamese - BristyBorah.MOV"
+    }
+    if (language === "Assamese" && questionId === "help") {
+      return "/videos/Q6_Assamese - BristyBorah.mov"
+    }
+    if (language === "Assamese" && questionId === "challenges") {
+      return "/videos/Q7_Assamese - BristyBorah.mov"
+    }
+    if (language === "Hindi" && questionId === "problem") {
+      return "/videos/Q1_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "solution") {
+      return "/videos/Q2_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "market") {
+      return "/videos/Q3_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "business") {
+      return "/videos/Q4_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "future") {
+      return "/videos/Q5_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "help") {
+      return "/videos/Q6_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "challenges") {
+      return "/videos/Q7_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Punjabi" && questionId === "problem") {
+      return "/videos/Q1_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "solution") {
+      return "/videos/Q2_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "market") {
+      return "/videos/Q3_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "business") {
+      return "/videos/Q4_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "future") {
+      return "/videos/Q5_punjabi - Manav Maini.mp4"
+    }
+    if (language === "Punjabi" && questionId === "help") {
+      return "/videos/Q6_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "challenges") {
+      return "/videos/Q7_punjabi - Manav Maini.mov"
+    }
+    if (language === "Sindhi" && questionId === "problem") {
+      return "/videos/Q1_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "solution") {
+      return "/videos/Q2_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "market") {
+      return "/videos/Q3_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "business") {
+      return "/videos/Q4_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "future") {
+      return "/videos/Q5_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "help") {
+      return "/videos/Q6_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "challenges") {
+      return "/videos/Q7_Sindhi.mov"
+    }
+    if (language === "Gujarati" && questionId === "problem") {
+      return "/videos/Q1_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "solution") {
+      return "/videos/Q2_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "market") {
+      return "/videos/Q3_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "business") {
+      return "/videos/Q4_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "future") {
+      return "/videos/Q5_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "help") {
+      return "/videos/Q6_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "challenges") {
+      return "/videos/Q7_Gujarati.mp4"
+    }
+    if (language === "Odia" && questionId === "problem") {
+      return "/videos/Q1_Odia.mp4"
+    }
+    
+    
+    
+    return "/videos/sample-pitch.mp4" // Default video
+  }
 
   return (
     <div className="flex flex-col items-center h-full px-4 py-12">
@@ -88,8 +205,8 @@ export default function FounderPage() {
               <Card className="overflow-hidden border-0 bg-muted/50">
                 <div className="aspect-[9/16] max-h-[700px] w-full flex items-center justify-center">
                   <video
-                    src="/videos/sample-pitch.mp4" // Placeholder; replace with actual video
-                    poster="/assets/video-poster.jpg" // Optional poster image
+                    src={getVideoSource(selectedLanguage, selectedQuestion)}
+                    poster="/assets/video-poster.jpg"
                     controls
                     className="w-full h-full object-cover rounded-[0.35rem]"
                   />
