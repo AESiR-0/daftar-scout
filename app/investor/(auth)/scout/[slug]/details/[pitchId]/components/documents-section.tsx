@@ -30,16 +30,17 @@ import { uploadInvestorPitchDocument, deleteFounderPitchDocument } from "@/lib/a
 interface Document {
   id: string;
   name: string;
+  docUrl: string;
   uploadedBy: string;
+  uploaderRole: "investor" | "founder" | "unknown";
   daftar: {
     id: string;
     name: string;
   };
   uploadedAt: string;
   type: "private" | "received" | "sent";
-  size: string;
-  docUrl: string;
-  isHidden?: boolean;
+  size: number;
+  isHidden: boolean;
 }
 
 // Interface for Activity Log (local-only)
@@ -51,6 +52,29 @@ interface ActivityLog {
   timestamp: string;
 }
 
+interface APIDocument {
+  id: string;
+  pitchId: string;
+  docName: string;
+  docType: string;
+  docUrl: string;
+  size: number;
+  isPrivate: boolean;
+  uploadedBy: string;
+  uploadedAt: string;
+  isViewed?: boolean;
+  // Additional fields for investor docs
+  scoutId?: string;
+  daftarId?: string;
+}
+
+interface UserInfo {
+  name: string;
+  role: string;
+  daftarId: string | null;
+  daftarName: string | null;
+}
+
 export default function DocumentsSection({
   pitchId,
   scoutId,
@@ -59,97 +83,202 @@ export default function DocumentsSection({
   scoutId: string;
 }) {
   const { toast } = useToast();
-  const [documentsList, setDocumentsList] = useState<Document[]>([]);
-  const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([]);
+  const [documentsByType, setDocumentsByType] = useState<{
+    private: Document[];
+    received: Document[];
+    sent: Document[];
+  }>({
+    private: [],
+    received: [],
+    sent: []
+  });
   const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("private");
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [loadingUserIds, setLoadingUserIds] = useState<Set<string>>(new Set());
 
-  // Fetch documents from API
-  const fetchDocuments = async () => {
+  // Optimized user info fetching with caching
+  const userInfoCache = new Map<string, UserInfo>();
+  const fetchUserInfo = async (userId: string | undefined): Promise<UserInfo> => {
+    if (!userId) {
+      return {
+        name: "Unknown",
+        role: "unknown",
+        daftarId: null,
+        daftarName: null
+      };
+    }
+
+    // Check cache first
+    const cachedInfo = userInfoCache.get(userId);
+    if (cachedInfo) {
+      return cachedInfo;
+    }
+
+    try {
+      setLoadingUserIds(prev => new Set(prev).add(userId));
+
+      // Fetch user info
+      const userResponse = await fetch(`/api/endpoints/users/info?userId=${userId}`);
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+      const userInfo = await userResponse.json();
+
+      // If user is an investor, fetch their daftar info
+      let daftarInfo = { daftarId: null, daftarName: null };
+      if (userInfo.role === "investor") {
+        const daftarResponse = await fetch(`/api/endpoints/daftar/by-user?userId=${userId}`);
+        if (daftarResponse.ok) {
+          daftarInfo = await daftarResponse.json();
+        }
+      }
+
+      const info = {
+        name: userInfo.name || "Unknown",
+        role: userInfo.role || "unknown",
+        daftarId: daftarInfo.daftarId,
+        daftarName: daftarInfo.daftarName
+      };
+
+      // Cache the result
+      userInfoCache.set(userId, info);
+      return info;
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      return {
+        name: "Unknown",
+        role: "unknown",
+        daftarId: null,
+        daftarName: null
+      };
+    } finally {
+      setLoadingUserIds(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    }
+  };
+
+  // Optimized document processing function
+  const processDocument = (defaultType: "sent" | "received") => async (doc: any) => {
+    try {
+      if (!doc) return null;
+
+      const userInfo = await fetchUserInfo(doc.uploadedBy);
+
+      // Base document structure
+      const baseDoc = {
+        id: doc.id || String(Math.random()),
+        name: doc.docName || doc.name || "Untitled Document",
+        docUrl: doc.docUrl || "",
+        uploadedBy: userInfo.name,
+        uploaderRole: userInfo.role,
+        uploadedAt: doc.uploadedAt ? formatDate(doc.uploadedAt) : formatDate(new Date().toISOString()),
+        size: doc.size ? formatFileSize(doc.size) : "Unknown",
+        isHidden: Boolean(doc.isPrivate),
+      };
+
+      // For received documents (from founders), don't include daftar info
+      if (defaultType === "received") {
+        return {
+          ...baseDoc,
+          type: "received",
+          daftar: {
+            id: "N/A",
+            name: "N/A"
+          }
+        };
+      }
+
+      // For sent documents (from investors), include daftar info
+      return {
+        ...baseDoc,
+        type: doc.isPrivate ? "private" : "sent",
+        daftar: {
+          id: userInfo.daftarId,
+          name: userInfo.daftarName
+        }
+      };
+    } catch (error) {
+      console.error(`Error processing ${defaultType} document:`, error);
+      return null;
+    }
+  };
+
+  // Fetch all documents at once
+  const fetchAllDocuments = async () => {
     try {
       setIsLoading(true);
-      const params = new URLSearchParams({ pitchId, scoutId });
       const response = await fetch(
-        `/api/endpoints/pitch/investor/documents?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
+        `/api/endpoints/pitch/investor/documents?scoutId=${scoutId}&pitchId=${pitchId}`
       );
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to fetch documents");
+        throw new Error("Failed to fetch documents");
       }
 
-      const data = await response.json();
+      const { sent, received } = await response.json();
       
-      // Initialize arrays even if they're not in the response
-      const sent = data.sent || [];
-      const received = data.received || [];
-
-      // Map API response to Document interface with error handling
-      const sentDocs: Document[] = await Promise.all(sent.map(async (doc: any) => {
+      // Flatten and process all documents
+      const allDocs = [...(sent || []).flat(), ...(received || [])];
+      
+      const processedDocs = await Promise.all(allDocs.map(async (doc: APIDocument) => {
         try {
-          const userResponse = await fetch(`/api/endpoints/users/info?userId=${doc.uploadedBy}`);
-          const userData = await userResponse.json();
-
-          return {
-            id: doc.id || String(Math.random()),
-            name: doc.docName || "Untitled Document",
-            docUrl: doc.docUrl || "",
-            uploadedBy: userData?.name || "Unknown User",
-            daftar: {
-              id: userData?.daftarId || "unknown",
-              name: userData?.daftarName || "Unknown Daftar"
+          if (!doc) return null;
+          const userInfo = await fetchUserInfo(doc.uploadedBy);
+          
+          const isInvestorDoc = Boolean(doc.daftarId || userInfo.role === "investor");
+          
+          const processedDoc: Document = {
+            id: doc.id,
+            name: doc.docName,
+            docUrl: doc.docUrl,
+            uploadedBy: userInfo.name,
+            uploaderRole: (userInfo.role as Document['uploaderRole']) || "unknown",
+            daftar: isInvestorDoc ? {
+              id: doc.daftarId || userInfo.daftarId || "unknown",
+              name: userInfo.daftarName || "Unknown"
+            } : {
+              id: "N/A",
+              name: "N/A"
             },
-            uploadedAt: doc.createdAt ? formatDate(doc.createdAt) : formatDate(new Date().toISOString()),
-            type: doc.isPrivate ? "private" : "sent",
-            size: doc.size ? formatFileSize(doc.size.toString()) : "Unknown",
-            isHidden: Boolean(doc.isPrivate),
+            uploadedAt: formatDate(doc.uploadedAt),
+            type: isInvestorDoc ? (doc.isPrivate ? "private" : "sent") : "received",
+            size: typeof doc.size === 'number' ? doc.size : 0,
+            isHidden: Boolean(doc.isPrivate)
           };
+          
+          return processedDoc;
         } catch (error) {
-          console.error("Error processing sent document:", error);
+          console.error("Error processing document:", error);
           return null;
         }
       }));
 
-      const receivedDocs: Document[] = await Promise.all(received.map(async (doc: any) => {
-        try {
-          const userResponse = await fetch(`/api/endpoints/users/info?userId=${doc.uploadedBy}`);
-          const userData = await userResponse.json();
+      // Filter and categorize documents
+      const validDocs = {
+        private: [] as Document[],
+        sent: [] as Document[],
+        received: [] as Document[]
+      };
 
-          return {
-            id: doc.id || String(Math.random()),
-            name: doc.docName || doc.name || "Untitled Document",
-            docUrl: doc.docUrl || "",
-            uploadedBy: userData?.name || "Unknown User",
-            daftar: {
-              id: userData?.daftarId || "unknown",
-              name: userData?.daftarName || "Unknown Daftar"
-            },
-            uploadedAt: doc.createdAt ? formatDate(doc.createdAt) : formatDate(new Date().toISOString()),
-            type: "received",
-            size: doc.size ? formatFileSize(doc.size.toString()) : "Unknown",
-            isHidden: Boolean(doc.isPrivate),
-          };
-        } catch (error) {
-          console.error("Error processing received document:", error);
-          return null;
-        }
-      }));
+      processedDocs
+        .filter((doc): doc is Document => doc !== null)
+        .forEach(doc => {
+          if (doc.uploaderRole === "investor") {
+            if (doc.isHidden) {
+              validDocs.private.push(doc);
+            } else {
+              validDocs.sent.push(doc);
+            }
+          } else if (!doc.isHidden) {
+            validDocs.received.push(doc);
+          }
+        });
 
-      // Filter out any null values from failed processing
-      const validSentDocs = sentDocs.filter((doc): doc is Document => doc !== null);
-      const validReceivedDocs = receivedDocs.filter((doc): doc is Document => doc !== null);
-
-      setDocumentsList([...validSentDocs, ...validReceivedDocs]);
+      setDocumentsByType(validDocs);
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast({
@@ -157,119 +286,69 @@ export default function DocumentsSection({
         description: error instanceof Error ? error.message : "Failed to fetch documents",
         variant: "destructive",
       });
-      // Initialize with empty array on error
-      setDocumentsList([]);
+      setDocumentsByType({ private: [], received: [], sent: [] });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch documents on mount and when activeTab changes
+  // Fetch documents only on mount
   useEffect(() => {
-    fetchDocuments();
-  }, [activeTab, pitchId]);
+    fetchAllDocuments();
+  }, [pitchId]); // Only re-fetch if pitchId changes
 
-  const privateCount = documentsList.filter((doc) => doc.type === "private").length;
-  const receivedCount = documentsList.filter((doc) => doc.type === "received").length;
-  const sentCount = documentsList.filter((doc) => doc.type === "sent").length;
-
-  const filteredDocuments = documentsList.filter((doc) => doc.type === activeTab);
-
-  const addActivityLog = (newActivity: Omit<ActivityLog, "id">) => {
-    const activity: ActivityLog = {
-      id: Math.random().toString(36).substr(2, 9),
-      ...newActivity,
-    };
-    setRecentActivity((prev) => [activity, ...prev]);
-  };
-
-  const handleUpload = () => {
+  const handleUpload = async () => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".pdf,.doc,.docx,.xlsx";
     input.multiple = true;
 
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files;
-      if (files && files.length > 0) {
-        setSelectedFiles(files);
-        setIsUploadModalOpen(true);
+      if (!files?.length) return;
+
+      try {
+        setIsUploading(true);
+        await Promise.all(Array.from(files).map(async (file) => {
+          try {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("scoutId", scoutId);
+            formData.append("pitchId", pitchId);
+            formData.append("isPrivate", String(activeTab === "private"));
+
+            const response = await fetch("/api/endpoints/pitch/investor/documents/upload", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.message || "Failed to upload document");
+            }
+
+            toast({
+              title: "Success",
+              description: `Successfully uploaded ${file.name}`,
+            });
+
+            // Refresh the document list
+            await fetchAllDocuments();
+          } catch (error: any) {
+            console.error("Error uploading document:", error);
+            toast({
+              title: "Error",
+              description: `Failed to upload ${file.name}: ${error.message}`,
+              variant: "destructive",
+            });
+          }
+        }));
+      } finally {
+        setIsUploading(false);
       }
     };
 
     input.click();
-  };
-
-  const handleUploadConfirm = async (type: "private" | "sent") => {
-    if (!selectedFiles) return;
-
-    try {
-      setIsUploading(true);
-      for (const file of Array.from(selectedFiles)) {
-        // Upload to storage and get URL
-        const docUrl = await uploadInvestorPitchDocument(file, pitchId);
-
-        // Create document record
-        const response = await fetch("/api/endpoints/pitch/investor/documents", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            pitchId,
-            docName: file.name,
-            docType: file.type || file.name.split(".").pop(),
-            docUrl,
-            size: file.size,
-            isPrivate: type === "private",
-          }),
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || "Failed to upload document");
-        }
-
-        const [insertedDoc] = await response.json();
-
-        // Fetch user info
-        const userResponse = await fetch(`/api/endpoints/users/info?userId=${insertedDoc.uploadedBy}`);
-        const userData = await userResponse.json();
-
-        const newDoc: Document = {
-          id: insertedDoc.id,
-          name: insertedDoc.docName,
-          docUrl: insertedDoc.docUrl || "",
-          uploadedBy: userData ? userData.name : "Unknown",
-          daftar: {
-            id: userData?.daftarId || "unknown",
-            name: userData?.daftarName || "Unknown Daftar"
-          },
-          uploadedAt: formatDate(insertedDoc.uploadedAt || new Date().toISOString()),
-          type: type === "private" ? "private" : "sent",
-          size: formatFileSize(insertedDoc.size.toString()),
-          isHidden: insertedDoc.isPrivate,
-        };
-
-        setDocumentsList((prev) => [newDoc, ...prev]);
-        toast({
-          title: "Success",
-          description: `Successfully uploaded ${file.name}`,
-        });
-      }
-    } catch (error: any) {
-      console.error("Error uploading documents:", error);
-      toast({
-        title: "Error",
-        description: `Failed to upload document: ${error.message}`,
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-      setIsUploadModalOpen(false);
-      setSelectedFiles(null);
-    }
   };
 
   const handleDownload = (doc: Document) => {
@@ -306,31 +385,14 @@ export default function DocumentsSection({
 
   const handleDelete = async (docId: string) => {
     try {
-      const doc = documentsList.find((d) => d.id === docId);
+      const doc = documentsByType[activeTab].find((d) => d.id === docId);
       if (!doc) return;
 
-      // First confirm with the user
       if (!window.confirm(`Are you sure you want to delete "${doc.name}"?`)) {
         return;
       }
 
-      // First delete from storage
-      if (doc.docUrl) {
-        try {
-          await deleteFounderPitchDocument(doc.docUrl);
-        } catch (error) {
-          console.error("Error deleting from storage:", error);
-          toast({
-            title: "Error",
-            description: "Failed to delete file from storage",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
-
-      // Then delete from database
-      const response = await fetch(`/api/endpoints/pitch/investor/documents?id=${docId}`, {
+      const response = await fetch(`/api/endpoints/pitch/investor/documents/${docId}`, {
         method: "DELETE",
       });
 
@@ -339,7 +401,15 @@ export default function DocumentsSection({
         throw new Error(error.error || "Failed to delete document");
       }
 
-      setDocumentsList((prev) => prev.filter((d) => d.id !== docId));
+      // Update the appropriate document list
+      setDocumentsByType(prev => {
+        const type = doc.type;
+        return {
+          ...prev,
+          [type]: prev[type].filter(d => d.id !== docId)
+        };
+      });
+
       toast({
         title: "Document deleted",
         description: `Successfully deleted ${doc.name}`,
@@ -356,7 +426,7 @@ export default function DocumentsSection({
 
   const handleToggleVisibility = async (docId: string) => {
     try {
-      const doc = documentsList.find((d) => d.id === docId);
+      const doc = documentsByType[activeTab].find((d) => d.id === docId);
       if (!doc) return;
 
       const response = await fetch(`/api/endpoints/pitch/investor/documents/${docId}`, {
@@ -369,19 +439,33 @@ export default function DocumentsSection({
         throw new Error("Failed to toggle visibility");
       }
 
-      setDocumentsList((prev) =>
-        prev.map((d) => {
-          if (d.id === docId) {
-            const newVisibility = !d.isHidden;
-            toast({
-              title: newVisibility ? "Document hidden" : "Document visible",
-              description: `${d.name} is now ${newVisibility ? "hidden" : "visible"}`,
-            });
-            return { ...d, isHidden: newVisibility, type: newVisibility ? "private" : d.type };
-          }
-          return d;
-        })
-      );
+      // Update document visibility in state
+      setDocumentsByType(prev => {
+        const newVisibility = !doc.isHidden;
+        const oldType = doc.type;
+        const newType = newVisibility ? "private" : "sent";
+
+        // Remove from old list
+        const updatedOldList = prev[oldType].filter(d => d.id !== docId);
+        
+        // Add to new list with updated properties
+        const updatedDoc = {
+          ...doc,
+          isHidden: newVisibility,
+          type: newType
+        };
+
+        return {
+          ...prev,
+          [oldType]: updatedOldList,
+          [newType]: [updatedDoc, ...prev[newType]]
+        };
+      });
+
+      toast({
+        title: doc.isHidden ? "Document visible" : "Document hidden",
+        description: `${doc.name} is now ${doc.isHidden ? "visible" : "hidden"}`,
+      });
     } catch (error: any) {
       console.error("Error toggling visibility:", error);
       toast({
@@ -393,150 +477,121 @@ export default function DocumentsSection({
   };
 
   return (
-    <>
-      <div className="flex p-0 mt-10 gap-6">
-        <Card className="border-none bg-[#0e0e0e] flex-1">
-          <CardContent className="space-y-6">
-            {isLoading && <div>Loading documents...</div>}
-            <Tabs
-              defaultValue="private"
-              onValueChange={(value: string) => setActiveTab(value as typeof activeTab)}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <TabsList>
-                  <TabsTrigger value="private" className="flex items-center gap-2">
-                    Private
-                    <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
-                      {privateCount}
-                    </span>
-                  </TabsTrigger>
-                  <TabsTrigger value="received" className="flex items-center gap-2">
-                    Received
-                    <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
-                      {receivedCount}
-                    </span>
-                  </TabsTrigger>
-                  <TabsTrigger value="sent" className="flex items-center gap-2">
-                    Sent
-                    <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
-                      {sentCount}
-                    </span>
-                  </TabsTrigger>
-                </TabsList>
+    <div className="flex px-5 mt-10 gap-6">
+      <Card className="border-none bg-[#0e0e0e] flex-1">
+        <CardContent className="space-y-6">
+          <Tabs
+            defaultValue="private"
+            onValueChange={(value: string) => setActiveTab(value as typeof activeTab)}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <TabsList>
+                <TabsTrigger value="private" className="flex items-center gap-2">
+                  Private
+                  <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
+                    {documentsByType.private.length}
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="received" className="flex items-center gap-2">
+                  Received
+                  <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
+                    {documentsByType.received.length}
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="sent" className="flex items-center gap-2">
+                  Sent
+                  <span className="bg-muted px-2 py-0.5 rounded text-xs text-muted-foreground">
+                    {documentsByType.sent.length}
+                  </span>
+                </TabsTrigger>
+              </TabsList>
+              <Button variant="outline" onClick={handleUpload} disabled={isUploading}>
+                {isUploading ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm mr-2"></span>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload {activeTab === "private" ? "(Private)" : "(Public)"}
+                  </>
+                )}
+              </Button>
+            </div>
 
-                <Button
-                  variant="outline"
-                  className="rounded-[0.35rem]"
-                  onClick={handleUpload}
-                  disabled={isUploading}
-                >
-                  {isUploading ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm mr-2"></span>
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload
-                    </>
-                  )}
-                </Button>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <span className="loading loading-spinner loading-lg"></span>
               </div>
+            ) : (
+              <>
+                <TabsContent value="private">
+                  <DocumentsList
+                    documents={documentsByType.private}
+                    canDelete={true}
+                    onDownload={handleDownload}
+                    onView={handleView}
+                    onDelete={handleDelete}
+                    onToggleVisibility={handleToggleVisibility}
+                    emptyMessage="No private documents uploaded yet. These will be visible to scout members only."
+                    loadingUserIds={loadingUserIds}
+                  />
+                </TabsContent>
 
-              {isLoading ? (
-                <div className="flex justify-center items-center py-8">
-                  <span className="loading loading-spinner loading-lg"></span>
-                </div>
-              ) : (
-                <>
-                  <TabsContent value="private">
-                    <DocumentsList
-                      documents={filteredDocuments}
-                      canDelete={true}
-                      onDownload={handleDownload}
-                      onView={handleView}
-                      onDelete={handleDelete}
-                      onToggleVisibility={handleToggleVisibility}
-                      emptyMessage="No private documents uploaded yet. These will be visible to scout members only."
-                    />
-                  </TabsContent>
+                <TabsContent value="received">
+                  <DocumentsList
+                    documents={documentsByType.received}
+                    canDelete={false}
+                    onDownload={handleDownload}
+                    onView={handleView}
+                    onDelete={handleDelete}
+                    onToggleVisibility={handleToggleVisibility}
+                    emptyMessage="No documents received from founders yet"
+                    loadingUserIds={loadingUserIds}
+                  />
+                </TabsContent>
 
-                  <TabsContent value="received">
-                    <DocumentsList
-                      documents={filteredDocuments}
-                      canDelete={false}
-                      onDownload={handleDownload}
-                      onView={handleView}
-                      onDelete={handleDelete}
-                      onToggleVisibility={handleToggleVisibility}
-                      emptyMessage="No documents received from founders yet"
-                    />
-                  </TabsContent>
-
-                  <TabsContent value="sent">
-                    <DocumentsList
-                      documents={filteredDocuments}
-                      canDelete={true}
-                      onDownload={handleDownload}
-                      onView={handleView}
-                      onDelete={handleDelete}
-                      onToggleVisibility={handleToggleVisibility}
-                      emptyMessage="No documents sent to founders yet"
-                    />
-                  </TabsContent>
-                </>
-              )}
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upload Documents</DialogTitle>
-            <DialogDescription>Choose how you want to share these documents</DialogDescription>
-          </DialogHeader>
-
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <Button
-              variant="outline"
-              className="flex py-2 flex-col items-center justify-center h-24 space-y-1"
-              onClick={() => handleUploadConfirm("private")}
-              disabled={isUploading}
-            >
-              <EyeOff className="h-6 w-6" />
-              <span>Keep Private</span>
-              <span className="text-xs text-muted-foreground">Only visible to scout members</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              className="flex py-2 flex-col items-center justify-center h-24 space-y-1"
-              onClick={() => handleUploadConfirm("sent")}
-              disabled={isUploading}
-            >
-              <Upload className="h-6 w-6" />
-              <span>Send to Founder</span>
-              <span className="text-xs text-muted-foreground">Share with the founder</span>
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+                <TabsContent value="sent">
+                  <DocumentsList
+                    documents={documentsByType.sent}
+                    canDelete={true}
+                    onDownload={handleDownload}
+                    onView={handleView}
+                    onDelete={handleDelete}
+                    onToggleVisibility={handleToggleVisibility}
+                    emptyMessage="No documents sent to founders yet"
+                    loadingUserIds={loadingUserIds}
+                  />
+                </TabsContent>
+              </>
+            )}
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
+function formatFileSize(sizeInBytes: number): string {
+  // Handle invalid input
+  if (typeof sizeInBytes !== 'number' || isNaN(sizeInBytes)) {
+    return "Unknown";
+  }
 
-function formatFileSize(sizeInBytes: string): string {
-  const bytes = parseInt(sizeInBytes);
-  if (bytes === 0) return "0 B";
+  if (sizeInBytes === 0) return "0 Mb";
+
+  // Convert bytes to bits (1 byte = 8 bits) and then to Megabits
+  const Mb = (sizeInBytes * 8) / (1024 * 1024);
   
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  // If less than 0.01 Mb, show as "< 0.01 Mb"
+  if (Mb < 0.01) {
+    return "< 0.01 Mb";
+  }
   
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+  // Format to 2 decimal places, but remove trailing zeros
+  const formattedSize = Mb.toFixed(2).replace(/\.?0+$/, '');
+  
+  return `${formattedSize} Mb`;
 }
 
 function DocumentsList({
@@ -547,6 +602,7 @@ function DocumentsList({
   onDelete,
   onToggleVisibility,
   emptyMessage,
+  loadingUserIds,
 }: {
   documents: Document[];
   canDelete?: boolean;
@@ -555,6 +611,7 @@ function DocumentsList({
   onDelete: (docId: string) => void;
   onToggleVisibility: (docId: string) => void;
   emptyMessage: string;
+  loadingUserIds: Set<string>;
 }) {
   if (documents.length === 0) {
     return (
@@ -566,58 +623,80 @@ function DocumentsList({
 
   return (
     <div className="space-y-4">
-      {documents.map((doc) => (
-        <div
-          key={doc.id}
-          className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${doc.isHidden ? "opacity-50" : ""}`}
-        >
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <FileText className="h-8 w-8" />
-                <div>
-                  <h3 className="font-medium">{doc.name}</h3>
-                  <p className="text-xs text-muted-foreground">{doc.size}</p>
+      {documents.map((doc, index) => {
+        const isLoadingUserInfo = loadingUserIds.has(doc.uploadedBy);
+        return (
+          <div
+            key={doc.id + index}
+            className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${doc.isHidden ? "opacity-50" : ""} ${isLoadingUserInfo ? "animate-pulse" : ""}`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-8 w-8" />
+                  <div>
+                    <h3 className="font-medium">{doc.name}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {formatFileSize(doc.size)}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDownload(doc)}
-                className="hover:bg-muted/50"
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onView(doc)}
-                className="hover:bg-muted/50"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              {canDelete && (
+              <div className="flex gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => onDownload(doc)}
                   className="hover:bg-muted/50"
-                  onClick={() => onDelete(doc.id)}
+                  disabled={isLoadingUserInfo}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Download className="h-4 w-4" />
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onView(doc)}
+                  className="hover:bg-muted/50"
+                  disabled={isLoadingUserInfo}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                {canDelete && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-muted/50"
+                    onClick={() => onDelete(doc.id)}
+                    disabled={isLoadingUserInfo}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+              <div>
+                {isLoadingUserInfo ? (
+                  <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+                ) : (
+                  <>Uploaded by: {doc.uploadedBy}</>
+                )}
+              </div>
+              {doc.daftar.name !== "N/A" && (
+                <div>
+                  {isLoadingUserInfo ? (
+                    <div className="h-4 w-40 bg-muted rounded animate-pulse" />
+                  ) : (
+                    <>Daftar: {doc.daftar.name}</>
+                  )}
+                </div>
               )}
+              <div>Uploaded at: {doc.uploadedAt}</div>
             </div>
           </div>
-
-          <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-            <div>Uploaded by: {doc.uploadedBy}</div>
-            <div>Daftar: {doc.daftar.name}</div>
-            <div>Uploaded at: {doc.uploadedAt}</div>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

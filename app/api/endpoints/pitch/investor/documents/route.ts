@@ -3,7 +3,7 @@ import { db } from "@/backend/database"; // your Drizzle instance
 import { pitchDocs } from "@/backend/drizzle/models/pitch";
 import { scoutDocuments } from "@/backend/drizzle/models/scouts";
 import { users } from "@/backend/drizzle/models/users";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, and } from "drizzle-orm";
 import { auth } from "@/auth"; // your auth function
 
 // POST: Upload a document
@@ -63,47 +63,58 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const scoutId = searchParams.get("scoutId");
-    if (!scoutId) {
-      return NextResponse.json(
-        { error: "Scout ID is required" },
-        { status: 400 }
-      );
-    }
     const pitchId = searchParams.get("pitchId");
-    if (!pitchId) {
+    
+    if (!scoutId || !pitchId) {
       return NextResponse.json(
-        { error: "Pitch ID is required" },
+        { error: "scoutId and pitchId are required" },
         { status: 400 }
       );
     }
-    // All documents user uploaded = sent
-    const sentDocs = await db
-      .select()
-      .from(pitchDocs)
-      .where(eq(pitchDocs.pitchId, pitchId));
-    // All scout documents = received
-    const scoutDocs = await db
-      .select()
-      .from(scoutDocuments)
-      .where(eq(scoutDocuments.scoutId, scoutId));
-    // Get documents from pitchDocs where uploadedBy is an investor
+
+    // Get all investor users
     const investorUsers = await db
       .select({ id: users.id })
       .from(users)
       .where(eq(users.role, "investor"));
     const investorIds = investorUsers.map((u) => u.id);
 
-    const investorPitchDocs = investorIds.length
+    // Get all founder users
+    const founderUsers = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.role, "founder"));
+    const founderIds = founderUsers.map((u) => u.id);
+
+    // Get documents uploaded by investors
+    const investorDocs = investorIds.length
       ? await db
           .select()
           .from(pitchDocs)
-          .where((row) => inArray(row.uploadedBy, investorIds))
+          .where(
+            and(
+              eq(pitchDocs.pitchId, pitchId),
+              inArray(pitchDocs.uploadedBy, investorIds)
+            )
+          )
       : [];
-    const receivedDocs = [...investorPitchDocs];
+
+    // Get documents uploaded by founders
+    const founderDocs = founderIds.length
+      ? await db
+          .select()
+          .from(pitchDocs)
+          .where(
+            and(
+              eq(pitchDocs.pitchId, pitchId),
+              inArray(pitchDocs.uploadedBy, founderIds)
+            )
+          )
+      : [];
 
     return NextResponse.json({
-      sent: [sentDocs, scoutDocs],
-      received: receivedDocs,
+      sent: [investorDocs],
+      received: founderDocs,
     });
   } catch (error) {
     console.error("[GET /pitch-docs]", error);
