@@ -36,7 +36,7 @@ export default function RootLayout({
       </head>
       <body className="subpixel-antialiased font-poppins">
         <ToastProvider>
-          <div className="relative flex min-h-screen bg-[#0e0e0e] flex-col">
+          <div className="flex min-h-screen bg-[#0e0e0e] flex-col">
             {children}
             <Footer />
           </div>

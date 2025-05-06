@@ -19,7 +19,6 @@ import {
 } from "@/lib/actions/video";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
-import { usePitch } from "@/contexts/PitchContext";
 
 interface Question {
   id: number;
@@ -255,8 +254,8 @@ export default function InvestorQuestionsPage() {
 
                 {/* Video Preview Column */}
                 <div className="col-span-6">
-                  <Card className="overflow-hidden border-0 bg-muted/50">
-                    <div className="aspect-[9/16] max-h-[500px] w-full flex items-center justify-center">
+                  <Card className="overflow-hidden border-0 bg-[#1a1a1a] shadow-none">
+                    <div className="aspect-[9/16] h-[533px] w-[300px] flex items-center justify-center">
                       <video
                         src={
                           selectedQuestion?.videoUrl ||
@@ -269,7 +268,6 @@ export default function InvestorQuestionsPage() {
                     </div>
                   </Card>
                 </div>
-
                 {/* Questions Column */}
                 <div className="col-span-4 space-y-4">
                   <h3 className="text-lg font-semibold">
@@ -279,18 +277,15 @@ export default function InvestorQuestionsPage() {
                     {sampleQuestions.map((q) => (
                       <div
                         key={q.id}
-                        className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                          selectedQuestion?.id === q.id
-                            ? "text-blue-600"
-                            : "hover:bg-muted"
-                        }`}
+                        className="flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors hover:text-blue-600"
                         onClick={() => handleQuestionSelect(q)}
                       >
-                        <span className="text-sm">{q.question}</span>
+                        <p className="text-sm">{q.question}</p>
                       </div>
                     ))}
                   </div>
                 </div>
+
               </div>
             </DialogContent>
           </Dialog>
@@ -305,11 +300,11 @@ export default function InvestorQuestionsPage() {
               <div className="space-y-4">
                 <div className="border-2 flex flex-col border-dashed border-gray-700 rounded-lg p-6 text-center">
                   {previewUrl ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex flex-col items-center justify-center">
                       <video
                         src={previewUrl}
                         controls
-                        className="w-full rounded-[0.35rem]  aspect-[9/16] "
+                        className="w-[300px] h-[533px] rounded-[0.35rem]  aspect-[9/16] "
                       />
                       <div className="flex gap-2">
                         <Button

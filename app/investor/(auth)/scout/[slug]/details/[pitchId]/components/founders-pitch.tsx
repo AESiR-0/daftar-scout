@@ -181,11 +181,11 @@ export function FoundersPitchSection({
                   <video
                     src={selectedVideo}
                     controls
-                    className="w-full rounded-[0.35rem]  aspect-[9/16]  bg-muted"
+                    className="w-[300px] h-[533px] rounded-[0.35rem]  aspect-[9/16] ml-20  bg-muted"
                   />
                 </div>
               ) : (
-                <div className="w-full  aspect-[9/16]  bg-muted rounded-[0.35rem] flex items-center justify-center">
+                <div className="w-[300px] h-[533px]  aspect-[9/16]  bg-muted rounded-[0.35rem] ml-20 flex items-center justify-center">
                   <p className="text-sm text-muted-foreground">
                     No video available
                   </p>
@@ -204,8 +204,10 @@ export function FoundersPitchSection({
                     <div
                       key={item.id}
                       className={cn(
-                        "px-4 rounded-[0.35rem] hover:underline cursor-pointer transition-colors"
+                        "p-2 rounded-[0.35rem] hover:bg-muted/50 cursor-pointer transition-colors",
+                        item.id === selectedQuestion.id && "text-blue-600"
                       )}
+                      onClick={() => setSelectedQuestion(item)}
                     >
                       <h3 className="text-sm font-medium">{item.question}</h3>
                     </div>
