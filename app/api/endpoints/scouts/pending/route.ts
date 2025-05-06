@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
       .from(daftarInvestors)
       .where(
         and(
-          inArray(daftarInvestors.daftarId, daftarIds),
+          inArray(daftarInvestors.daftarId, daftarIds.filter((id): id is string => id !== null)),
           eq(daftarInvestors.status, "active")
         )
       );
@@ -147,7 +147,7 @@ export async function GET(req: NextRequest) {
       .where(eq(scoutApproved.scoutId, scoutId));
 
     // Get user details for all investors
-    const investorIds = daftarInvestorsList.map(di => di.investorId);
+    const investorIds = daftarInvestorsList.map(di => di.investorId).filter((id): id is string => id !== null);
     const userDetails = await db
       .select({
         id: users.id,
@@ -165,7 +165,7 @@ export async function GET(req: NextRequest) {
         name: daftar.name,
       })
       .from(daftar)
-      .where(inArray(daftar.id, daftarIds));
+      .where(inArray(daftar.id, daftarIds.filter((id): id is string => id !== null)));
 
     // Combine all information
     const listOfUsers = daftarInvestorsList.map(investor => {

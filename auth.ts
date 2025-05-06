@@ -9,7 +9,6 @@ import {
   sessions,
   verificationTokens,
 } from "@/backend/drizzle/models/users";
-import { createDemoContent } from "@/lib/utils/createDemoScoutAndPitch";
 
 const ALLOWED_EMAILS = [
   "workbyprat@gmail.com",
@@ -91,7 +90,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
         
         // Create demo content for existing user if they don't have it
-        await createDemoContent(userId);
       } else {
         // Create a new temp user if no user exists
         const [newUser] = await db

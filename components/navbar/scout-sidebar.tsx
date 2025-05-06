@@ -258,13 +258,6 @@ export function ScoutSidebar({
         <UpdatesDialog
           open={updatesOpen}
           onOpenChange={setUpdatesOpen}
-          updates={[]}
-          onAddUpdate={(content: string) => {
-            console.log("Adding update:", content);
-          }}
-          onDeleteUpdate={(id: string) => {
-            console.log("Deleting update:", id);
-          }}
         />
         <LaunchProgramDialog
           open={launchProgramOpen}

@@ -8,7 +8,6 @@ import { and } from "drizzle-orm";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { docId: string } }
 ) {
   try {
     const session = await auth();
@@ -16,7 +15,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const docId = params.docId;
+    const searchParams = new URL(request.url).searchParams;
+    const docId = searchParams.get("docId");
     if (!docId) {
       return NextResponse.json(
         { error: "Document ID is required" },
@@ -31,7 +31,7 @@ export async function DELETE(
         uploadedBy: pitchDocs.uploadedBy,
       })
       .from(pitchDocs)
-      .where(eq(pitchDocs.id, docId));
+      .where(eq(pitchDocs.id, docId || ""));
 
     if (!doc) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
@@ -60,7 +60,6 @@ export async function DELETE(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { docId: string } }
 ) {
   try {
     const session = await auth();
@@ -68,7 +67,8 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { docId } = params;
+    const searchParams = new URL(req.url).searchParams;
+    const docId = searchParams.get("docId");
     const { isPrivate } = await req.json();
 
     // Get user by email
@@ -87,7 +87,7 @@ export async function PATCH(
     const document = await db
       .select()
       .from(pitchDocs)
-      .where(and(eq(pitchDocs.id, docId), eq(pitchDocs.uploadedBy, userId)))
+      .where(and(eq(pitchDocs.id, docId || ""), eq(pitchDocs.uploadedBy, userId)))
       .limit(1);
 
     if (!document.length) {
@@ -103,7 +103,7 @@ export async function PATCH(
       .set({
         isPrivate,
       })
-      .where(eq(pitchDocs.id, docId))
+      .where(eq(pitchDocs.id, docId || ""))
       .returning();
 
     return NextResponse.json(updated[0], { status: 200 });

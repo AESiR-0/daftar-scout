@@ -55,7 +55,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const daftarIds = scoutDaftars.map(d => d.daftarId).filter(Boolean);
+    const daftarIds = scoutDaftars
+      .map(d => d.daftarId)
+      .filter((id): id is string => id !== null);
 
     // Check if user is part of any of these daftars
     const userDaftars = await db
@@ -149,7 +151,6 @@ export async function POST(req: NextRequest) {
         .set({
           isApprovedByAll,
           status: "Active",
-          approvedAt: new Date(),
         })
         .where(eq(scouts.scoutId, scoutId));
     }

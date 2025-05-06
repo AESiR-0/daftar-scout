@@ -152,7 +152,6 @@ export async function GET(req: NextRequest) {
         userId: userLanguages.userId,
         languageName: languages.language_name,
         languageId: languages.id,
-        isPreferred: userLanguages.isPreferred,
       })
       .from(userLanguages)
       .innerJoin(languages, eq(userLanguages.languageId, languages.id))
@@ -160,11 +159,9 @@ export async function GET(req: NextRequest) {
 
     // Build a map of userId to list of language names, only including preferred languages
     const languageMap: Record<string, string[]> = {};
-    userLangData.forEach(({ userId, languageName, isPreferred }) => {
-      if (isPreferred) {
-        if (!languageMap[userId]) languageMap[userId] = [];
-        languageMap[userId].push(languageName);
-      }
+    userLangData.forEach(({ userId, languageName }) => {
+      if (!languageMap[userId]) languageMap[userId] = [];
+      languageMap[userId].push(languageName);
     });
 
     // Combine data
@@ -191,7 +188,7 @@ export async function GET(req: NextRequest) {
         location: member.location || "Unknown",
         imageUrl: member.image,
         designation: member.designation,
-        language: languageMap[member.userId] || [], // Use the correct field name
+        language: member.userId ? languageMap[member.userId] || [] : [],
       })),
 
       fields: {
