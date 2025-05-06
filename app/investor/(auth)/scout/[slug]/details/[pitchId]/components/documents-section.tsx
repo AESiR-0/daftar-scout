@@ -71,7 +71,7 @@ export default function DocumentsSection({
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
-      const params = new URLSearchParams({ pitchId });
+      const params = new URLSearchParams({ pitchId, scoutId });
       const response = await fetch(
         `/api/endpoints/pitch/investor/documents?${params.toString()}`,
         {
@@ -83,64 +83,82 @@ export default function DocumentsSection({
         }
       );
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch documents");
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch documents");
       }
 
-      const { sent, received } = data;
+      const data = await response.json();
+      
+      // Initialize arrays even if they're not in the response
+      const sent = data.sent || [];
+      const received = data.received || [];
 
-      // Map API response to Document interface
+      // Map API response to Document interface with error handling
       const sentDocs: Document[] = await Promise.all(sent.map(async (doc: any) => {
-        // Fetch user info
-        const userResponse = await fetch(`/api/endpoints/users/info?userId=${doc.uploadedBy}`);
-        const userData = await userResponse.json();
+        try {
+          const userResponse = await fetch(`/api/endpoints/users/info?userId=${doc.uploadedBy}`);
+          const userData = await userResponse.json();
 
-        return {
-          id: doc.id,
-          name: doc.docName,
-          docUrl: doc.docUrl || "",
-          uploadedBy: userData ? userData.name : "Unknown",
-          daftar: {
-            id: userData?.daftarId || "unknown",
-            name: userData?.daftarName || "Unknown Daftar"
-          },
-          uploadedAt: formatDate(doc.createdAt || doc.uploadedAt),
-          type: doc.isPrivate ? "private" : "sent",
-          size: doc.size ? formatFileSize(doc.size.toString()) : "Unknown",
-          isHidden: doc.isPrivate,
-        };
+          return {
+            id: doc.id || String(Math.random()),
+            name: doc.docName || "Untitled Document",
+            docUrl: doc.docUrl || "",
+            uploadedBy: userData?.name || "Unknown User",
+            daftar: {
+              id: userData?.daftarId || "unknown",
+              name: userData?.daftarName || "Unknown Daftar"
+            },
+            uploadedAt: doc.createdAt ? formatDate(doc.createdAt) : formatDate(new Date().toISOString()),
+            type: doc.isPrivate ? "private" : "sent",
+            size: doc.size ? formatFileSize(doc.size.toString()) : "Unknown",
+            isHidden: Boolean(doc.isPrivate),
+          };
+        } catch (error) {
+          console.error("Error processing sent document:", error);
+          return null;
+        }
       }));
 
       const receivedDocs: Document[] = await Promise.all(received.map(async (doc: any) => {
-        // Fetch user info
-        const userResponse = await fetch(`/api/endpoints/users/info?userId=${doc.uploadedBy}`);
-        const userData = await userResponse.json();
+        try {
+          const userResponse = await fetch(`/api/endpoints/users/info?userId=${doc.uploadedBy}`);
+          const userData = await userResponse.json();
 
-        return {
-          id: doc.id,
-          name: doc.docName || doc.name,
-          docUrl: doc.docUrl || "",
-          uploadedBy: userData ? userData.name : "Unknown",
-          daftar: {
-            id: userData?.daftarId || "unknown",
-            name: userData?.daftarName || "Unknown Daftar"
-          },
-          uploadedAt: formatDate(doc.createdAt || doc.uploadedAt),
-          type: "received",
-          size: doc.size ? formatFileSize(doc.size.toString()) : "Unknown",
-          isHidden: doc.isPrivate,
-        };
+          return {
+            id: doc.id || String(Math.random()),
+            name: doc.docName || doc.name || "Untitled Document",
+            docUrl: doc.docUrl || "",
+            uploadedBy: userData?.name || "Unknown User",
+            daftar: {
+              id: userData?.daftarId || "unknown",
+              name: userData?.daftarName || "Unknown Daftar"
+            },
+            uploadedAt: doc.createdAt ? formatDate(doc.createdAt) : formatDate(new Date().toISOString()),
+            type: "received",
+            size: doc.size ? formatFileSize(doc.size.toString()) : "Unknown",
+            isHidden: Boolean(doc.isPrivate),
+          };
+        } catch (error) {
+          console.error("Error processing received document:", error);
+          return null;
+        }
       }));
 
-      setDocumentsList([...sentDocs, ...receivedDocs]);
+      // Filter out any null values from failed processing
+      const validSentDocs = sentDocs.filter((doc): doc is Document => doc !== null);
+      const validReceivedDocs = receivedDocs.filter((doc): doc is Document => doc !== null);
+
+      setDocumentsList([...validSentDocs, ...validReceivedDocs]);
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch documents",
+        description: error instanceof Error ? error.message : "Failed to fetch documents",
         variant: "destructive",
       });
+      // Initialize with empty array on error
+      setDocumentsList([]);
     } finally {
       setIsLoading(false);
     }

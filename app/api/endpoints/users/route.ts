@@ -6,6 +6,7 @@ import {
   languages,
   userLanguages,
 } from "@/backend/drizzle/models/users";
+import { createDemoContent } from "@/lib/utils/createDemoScoutAndPitch";
 
 export async function PATCH(req: Request) {
   try {
@@ -36,7 +37,7 @@ export async function PATCH(req: Request) {
 
     // Fetch the userId based on the provided email
     const user = await db
-      .select({ id: users.id })
+      .select({ id: users.id, currentRole: users.role })
       .from(users)
       .where(eq(users.email, email))
       .limit(1);
@@ -48,6 +49,10 @@ export async function PATCH(req: Request) {
     }
 
     const userId = user[0].id;
+    const currentRole = user[0].currentRole;
+    
+    // Check if the user is updating from "temp" role to "founder" or "investor"
+    const isRoleUpdate = currentRole === "temp" && (role === "founder" || role === "investor");
 
     // Fetch language IDs based on the provided language names in formData
     const languageIds = await Promise.all(
@@ -90,6 +95,17 @@ export async function PATCH(req: Request) {
       })
       .where(eq(users.email, email))
       .returning();
+    
+    // Create demo content if the user is updating from "temp" role
+    if (isRoleUpdate) {
+      try {
+        console.log(`Creating demo content for user ${userId} with new role ${role}`);
+        await createDemoContent(userId);
+      } catch (error) {
+        console.error(`Error creating demo content for user ${userId}:`, error);
+        // Don't fail the request if demo content creation fails
+      }
+    }
 
     return new Response(
       JSON.stringify({ message: "Profile updated", user: updatedUser }),

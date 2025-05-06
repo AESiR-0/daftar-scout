@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { z } from "zod";
 import debounce from "lodash.debounce";
+import { canEditScout } from "@/lib/utils/scout";
+import { useToast } from "@/hooks/use-toast";
 
 // Zod schema for validation
 const scoutSchema = z.object({
@@ -19,6 +21,8 @@ type ScoutDetails = z.infer<typeof scoutSchema>;
 export default function DetailsPage() {
   const pathname = usePathname();
   const ScoutId = pathname.split("/")[3];
+  const { toast } = useToast();
+  const [canEdit, setCanEdit] = useState(true);
 
   const [details, setDetails] = useState<ScoutDetails>({
     name: "",
@@ -27,7 +31,7 @@ export default function DetailsPage() {
 
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Fetch details on mount
+  // Fetch details and check edit permissions
   useEffect(() => {
     const fetchDetails = async () => {
       const res = await fetch(
@@ -39,15 +43,27 @@ export default function DetailsPage() {
           name: data.data.scoutName || "",
           description: data.data.scoutVision || "",
         });
+        const canEditStatus = canEditScout(data.data);
+        setCanEdit(canEditStatus);
+        
+        if (!canEditStatus) {
+          toast({
+            title: "Access Restricted",
+            description: "This scout is no longer in the planning phase. Editing is restricted.",
+            variant: "destructive",
+          });
+        }
       }
     };
 
     fetchDetails();
-  }, [ScoutId]);
+  }, [ScoutId, toast]);
 
   // Debounced save function
   const debouncedSave = useCallback(
     debounce(async (data: ScoutDetails) => {
+      if (!canEdit) return;
+      
       const parsed = scoutSchema.safeParse(data);
       if (!parsed.success) return;
 
@@ -63,7 +79,7 @@ export default function DetailsPage() {
         }),
       });
     }, 800),
-    [ScoutId]
+    [ScoutId, canEdit]
   );
 
   // Trigger save on change
@@ -87,6 +103,7 @@ export default function DetailsPage() {
                 setDetails((prev) => ({ ...prev, name: e.target.value }))
               }
               placeholder="Enter Scout name"
+              disabled={!canEdit}
             />
           </div>
 
@@ -103,6 +120,7 @@ export default function DetailsPage() {
                   }))
                 }
                 placeholder="Use this space to explain why you're scouting this startup and what specific value you're hoping it adds to your portfolio. This helps your team understand your thinking and stay focused while scouting."
+                disabled={!canEdit}
               ></textarea>
             </div>
           </div>

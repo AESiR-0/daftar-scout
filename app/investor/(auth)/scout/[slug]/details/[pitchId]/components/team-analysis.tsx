@@ -49,10 +49,12 @@ interface TeamAnalysis {
 
 interface TeamAnalysisSectionProps {
   currentProfile: Profile;
+  teamAnalysis: TeamAnalysis[];
 }
 
 export function TeamAnalysisSection({
   currentProfile,
+  teamAnalysis: initialTeamAnalysis,
 }: TeamAnalysisSectionProps) {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
@@ -63,8 +65,8 @@ export function TeamAnalysisSection({
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>(initialTeamAnalysis);
+  const [loading, setLoading] = useState(false);
 
   // Check if the user has already submitted an analysis
   useEffect(() => {
@@ -85,21 +87,6 @@ export function TeamAnalysisSection({
           const data = await response.json();
           if (data.analysis && data.analysis.length > 0) {
             setHasSubmitted(true);
-            setTeamAnalysis(
-              data.analysis.map((item: any) => ({
-                id: item.id || Date.now().toString(),
-                nps: item.believeRating || 0,
-                analyst: {
-                  name: currentProfile.name,
-                  role: currentProfile.role,
-                  avatar: currentProfile.avatar,
-                  daftarName: currentProfile.daftarName,
-                },
-                belief: item.shouldMeet ? "yes" : "no",
-                note: item.analysis || "",
-                date: item.lastActionTakenOn || new Date().toISOString(),
-              }))
-            );
           }
         }
       } catch (error) {
@@ -115,7 +102,7 @@ export function TeamAnalysisSection({
     };
 
     checkSubmissionStatus();
-  }, [scoutId, pitchId, currentProfile, toast]);
+  }, [scoutId, pitchId, toast]);
 
   const handleSubmit = async () => {
     if (!belief || !note.trim() || nps === null) return;

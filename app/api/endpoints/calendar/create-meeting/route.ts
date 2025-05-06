@@ -47,7 +47,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Create event in Google Calendar
-    const oauth2Client = new google.auth.OAuth2();
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+    
     oauth2Client.setCredentials({
       access_token: account.access_token,
       refresh_token: account.refresh_token,
@@ -60,16 +65,17 @@ export async function POST(request: NextRequest) {
       description,
       start: {
         dateTime: new Date(startTime).toISOString(),
-        timeZone: "UTC",
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
       end: {
         dateTime: new Date(endTime).toISOString(),
-        timeZone: "UTC",
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       },
       attendees: attendees.map((email: string) => ({ email })),
+      guestsCanModify: true,
       conferenceData: {
         createRequest: {
-          requestId: Math.random().toString(36).substring(7),
+          requestId: `${Date.now()}-${Math.random().toString(36).substring(2)}`,
           conferenceSolutionKey: { type: "hangoutsMeet" },
         },
       },
@@ -79,6 +85,7 @@ export async function POST(request: NextRequest) {
       calendarId: "primary",
       requestBody: event,
       conferenceDataVersion: 1,
+      sendUpdates: "all"
     });
 
     if (!calendarResponse.data.id) {

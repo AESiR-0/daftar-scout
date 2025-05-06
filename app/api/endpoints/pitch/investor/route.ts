@@ -133,8 +133,8 @@ export async function GET(req: NextRequest) {
       .select({
         id: investorPitch.id,
         believeRating: investorPitch.believeRating,
-        note: investorPitch.note,
-        analysis: investorPitch.analysis,
+        note: investorPitch.analysis,
+        shouldMeet: investorPitch.shouldMeet,
         submittedOn: investorPitch.submittedOn,
         investorId: investorPitch.investorId,
         investorName: users.name,
@@ -145,24 +145,26 @@ export async function GET(req: NextRequest) {
       .innerJoin(users, eq(investorPitch.investorId, users.id))
       .where(eq(investorPitch.pitchId, pitchId));
     // Fetch preferred languages for all team members
-    const userIds = teamMembers.map((member) => member.userId);
-
-    const filteredUserIds = userIds.filter((id): id is string => id !== null);
+    const userIds = teamMembers.map((member) => member.userId).filter((id): id is string => id !== null);
 
     const userLangData = await db
       .select({
         userId: userLanguages.userId,
-        language: languages.language_name,
+        languageName: languages.language_name,
+        languageId: languages.id,
+        isPreferred: userLanguages.isPreferred,
       })
       .from(userLanguages)
       .innerJoin(languages, eq(userLanguages.languageId, languages.id))
-      .where(inArray(userLanguages.userId, filteredUserIds));
+      .where(inArray(userLanguages.userId, userIds));
 
-    // Build a map of userId to list of language names
+    // Build a map of userId to list of language names, only including preferred languages
     const languageMap: Record<string, string[]> = {};
-    userLangData.forEach(({ userId, language }) => {
-      if (!languageMap[userId]) languageMap[userId] = [];
-      languageMap[userId].push(language);
+    userLangData.forEach(({ userId, languageName, isPreferred }) => {
+      if (isPreferred) {
+        if (!languageMap[userId]) languageMap[userId] = [];
+        languageMap[userId].push(languageName);
+      }
     });
 
     // Combine data
@@ -189,7 +191,7 @@ export async function GET(req: NextRequest) {
         location: member.location || "Unknown",
         imageUrl: member.image,
         designation: member.designation,
-        languages: languageMap[member?.userId || ""] || [], // 👈 add this line
+        language: languageMap[member.userId] || [], // Use the correct field name
       })),
 
       fields: {
@@ -226,8 +228,8 @@ export async function GET(req: NextRequest) {
             avatar: a.investorImage || "/avatars/default.jpg",
             daftarName: pitchData[0].pitchName,
           },
-          belief: a.believeRating && a.believeRating >= 5 ? "yes" : "no",
-          note: a.analysis || "",
+          belief: a.shouldMeet ? "yes" : "no",
+          note: a.note || "",
           nps: a.believeRating || 0,
           date: a.submittedOn?.toISOString() || new Date().toISOString(),
         })),

@@ -3,7 +3,6 @@ import { db } from "@/backend/database";
 import { pitchDocs } from "@/backend/drizzle/models/pitch";
 import { auth } from "@/auth";
 import { eq } from "drizzle-orm";
-import { pitchDocuments } from "@/backend/drizzle/models/pitch";
 import { users } from "@/backend/drizzle/models/users";
 import { and } from "drizzle-orm";
 
@@ -87,8 +86,8 @@ export async function PATCH(
     // Verify document exists and belongs to user
     const document = await db
       .select()
-      .from(pitchDocuments)
-      .where(and(eq(pitchDocuments.id, docId), eq(pitchDocuments.uploadedBy, userId)))
+      .from(pitchDocs)
+      .where(and(eq(pitchDocs.id, docId), eq(pitchDocs.uploadedBy, userId)))
       .limit(1);
 
     if (!document.length) {
@@ -100,12 +99,11 @@ export async function PATCH(
 
     // Update document visibility
     const updated = await db
-      .update(pitchDocuments)
+      .update(pitchDocs)
       .set({
         isPrivate,
-        visibility: isPrivate ? "private" : "public",
       })
-      .where(eq(pitchDocuments.id, docId))
+      .where(eq(pitchDocs.id, docId))
       .returning();
 
     return NextResponse.json(updated[0], { status: 200 });

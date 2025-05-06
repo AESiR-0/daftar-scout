@@ -8,7 +8,6 @@ import { google } from "googleapis";
 
 export async function POST(
   request: Request,
-  { params }: { params: { meetingId: string } }
 ) {
   try {
     const session = await auth();
@@ -16,7 +15,8 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const meetingId = params.meetingId;
+    const searchParams = new URL(request.url).searchParams;
+    const meetingId = searchParams.get("meetingId");
 
     // Find user by email
     const [user] = await db
@@ -34,7 +34,7 @@ export async function POST(
       .from(meetings)
       .where(
         and(
-          eq(meetings.id, meetingId),
+          eq(meetings.id, meetingId || ""),
           eq(meetings.userId, user.id)
         )
       );
@@ -86,7 +86,7 @@ export async function POST(
         status: "rejected",
         updatedAt: new Date(),
       })
-      .where(eq(meetings.id, meetingId))
+      .where(eq(meetings.id, meetingId || ""))
       .returning();
 
     return NextResponse.json(updatedMeeting);

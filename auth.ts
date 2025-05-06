@@ -9,6 +9,7 @@ import {
   sessions,
   verificationTokens,
 } from "@/backend/drizzle/models/users";
+import { createDemoContent } from "@/lib/utils/createDemoScoutAndPitch";
 
 const ALLOWED_EMAILS = [
   "workbyprat@gmail.com",
@@ -88,6 +89,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             type: "oauth",
           });
         }
+        
+        // Create demo content for existing user if they don't have it
+        await createDemoContent(userId);
       } else {
         // Create a new temp user if no user exists
         const [newUser] = await db
@@ -112,6 +116,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           scope: account.scope,
           type: "oauth",
         });
+        
+        // Create demo content for the new user once they set their role
+        // Note: We can't create demo content here because the user role is still "temp"
+        // Demo content will be created when the user updates their role
 
         return true;
       }

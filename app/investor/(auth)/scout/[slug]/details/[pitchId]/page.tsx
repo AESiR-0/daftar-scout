@@ -680,7 +680,22 @@ export default function PitchDetailsPage() {
           />
         )}
         {activeSection === "investors-analysis" && (
-          <TeamAnalysisSection currentProfile={currentProfile} />
+          <TeamAnalysisSection 
+            currentProfile={currentProfile}
+            teamAnalysis={pitchDetails.fields.teamAnalysis.map(analysis => ({
+              id: analysis.id,
+              analyst: {
+                name: analysis.analyst.name,
+                role: analysis.analyst.role,
+                avatar: analysis.analyst.avatar,
+                daftarName: analysis.analyst.daftarName
+              },
+              belief: analysis.belief,
+              note: analysis.note,
+              nps: analysis.nps,
+              date: analysis.date
+            }))}
+          />
         )}
         {activeSection === "make-offer" && (
           <MakeOfferSection

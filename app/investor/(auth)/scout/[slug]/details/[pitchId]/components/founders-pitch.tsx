@@ -65,46 +65,11 @@ interface FoundersPitchSectionProps {
   onScheduleMeeting: () => void;
 }
 
-const questions = [
-  {
-    id: 1,
-    question: "Introduce yourself.",
-    answer: "",
-  },
-  {
-    id: 2,
-    question: "How did you come up with the idea?",
-    answer: "",
-  },
-  {
-    id: 3,
-    question:
-      "What is the problem, and why is it so important for you to solve it?",
-    answer: "",
-  },
-  {
-    id: 4,
-    question: "Who are your customers, and why would they pay for it?",
-    answer: "",
-  },
-  {
-    id: 5,
-    question:
-      "What is the progress so far, and where do you see it in 3 years?",
-    answer: "",
-  },
-  {
-    id: 6,
-    question: "What are the challenges today and what support do you want?",
-    answer: "",
-  },
-];
-
 export function FoundersPitchSection({
   pitch,
   onScheduleMeeting,
 }: FoundersPitchSectionProps) {
-  const [selectedQuestion, setSelectedQuestion] = useState(questions[0]);
+  const [selectedQuestion, setSelectedQuestion] = useState(pitch.questions[0] || null);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,9 +116,7 @@ export function FoundersPitchSection({
     }
   };
 
-  const selectedVideo = pitch.questions.find(
-    (q) => q.id === selectedQuestion.id
-  )?.videoUrl;
+  const selectedVideo = selectedQuestion?.videoUrl;
 
   // Helper function to format sectors
   const formatSectors = (sectors: string[]) => {
@@ -200,12 +163,12 @@ export function FoundersPitchSection({
             <div className="w-1/2">
               <ScrollArea className="h-[calc(100vh-24rem)]">
                 <div className="space-y-4 pr-4">
-                  {questions.map((item) => (
+                  {pitch.questions.map((item) => (
                     <div
                       key={item.id}
                       className={cn(
                         "p-2 rounded-[0.35rem] hover:bg-muted/50 cursor-pointer transition-colors",
-                        item.id === selectedQuestion.id && "text-blue-600"
+                        item.id === selectedQuestion?.id && "text-blue-600"
                       )}
                       onClick={() => setSelectedQuestion(item)}
                     >
