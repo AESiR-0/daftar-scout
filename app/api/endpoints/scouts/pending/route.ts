@@ -7,7 +7,7 @@ import {
   scoutApproved,
   daftarScouts,
 } from "@/backend/drizzle/models/scouts";
-import { isNull, or, eq, and } from "drizzle-orm";
+import { isNull, or, eq, and, inArray } from "drizzle-orm";
 import { users } from "@/backend/drizzle/models/users";
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
 import { NextRequest, NextResponse } from "next/server";
@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
       throw Error("ScoutId not given");
     }
 
+    // Get current user's ID
     const user = await db
       .select({ id: users.id })
       .from(users)
@@ -39,6 +40,48 @@ export async function GET(req: NextRequest) {
     }
 
     const currentUserId = user[0].id;
+
+    // Get the daftars associated with this scout
+    const scoutDaftars = await db
+      .select({ daftarId: daftarScouts.daftarId })
+      .from(daftarScouts)
+      .where(eq(daftarScouts.scoutId, scoutId));
+
+    if (scoutDaftars.length === 0) {
+      return NextResponse.json(
+        { error: "Scout not associated with any daftar" },
+        { status: 404 }
+      );
+    }
+
+    const daftarIds = scoutDaftars.map(d => d.daftarId).filter(Boolean);
+
+    // Get all investors from these daftars
+    const daftarInvestorsList = await db
+      .select({
+        investorId: daftarInvestors.investorId,
+        daftarId: daftarInvestors.daftarId,
+        designation: daftarInvestors.designation,
+      })
+      .from(daftarInvestors)
+      .where(
+        and(
+          inArray(daftarInvestors.daftarId, daftarIds),
+          eq(daftarInvestors.status, "active")
+        )
+      );
+
+    // Check if current user is part of any of these daftars
+    const isUserAuthorized = daftarInvestorsList.some(
+      di => di.investorId === currentUserId
+    );
+
+    if (!isUserAuthorized) {
+      return NextResponse.json(
+        { error: "User not authorized to view this scout" },
+        { status: 403 }
+      );
+    }
 
     const issues: string[] = [];
 
@@ -57,13 +100,13 @@ export async function GET(req: NextRequest) {
     if (scoutRecord.length > 0) {
       const s = scoutRecord[0];
       if (!s.scoutDetails?.trim())
-        issues.push("Please ensure the field in scoutDetails of scouts");
+        issues.push("Scout details are missing");
       if (!s.scoutCommunity?.trim())
-        issues.push("Please ensure the field in scoutCommunity of scouts");
+        issues.push("Scout community information is missing");
       if (!s.targetAudLocation?.trim())
-        issues.push("Please ensure the field in targetAudLocation of scouts");
+        issues.push("Target audience location is missing");
       if (!s.investorPitch?.trim())
-        issues.push("Please ensure the field in investorPitch of scouts");
+        issues.push("Investor pitch is missing");
     }
 
     // Check FAQs
@@ -74,7 +117,7 @@ export async function GET(req: NextRequest) {
 
     for (const faq of faqsEmpty) {
       if (!faq.faqAnswer?.trim()) {
-        issues.push("Please ensure the field in faqAnswer of faqs");
+        issues.push("One or more FAQ answers are missing");
         break;
       }
     }
@@ -87,50 +130,73 @@ export async function GET(req: NextRequest) {
 
     for (const doc of docsEmpty) {
       if (!doc.docUrl?.trim()) {
-        issues.push("Please ensure the field in docUrl of scoutDocuments");
+        issues.push("One or more document URLs are missing");
         break;
       }
     }
 
-    // Check approvals list
-    const listOfUsers = await db
+    // Get all approvals for this scout
+    const approvals = await db
       .select({
         scoutId: scoutApproved.scoutId,
         isApproved: scoutApproved.isApproved,
         investorId: scoutApproved.investorId,
         approvedAt: scoutApproved.approvedAt,
-        daftarName: daftar.name,
-        designation: daftarInvestors.designation,
-        user: {
-          name: users.name,
-          lastName: users.lastName,
-          email: users.email,
-          role: users.role,
-        },
       })
       .from(scoutApproved)
-      .leftJoin(users, eq(scoutApproved.investorId, users.id))
-      .leftJoin(daftarScouts, eq(scoutApproved.scoutId, daftarScouts.scoutId))
-      .leftJoin(daftar, eq(daftarScouts.daftarId, daftar.id))
-      .leftJoin(
-        daftarInvestors,
-        and(
-          eq(daftar.id, daftarInvestors.daftarId),
-          eq(scoutApproved.investorId, daftarInvestors.investorId)
-        )
-      )
       .where(eq(scoutApproved.scoutId, scoutId));
 
-    const userApproval = listOfUsers.find(
-      (entry) => entry.investorId === currentUserId
-    );
+    // Get user details for all investors
+    const investorIds = daftarInvestorsList.map(di => di.investorId);
+    const userDetails = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        lastName: users.lastName,
+        email: users.email,
+      })
+      .from(users)
+      .where(inArray(users.id, investorIds));
 
-    const currentUserApprovalStatus = userApproval?.isApproved ?? null;
+    // Get daftar names
+    const daftarNames = await db
+      .select({
+        id: daftar.id,
+        name: daftar.name,
+      })
+      .from(daftar)
+      .where(inArray(daftar.id, daftarIds));
+
+    // Combine all information
+    const listOfUsers = daftarInvestorsList.map(investor => {
+      const user = userDetails.find(u => u.id === investor.investorId);
+      const daftarName = daftarNames.find(d => d.id === investor.daftarId)?.name;
+      const approval = approvals.find(a => a.investorId === investor.investorId);
+
+      return {
+        scoutId,
+        isApproved: approval?.isApproved ?? false,
+        investorId: investor.investorId,
+        approvedAt: approval?.approvedAt ?? null,
+        daftarName,
+        designation: investor.designation,
+        user: {
+          name: user?.name ?? "",
+          lastName: user?.lastName ?? "",
+          email: user?.email ?? "",
+        },
+      };
+    });
+
+    const currentUserApprovalStatus = approvals.find(
+      a => a.investorId === currentUserId
+    )?.isApproved ?? false;
 
     return NextResponse.json({
       issues,
       listOfUsers,
       currentUserApprovalStatus,
+      currentUserId,
     });
   } catch (err) {
     console.error(err);

@@ -65,6 +65,7 @@ export const pitchDocs = pgTable("pitch_docs", {
   docName: text("doc_name").notNull(),
   docType: text("doc_type").notNull(),
   docUrl: text("doc_url").notNull(),
+  size: integer("size"), // size in bytes
   isPrivate: boolean("is_private").default(false),
   uploadedBy: varchar("uploaded_by", { length: 255 }).references(
     () => users.id,

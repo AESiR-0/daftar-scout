@@ -122,10 +122,12 @@ export default function ScoutPage({ scouts }: { scouts: Scout[] }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-6">
-                  <BookmarkButton
-                    isBookmarked={bookmarkedSlugs.has(scout.id)}
-                    onToggle={() => toggleBookmark(scout.id)}
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <BookmarkButton
+                      isBookmarked={bookmarkedSlugs.has(scout.id)}
+                      onToggle={() => toggleBookmark(scout.id)}
+                    />
+                  </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground transition-transform group-hover:translate-x-1" />
                 </div>
               </div>

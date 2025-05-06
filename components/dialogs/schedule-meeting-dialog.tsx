@@ -25,14 +25,16 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSession } from "next-auth/react";
 
-interface ScheduleMeetingDialogProps {
+export interface ScheduleMeetingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onScheduled?: () => void;
 }
 
 export function ScheduleMeetingDialog({
   open,
   onOpenChange,
+  onScheduled,
 }: ScheduleMeetingDialogProps) {
   const { data: session } = useSession();
   const [formData, setFormData] = useState({
@@ -105,6 +107,7 @@ export function ScheduleMeetingDialog({
       }
 
       onOpenChange(false);
+      onScheduled?.(); // Call the onScheduled callback if provided
     } catch (error) {
       console.error("Error scheduling meeting:", error);
       // You might want to show an error toast here

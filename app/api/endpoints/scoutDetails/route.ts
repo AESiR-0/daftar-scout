@@ -8,7 +8,7 @@ import {
   scoutApproved,
 } from "@/backend/drizzle/models/scouts"; // Adjust path as needed
 import { daftar } from "@/backend/drizzle/models/daftar";
-import { eq, inArray } from "drizzle-orm"; // Drizzle ORM query helpers
+import { eq, inArray, desc } from "drizzle-orm"; // Drizzle ORM query helpers
 
 export async function GET(req: NextRequest) {
   try {
@@ -28,10 +28,12 @@ export async function GET(req: NextRequest) {
         targetAudAgeStart: scouts.targetAudAgeStart,
         targetAudAgeEnd: scouts.targetAudAgeEnd,
         scoutCommunity: scouts.scoutCommunity,
+        scoutGender: scouts.targetedGender,
         targetAudLocation: scouts.targetAudLocation,
         scoutStage: scouts.scoutStage,
         scoutSector: scouts.scoutSector,
-        lastDayToPitch: scouts.lastDayToPitch, // Last day to pitch
+        lastDayToPitch: scouts.lastDayToPitch,
+        investorPitch: scouts.investorPitch,
       })
       .from(scouts)
       .where(eq(scouts.scoutId, scoutId))
@@ -42,6 +44,7 @@ export async function GET(req: NextRequest) {
     }
 
     const scout = scoutData[0];
+    console.log("Scout data:", scout); // Add logging to debug
 
     // Fetch related FAQs
     const faqData = await db
@@ -59,9 +62,10 @@ export async function GET(req: NextRequest) {
         updateDate: scoutUpdates.updateDate,
       })
       .from(scoutUpdates)
-      .where(eq(scoutUpdates.scoutId, scoutId));
+      .where(eq(scoutUpdates.scoutId, scoutId))
+      .orderBy(desc(scoutUpdates.updateDate));
 
-    // Fetch daftar names and related data from daftarScouts (without needing to query daftar table directly)
+    // Fetch daftar names and related data from daftarScouts
     const daftarNamesData = await db
       .select({
         name: daftar.name,

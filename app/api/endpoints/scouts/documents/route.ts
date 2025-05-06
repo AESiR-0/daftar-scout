@@ -3,24 +3,58 @@ import { scoutDocuments, daftarScouts } from "@/backend/drizzle/models/scouts";
 import { users } from "@/backend/drizzle/models/users";
 import { daftarInvestors, daftar } from "@/backend/drizzle/models/daftar";
 import { auth } from "@/auth";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
+
 export async function GET(req: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const scoutId = searchParams.get("scoutId");
+    const daftarId = searchParams.get("daftarId");
 
-    if (!scoutId) {
+    if (!scoutId || !daftarId) {
       return NextResponse.json(
-        { error: "Scout ID is required" },
+        { error: "Scout ID and Daftar ID are required" },
         { status: 400 }
       );
     }
 
-    // Fetch scout documents
+    // Get current user's daftar ID
+    const userResult = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, session.user.email));
+
+    if (!userResult.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userDaftarInfo = await db
+      .select({
+        daftarId: daftarInvestors.daftarId,
+      })
+      .from(daftarInvestors)
+      .where(eq(daftarInvestors.investorId, userResult[0].id))
+      .limit(1);
+
+    if (!userDaftarInfo.length || !userDaftarInfo[0].daftarId) {
+      return NextResponse.json({ error: "User not in any daftar" }, { status: 404 });
+    }
+
+    const userDaftarId = userDaftarInfo[0].daftarId;
+
+    // Fetch documents with visibility rules:
+    // 1. Public documents (isPrivate = false)
+    // 2. Private documents from user's own daftar
     const documents = await db
       .select({
         docId: scoutDocuments.docId,
+        docName: scoutDocuments.docName,
         docType: scoutDocuments.docType,
         docUrl: scoutDocuments.docUrl,
         size: scoutDocuments.size,
@@ -30,19 +64,24 @@ export async function GET(req: Request) {
         daftarId: scoutDocuments.daftarId,
       })
       .from(scoutDocuments)
-      .where(eq(scoutDocuments.scoutId, scoutId));
-
-    if (!documents.length) {
-      return NextResponse.json(
-        { message: "No documents found for this scout" },
-        { status: 200 }
+      .where(
+        and(
+          eq(scoutDocuments.scoutId, scoutId),
+          or(
+            eq(scoutDocuments.isPrivate, false),
+            and(
+              eq(scoutDocuments.isPrivate, true),
+              eq(scoutDocuments.daftarId, userDaftarId as string)
+            )
+          )
+        )
       );
-    }
 
-    // Fetch user details
+    // Fetch user details for the documents
     const userIds = documents
       .map((doc) => doc.uploadedBy)
       .filter((id): id is string => !!id);
+
     const usersResult = await db
       .select({
         id: users.id,
@@ -54,7 +93,7 @@ export async function GET(req: Request) {
 
     const userMap = new Map(usersResult.map((user) => [user.id, user]));
 
-    // Fetch daftar name using correct table
+    // Fetch daftar names
     const daftarIds = [...new Set(documents.map((doc) => doc.daftarId))].filter(
       (id): id is string => id !== null
     );
@@ -67,19 +106,30 @@ export async function GET(req: Request) {
       .where(inArray(daftar.id, daftarIds));
 
     const daftarMap = new Map(
-      daftarResult.map((daftar) => [daftar.id, daftar.name])
+      daftarResult.map((daftar) => [daftar.id, daftar])
     );
 
     // Combine results
     const response = documents.map((doc) => ({
-      docId: doc.docId,
+      id: doc.docId,
+      docName: doc.docName,
       docType: doc.docType,
       docUrl: doc.docUrl,
       size: doc.size,
       isPrivate: doc.isPrivate,
       uploadedAt: doc.uploadedAt,
-      uploadedBy: doc.uploadedBy ? userMap.get(doc.uploadedBy) || null : null,
-      daftarName: doc.daftarId ? daftarMap.get(doc.daftarId) || null : null,
+      uploadedBy: doc.uploadedBy
+        ? {
+          id: doc.uploadedBy,
+          ...userMap.get(doc.uploadedBy),
+        }
+        : null,
+      daftar: doc.daftarId
+        ? {
+          id: doc.daftarId,
+          name: daftarMap.get(doc.daftarId)?.name || "Unknown Daftar",
+        }
+        : null,
     }));
 
     return NextResponse.json(response, { status: 200 });
@@ -102,7 +152,14 @@ export async function POST(req: Request) {
     const { size, docType, scoutId, daftarId, url, docName, isPrivate } =
       await req.json();
 
-    // 1. Get user by email
+    if (!scoutId || !docName || !docType || !url || !daftarId) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Get user by email
     const userResult = await db
       .select()
       .from(users)
@@ -114,23 +171,7 @@ export async function POST(req: Request) {
 
     const userId = userResult[0].id;
 
-    // const investorCheck = await db
-    //   .select()
-    //   .from(daftarInvestors)
-    //   .where(
-    //     and(
-    //       eq(daftarInvestors.investorId, userId),
-    //       eq(daftarInvestors.daftarId, daftarId)
-    //     )
-    //   );
-
-    // if (!investorCheck.length) {
-    //   return NextResponse.json(
-    //     { error: "User not part of this Daftar" },
-    //     { status: 403 }
-    //   );
-    // }
-
+    // Verify scout belongs to daftar
     const scoutCheck = await db
       .select()
       .from(daftarScouts)
@@ -140,30 +181,165 @@ export async function POST(req: Request) {
           eq(daftarScouts.daftarId, daftarId)
         )
       );
-    console.log("scoutCheck", scoutCheck);
+
     if (!scoutCheck.length) {
       return NextResponse.json(
         { error: "Scout not found in this Daftar" },
         { status: 400 }
       );
     }
-    await db.insert(scoutDocuments).values({
-      docName,
-      scoutId,
-      daftarId,
-      docUrl: url,
-      docType,
-      size,
-      uploadedBy: userId,
-      isPrivate,
-      uploadedAt: new Date(),
-    });
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    // Insert document
+    const inserted = await db
+      .insert(scoutDocuments)
+      .values({
+        docName,
+        scoutId,
+        daftarId,
+        docUrl: url,
+        docType,
+        size,
+        uploadedBy: userId,
+        isPrivate,
+      })
+      .returning();
+
+    // Fetch complete document info with user and daftar details
+    const completeDoc = await db
+      .select({
+        doc: scoutDocuments,
+        user: users,
+        daftarInfo: daftar,
+      })
+      .from(scoutDocuments)
+      .leftJoin(users, eq(scoutDocuments.uploadedBy, users.id))
+      .leftJoin(daftar, eq(scoutDocuments.daftarId, daftar.id))
+      .where(eq(scoutDocuments.docId, inserted[0].docId))
+      .limit(1);
+
+    if (!completeDoc.length) {
+      return NextResponse.json(inserted[0], { status: 201 });
+    }
+
+    const { doc, user, daftarInfo } = completeDoc[0];
+
+    const response = {
+      id: doc.docId,
+      docName: doc.docName,
+      docType: doc.docType,
+      docUrl: doc.docUrl,
+      size: doc.size,
+      isPrivate: doc.isPrivate,
+      uploadedAt: doc.uploadedAt,
+      uploadedBy: user
+        ? {
+          id: user.id,
+          firstName: user.name,
+          lastName: user.lastName,
+        }
+        : null,
+      daftar: daftarInfo
+        ? {
+          id: daftarInfo.id,
+          name: daftarInfo.name,
+        }
+        : null,
+    };
+
+    return NextResponse.json(response, { status: 201 });
   } catch (err) {
     console.error("POST /scout-documents error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get docId from query params
+    const { searchParams } = new URL(req.url);
+    const docId = searchParams.get("docId");
+    
+    if (!docId) {
+      return NextResponse.json(
+        { error: "Document ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Get user's daftar ID
+    const userResult = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, session.user.email))
+      .limit(1);
+
+    if (!userResult.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Get user's daftar
+    const userDaftarInfo = await db
+      .select({
+        daftarId: daftarInvestors.daftarId,
+      })
+      .from(daftarInvestors)
+      .where(eq(daftarInvestors.investorId, userResult[0].id))
+      .limit(1);
+
+    if (!userDaftarInfo.length || !userDaftarInfo[0].daftarId) {
+      return NextResponse.json(
+        { error: "User not in any daftar" },
+        { status: 404 }
+      );
+    }
+
+    // Get document to verify ownership
+    const document = await db
+      .select()
+      .from(scoutDocuments)
+      .where(eq(scoutDocuments.docId, docId))
+      .limit(1);
+
+    if (!document.length) {
+      return NextResponse.json(
+        { error: "Document not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify user has permission to delete (same daftar or document owner)
+    const canDelete =
+      document[0].daftarId === userDaftarInfo[0].daftarId ||
+      document[0].uploadedBy === userResult[0].id;
+
+    if (!canDelete) {
+      return NextResponse.json(
+        { error: "Not authorized to delete this document" },
+        { status: 403 }
+      );
+    }
+
+    // Delete the document
+    await db
+      .delete(scoutDocuments)
+      .where(eq(scoutDocuments.docId, docId));
+
+    return NextResponse.json(
+      { message: "Document deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("DELETE /scout-documents error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete document" },
       { status: 500 }
     );
   }

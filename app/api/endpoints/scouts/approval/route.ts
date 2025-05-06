@@ -7,7 +7,7 @@ import {
   scouts,
 } from "@/backend/drizzle/models/scouts";
 import { users } from "@/backend/drizzle/models/users";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { daftarInvestors } from "@/backend/drizzle/models/daftar";
 
 export async function POST(req: NextRequest) {
@@ -42,6 +42,40 @@ export async function POST(req: NextRequest) {
 
     const investorId = userRes[0].id;
 
+    // Get the daftars associated with this scout
+    const scoutDaftars = await db
+      .select({ daftarId: daftarScouts.daftarId })
+      .from(daftarScouts)
+      .where(eq(daftarScouts.scoutId, scoutId));
+
+    if (scoutDaftars.length === 0) {
+      return NextResponse.json(
+        { error: "Scout not associated with any daftar" },
+        { status: 404 }
+      );
+    }
+
+    const daftarIds = scoutDaftars.map(d => d.daftarId).filter(Boolean);
+
+    // Check if user is part of any of these daftars
+    const userDaftars = await db
+      .select()
+      .from(daftarInvestors)
+      .where(
+        and(
+          inArray(daftarInvestors.daftarId, daftarIds),
+          eq(daftarInvestors.investorId, investorId),
+          eq(daftarInvestors.status, "active")
+        )
+      );
+
+    if (userDaftars.length === 0) {
+      return NextResponse.json(
+        { error: "User not authorized to approve this scout" },
+        { status: 403 }
+      );
+    }
+
     // Check if approval exists
     const existingApproval = await db
       .select()
@@ -66,39 +100,35 @@ export async function POST(req: NextRequest) {
           )
         );
     } else {
-      return NextResponse.json(
-        { error: "Approval record not found for this user and scout" },
-        { status: 404 }
-      );
+      // Create new approval
+      await db.insert(scoutApproved).values({
+        scoutId,
+        investorId,
+        isApproved: true,
+        approvedAt: new Date(),
+      });
     }
 
-    // Get daftarId for the scout
-    const daftarIdRes = await db
-      .select({ daftarId: daftarScouts.daftarId })
-      .from(daftarScouts)
-      .where(eq(daftarScouts.scoutId, scoutId))
-      .limit(1);
-
-    if (daftarIdRes.length === 0 || !daftarIdRes) {
-      return NextResponse.json(
-        { error: "Daftar not linked to scout" },
-        { status: 400 }
-      );
-    }
-
-    const daftarId = daftarIdRes[0].daftarId;
-
-    // Get all members of that daftar
-    const daftarMembers = await db
-      .select({ investorId: daftarInvestors.investorId })
+    // Get all investors from these daftars
+    const daftarInvestorsList = await db
+      .select({
+        investorId: daftarInvestors.investorId,
+      })
       .from(daftarInvestors)
-      .where(eq(daftarInvestors.daftarId, daftarId!));
+      .where(
+        and(
+          inArray(daftarInvestors.daftarId, daftarIds),
+          eq(daftarInvestors.status, "active")
+        )
+      );
 
-    const allInvestorIds = daftarMembers.map((member) => member.investorId);
+    const allInvestorIds = daftarInvestorsList.map(di => di.investorId);
 
     // Get all approvals for this scout
-    const approved = await db
-      .select({ investorId: scoutApproved.investorId })
+    const approvals = await db
+      .select({
+        investorId: scoutApproved.investorId,
+      })
       .from(scoutApproved)
       .where(
         and(
@@ -107,27 +137,32 @@ export async function POST(req: NextRequest) {
         )
       );
 
-    const approvedIds = approved.map((item) => item.investorId);
+    const approvedIds = approvals.map(a => a.investorId);
 
-    // Check if all daftar members have approved
-    const isApprovedByAll = allInvestorIds.every((id) =>
-      approvedIds.includes(id)
-    );
+    // Check if all investors have approved
+    const isApprovedByAll = allInvestorIds.every(id => approvedIds.includes(id));
 
-    // Update the scout
-    const updatedScout = await db
-      .update(scouts)
-      .set({
-        isApprovedByAll,
-      })
-      .where(eq(scouts.scoutId, scoutId))
-      .returning();
+    // Update scout status if all approved
+    if (isApprovedByAll) {
+      await db
+        .update(scouts)
+        .set({
+          isApprovedByAll,
+          status: "Active",
+          approvedAt: new Date(),
+        })
+        .where(eq(scouts.scoutId, scoutId));
+    }
 
     return NextResponse.json(
-      { message: "Scout approved successfully", data: updatedScout[0] },
+      { 
+        message: "Scout approval recorded successfully",
+        isApprovedByAll,
+      },
       { status: 200 }
     );
   } catch (error: any) {
+    console.error("Error in scout approval:", error);
     return NextResponse.json(
       { error: "Failed to approve scout", details: error.message },
       { status: 500 }

@@ -18,22 +18,22 @@ interface Scout {
   title: string;
   collaborator: string[];
   postedby: string;
-  status: "Planning" | "scheduled" | "Active" | "Closed";
+  status: "planning" | "scheduled" | "active" | "closed";
   scheduledDate?: string | null;
 }
 
 interface ScoutStatus {
-  Planning: Scout[];
+  planning: Scout[];
   scheduled: Scout[];
-  Active: Scout[];
-  Closed: Scout[];
+  active: Scout[];
+  closed: Scout[];
 }
 
 const emptyStateMessages: Record<string, string> = {
-  Planning: "No scout is currently being planned.",
+  planning: "No scout is currently being planned.",
   scheduled: "There are no scouts on the schedule.",
-  Active: "You have no active scouts at this time.",
-  Closed: "You have not closed any scout.",
+  active: "You have no active scouts at this time.",
+  closed: "You have not closed any scout.",
 };
 
 export default function ScoutPage() {
@@ -44,10 +44,10 @@ export default function ScoutPage() {
   const [showMeetings, setShowMeetings] = useState(false);
   const [createScoutOpen, setCreateScoutOpen] = useState(false);
   const [scoutStatus, setScoutStatus] = useState<ScoutStatus>({
-    Planning: [],
+    planning: [],
     scheduled: [],
-    Active: [],
-    Closed: [],
+    active: [],
+    closed: [],
   });
 
   const { toast } = useToast();
@@ -69,18 +69,19 @@ export default function ScoutPage() {
             description: "Failed to fetch scouts.",
             variant: "destructive",
           });
-          return;
           setLoading(false);
+          return;
         }
+
         const grouped: ScoutStatus = {
-          Planning: [],
+          planning: [],
           scheduled: [],
-          Active: [],
-          Closed: [],
+          active: [],
+          closed: [],
         };
 
         data.forEach((item: any) => {
-          const statusKey = item.status as keyof ScoutStatus;
+          const statusKey = item.status.toLowerCase() as keyof ScoutStatus;
 
           // Skip if status is invalid
           if (!grouped[statusKey]) return;
@@ -90,7 +91,7 @@ export default function ScoutPage() {
             title: item.title,
             collaborator: item.collaborator ?? [],
             postedby: item.postedby,
-            status: item.status,
+            status: item.status.toLowerCase(),
             scheduledDate: item.scheduledDate ?? null,
           };
 
@@ -148,7 +149,7 @@ export default function ScoutPage() {
         </div>
         {/* Skeleton for Columns */}
         <div className="grid grid-cols-4 gap-6">
-          {["Planning", "scheduled", "Active", "Closed"].map(
+          {["planning", "scheduled", "active", "closed"].map(
             (status, index) => (
               <div
                 key={index}
@@ -186,7 +187,7 @@ export default function ScoutPage() {
             variant="secondary"
             className="text-xs bg-muted text-muted-foreground"
           >
-            {scoutStatus.Active.length}
+            {scoutStatus.active.length}
           </Badge>
         </Button>
 
@@ -203,7 +204,7 @@ export default function ScoutPage() {
             variant="secondary"
             className="text-xs bg-muted text-muted-foreground"
           >
-            {scoutStatus.Active.length}
+            {scoutStatus.active.length}
           </Badge>
         </Button>
 
@@ -263,14 +264,13 @@ export default function ScoutPage() {
                             <span className="font-medium">
                               {scout.collaborator.map(
                                 (collaboration: string, num: number) =>
-                                  `${collaboration} ${
-                                    scout.collaborator.length === 1
-                                      ? ''
-                                      : num === scout.collaborator.length - 2
+                                  `${collaboration} ${scout.collaborator.length === 1
+                                    ? ''
+                                    : num === scout.collaborator.length - 2
                                       ? "and"
                                       : num < scout.collaborator.length - 2
-                                      ? ", "
-                                      : ""
+                                        ? ", "
+                                        : ""
                                   } `
                               )}
                             </span>

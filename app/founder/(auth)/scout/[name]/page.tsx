@@ -43,14 +43,22 @@ export default function ScoutDetailsPage() {
   useEffect(() => {
     async function fetchScout() {
       try {
+        console.log("Fetching scout details for ID:", scoutId);
         const res = await fetch(
           `/api/endpoints/scoutDetails?scoutId=${scoutId}`
         );
-        if (!res.ok) throw new Error("Failed to fetch scout");
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || 
+            `Failed to fetch scout (${res.status}): ${res.statusText}`
+          );
+        }
         const data = await res.json();
+        console.log("Received scout data:", data);
         setScoutData(data);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching scout details:", err);
         setError(true);
       } finally {
         setLoading(false);
@@ -122,7 +130,7 @@ export default function ScoutDetailsPage() {
   const transformedScout = {
     title: `Scout Opportunity: ${scout.scoutStage}`,
     description: `Sector: ${scout.scoutSector} | Community: ${scout.scoutCommunity}`,
-    videoUrl: scout.investorPitch || "video/mp4.mp4",
+    videoUrl: scout.investorPitch && scout.investorPitch.trim() !== "" ? scout.investorPitch : null,
     slug: scoutId,
     details: {
       Community: scout.scoutCommunity,
@@ -137,9 +145,9 @@ export default function ScoutDetailsPage() {
       answer: f.faqAnswer,
     })),
     updates: updates.map((u: any) => ({
-      date: u.updateDate,
+      date: new Date(u.updateDate).toISOString(),
       content: u.updateInfo,
-    })),
+    })) || [],
     lastPitchDate: lastDayToPitch,
   };
 
@@ -159,11 +167,27 @@ export default function ScoutDetailsPage() {
         <div className="flex gap-6">
           <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
             <div className="mx-auto relative aspect-[9/16] w-[300px] h-[533px]">
-              <video
-                src={transformedScout.videoUrl}
-                controls
-                className="w-full h-full object-cover rounded-[0.35rem]"
-              />
+              {transformedScout.videoUrl ? (
+                <video
+                  key={transformedScout.videoUrl}
+                  src={transformedScout.videoUrl}
+                  controls
+                  className="w-full h-full object-cover rounded-[0.35rem]"
+                  onError={(e) => {
+                    console.error("Error loading video:", e);
+                    const target = e.target as HTMLVideoElement;
+                    target.style.display = 'none';
+                    target.parentElement?.querySelector('.video-error')?.classList.remove('hidden');
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-muted rounded-[0.35rem]">
+                  <p className="text-sm text-muted-foreground">No video available</p>
+                </div>
+              )}
+              <div className="video-error hidden w-full h-full absolute top-0 left-0 flex items-center justify-center bg-muted rounded-[0.35rem]">
+                <p className="text-sm text-muted-foreground">Error loading video</p>
+              </div>
             </div>
 
             <div className="mt-8">
@@ -279,7 +303,7 @@ export default function ScoutDetailsPage() {
               <TabsContent value="updates">
                 <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
                   <div className="space-y-6 relative">
-                    {transformedScout.updates.length > 0 ? (
+                    {Array.isArray(transformedScout.updates) && transformedScout.updates.length > 0 ? (
                       transformedScout.updates.map(
                         (
                           update: { date: string; content: string },
@@ -316,7 +340,7 @@ export default function ScoutDetailsPage() {
                     ) : (
                       <div className="text-sm text-muted-foreground">
                         No Updates Yet. If investors share any information,
-                        we’ll notify you.
+                        we'll notify you.
                       </div>
                     )}
                   </div>

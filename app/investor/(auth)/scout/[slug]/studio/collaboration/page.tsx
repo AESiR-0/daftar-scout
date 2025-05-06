@@ -46,14 +46,14 @@ export default function CollaborationPage() {
         const formatted: Collaborator[] = data.map((item: any) => ({
           id: item.id,
           daftarId: item.daftarId,
-          daftarName: item.daftar?.name || "Unknown Daftar",
+          daftarName: item.daftarName || "Unknown Daftar",
           status: item.isPending ? "Pending" : "Accepted",
           addedAt: item.createdAt || new Date().toISOString(),
           daftarDetails: {
-            structure: item.daftar?.structure || "Unknown",
-            website: item.daftar?.website || "N/A",
-            location: item.daftar?.location || "N/A",
-            bigPicture: item.daftar?.bigPicture || "No description",
+            structure: item.daftarStructure || "Unknown",
+            website: item.daftarWebsite || "N/A",
+            location: item.daftarLocation || "N/A",
+            bigPicture: item.daftarBigPicture || "No description",
           },
         }));
 

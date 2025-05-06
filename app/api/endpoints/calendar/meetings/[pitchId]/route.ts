@@ -3,10 +3,13 @@ import { auth } from "@/auth";
 import { db } from "@/backend/database";
 import { meetings } from "@/backend/drizzle/models/meetings";
 import { users, accounts } from "@/backend/drizzle/models/users";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { google } from "googleapis";
 
-export async function GET() {
+export async function GET(
+  req: Request,
+  { params }: { params: { pitchId: string } }
+) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
@@ -37,16 +40,10 @@ export async function GET() {
     }
 
     // Get meetings from Google Calendar
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      process.env.NEXTAUTH_URL
-    );
-    
+    const oauth2Client = new google.auth.OAuth2();
     oauth2Client.setCredentials({
       access_token: account.access_token,
       refresh_token: account.refresh_token,
-      expiry_date: account.expires_at ? account.expires_at * 1000 : undefined,
     });
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
@@ -57,25 +54,24 @@ export async function GET() {
       singleEvents: true,
       orderBy: "startTime",
       maxResults: 100,
-      fields: "items(id,summary,description,start,end,attendees,hangoutLink,location,conferenceData)",
     });
 
     // Get meetings from database
     const dbMeetings = await db
       .select()
       .from(meetings)
-      .where(eq(meetings.userId, user.id))
-      .orderBy(meetings.startTime);
+      .where(
+        and(
+          eq(meetings.userId, user.id),
+          eq(meetings.pitchId, params.pitchId)
+        )
+      );
 
     // Combine calendar events with database meetings
     const combinedMeetings = dbMeetings.map(dbMeeting => {
       const calendarEvent = calendarResponse.data.items?.find(
         event => event.id === dbMeeting.calendarEventId
       );
-
-      if (!calendarEvent) {
-        return null; // Meeting was deleted from Google Calendar
-      }
 
       return {
         id: dbMeeting.id,
@@ -84,12 +80,11 @@ export async function GET() {
         startTime: dbMeeting.startTime.toISOString(),
         endTime: dbMeeting.endTime.toISOString(),
         status: dbMeeting.status,
-        attendees: calendarEvent.attendees?.map(a => a.email) || [],
-        meetLink: calendarEvent.hangoutLink || calendarEvent.conferenceData?.entryPoints?.[0]?.uri || dbMeeting.meetLink,
-        location: calendarEvent.location || dbMeeting.location || "Virtual Meeting",
-        organizer: calendarEvent.organizer?.email || user.email,
+        attendees: calendarEvent?.attendees?.map(a => a.email) || [],
+        meetLink: calendarEvent?.hangoutLink || calendarEvent?.conferenceData?.entryPoints?.[0]?.uri,
+        location: calendarEvent?.location || "Virtual Meeting",
       };
-    }).filter(Boolean); // Remove null meetings
+    });
 
     return NextResponse.json(combinedMeetings);
   } catch (error) {

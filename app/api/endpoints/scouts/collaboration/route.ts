@@ -10,17 +10,70 @@ import { createNotification } from "@/lib/notifications/insert";
 import { auth } from "@/auth";
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const scoutId = searchParams.get("scoutId");
-  if (!scoutId || scoutId == undefined)
-    return NextResponse.json({ error: "scoutId is required" }, { status: 400 });
+  try {
+    const session = await auth();
+    const userEmail = session?.user?.email;
+    if (!userEmail) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const scoutEntries = await db
-    .select()
-    .from(daftarScouts)
-    .where(eq(daftarScouts.scoutId, scoutId));
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId");
+    if (!scoutId || scoutId == undefined)
+      return NextResponse.json({ error: "scoutId is required" }, { status: 400 });
 
-  return NextResponse.json(scoutEntries);
+    // Get the user's daftarId
+    const userDaftar = await db
+      .select({ daftarId: daftarInvestors.daftarId })
+      .from(users)
+      .leftJoin(daftarInvestors, eq(users.id, daftarInvestors.investorId))
+      .where(eq(users.email, userEmail))
+      .limit(1);
+
+    const currentDaftarId = userDaftar[0]?.daftarId;
+
+    const scoutEntries = await db
+      .select({
+        id: daftarScouts.id,
+        daftarId: daftarScouts.daftarId,
+        isPending: daftarScouts.isPending,
+        createdAt: daftarScouts.addedAt,
+        daftarName: daftar.name,
+        daftarStructure: daftar.structure,
+        daftarWebsite: daftar.website,
+        daftarLocation: daftar.location,
+        daftarBigPicture: daftar.bigPicture,
+      })
+      .from(daftarScouts)
+      .leftJoin(daftar, eq(daftarScouts.daftarId, daftar.id))
+      .where(eq(daftarScouts.scoutId, scoutId));
+
+    // Filter out the current user's daftar
+    const filteredEntries = scoutEntries.filter(
+      entry => entry.daftarId !== currentDaftarId
+    );
+
+    // Ensure all fields have default values if null
+    const sanitizedEntries = filteredEntries.map(entry => ({
+      id: entry.id || '',
+      daftarId: entry.daftarId || '',
+      isPending: entry.isPending ?? true,
+      createdAt: entry.createdAt || new Date().toISOString(),
+      daftarName: entry.daftarName || '',
+      daftarStructure: entry.daftarStructure || '',
+      daftarWebsite: entry.daftarWebsite || '',
+      daftarLocation: entry.daftarLocation || '',
+      daftarBigPicture: entry.daftarBigPicture || '',
+    }));
+
+    return NextResponse.json(sanitizedEntries);
+  } catch (error) {
+    console.error('Error in GET /api/endpoints/scouts/collaboration:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {

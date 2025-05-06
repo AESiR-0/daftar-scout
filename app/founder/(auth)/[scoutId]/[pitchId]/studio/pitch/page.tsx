@@ -40,10 +40,9 @@ const getStatusIcon = (status: boolean) => {
 };
 
 export default function PitchPage() {
-  const [userId, setUserId] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
   const pitchId = pathname.split("/")[3];
   const [specificAsks, setSpecificAsks] = useState("");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
@@ -74,24 +73,7 @@ export default function PitchPage() {
     if (pitchId) {
       fetchTeamDetails();
     }
-    fetchUserId(); // Fetch user ID on component mount
   }, [pitchId]);
-
-  const fetchUserId = async () => {
-    try {
-      const response = await fetch("/api/endpoints/users/getId"); // Adjust the endpoint as needed
-      if (!response.ok) throw new Error("Failed to fetch user ID");
-      const data = await response.json();
-      setUserId(data.id); // Assuming the response contains the userId
-    } catch (error) {
-      console.error("Error fetching user ID:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load user ID",
-        variant: "destructive",
-      });
-    }
-  };
 
   const fetchTeamDetails = async () => {
     try {
@@ -130,7 +112,6 @@ export default function PitchPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
-          userId,
           askForInvestor: specificAsks,
           status: termsAccepted ? "pending" : "draft", // Update status based on terms
         }),
@@ -164,10 +145,10 @@ export default function PitchPage() {
     const updatedApprovalRequests = approvalRequests.map((req) =>
       req.id === requestId
         ? {
-            ...req,
-            status: req.hasApproved,
-            date: formatDate(new Date().toISOString()),
-          }
+          ...req,
+          status: req.hasApproved,
+          date: formatDate(new Date().toISOString()),
+        }
         : req
     );
 
@@ -223,8 +204,6 @@ export default function PitchPage() {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to submit pitch");
       }
-
-      setShowPaymentDialog(true); // Open payment dialog on success
       toast({
         title: "Success",
         description: "Pitch submitted successfully",

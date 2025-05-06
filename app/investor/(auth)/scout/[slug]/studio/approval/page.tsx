@@ -16,6 +16,7 @@ interface ApprovalRequest {
   approvedAt: Date;
   daftarName: string;
   designation: string;
+  isCurrentUser?: boolean;
   user: {
     name: string;
     lastName: string;
@@ -59,9 +60,16 @@ export default function ApprovalPage() {
           listOfUsers,
           currentUserApprovalStatus,
           issues: issueList = [],
+          currentUserId,
         } = data;
 
-        setApprovalRequests(listOfUsers);
+        // Mark current user in the list
+        const updatedUsers = listOfUsers.map((user: ApprovalRequest) => ({
+          ...user,
+          isCurrentUser: user.investorId === currentUserId
+        }));
+
+        setApprovalRequests(updatedUsers);
         setUserApproved(currentUserApprovalStatus === true);
         setIssues(issueList);
         setLoading(false);
@@ -79,7 +87,10 @@ export default function ApprovalPage() {
   }, [scoutId]);
 
   const handleApprove = async () => {
+    if (!termsAccepted || userApproved || issues.length > 0) return;
+
     try {
+      setLoading(true);
       const res = await fetch(`/api/endpoints/scouts/approval`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,14 +105,30 @@ export default function ApprovalPage() {
           description: data.error || "Something went wrong.",
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
 
+      // Update local state
+      setUserApproved(true);
+      setApprovalRequests(prev => 
+        prev?.map(request => 
+          request.isCurrentUser 
+            ? { ...request, isApproved: true, approvedAt: new Date() }
+            : request
+        )
+      );
+
       toast({
         title: "Scout Approved",
-        description: "Your approval has been submitted successfully",
+        description: data.isApprovedByAll 
+          ? "Your approval has been submitted and the scout is now active!"
+          : "Your approval has been submitted successfully",
       });
-    } catch {
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
       toast({
         title: "Network Error",
         description: "Please try again later.",
@@ -132,10 +159,13 @@ export default function ApprovalPage() {
                         onCheckedChange={(checked: boolean) =>
                           setTermsAccepted(checked as boolean)
                         }
+                        disabled={loading || issues.length > 0}
                       />
                       <label
                         htmlFor="terms"
-                        className="text-sm text-muted-foreground"
+                        className={`text-sm text-muted-foreground ${
+                          issues.length > 0 ? "opacity-50" : ""
+                        }`}
                       >
                         All the data looks good to me. We can take the Scout
                         live.
@@ -147,31 +177,33 @@ export default function ApprovalPage() {
                     variant="outline"
                     className="w-fit rounded-[0.3rem]"
                     disabled={
-                      !termsAccepted || userApproved || issues.length > 0
+                      !termsAccepted || userApproved || issues.length > 0 || loading
                     }
                     onClick={handleApprove}
                   >
-                    Approve Scout
+                    {loading ? "Processing..." : "Approve Scout"}
                   </Button>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    {!userApproved && (
-                      <h3 className="text-sm font-medium">
-                        Team's Approval Required
-                      </h3>
-                    )}
+                    <h3 className="text-sm font-medium">
+                      {userApproved
+                        ? "Team's Approval Status"
+                        : "Team's Approval Required"}
+                    </h3>
                     <div className="text-sm text-muted-foreground">
-                      {approvedCount} of {totalMembers}
+                      {approvedCount} of {totalMembers} approved
                     </div>
                   </div>
 
-                  <div>
+                  <div className="space-y-3">
                     {approvalRequests?.map((member) => (
                       <div
                         key={member.investorId}
-                        className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                        className={`flex items-center justify-between p-4 border rounded-lg bg-background ${
+                          member.isCurrentUser ? "border-primary/50" : ""
+                        }`}
                       >
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
@@ -182,6 +214,9 @@ export default function ApprovalPage() {
                           <div>
                             <p className="text-sm font-medium">
                               {member.user.name} {member.user.lastName}
+                              {member.isCurrentUser && (
+                                <span className="ml-2 text-xs text-primary">(You)</span>
+                              )}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {member.designation}
