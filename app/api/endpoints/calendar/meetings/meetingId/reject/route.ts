@@ -7,7 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { google } from "googleapis";
 
 export async function POST(
-  req: Request,
+  request: Request,
   { params }: { params: { meetingId: string } }
 ) {
   try {
@@ -15,6 +15,8 @@ export async function POST(
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const meetingId = params.meetingId;
 
     // Find user by email
     const [user] = await db
@@ -24,6 +26,21 @@ export async function POST(
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Get the meeting
+    const [meeting] = await db
+      .select()
+      .from(meetings)
+      .where(
+        and(
+          eq(meetings.id, meetingId),
+          eq(meetings.userId, user.id)
+        )
+      );
+
+    if (!meeting) {
+      return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
     }
 
     // Get user's Google account
@@ -39,21 +56,17 @@ export async function POST(
       );
     }
 
-    // Find the meeting
-    const [meeting] = await db
-      .select()
-      .from(meetings)
-      .where(and(eq(meetings.id, params.meetingId), eq(meetings.userId, user.id)));
-
-    if (!meeting) {
-      return NextResponse.json({ error: "Meeting not found" }, { status: 404 });
-    }
-
-    // Update meeting status in Google Calendar
-    const oauth2Client = new google.auth.OAuth2();
+    // Update Google Calendar event
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.NEXTAUTH_URL
+    );
+    
     oauth2Client.setCredentials({
       access_token: account.access_token,
       refresh_token: account.refresh_token,
+      expiry_date: account.expires_at ? account.expires_at * 1000 : undefined,
     });
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
@@ -62,21 +75,25 @@ export async function POST(
       calendarId: "primary",
       eventId: meeting.calendarEventId,
       requestBody: {
-        status: "confirmed",
+        status: "cancelled",
       },
     });
 
-    // Update meeting status in database
-    await db
+    // Update meeting in database
+    const [updatedMeeting] = await db
       .update(meetings)
-      .set({ status: "confirmed" })
-      .where(eq(meetings.id, params.meetingId));
+      .set({
+        status: "rejected",
+        updatedAt: new Date(),
+      })
+      .where(eq(meetings.id, meetingId))
+      .returning();
 
-    return NextResponse.json({ message: "Meeting accepted successfully" });
+    return NextResponse.json(updatedMeeting);
   } catch (error) {
-    console.error("Error accepting meeting:", error);
+    console.error("Error rejecting meeting:", error);
     return NextResponse.json(
-      { error: "Failed to accept meeting" },
+      { error: "Failed to reject meeting" },
       { status: 500 }
     );
   }
