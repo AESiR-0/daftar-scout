@@ -140,12 +140,28 @@ export default function FounderPage() {
     if (language === "Gujarati" && questionId === "challenges") {
       return "/videos/Q7_Gujarati.mp4"
     }
-    if (language === "Odia" && questionId === "problem") {
-      return "/videos/Q1_Odia.mp4"
+    if (language === "Savji" && questionId === "problem") {
+      return "/videos/Q1_Savji.mp4"
     }
-    
-    
-    
+    if (language === "Savji" && questionId === "solution") {
+      return "/videos/Q2_Savji.mp4"
+    }
+    if (language === "Savji" && questionId === "market") {
+      return "/videos/Q3_Savji.mp4"
+    }
+    if (language === "Savji" && questionId === "business") {
+      return "/videos/Q4_Savji.mp4"
+    }
+    if (language === "Savji" && questionId === "future") {
+      return "/videos/Q5_Savji.mp4"
+    }
+    if (language === "Savji" && questionId === "help") {
+      return "/videos/Q6_Savji.mp4"
+    }
+    if (language === "Savji" && questionId === "challenges") {
+      return "/videos/Q7_Savji.mp4"
+    }
+
     return "/videos/sample-pitch.mp4" // Default video
   }
 

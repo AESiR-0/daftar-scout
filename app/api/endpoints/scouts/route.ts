@@ -81,50 +81,80 @@ export async function GET() {
       );
     }
 
-    // Get all daftars the user is associated with
-    const userDaftars = await db
-      .select({
-        daftarId: daftarInvestors.daftarId,
-      })
+    // Get current user and check role
+    const userResult = await db
+      .select({ id: users.id, role: users.role })
       .from(users)
-      .innerJoin(
-        daftarInvestors,
-        eq(users.id, daftarInvestors.investorId)
-      )
       .where(eq(users.email, session.user.email));
 
-    if (!userDaftars.length) {
+    if (!userResult.length) {
       return NextResponse.json(
-        { error: "User not associated with any daftar" },
+        { error: "User not found" },
         { status: 404 }
       );
     }
 
-    // Filter out null values and create the daftar IDs array
-    const userDaftarIds = userDaftars
-      .map(d => d.daftarId)
-      .filter((id): id is string => id !== null);
+    const user = userResult[0];
 
-    // Get all scouts where any of user's daftars is either the owner or a collaborator
-    const scoutsList = await db
-      .select({
-        id: scouts.scoutId,
-        title: scouts.scoutName,
-        status: scouts.status,
-        scheduledDate: scouts.lastDayToPitch,
-        postedby: scouts.daftarId,
-      })
-      .from(scouts)
-      .where(
-        or(
-          inArray(scouts.daftarId, userDaftarIds),
-          sql`${scouts.scoutId} IN (
-            SELECT ${daftarScouts.scoutId}
-            FROM ${daftarScouts}
-            WHERE ${inArray(daftarScouts.daftarId, userDaftarIds)}
-          )`
+    let scoutsList = [];
+    if (user.role === "founder") {
+      // Show only scouts with status 'active'
+      scoutsList = await db
+        .select({
+          id: scouts.scoutId,
+          title: scouts.scoutName,
+          status: scouts.status,
+          scheduledDate: scouts.lastDayToPitch,
+          postedby: scouts.daftarId,
+        })
+        .from(scouts)
+        .where(or(eq(scouts.status, "active"), eq(scouts.status, "Active")));
+    } else {
+      // Get all daftars the user is associated with
+      const userDaftars = await db
+        .select({
+          daftarId: daftarInvestors.daftarId,
+        })
+        .from(users)
+        .innerJoin(
+          daftarInvestors,
+          eq(users.id, daftarInvestors.investorId)
         )
-      );
+        .where(eq(users.email, session.user.email));
+
+      if (!userDaftars.length) {
+        return NextResponse.json(
+          { error: "User not associated with any daftar" },
+          { status: 404 }
+        );
+      }
+
+      // Filter out null values and create the daftar IDs array
+      const userDaftarIds = userDaftars
+        .map(d => d.daftarId)
+        .filter((id): id is string => id !== null);
+
+      // Get all scouts where any of user's daftars is either the owner or a collaborator
+      scoutsList = await db
+        .select({
+          id: scouts.scoutId,
+          title: scouts.scoutName,
+          status: scouts.status,
+          scheduledDate: scouts.lastDayToPitch,
+          postedby: scouts.daftarId,
+        })
+        .from(scouts)
+        .where(
+          or(
+            inArray(scouts.daftarId, userDaftarIds),
+            sql`${scouts.scoutId} IN (
+              SELECT ${daftarScouts.scoutId}
+              FROM ${daftarScouts}
+              WHERE ${inArray(daftarScouts.daftarId, userDaftarIds)}
+            )`
+          )
+        );
+    }
 
     // Get owner daftar names
     const ownerDaftars = await db

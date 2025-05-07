@@ -343,7 +343,7 @@ export function TeamAnalysisSection({
                       </div>
                     </div>
 
-                    <ScrollArea className="h-[300px] pr-2">
+                    <ScrollArea className="h-[350px] pr-2">
                       <div className="space-y-4">
                         {teamAnalysis.map((entry) => (
                           <div
@@ -354,7 +354,7 @@ export function TeamAnalysisSection({
                               <div className="flex items-center gap-2">
                                 <img
                                   src={entry.analyst.avatar}
-                                  alt={entry.analyst.name}
+                                  alt={entry.analyst.name.charAt(0)}
                                   className="w-8 h-8 rounded-full"
                                 />
                                 <div>

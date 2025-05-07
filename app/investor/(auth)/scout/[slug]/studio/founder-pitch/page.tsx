@@ -94,10 +94,10 @@ export default function InvestorStudioPage() {
 
   const getVideoSource = (language: string, questionId: string) => {
     if (language === "Assamese" && questionId === "problem") {
-      return "/videos/Q1_Assamese - BristyBorah.MOV"
+      return "/videos/Q1_Assamese - BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "solution") {
-      return "/videos/Q2_Assamese - BristyBorah.MOV"
+      return "/videos/Q2_Assamese - BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "market") {
       return "/videos/Q3_Assamese - BristyBorah.mov"
