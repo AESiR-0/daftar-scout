@@ -15,14 +15,9 @@ import { usePathname } from "next/navigation";
 interface Pitch {
   pitchId: string;
   pitchName: string;
-  daftarName: string;
-  Believer: string;
-  fields: {
-    teamAnalysis: {
-      nps: number;
-    }[];
-  };
   status: string;
+  interestedInvestors: any[];
+  averageBelieveRating: string;
 }
 
 interface Section {
@@ -67,12 +62,11 @@ export function ScoutSidebar({
         
         // Transform the data to match our interface
         const transformedData: Pitch[] = data.data.map((pitch: any) => ({
-          pitchId: pitch.id,
+          pitchId: pitch.pitchId,
           pitchName: pitch.pitchName,
-          daftarName: pitch.daftarName,
-          Believer: pitch.Believer || "",
-          fields: pitch.fields || { teamAnalysis: [] },
-          status: pitch.status
+          status: pitch.status,
+          interestedInvestors: pitch.interestedInvestors || [],
+          averageBelieveRating: pitch.averageBelieveRating || '0'
         }));
 
         const grouped: Record<string, Pitch[]> = {};
@@ -197,7 +191,7 @@ export function ScoutSidebar({
                       ) : (
                         <ChevronRight className="h-4 w-4" />
                       )}
-                      {section.title}
+                      {section.title.charAt(0).toUpperCase() + section.title.slice(1)}
                       <Badge variant="secondary">
                         {section.pitches.length}
                       </Badge>
@@ -222,12 +216,10 @@ export function ScoutSidebar({
                                   {pitch.pitchName}
                                 </h3>
                                 <div className="text-xs text-muted-foreground">
-                                  <p>NPS Score: {pitch.fields.teamAnalysis.length > 0 
-                                    ? (pitch.fields.teamAnalysis.reduce((acc, curr) => acc + curr.nps, 0) / pitch.fields.teamAnalysis.length).toFixed(1)
-                                    : 'N/A'}</p>
+                                  <p>NPS Score: {parseFloat(pitch.averageBelieveRating).toFixed(1) || 'N/A'}</p>
                                   <p>
                                     Interested Team Members:{" "}
-                                    {pitch.fields.teamAnalysis.length}
+                                    {pitch.interestedInvestors.length}
                                   </p>
                                 </div>
                               </CardContent>
