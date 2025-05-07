@@ -190,6 +190,13 @@
       "when": 1746490784560,
       "tag": "0026_boring_onslaught",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1746595856715,
+      "tag": "0027_giant_puma",
+      "breakpoints": true
     }
   ]
 }

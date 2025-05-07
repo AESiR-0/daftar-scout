@@ -194,7 +194,7 @@ export function FoundersPitchSection({
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("Hindi");
   const { toast } = useToast();
 
   const handleReasonToggle = (reasonId: string) => {
@@ -328,11 +328,11 @@ export function FoundersPitchSection({
               <h3 className="text-md mb-2 text-foreground">Details</h3>
               <div className="flex items-center gap-2">
                 <p className="text-sm text-muted-foreground">Stage</p>
-                {pitch.stage}
+                <span className="text-sm">{pitch.stage}</span>
               </div>
               <div className="flex items-center gap-2">
                 <p className="text-sm text-muted-foreground">Pitching From</p>
-                <p className="text-sm">{pitch.location}</p>
+                <span className="text-sm">{pitch.location}</span>
               </div>
               <div className="flex gap-2">
                 <p className="text-sm text-muted-foreground">Demo Link</p>
@@ -349,7 +349,7 @@ export function FoundersPitchSection({
               </div>
               <div className="flex gap-2">
                 <p className="text-sm text-muted-foreground">Sectors</p>
-                <p className="text-sm">{formatSectors(pitch.sectors)}</p>
+                <span className="text-sm">{formatSectors(pitch.sectors)}</span>
               </div>
             </div>
           </div>

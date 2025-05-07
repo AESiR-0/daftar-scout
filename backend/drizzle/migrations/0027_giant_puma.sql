@@ -1,0 +1,1 @@
+ALTER TABLE "scout_approved" ADD COLUMN "id" serial PRIMARY KEY NOT NULL;

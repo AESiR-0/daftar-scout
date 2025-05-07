@@ -96,6 +96,7 @@ export const faqs = pgTable("faqs", {
 });
 
 export const scoutApproved = pgTable("scout_approved", {
+  id: serial("id").primaryKey(),
   investorId: varchar("investor_id", { length: 255 }).references(
     () => users.id,
     {
