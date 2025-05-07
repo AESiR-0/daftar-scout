@@ -7,7 +7,6 @@ import { deleteFounderPitchDocument } from "@/lib/actions/document";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
 ) {
   try {
     const session = await auth();
@@ -15,7 +14,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
     if (!id) {
       return NextResponse.json(
         { error: "Document ID is required" },

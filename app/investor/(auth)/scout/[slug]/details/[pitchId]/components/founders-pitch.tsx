@@ -65,6 +65,131 @@ interface FoundersPitchSectionProps {
   onScheduleMeeting: () => void;
 }
 
+const getVideoSource = (language: string, questionId: string) => {
+  // Map numerical IDs to question types
+  const questionTypeMap: { [key: string]: string } = {
+    "1": "problem",
+    "2": "market",
+    "3": "solution",
+    "4": "customer",
+    "5": "business",
+    "6": "help",
+    "7": "challenges"
+  };
+
+  const questionType = questionTypeMap[questionId] || "problem";
+
+  if (language === "Assamese" && questionType === "problem") {
+    return "/videos/Q1_Assamese - BristyBorah.MOV"
+  }
+  if (language === "Assamese" && questionType === "solution") {
+    return "/videos/Q2_Assamese - BristyBorah.MOV"
+  }
+  if (language === "Assamese" && questionType === "market") {
+    return "/videos/Q3_Assamese - BristyBorah.mov"
+  }
+  if (language === "Assamese" && questionType === "business") {
+    return "/videos/Q4_Assamese - BristyBorah.mov"
+  }
+  if (language === "Assamese" && questionType === "future") {
+    return "/videos/Q5_Assamese - BristyBorah.MOV"
+  }
+  if (language === "Assamese" && questionType === "help") {
+    return "/videos/Q6_Assamese - BristyBorah.mov"
+  }
+  if (language === "Assamese" && questionType === "challenges") {
+    return "/videos/Q7_Assamese - BristyBorah.mov"
+  }
+  if (language === "Hindi" && questionType === "problem") {
+    return "/videos/Q1_Hindi-VanditaVerma.mov"
+  }
+  if (language === "Hindi" && questionType === "solution") {
+    return "/videos/Q2_Hindi-VanditaVerma.mov"
+  }
+  if (language === "Hindi" && questionType === "market") {
+    return "/videos/Q3_Hindi-VanditaVerma.mov"
+  }
+  if (language === "Hindi" && questionType === "business") {
+    return "/videos/Q4_Hindi-VanditaVerma.mov"
+  }
+  if (language === "Hindi" && questionType === "future") {
+    return "/videos/Q5_Hindi-VanditaVerma.mov"
+  }
+  if (language === "Hindi" && questionType === "help") {
+    return "/videos/Q6_Hindi-VanditaVerma.mov"
+  }
+  if (language === "Hindi" && questionType === "challenges") {
+    return "/videos/Q7_Hindi-VanditaVerma.mov"
+  }
+  if (language === "Punjabi" && questionType === "problem") {
+    return "/videos/Q1_punjabi - Manav Maini.mov"
+  }
+  if (language === "Punjabi" && questionType === "solution") {
+    return "/videos/Q2_punjabi - Manav Maini.mov"
+  }
+  if (language === "Punjabi" && questionType === "market") {
+    return "/videos/Q3_punjabi - Manav Maini.mov"
+  }
+  if (language === "Punjabi" && questionType === "business") {
+    return "/videos/Q4_punjabi - Manav Maini.mov"
+  }
+  if (language === "Punjabi" && questionType === "future") {
+    return "/videos/Q5_punjabi - Manav Maini.mp4"
+  }
+  if (language === "Punjabi" && questionType === "help") {
+    return "/videos/Q6_punjabi - Manav Maini.mov"
+  }
+  if (language === "Punjabi" && questionType === "challenges") {
+    return "/videos/Q7_punjabi - Manav Maini.mov"
+  }
+  if (language === "Sindhi" && questionType === "problem") {
+    return "/videos/Q1_Sindhi.mov"
+  }
+  if (language === "Sindhi" && questionType === "solution") {
+    return "/videos/Q2_Sindhi.mov"
+  }
+  if (language === "Sindhi" && questionType === "market") {
+    return "/videos/Q3_Sindhi.mov"
+  }
+  if (language === "Sindhi" && questionType === "business") {
+    return "/videos/Q4_Sindhi.mov"
+  }
+  if (language === "Sindhi" && questionType === "future") {
+    return "/videos/Q5_Sindhi.mov"
+  }
+  if (language === "Sindhi" && questionType === "help") {
+    return "/videos/Q6_Sindhi.mov"
+  }
+  if (language === "Sindhi" && questionType === "challenges") {
+    return "/videos/Q7_Sindhi.mov"
+  }
+  if (language === "Gujarati" && questionType === "problem") {
+    return "/videos/Q1_Gujarati.mp4"
+  }
+  if (language === "Gujarati" && questionType === "solution") {
+    return "/videos/Q2_Gujarati.mp4"
+  }
+  if (language === "Gujarati" && questionType === "market") {
+    return "/videos/Q3_Gujarati.mp4"
+  }
+  if (language === "Gujarati" && questionType === "business") {
+    return "/videos/Q4_Gujarati.mp4"
+  }
+  if (language === "Gujarati" && questionType === "future") {
+    return "/videos/Q5_Gujarati.mp4"
+  }
+  if (language === "Gujarati" && questionType === "help") {
+    return "/videos/Q6_Gujarati.mp4"
+  }
+  if (language === "Gujarati" && questionType === "challenges") {
+    return "/videos/Q7_Gujarati.mp4"
+  }
+  if (language === "Odia" && questionType === "problem") {
+    return "/videos/Q1_Odia.mp4"
+  }
+  return "/videos/sample-pitch.mp4" // Default video
+}
+
 export function FoundersPitchSection({
   pitch,
   onScheduleMeeting,
@@ -73,6 +198,7 @@ export function FoundersPitchSection({
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const { toast } = useToast();
 
   const handleReasonToggle = (reasonId: string) => {
@@ -116,7 +242,7 @@ export function FoundersPitchSection({
     }
   };
 
-  const selectedVideo = selectedQuestion?.videoUrl;
+  const selectedVideo = selectedQuestion ? getVideoSource(selectedLanguage, selectedQuestion.id.toString()) : null;
 
   // Helper function to format sectors
   const formatSectors = (sectors: string[]) => {
@@ -154,10 +280,22 @@ export function FoundersPitchSection({
                   </p>
                 </div>
               )}
-              <div className="mt-2 ml-4">
-                <p className="text-sm text-muted-foreground">
-                  Language: English
-                </p>
+              <div className="mt-2 ml-20">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="language" className="text-sm text-muted-foreground">Language:</Label>
+                  <select
+                    id="language"
+                    value={selectedLanguage}
+                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                    className="bg-[#1a1a1a] border border-gray-700 rounded-[0.35rem] text-sm px-2 py-1"
+                  >
+                    {["English", "Hindi", "Punjabi", "Sindhi", "Gujarati", "Odia", "Assamese"].map((lang) => (
+                      <option key={lang} value={lang}>
+                        {lang}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
             <div className="w-1/2">

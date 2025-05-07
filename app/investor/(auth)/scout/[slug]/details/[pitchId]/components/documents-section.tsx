@@ -392,7 +392,7 @@ export default function DocumentsSection({
         return;
       }
 
-      const response = await fetch(`/api/endpoints/pitch/investor/documents/${docId}`, {
+      const response = await fetch(`/api/endpoints/pitch/investor/documents?docId=${docId}`, {
         method: "DELETE",
       });
 
@@ -429,7 +429,7 @@ export default function DocumentsSection({
       const doc = documentsByType[activeTab].find((d) => d.id === docId);
       if (!doc) return;
 
-      const response = await fetch(`/api/endpoints/pitch/investor/documents/${docId}`, {
+      const response = await fetch(`/api/endpoints/pitch/investor/document?docId=${docId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isPrivate: !doc.isHidden }),
