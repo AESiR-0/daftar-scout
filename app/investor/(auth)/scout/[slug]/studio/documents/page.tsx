@@ -64,9 +64,9 @@ interface ApiDocument {
 }
 
 const emptyStateMessages: Record<string, string> = {
-  private: "No private pitch documents uploaded yet. These will be visible to investors only.",
-  received: "No pitch documents received yet.",
-  sent: "No pitch documents sent yet.",
+  private: "No private documents uploaded yet. These will be visible to your daftar's investors only.",
+  received: "No documents received from other investors yet.",
+  sent: "No documents shared with other investors yet.",
 };
 
 export default function DocumentsPage() {
@@ -84,7 +84,7 @@ export default function DocumentsPage() {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/endpoints/pitch/investor/documents?pitchId=${pathname.split("/")[5]}`,
+        `/api/endpoints/pitch/investor/documents?scoutId=${pathname.split("/")[3]}`,
         {
           method: "GET",
           headers: {
@@ -99,27 +99,37 @@ export default function DocumentsPage() {
       }
 
       const data = await response.json();
+
+      // Handle empty data case
+      if (!data || !Array.isArray(data)) {
+        setDocumentsList([]);
+        return;
+      }
+
+      console.log('Raw data from API:', data);
+
       const mappedDocuments: Document[] = data.map((doc: any) => ({
         id: doc.id,
         name: doc.docName,
         uploadedBy: {
-          id: doc.uploadedBy.id,
-          name: `${doc.uploadedBy.firstName} ${doc.uploadedBy.lastName}`,
-          daftarId: doc.uploadedBy.daftarId,
+          id: doc.uploadedBy?.id || "unknown",
+          name: doc.uploadedBy ? `${doc.uploadedBy.name || ''} ${doc.uploadedBy.lastName || ''}`.trim() || "Unknown User" : "Unknown User",
+          daftarId: doc.daftarId
         },
         daftar: {
-          id: doc.daftar.id,
-          name: doc.daftar.name,
+          id: doc.daftarId,
+          name: doc.daftarName || "Unknown Daftar"
         },
         url: doc.docUrl,
         uploadedAt: formatDate(doc.uploadedAt),
         type: doc.isPrivate ? "private" : "sent",
-        size: `${(doc.size / (1024 * 1024)).toFixed(1)} MB`,
-        isHidden: doc.isPrivate,
-        documentType: doc.documentType || "regular",
-        visibility: doc.visibility || "public"
+        size: doc.size ? `${(doc.size / (1024 * 1024)).toFixed(1)} MB` : "0 MB",
+        isHidden: false,
+        documentType: doc.docType,
+        visibility: doc.visibility || (doc.isPrivate ? "private" : "investors_only")
       }));
 
+      console.log('Mapped documents:', mappedDocuments); // Debug log
       setDocumentsList(mappedDocuments);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -128,6 +138,7 @@ export default function DocumentsPage() {
         description: "Failed to load documents",
         variant: "destructive",
       });
+      setDocumentsList([]); // Set empty array on error
     } finally {
       setIsLoading(false);
     }
@@ -140,20 +151,33 @@ export default function DocumentsPage() {
   }, [pathname]);
 
   const privateCount = documentsList.filter(
-    (doc) => doc.type === "private"
+    (doc) => doc.visibility === "private"
   ).length;
   const receivedCount = documentsList.filter(
-    (doc) => doc.type === "received"
+    (doc) => doc.visibility === "investors_only" && doc.uploadedBy.daftarId !== daftarId
   ).length;
-  const sentCount = documentsList.filter((doc) => doc.type === "sent").length;
+  const sentCount = documentsList.filter(
+    (doc) => doc.visibility === "investors_only" && doc.uploadedBy.daftarId === daftarId
+  ).length;
+
+  console.log('Counts:', { privateCount, receivedCount, sentCount });
+  console.log('Active Tab:', activeTab);
 
   const filteredDocuments = documentsList.filter((doc) => {
-    if (doc.type === "private") {
-      // Only show private documents from the same daftar
-      return doc.uploadedBy.daftarId === daftarId;
+    console.log('Filtering doc:', doc, 'activeTab:', activeTab, 'daftarId:', daftarId);
+    switch (activeTab) {
+      case "private":
+        return doc.visibility === "private" && doc.uploadedBy.daftarId === daftarId;
+      case "received":
+        return doc.visibility === "investors_only" && doc.uploadedBy.daftarId !== daftarId;
+      case "sent":
+        return doc.visibility === "investors_only" && doc.uploadedBy.daftarId === daftarId;
+      default:
+        return false;
     }
-    return doc.type === activeTab;
   });
+
+  console.log('Filtered Documents:', filteredDocuments);
 
   const addActivityLog = (newActivity: Omit<ActivityLog, "id">) => {
     const activity: ActivityLog = {
@@ -176,47 +200,53 @@ export default function DocumentsPage() {
       try {
         setIsUploading(true);
         for (const file of Array.from(files)) {
-          const url = await uploadInvestorPitchDocument(file, pathname.split("/")[5]);
+          try {
+            const url = await uploadInvestorPitchDocument(file, pitchId);
 
-          const response = await fetch("/api/endpoints/pitch/investor/documents", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              size: file.size,
-              docType: file.type || file.name.split(".").pop(),
-              docName: file.name,
-              pitchId: pathname.split("/")[5],
-              daftarId,
-              url,
-              isPrivate: activeTab === "private",
-              documentType: "regular",
-              visibility: activeTab === "private" ? "investors_only" : "public"
-            }),
-            credentials: "include",
-          });
+            if (!url) {
+              throw new Error("Failed to get upload URL");
+            }
 
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || "Failed to upload document");
+            const response = await fetch("/api/endpoints/pitch/investor/documents", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                size: file.size,
+                docType: file.type || file.name.split(".").pop(),
+                docName: file.name,
+                scoutId: pathname.split("/")[3],
+                pitchId: pathname.split("/")[5],
+                daftarId,
+                docUrl: url,
+                isPrivate: activeTab === "private",
+                documentType: "regular",
+                visibility: activeTab === "private" ? "private" : "investors_only",
+                accessLevel: "investor"
+              }),
+              credentials: "include",
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error || "Failed to create document record");
+            }
+
+            toast({
+              title: "Success",
+              description: `Successfully uploaded ${file.name}`,
+            });
+          } catch (fileError: any) {
+            console.error(`Error uploading ${file.name}:`, fileError);
+            toast({
+              title: "Error",
+              description: `Failed to upload ${file.name}: ${fileError.message}`,
+              variant: "destructive",
+            });
           }
-
-          toast({
-            title: "Success",
-            description: `Successfully uploaded ${file.name}`,
-          });
         }
-
-        // Refresh the documents list
-        await fetchDocuments();
-      } catch (error: any) {
-        console.error("Error uploading documents:", error);
-        toast({
-          title: "Error",
-          description: `Failed to upload document: ${error.message}`,
-          variant: "destructive",
-        });
       } finally {
         setIsUploading(false);
+        fetchDocuments();
       }
     };
 
@@ -295,9 +325,8 @@ export default function DocumentsPage() {
           });
           toast({
             title: newVisibility ? "Document hidden" : "Document visible",
-            description: `${doc.name} is now ${
-              newVisibility ? "hidden" : "visible"
-            }`,
+            description: `${doc.name} is now ${newVisibility ? "hidden" : "visible"
+              }`,
           });
           return { ...doc, isHidden: newVisibility };
         }
@@ -345,16 +374,14 @@ export default function DocumentsPage() {
                   </TabsTrigger>
                 </TabsList>
 
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={handleUpload}
                   disabled={isUploading}
+                  className="rounded-[0.35rem]"
                 >
                   {isUploading ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm mr-2"></span>
-                      Uploading...
-                    </>
+                    "Uploading..."
                   ) : (
                     <>
                       <Upload className="h-4 w-4 mr-2" />
@@ -364,41 +391,49 @@ export default function DocumentsPage() {
                 </Button>
               </div>
 
-              <TabsContent value="private" className="space-y-4">
-                <DocumentsList
-                  documents={filteredDocuments}
-                  canDelete={true}
-                  onDownload={handleDownload}
-                  onView={handleView}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  emptyMessage="No private documents uploaded yet. These will be visible to your daftar only."
-                />
-              </TabsContent>
+              {isLoading ? (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  Loading documents...
+                </div>
+              ) : (
+                <>
+                  <TabsContent value="private" className="space-y-4">
+                    <DocumentsList
+                      documents={filteredDocuments}
+                      canDelete={true}
+                      onDownload={handleDownload}
+                      onView={handleView}
+                      onDelete={handleDelete}
+                      onToggleVisibility={handleToggleVisibility}
+                      emptyMessage={emptyStateMessages.private}
+                    />
+                  </TabsContent>
 
-              <TabsContent value="received" className="space-y-4">
-                <DocumentsList
-                  documents={filteredDocuments}
-                  canDelete={false}
-                  onDownload={handleDownload}
-                  onView={handleView}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  emptyMessage="No documents received yet."
-                />
-              </TabsContent>
+                  <TabsContent value="received" className="space-y-4">
+                    <DocumentsList
+                      documents={filteredDocuments}
+                      canDelete={false}
+                      onDownload={handleDownload}
+                      onView={handleView}
+                      onDelete={handleDelete}
+                      onToggleVisibility={handleToggleVisibility}
+                      emptyMessage={emptyStateMessages.received}
+                    />
+                  </TabsContent>
 
-              <TabsContent value="sent" className="space-y-4">
-                <DocumentsList
-                  documents={filteredDocuments}
-                  canDelete={true}
-                  onDownload={handleDownload}
-                  onView={handleView}
-                  onDelete={handleDelete}
-                  onToggleVisibility={handleToggleVisibility}
-                  emptyMessage="No documents sent yet."
-                />
-              </TabsContent>
+                  <TabsContent value="sent" className="space-y-4">
+                    <DocumentsList
+                      documents={filteredDocuments}
+                      canDelete={true}
+                      onDownload={handleDownload}
+                      onView={handleView}
+                      onDelete={handleDelete}
+                      onToggleVisibility={handleToggleVisibility}
+                      emptyMessage={emptyStateMessages.sent}
+                    />
+                  </TabsContent>
+                </>
+              )}
             </Tabs>
           </CardContent>
         </Card>
@@ -434,24 +469,32 @@ function DocumentsList({
 
   const renderMetadata = (doc: Document) => {
     const visibilityText = {
-      "public": "Visible to everyone",
-      "investors_only": "Visible to investors only",
-      "private": "Private"
+      "investors_only": "Visible to all investors",
+      "private": "Visible to daftar investors only"
     };
 
     return (
       <>
-        <div>Uploaded by {doc.uploadedBy?.name || "Unknown"}</div>
-        <div>From {doc.daftar?.name || "Unknown Daftar"}</div>
-        <div>Uploaded at: {doc.uploadedAt}</div>
-        <div className="text-xs mt-2">
-          <span className={`px-2 py-1 rounded ${
-            doc.visibility === "public" ? "bg-green-900/50" :
-            doc.visibility === "investors_only" ? "bg-blue-900/50" :
-            "bg-red-900/50"
-          }`}>
-            {visibilityText[doc.visibility]}
-          </span>
+        <div className="flex flex-col gap-1">
+          <div>
+            <span className="text-muted-foreground">Uploaded by:</span>{" "}
+            {doc.uploadedBy?.name || "Unknown"}
+          </div>
+          <div>
+            <span className="text-muted-foreground">From:</span>{" "}
+            {doc.daftar.name}
+          </div>
+          <div>
+            <span className="text-muted-foreground">Uploaded at:</span>{" "}
+            {doc.uploadedAt}
+          </div>
+          <div className="text-xs mt-2">
+            <span className={`px-2 py-1 rounded ${
+              doc.visibility === "investors_only" ? "bg-blue-900/50" : "bg-red-900/50"
+            }`}>
+              {visibilityText[doc.visibility as keyof typeof visibilityText]}
+            </span>
+          </div>
         </div>
       </>
     );
@@ -462,9 +505,8 @@ function DocumentsList({
       {documents.map((doc) => (
         <div
           key={doc.id}
-          className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${
-            doc.isHidden ? "opacity-50" : ""
-          }`}
+          className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${doc.isHidden ? "opacity-50" : ""
+            }`}
         >
           <div className="flex items-start justify-between">
             <div className="space-y-1">
@@ -492,9 +534,8 @@ function DocumentsList({
                 className="hover:bg-muted/50"
               >
                 <Eye
-                  className={`h-4 w-4 ${
-                    doc.isHidden ? "text-muted-foreground" : ""
-                  }`}
+                  className={`h-4 w-4 ${doc.isHidden ? "text-muted-foreground" : ""
+                    }`}
                 />
               </Button>
               {canDelete && (

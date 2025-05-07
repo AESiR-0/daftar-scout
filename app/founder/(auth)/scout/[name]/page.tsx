@@ -18,6 +18,26 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+interface Collaboration {
+  image: string;
+  name: string;
+  structure: string;
+  onDaftarSince: string;
+  bigPicture: string;
+  website: string;
+  location: string;
+}
+
+interface InvestorProfileProps {
+  image: string;
+  daftarName: string;
+  structure: string;
+  onDaftarSince: string;
+  bigPicture: string;
+  website: string;
+  location: string;
+}
+
 function ErrorPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -151,15 +171,15 @@ export default function ScoutDetailsPage() {
     lastPitchDate: lastDayToPitch,
   };
 
-  const collaborationDetails = {
-    image: collaboration[0]?.image || "",
-    daftarName: collaboration[0]?.name || "",
-    structure: collaboration[0]?.structure || "",
-    onDaftarSince: collaboration[0]?.onDaftarSince || "",
-    bigPicture: collaboration[0]?.bigPicture || "",
-    website: collaboration[0]?.website || "",
-    location: collaboration[0]?.location || "",
-  };
+  const collaborations = collaboration.map((c: Collaboration): InvestorProfileProps => ({
+    image: c.image || "",
+    daftarName: c.name || "",
+    structure: c.structure[0] + c.structure.slice(1) || "",
+    onDaftarSince: c.onDaftarSince || "",
+    bigPicture: c.bigPicture || "",
+    website: c.website || "",
+    location: c.location || "",
+  }));
 
   return (
     <>
@@ -209,10 +229,14 @@ export default function ScoutDetailsPage() {
                 </div>
               </div>
 
-              <div className="mt-2 space-y-2">
-                <div className="text-sm text-muted-foreground">
-                  Collaboration:{" "}
-                  <InvestorProfile investor={collaborationDetails} />
+              <div className="mt-2 space-y-4">
+                <div className="text-sm text-muted-foreground space-y-2">
+                  <p className="font-medium mb-2">Collaborations:</p>
+                  {collaborations.map((c: any, index: number) => (
+                    <div key={index} className="pl-2 border-l-2 border-blue-500/50">
+                      <InvestorProfile investor={c} />
+                    </div>
+                  ))}
                 </div>
                 <p className="text-xs text-muted-foreground font-bold">
                   Last date for pitch:{" "}
