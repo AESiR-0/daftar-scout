@@ -179,7 +179,7 @@ export function ScheduleMeetingDialog({
                     </Badge>
                   ))}
                   {session?.user?.email && (
-                    <Badge variant="secondary" className="flex items-center gap-1 bg-blue-100">
+                    <Badge variant="secondary" className="flex items-center gap-1">
                       {session.user.email} (You)
                     </Badge>
                   )}

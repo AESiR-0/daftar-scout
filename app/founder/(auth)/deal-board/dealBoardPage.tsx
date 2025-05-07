@@ -189,8 +189,8 @@ export default function PitchBoardPage({ pitches }: PitchBoardPageProps) {
                                   <h4 className="font-medium text-sm">
                                     {pitch.pitchName}
                                   </h4>
-                                  <div className="flex flex-col gap-1 mt-1">
-                                    <p className="text-xs font-medium">
+                                  <div className="flex flex-col gap-1 mt-2">
+                                    <p className="text-xs">
                                       Pitch Location: {pitch.location}
                                     </p>
                                   </div>
