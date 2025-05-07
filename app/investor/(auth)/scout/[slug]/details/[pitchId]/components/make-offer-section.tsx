@@ -79,64 +79,65 @@ export function MakeOfferSection({
   });
   const [offerMessage, setOfferMessage] = useState("");
 
-  useEffect(() => {
-    const fetchOffers = async () => {
-      try {
-        const response = await fetch(
-          `/api/endpoints/pitch/investor/offer?scoutId=${scoutId}&pitchId=${pitchId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch offers");
-        }
-        const data = await response.json();
-        const mappedOffers: Offer[] = data.map((offer: any) => ({
-          id: offer.id.toString(),
-          scoutName: "Scout Name",
-          collaboration: ["Collaboration Partner"],
-          status:
-            offer.offerStatus === "accepted" ? "completed" : offer.offerStatus,
-          type:
-            offer.offerStatus === "accepted"
-              ? "accepted"
-              : offer.offerStatus === "withdrawn"
-              ? "withdrawn"
-              : "sent",
-          date: formatDate(offer.offeredAt),
-          responses: [
-            {
-              action:
-                offer.offerStatus === "pending"
-                  ? "Offer Sent"
-                  : offer.offerStatus,
-              reason: offer.offerDescription,
-              timestamp: formatDate(offer.offeredAt),
-              user: {
-                founder: {
-                  name: "Investor Name",
-                  age: "30",
-                  designation: "Investor",
-                  email: "investor@example.com",
-                  phone: "1234567890",
-                  gender: "Unknown",
-                  location: "Unknown",
-                  language: ["English"],
-                },
+  const fetchOffers = async () => {
+    try {
+      const response = await fetch(
+        `/api/endpoints/pitch/investor/offer?scoutId=${scoutId}&pitchId=${pitchId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch offers");
+      }
+      const data = await response.json();
+      const mappedOffers: Offer[] = data.map((offer: any) => ({
+        id: offer.id.toString(),
+        scoutName: "Scout Name",
+        collaboration: ["Collaboration Partner"],
+        status:
+          offer.offerStatus === "accepted" ? "completed" : offer.offerStatus,
+        type:
+          offer.offerStatus === "accepted"
+            ? "accepted"
+            : offer.offerStatus === "withdrawn"
+            ? "withdrawn"
+            : "sent",
+        date: formatDate(offer.offeredAt),
+        responses: [
+          {
+            action:
+              offer.offerStatus === "pending"
+                ? "Offer Sent"
+                : offer.offerStatus,
+            reason: offer.offerDescription,
+            timestamp: formatDate(offer.offeredAt),
+            user: {
+              founder: {
+                name: "Investor Name",
+                age: "30",
+                designation: "Investor",
+                email: "investor@example.com",
+                phone: "1234567890",
+                gender: "Unknown",
+                location: "Unknown",
+                language: ["English"],
               },
             },
-          ],
-        }));
-        setOffers(mappedOffers);
-      } catch (error) {
-        console.error("Error fetching offers:", error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch offers",
-          variant: "destructive",
-        });
-      }
-    };
+          },
+        ],
+      }));
+      setOffers(mappedOffers);
+    } catch (error) {
+      console.error("Error fetching offers:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch offers",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
     fetchOffers();
-  }, [scoutId, pitchId, toast]);
+  }, [scoutId, pitchId]);
 
   const hasPendingOffer = offers.some((o) => o.status === "pending");
 
@@ -170,41 +171,10 @@ export function MakeOfferSection({
         throw new Error("Failed to create offer");
       }
 
-      const { offer } = await response.json();
-      const newOfferData: Offer = {
-        id: offer.id.toString(),
-        scoutName: newOffer.scoutName || "Scout Name",
-        collaboration: newOffer.collaboration
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean) || ["Collaboration Partner"],
-        status: "pending",
-        type: "sent",
-        date: formatDate(offer.offeredAt),
-        responses: [
-          {
-            action: "Offer Sent",
-            reason: newOffer.description,
-            timestamp: formatDate(offer.offeredAt),
-            user: {
-              founder: {
-                name: "Investor Name",
-                age: "30",
-                designation: "Investor",
-                email: "investor@example.com",
-                phone: "1234567890",
-                gender: "Unknown",
-                location: "Unknown",
-                language: ["English"],
-              },
-            },
-          },
-        ],
-      };
-
-      setOffers((prev) => [newOfferData, ...prev]);
+      await fetchOffers(); // Reload offers after creating
       setShowCreateModal(false);
       setNewOffer({ scoutName: "", collaboration: "", description: "" });
+      setOfferMessage("");
 
       toast({
         title: "Offer Sent",
@@ -248,50 +218,8 @@ export function MakeOfferSection({
         throw new Error(`Failed to ${action} offer`);
       }
 
-      setOffers((prev) =>
-        prev.map((offer) => {
-          if (offer.id === offerId) {
-            const newStatus =
-              action === "accepted"
-                ? "completed"
-                : action === "declined"
-                ? "declined"
-                : "withdrawn";
-            const newType =
-              action === "accepted"
-                ? "accepted"
-                : action === "withdrawn"
-                ? "withdrawn"
-                : "sent";
-            const newLog: ActionLog = {
-              action,
-              reason:
-                notes ||
-                `${action.charAt(0).toUpperCase() + action.slice(1)} offer`,
-              timestamp: formatDate(new Date().toISOString()),
-              user: {
-                founder: {
-                  name: "Investor Name",
-                  age: "30",
-                  designation: "Investor",
-                  email: "investor@example.com",
-                  phone: "1234567890",
-                  gender: "Unknown",
-                  location: "Unknown",
-                  language: ["English"],
-                },
-              },
-            };
-            return {
-              ...offer,
-              status: newStatus,
-              type: newType,
-              responses: [newLog, ...(offer.responses || [])],
-            };
-          }
-          return offer;
-        })
-      );
+      await fetchOffers(); // Reload offers after action
+      setOfferMessage("");
 
       toast({
         title: `Offer ${action.charAt(0).toUpperCase() + action.slice(1)}`,
@@ -448,7 +376,7 @@ export function MakeOfferSection({
                               {offer.responses?.[0].reason}
                             </p>
                             <time className="text-xs text-muted-foreground self-end">
-                              {offer.date}
+                              {offer.type === "withdrawn" ? "Withdrawn at: " : ""}{offer.date}
                             </time>
                           </div>
                         </div>
@@ -475,7 +403,7 @@ export function MakeOfferSection({
                                       />
                                     </div>
                                     <time className="text-xs text-muted-foreground self-end">
-                                      {response.timestamp}
+                                      {response.action === "withdrawn" ? "Withdrawn at: " : ""}{response.timestamp}
                                     </time>
                                   </div>
                                 </div>

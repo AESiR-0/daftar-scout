@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
                 name: daftar.name,
             })
             .from(daftar)
-            .where(eq(daftar.id, daftarInvestor[0].daftarId))
+            .where(eq(daftar.id, daftarInvestor[0].daftarId ?? ''))
             .limit(1);
 
         if (daftarDetails.length === 0) {
