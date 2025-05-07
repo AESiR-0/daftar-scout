@@ -49,10 +49,6 @@ interface FoundersPitch {
   demoLink?: string;
   stage: string;
   ask: string;
-  founderQuestions?: {
-    question: string;
-    answer: string;
-  }[];
   questions: {
     id: number;
     question: string;
@@ -265,16 +261,16 @@ export function FoundersPitchSection({
         <div className="flex flex-col justify-center">
           <div className="flex h-fit gap-10">
             <div className="w-1/2">
-              {selectedVideo ? (
+              {selectedQuestion ? (
                 <div className="space-y-4">
                   <video
-                    src={selectedVideo}
+                    src={selectedQuestion.videoUrl}
                     controls
-                    className="w-[300px] h-[533px] rounded-[0.35rem]  aspect-[9/16] ml-20  bg-muted"
+                    className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16] ml-20 bg-muted"
                   />
                 </div>
               ) : (
-                <div className="w-[300px] h-[533px]  aspect-[9/16]  bg-muted rounded-[0.35rem] ml-20 flex items-center justify-center">
+                <div className="w-[300px] h-[533px] aspect-[9/16] bg-muted rounded-[0.35rem] ml-20 flex items-center justify-center">
                   <p className="text-sm text-muted-foreground">
                     No video available
                   </p>
@@ -317,11 +313,12 @@ export function FoundersPitchSection({
               </ScrollArea>
             </div>
           </div>
-          <div className="">
+
+          <div className="mt-8">
             {/* Founder's Ask */}
             <div className="flex flex-col">
-              <h3 className="text-md pl-4  text-foreground">Founder's Ask</h3>
-              <div className="  rounded-[0.35rem] p-4">
+              <h3 className="text-md pl-4 text-foreground">Founder's Ask</h3>
+              <div className="rounded-[0.35rem] p-4">
                 <p className="text-sm text-muted-foreground">{pitch.ask}</p>
               </div>
             </div>
@@ -329,20 +326,20 @@ export function FoundersPitchSection({
             {/* Founder Details Grid */}
             <div className="w-1/2 px-5">
               <h3 className="text-md mb-2 text-foreground">Details</h3>
-              <div className=" flex  items-center gap-2">
-                <p className="text-sm text-muted-foreground ">Stage</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">Stage</p>
                 {pitch.stage}
               </div>
-              <div className=" flex  items-center gap-2">
+              <div className="flex items-center gap-2">
                 <p className="text-sm text-muted-foreground">Pitching From</p>
                 <p className="text-sm">{pitch.location}</p>
               </div>
-              <div className="  flex gap-2 ">
+              <div className="flex gap-2">
                 <p className="text-sm text-muted-foreground">Demo Link</p>
                 {pitch.demoLink ? (
                   <Link
                     href={pitch.demoLink}
-                    className="text-sm  hover:underline"
+                    className="text-sm hover:underline"
                   >
                     View Demo
                   </Link>
@@ -350,33 +347,11 @@ export function FoundersPitchSection({
                   <span className="text-sm">No Demo Link</span>
                 )}
               </div>
-              <div className="flex gap-2 ">
+              <div className="flex gap-2">
                 <p className="text-sm text-muted-foreground">Sectors</p>
                 <p className="text-sm">{formatSectors(pitch.sectors)}</p>
               </div>
             </div>
-
-            {/* Founder's Specific Questions */}
-            {pitch.founderQuestions && pitch.founderQuestions.length > 0 && (
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Founder's Responses
-                </p>
-                <div className="space-y-3">
-                  {pitch.founderQuestions.map((item, index) => (
-                    <div
-                      key={index}
-                      className="p-4 bg-[#1f1f1f] rounded-[0.35rem] space-y-2"
-                    >
-                      <p className="text-sm font-medium">{item.question}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {item.answer}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </CardContent>

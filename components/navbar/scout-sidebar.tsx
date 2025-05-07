@@ -17,8 +17,11 @@ interface Pitch {
   pitchName: string;
   daftarName: string;
   Believer: string;
-  averageNPS: string;
-  interestedCount: string;
+  fields: {
+    teamAnalysis: {
+      nps: number;
+    }[];
+  };
   status: string;
 }
 
@@ -60,10 +63,20 @@ export function ScoutSidebar({
         const res = await fetch(
           `/api/endpoints/scouts/pitchesList?scoutId=${scoutId}`
         );
-        const data: Pitch[] = await res.json().then((res) => res.data);
+        const data = await res.json();
+        
+        // Transform the data to match our interface
+        const transformedData: Pitch[] = data.data.map((pitch: any) => ({
+          pitchId: pitch.id,
+          pitchName: pitch.pitchName,
+          daftarName: pitch.daftarName,
+          Believer: pitch.Believer || "",
+          fields: pitch.fields || { teamAnalysis: [] },
+          status: pitch.status
+        }));
 
         const grouped: Record<string, Pitch[]> = {};
-        await data.map((pitch) => {
+        transformedData.forEach((pitch) => {
           if (!grouped[pitch.status]) {
             grouped[pitch.status] = [];
           }
@@ -209,10 +222,12 @@ export function ScoutSidebar({
                                   {pitch.pitchName}
                                 </h3>
                                 <div className="text-xs text-muted-foreground">
-                                  <p>NPS Score: {pitch.averageNPS}</p>
+                                  <p>NPS Score: {pitch.fields.teamAnalysis.length > 0 
+                                    ? (pitch.fields.teamAnalysis.reduce((acc, curr) => acc + curr.nps, 0) / pitch.fields.teamAnalysis.length).toFixed(1)
+                                    : 'N/A'}</p>
                                   <p>
                                     Interested Team Members:{" "}
-                                    {pitch.interestedCount}
+                                    {pitch.fields.teamAnalysis.length}
                                   </p>
                                 </div>
                               </CardContent>

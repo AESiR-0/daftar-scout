@@ -56,7 +56,7 @@ export function TeamAnalysisSection({
   const scoutId = pathname.split("/")[3];
   const pitchId = pathname.split("/")[5];
   const { toast } = useToast();
-  
+
   const [formState, setFormState] = useState<FormState>({
     nps: null,
     belief: undefined,
@@ -161,7 +161,7 @@ export function TeamAnalysisSection({
         },
         ...prev,
       ]);
-      
+
       // Reset form state
       setFormState({
         nps: null,
