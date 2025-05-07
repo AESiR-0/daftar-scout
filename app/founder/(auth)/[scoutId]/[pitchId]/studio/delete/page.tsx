@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/format-date";
 import { Clock, MinusCircle, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { usePitch } from "@/contexts/PitchContext";
+import { usePathname } from "next/navigation";
 
 interface TeamMember {
   name: string;
@@ -25,7 +26,7 @@ interface TeamMember {
   language: string[];
   imageUrl?: string;
   date?: string;
-  founderId: string; // Added for API integration
+  founderId: string;
 }
 
 const getStatusIcon = (status: string) => {
@@ -40,90 +41,117 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function DeletePage() {
-  const { pitchId } = usePitch(); // Get pitchId from context
+  const pathname = usePathname();
+  const pitchId = pathname.split("/")[3];
+  const scoutId = pathname.split("/")[2];
   const { toast } = useToast();
   const [approvals, setApprovals] = useState<TeamMember[]>([]);
   const [userConsent, setUserConsent] = useState(false);
   const [deleteClicked, setDeleteClicked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Dummy current user (replace with auth system)
-  const currentUser = {
-    founderId: "user_1", // Example ID
-    name: "John Doe",
-    email: "john@example.com",
-    role: "You",
-    age: "28",
-    phone: "+91 9876543210",
-    gender: "Male",
-    location: "Bangalore, India",
-    designation: "Founder",
-    language: ["English", "Hindi"],
-  };
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [currentUser, setCurrentUser] = useState<TeamMember | null>(null);
 
   useEffect(() => {
-    if (pitchId) {
+    if (pitchId && scoutId) {
       fetchDeleteRequests();
     }
-  }, [pitchId]);
+  }, [pitchId, scoutId]);
 
   const fetchDeleteRequests = async () => {
+    if (isLoading) return;
+
     setIsLoading(true);
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/delete", {
+      console.log('Fetching delete requests for:', { pitchId, scoutId });
+      
+      const response = await fetch(`/api/endpoints/pitch/founder/delete?pitchId=${pitchId}&scoutId=${scoutId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          ...(pitchId && { "pitch-id": pitchId }),
         },
       });
-      if (!response.ok) throw new Error("Failed to fetch delete requests");
+
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
-      // Map API data to TeamMember interface (dummy team data for now)
-      const teamMembers: TeamMember[] = [
-        {
-          ...currentUser,
-          isApproved: false,
-          status: "pending",
-          isUser: true,
-          date: new Date().toISOString(),
-          founderId: currentUser.founderId,
-        },
-        {
-          name: "Jane Smith",
-          email: "jane@example.com",
-          role: "Team Member",
-          age: "32",
-          phone: "+91 9876543211",
-          gender: "Female",
-          location: "Mumbai, India",
-          designation: "CTO",
-          language: ["English", "Marathi"],
-          isApproved: false,
-          status: "pending",
-          isUser: false,
-          date: new Date().toISOString(),
-          founderId: "user_2", // Example ID
-        },
-      ];
+      if (!response.ok) {
+        throw new Error(`Failed to fetch delete requests: ${response.status} - ${data.message || 'Unknown error'}`);
+      }
 
-      // Update with API data
-      const updatedApprovals = teamMembers.map((member) => {
-        const request = data.find((req: any) => req.founder_id === member.founderId);
-        return {
-          ...member,
-          isApproved: request ? request.is_agreed : false,
-          status: request && request.is_agreed ? "approved" as const : "pending" as const,
+      if (!data || typeof data !== 'object') {
+        throw new Error(`Invalid response data: ${JSON.stringify(data)}`);
+      }
+
+      // Get team members and current user from response
+      const { teamMembers, currentUser: apiCurrentUser } = data;
+      
+      if (!Array.isArray(teamMembers)) {
+        throw new Error('Expected teamMembers array in response');
+      }
+
+      console.log('Processing team members:', teamMembers);
+      
+      // Transform API data to match our interface
+      const processedMembers = teamMembers.map((member: {
+        name: string;
+        email: string;
+        userId: string;
+        designation: string;
+        hasApproved: boolean;
+        isApproved: boolean;
+        status: "pending" | "approved";
+      }): TeamMember => {
+        const memberData: TeamMember = {
+          name: member.name,
+          email: member.email,
+          role: member.designation,
+          designation: member.designation,
+          isApproved: member.isApproved,
+          status: member.status,
+          founderId: member.userId,
+          // Default values for required fields
+          age: "",
+          phone: "",
+          gender: "",
+          location: "",
+          language: [],
+          // Mark as current user if IDs match
+          isUser: apiCurrentUser?.id === member.userId
         };
+
+        // Set current user if this is the current user
+        if (memberData.isUser) {
+          console.log('Found current user:', memberData);
+          setCurrentUser(memberData);
+        }
+
+        return memberData;
       });
 
-      setApprovals(updatedApprovals);
+      console.log('Final team members:', processedMembers);
+      setApprovals(processedMembers);
+
+      // If all approvals are received, show success message
+      const allApproved = processedMembers.every((member: TeamMember) => member.isApproved);
+      if (allApproved && deleteClicked) {
+        toast({
+          title: "All Approvals Received",
+          description: "The pitch can now be deleted.",
+        });
+      }
     } catch (error) {
-      console.error("Error fetching delete requests:", error);
+      console.error("Error fetching delete requests:", {
+        error,
+        pitchId,
+        scoutId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
       toast({
         title: "Error",
-        description: "Failed to load deletion requests",
+        description: error instanceof Error ? error.message : "Failed to load deletion requests. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -132,22 +160,25 @@ export default function DeletePage() {
   };
 
   const handleDelete = async () => {
-    if (!userConsent || !pitchId) {
+    if (!userConsent || !pitchId || !scoutId || !currentUser) {
       toast({
         title: "Error",
-        description: "Please agree to delete and ensure a pitch is selected",
+        description: "Please agree to delete and ensure all required information is available",
         variant: "destructive",
       });
       return;
     }
 
-    setIsLoading(true);
+    if (isDeleting) return;
+
+    setIsDeleting(true);
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/delete", {
+      const response = await fetch(`/api/endpoints/pitch/founder/delete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
+          scoutId,
           founderId: currentUser.founderId,
           isAgreed: true,
         }),
@@ -155,12 +186,14 @@ export default function DeletePage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to process delete request");
+        throw new Error(errorData.message || "Failed to process delete request");
       }
 
+      await response.json();
+
       setApprovals((prev) =>
-        prev.map((member) =>
-          member.isUser
+        prev.map((member: TeamMember) =>
+          member.founderId === currentUser.founderId
             ? { ...member, isApproved: true, status: "approved" }
             : member
         )
@@ -172,26 +205,24 @@ export default function DeletePage() {
         description: "Your approval for deletion has been recorded",
       });
 
-      // Check if all approvals are received
-      const allApproved = approvals.every((member) => member.isApproved);
-      if (allApproved) {
-        // Trigger full pitch deletion here (not implemented in provided endpoint)
-        toast({
-          title: "Pitch Deleted",
-          description: "All team members approved; pitch has been deleted.",
-        });
-      }
+      // Refresh the approval status
+      await fetchDeleteRequests();
+
     } catch (error: any) {
       console.error("Error processing delete request:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to process delete request",
+        description: error.message || "Failed to process delete request. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsDeleting(false);
     }
   };
+
+  if (!currentUser) {
+    return null; // Or loading state
+  }
 
   const pendingApprovals = approvals.filter((member) => !member.isApproved).length;
 
@@ -211,6 +242,7 @@ export default function DeletePage() {
                 checked={userConsent}
                 onCheckedChange={(checked: boolean) => setUserConsent(checked)}
                 className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+                disabled={isDeleting}
               />
               <label htmlFor="user-consent" className="text-sm text-muted-foreground">
                 I agree to delete the pitch
@@ -220,11 +252,10 @@ export default function DeletePage() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={!userConsent || deleteClicked || isLoading}
+              disabled={!userConsent || isDeleting || (deleteClicked && approvals.find(m => m.founderId === currentUser.founderId)?.isApproved)}
               className="w-[12%] rounded-[0.35rem]"
-
             >
-              {isLoading ? "Processing..." : "Delete"}
+              {isDeleting ? "Processing..." : deleteClicked ? "Approved" : "Delete"}
             </Button>
 
             {deleteClicked && (
@@ -232,7 +263,7 @@ export default function DeletePage() {
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium">Team's Approval Required</h3>
                   <div className="text-sm text-muted-foreground">
-                    {approvals.filter((a) => a.isApproved).length} of {approvals.length}
+                    {approvals.filter((a) => a.isApproved).length} of {approvals.length} approved
                   </div>
                 </div>
 
@@ -247,18 +278,23 @@ export default function DeletePage() {
                           <AvatarFallback>{member.name[0]}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-sm font-medium">{member.name}</p>
+                          <p className="text-sm font-medium">
+                            {member.name} {member.isUser && "(You)"}
+                          </p>
                           <p className="text-xs text-muted-foreground">{member.designation}</p>
                         </div>
                       </div>
-                      <div className="flex items-center">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {member.status === "approved" ? "Approved" : "Pending"}
+                        </span>
                         {getStatusIcon(member.status)}
                       </div>
                     </div>
                   ))}
                   <div className="pt-4">
                     <span className="text-xs text-muted-foreground">
-                      <strong>Deletion Requested On</strong> <br />{" "}
+                      <strong>Deletion Requested On</strong> <br />
                       {formatDate(new Date().toISOString())}
                     </span>
                   </div>

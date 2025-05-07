@@ -71,123 +71,115 @@ async function generateScoutId(scoutName: string): Promise<string> {
   return scoutId;
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    // Get the authenticated user's session
     const session = await auth();
-    if (!session || !session.user?.email) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    // Fetch the user's role based on their email
-    const user = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, session.user.email))
-      .limit(1)
-      .execute();
-
-    if (!user.length) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
-
-    const userRole = user[0].role;
-    const investorId = user[0].id;
-    // Fetch the daftarId associated with the investorId from the investordaftar table
-
-    let scoutsList,
-      collaboratorsList: { daftarName: string; scoutId: string | null }[];
-
-    if (userRole === "founder") {
-      // If the user is a founder, fetch all scouts
-      scoutsList = await db
-        .select({
-          id: scouts.scoutId,
-          title: scouts.scoutName,
-          status: scouts.status,
-          scheduledDate: scouts.lastDayToPitch,
-          postedBy: scouts.daftarId,
-        })
-        .from(scouts)
-        .where(sql`LOWER(${scouts.status}) = 'active'`);
-    } else {
-      const investordaftar = await db
-        .select()
-        .from(daftarInvestors) // Replace with the actual table name if different
-        .where(eq(daftarInvestors.investorId, investorId));
-
-      if (!investordaftar.length) {
-        return NextResponse.json(
-          { message: "Daftar ID not found" },
-          { status: 404 }
-        );
-      }
-
-      const daftarId = investordaftar[0].daftarId;
-      // If the user is not a founder, fetch scouts related to their daftarId
-      scoutsList = await db
-        .select({
-          id: scouts.scoutId,
-          title: scouts.scoutName,
-          status: scouts.status,
-          scheduledDate: scouts.lastDayToPitch,
-          postedBy: scouts.daftarId,
-        })
-        .from(scouts)
-        .where(daftarId ? eq(scouts.daftarId, daftarId) : undefined);
-    }
-
-    const collaboratorId = await db
+    // Get all daftars the user is associated with
+    const userDaftars = await db
       .select({
-        daftarId: daftarScouts.daftarId,
+        daftarId: daftarInvestors.daftarId,
+      })
+      .from(users)
+      .innerJoin(
+        daftarInvestors,
+        eq(users.id, daftarInvestors.investorId)
+      )
+      .where(eq(users.email, session.user.email));
+
+    if (!userDaftars.length) {
+      return NextResponse.json(
+        { error: "User not associated with any daftar" },
+        { status: 404 }
+      );
+    }
+
+    // Filter out null values and create the daftar IDs array
+    const userDaftarIds = userDaftars
+      .map(d => d.daftarId)
+      .filter((id): id is string => id !== null);
+
+    // Get all scouts where any of user's daftars is either the owner or a collaborator
+    const scoutsList = await db
+      .select({
+        id: scouts.scoutId,
+        title: scouts.scoutName,
+        status: scouts.status,
+        scheduledDate: scouts.lastDayToPitch,
+        postedby: scouts.daftarId,
+      })
+      .from(scouts)
+      .where(
+        or(
+          inArray(scouts.daftarId, userDaftarIds),
+          sql`${scouts.scoutId} IN (
+            SELECT ${daftarScouts.scoutId}
+            FROM ${daftarScouts}
+            WHERE ${inArray(daftarScouts.daftarId, userDaftarIds)}
+          )`
+        )
+      );
+
+    // Get owner daftar names
+    const ownerDaftars = await db
+      .select({
+        id: daftar.id,
+        name: daftar.name,
+      })
+      .from(daftar)
+      .where(
+        inArray(
+          daftar.id,
+          scoutsList.map(s => s.postedby).filter((id): id is string => id !== null)
+        )
+      );
+
+    // Get collaborator daftars
+    const collaborators = await db
+      .select({
         scoutId: daftarScouts.scoutId,
+        daftarName: daftar.name,
       })
       .from(daftarScouts)
+      .innerJoin(
+        daftar,
+        eq(daftarScouts.daftarId, daftar.id)
+      )
       .where(
         inArray(
           daftarScouts.scoutId,
           scoutsList.map((s) => s.id).filter((id): id is string => id !== null)
         )
       );
-    if (collaboratorId.length === 0)
-      return NextResponse.json(scoutsList, { status: 200 });
 
-    collaboratorsList = await db
-      .select({
-        daftarName: daftar.name,
-        scoutId: daftarScouts.scoutId,
-      })
-      .from(daftar)
-      .innerJoin(daftarScouts, eq(daftar.id, daftarScouts.daftarId))
-      .where(
-        inArray(
-          daftar.id,
-          collaboratorId
-            .map((c) => c.daftarId)
-            .filter((id): id is string => id !== null)
-        )
-      );
-    const scoutsAll = scoutsList.map((scout) => {
-      const collaborators =
-        collaboratorsList
-          ?.filter((collaborator) => collaborator.scoutId === scout.id)
-          .map((collaborator) => collaborator.daftarName) || [];
+    // Format the response to match the frontend's expected structure
+    const formattedScouts = scoutsList.map((scout) => {
+      const ownerDaftar = ownerDaftars.find(d => d.id === scout.postedby);
+      const scoutCollaborators = collaborators
+        .filter(c => c.scoutId === scout.id)
+        .map(c => c.daftarName);
 
       return {
         id: scout.id,
         title: scout.title,
-        postedby: scout.postedBy,
-        status: scout.status,
+        status: (scout.status || 'planning').toLowerCase(),
         scheduledDate: scout.scheduledDate,
-        collaborator: collaborators,
+        postedby: ownerDaftar?.name || scout.postedby,
+        collaborator: scoutCollaborators
       };
     });
 
-    return NextResponse.json(scoutsAll, { status: 200 });
-  } catch (error: any) {
-    console.error("Error fetching scouts:", error);
+    return NextResponse.json(formattedScouts);
+  } catch (error) {
+    console.error("Error in scouts GET endpoint:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

@@ -71,7 +71,7 @@ export async function POST(
       .values({
         pitchId,
         pitchAnswerUrl,
-        questionId: questionId.toString(), // Convert to string if schema expects varchar
+        questionId,
         answerLanguage,
       })
       .returning({

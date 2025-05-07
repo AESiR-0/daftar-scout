@@ -19,7 +19,7 @@ type Pitch = {
   stage: string;
   askForInvestor: boolean;
   createdAt: string;
-  status: string | null;
+  status: string;
   isCompleted: boolean;
   teamSize: number | null;
   isPaid: boolean;

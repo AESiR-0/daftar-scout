@@ -45,6 +45,7 @@ export default function InvestorQuestionsPage() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
 
   // Sample languages and questions for the dialog
   const languages = [
@@ -130,8 +131,12 @@ export default function InvestorQuestionsPage() {
       }));
 
       setQuestions(fetchedQuestions);
-      setSelectedQuestion(fetchedQuestions[0] || null);
-      setPreviewUrl(fetchedQuestions[0]?.videoUrl || "");
+      const firstQuestion = fetchedQuestions[0] || null;
+      setSelectedQuestion(firstQuestion);
+      setPreviewUrl(firstQuestion?.videoUrl || "");
+      if (firstQuestion?.language) {
+        setLanguage(firstQuestion.language);
+      }
     } catch (error) {
       console.error("Error fetching questions:", error);
       toast({
@@ -169,11 +174,12 @@ export default function InvestorQuestionsPage() {
       return;
     }
 
+    setIsUploading(true);
     try {
       const url = await uploadAnswersPitchVideo(file, pitchId, scoutId);
       setPreviewUrl(url);
 
-      const postRes = await fetch("/api/endpoints/pitch/founder/questions", {
+      const postRes = await fetch("/api/endpoints/pitch/founder/answers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -191,6 +197,9 @@ export default function InvestorQuestionsPage() {
         description: "Your video answer has been saved.",
         variant: "success",
       });
+      
+      // Refresh questions to get updated data
+      await fetchQuestions();
     } catch (error) {
       console.error("Error uploading video:", error);
       toast({
@@ -198,6 +207,8 @@ export default function InvestorQuestionsPage() {
         description: "There was an error uploading or saving your video.",
         variant: "destructive",
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -211,7 +222,9 @@ export default function InvestorQuestionsPage() {
   const handleQuestionSelect = (question: Question) => {
     setSelectedQuestion(question);
     setPreviewUrl(question.videoUrl);
-    setLanguage(question.language || "English");
+    if (question.language) {
+      setLanguage(question.language);
+    }
   };
 
   return (
@@ -321,10 +334,20 @@ export default function InvestorQuestionsPage() {
                             selectedQuestion &&
                             handleUploadVideo(e, selectedQuestion.id)
                           }
+                          disabled={isUploading}
                           className="w-full"
                         >
-                          <Upload className="h-4 w-4 mr-2" />
-                          Upload Video
+                          {isUploading ? (
+                            <>
+                              <div className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent border-white rounded-full" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Video
+                            </>
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -363,14 +386,7 @@ export default function InvestorQuestionsPage() {
                     <Combobox
                       placeholder="Select video's language"
                       value={language}
-                      options={[
-                        "English",
-                        "Spanish",
-                        "French",
-                        "German",
-                        "Italian",
-                        "Portuguese",
-                      ]}
+                      options={languages}
                       onSelect={(value) => setLanguage(value)}
                     />
                   </div>

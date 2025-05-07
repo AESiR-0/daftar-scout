@@ -20,6 +20,7 @@ import { DeclinePitchDialog } from "./components/decline-pitch-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PieChart } from "@/components/ui/charts";
 import { Loader2 } from "lucide-react";
+import { useDaftar } from "@/lib/context/daftar-context";
 
 // Import ApexCharts with NoSSR
 const Chart = dynamic(() => import("react-apexcharts"), {
@@ -48,17 +49,19 @@ interface Document {
   isHidden?: boolean;
 }
 
+interface Question {
+  id: number;
+  question: string;
+  videoUrl: string;
+}
+
 interface FoundersPitch {
   status: string;
   location: string;
   sectors: string[];
   stage: string;
   ask: string;
-  questions: {
-    id: number;
-    question: string;
-    videoUrl: string;
-  }[];
+  questions: Question[];
 }
 
 interface Analysis {
@@ -209,6 +212,7 @@ const MemberCard = ({ member }: { member: TeamMember }) => (
 /** ------------- Main Component -------------- **/
 export default function PitchDetailsPage() {
   const { toast } = useToast();
+  const { selectedDaftar, isLoading: isDaftarLoading } = useDaftar();
   const [activeSection, setActiveSection] = useState("founders-pitch");
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
@@ -227,6 +231,7 @@ export default function PitchDetailsPage() {
   // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
+      if (isDaftarLoading) return; // Don't fetch if daftar context is still loading
       try {
         const [userIdResponse, userInfoResponse] = await Promise.all([
           fetch("/api/endpoints/users/getId"),
@@ -246,25 +251,27 @@ export default function PitchDetailsPage() {
           name: userInfo.name,
           role: userInfo.role,
           avatar: userInfo.avatar || "/avatars/default.jpg",
-          daftarName: userInfo.daftarName || "N/A"
+          daftarName: userInfo.daftarName,
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
         toast({
           title: "Error",
-          description: "Failed to load user information",
+          description: "Failed to fetch user data",
           variant: "destructive",
         });
       }
     };
 
     fetchUserData();
-  }, [toast]);
+  }, [isDaftarLoading, toast]);
 
+  // Fetch pitch details
   useEffect(() => {
     const fetchPitch = async () => {
+      if (isDaftarLoading || !selectedDaftar) return; // Don't fetch if daftar context is still loading
+      setLoading(true);
       try {
-        setLoading(true);
         const [pitchResponse, analysisResponse] = await Promise.all([
           fetch(`/api/endpoints/pitch/investor?pitchId=${pitchId}`, {
             method: "GET",
@@ -551,6 +558,22 @@ export default function PitchDetailsPage() {
     };
   };
 
+  if (isDaftarLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!selectedDaftar) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">No Daftar selected</p>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="container flex justify-center align-center m-10">
@@ -705,7 +728,7 @@ export default function PitchDetailsPage() {
         )}
         {activeSection === "founders-pitch" && (
           <FoundersPitchSection
-            pitch={pitchDetails.fields.foundersPitch}
+            pitch={pitchDetails.fields.foundersPitch as FoundersPitch}
             onScheduleMeeting={() => setScheduleMeetingOpen(true)}
           />
         )}

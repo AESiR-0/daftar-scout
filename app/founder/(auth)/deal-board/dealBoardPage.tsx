@@ -45,7 +45,7 @@ const emptyStateMessages: Record<string, { title: string; description: string }>
   },
   Withdrawn: {
     title: "No Pitch Withdrawn Yet",
-    description: "When a pitch is withdrawn by you or the investor, it’ll show up here.",
+    description: "When a pitch is withdrawn by you or the investor, it'll show up here.",
   },
 };
 

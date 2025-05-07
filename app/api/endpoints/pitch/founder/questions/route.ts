@@ -41,15 +41,15 @@ export async function GET(req: NextRequest) {
     // Map questionId to answer
     const answerMap = new Map(
       answers.map((a) => [
-        a.questionId,
+        Number(a.questionId), // Convert string ID to number for consistent comparison
         { url: a.pitchAnswerUrl, language: a.answerLanguage },
       ])
     );
 
     const response = questions.map((q) => ({
       ...q,
-      answerUrl: answerMap.get(q.id)?.url ?? q.scoutAnswerSampleUrl,
-      answerLanguage: answerMap.get(q.id)?.language ?? null,
+      answerUrl: answerMap.get(Number(q.id))?.url ?? q.scoutAnswerSampleUrl,
+      answerLanguage: answerMap.get(Number(q.id))?.language ?? null,
     }));
 
     return NextResponse.json(response, { status: 200 });

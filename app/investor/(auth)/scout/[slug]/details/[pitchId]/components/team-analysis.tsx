@@ -4,20 +4,10 @@ import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
@@ -52,6 +42,12 @@ interface TeamAnalysisSectionProps {
   teamAnalysis: TeamAnalysis[];
 }
 
+interface FormState {
+  nps: number | null;
+  belief: "yes" | "no" | undefined;
+  note: string;
+}
+
 export function TeamAnalysisSection({
   currentProfile,
   teamAnalysis: initialTeamAnalysis,
@@ -60,9 +56,12 @@ export function TeamAnalysisSection({
   const scoutId = pathname.split("/")[3];
   const pitchId = pathname.split("/")[5];
   const { toast } = useToast();
-  const [belief, setBelief] = useState<"yes" | "no">();
-  const [nps, setNps] = useState<number | null>(null);
-  const [note, setNote] = useState("");
+  
+  const [formState, setFormState] = useState<FormState>({
+    nps: null,
+    belief: undefined,
+    note: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>(initialTeamAnalysis);
@@ -105,11 +104,12 @@ export function TeamAnalysisSection({
   }, [scoutId, pitchId, toast]);
 
   const handleSubmit = async () => {
-    if (!belief || !note.trim() || nps === null) return;
+    if (!formState.belief || !formState.note.trim() || formState.nps === null) return;
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
+      // Submit the analysis
+      const analysisResponse = await fetch(
         `/api/endpoints/pitch/investor/analysis?scoutId=${scoutId}&pitchId=${pitchId}`,
         {
           method: "POST",
@@ -119,33 +119,55 @@ export function TeamAnalysisSection({
           body: JSON.stringify({
             scoutId,
             pitchId,
-            analysis: note,
-            believeRating: nps,
-            shouldMeet: belief === "yes",
+            analysis: formState.note,
+            believeRating: formState.nps,
+            shouldMeet: formState.belief === "yes",
           }),
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!analysisResponse.ok) {
+        const errorData = await analysisResponse.json();
         throw new Error(errorData.error || "Failed to submit analysis");
+      }
+
+      // Update pitch status to review
+      const statusResponse = await fetch(
+        `/api/endpoints/pitch/investor/status?scoutId=${scoutId}&pitchId=${pitchId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            investorStatus: "review"
+          }),
+        }
+      );
+
+      if (!statusResponse.ok) {
+        throw new Error("Failed to update pitch status");
       }
 
       setHasSubmitted(true);
       setTeamAnalysis((prev) => [
         {
           id: Date.now().toString(),
-          nps,
+          nps: formState.nps!,
           analyst: currentProfile,
-          belief,
-          note,
+          belief: formState.belief!,
+          note: formState.note,
           date: new Date().toISOString(),
         },
         ...prev,
       ]);
-      setNote("");
-      setBelief(undefined);
-      setNps(null);
+      
+      // Reset form state
+      setFormState({
+        nps: null,
+        belief: undefined,
+        note: "",
+      });
 
       toast({
         title: "Success",
@@ -169,8 +191,8 @@ export function TeamAnalysisSection({
   const averageNPS =
     teamAnalysis.length > 0
       ? Math.round(
-          teamAnalysis.reduce((sum, a) => sum + a.nps, 0) / teamAnalysis.length
-        )
+        teamAnalysis.reduce((sum, a) => sum + a.nps, 0) / teamAnalysis.length
+      )
       : 0;
 
   if (loading) {
@@ -194,13 +216,13 @@ export function TeamAnalysisSection({
                   <div className="flex gap-2 flex-wrap">
                     {Array.from({ length: 11 }, (_, i) => (
                       <Button
-                        key={i}
-                        variant={nps === i ? "default" : "outline"}
-                        onClick={() => setNps(i)}
+                        key={`nps-${i}`}
+                        variant={formState.nps === i ? "default" : "outline"}
+                        onClick={() => setFormState(prev => ({ ...prev, nps: i }))}
                         disabled={hasSubmitted}
                         className={cn(
                           "w-8 h-8 p-0 rounded-[0.35rem]",
-                          nps === i && "bg-blue-600 hover:bg-blue-700",
+                          formState.nps === i && "bg-blue-600 hover:bg-blue-700",
                           hasSubmitted && "cursor-not-allowed opacity-50"
                         )}
                       >
@@ -213,11 +235,11 @@ export function TeamAnalysisSection({
                   <Label>Should we meet the startup?</Label>
                   <div className="flex gap-2">
                     <Button
-                      variant={belief === "yes" ? "default" : "outline"}
-                      onClick={() => setBelief("yes")}
+                      variant={formState.belief === "yes" ? "default" : "outline"}
+                      onClick={() => setFormState(prev => ({ ...prev, belief: "yes" }))}
                       disabled={hasSubmitted}
                       className={cn(
-                        belief === "yes"
+                        formState.belief === "yes"
                           ? "bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
                           : "rounded-[0.35rem]",
                         hasSubmitted && "cursor-not-allowed opacity-50"
@@ -226,11 +248,11 @@ export function TeamAnalysisSection({
                       Yes
                     </Button>
                     <Button
-                      variant={belief === "no" ? "default" : "outline"}
-                      onClick={() => setBelief("no")}
+                      variant={formState.belief === "no" ? "default" : "outline"}
+                      onClick={() => setFormState(prev => ({ ...prev, belief: "no" }))}
                       disabled={hasSubmitted}
                       className={cn(
-                        belief === "no"
+                        formState.belief === "no"
                           ? "bg-red-600 hover:bg-red-700 rounded-[0.35rem]"
                           : "rounded-[0.35rem]",
                         hasSubmitted && "cursor-not-allowed opacity-50"
@@ -245,8 +267,8 @@ export function TeamAnalysisSection({
                   <Label>Your Analysis</Label>
                   <Textarea
                     placeholder="Why do you want to meet... or not meet... in the startup?"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
+                    value={formState.note}
+                    onChange={(e) => setFormState(prev => ({ ...prev, note: e.target.value }))}
                     disabled={hasSubmitted}
                     className={cn(
                       "min-h-[100px] rounded-[0.35rem] bg-muted/50 text-white border p-4",
@@ -264,9 +286,9 @@ export function TeamAnalysisSection({
               <Button
                 onClick={handleSubmit}
                 disabled={
-                  !belief ||
-                  !note.trim() ||
-                  nps === null ||
+                  !formState.belief ||
+                  !formState.note.trim() ||
+                  formState.nps === null ||
                   isSubmitting ||
                   hasSubmitted
                 }

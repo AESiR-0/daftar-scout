@@ -29,7 +29,7 @@ export default async function Layout({
     redirect("/sign-up/complete");
   }
   if (user.role !== "investor") {
-    redirect("/login");
+    redirect("/founder");
   }
   return (
     <>

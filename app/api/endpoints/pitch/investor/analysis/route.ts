@@ -20,6 +20,45 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Get current user
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Get current user's ID
+    const currentUser = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, session.user.email))
+      .limit(1);
+
+    if (!currentUser.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const currentUserId = currentUser[0].id;
+
+    // Check if current user has submitted their analysis
+    const userAnalysis = await db
+      .select()
+      .from(investorPitch)
+      .where(
+        and(
+          eq(investorPitch.scoutId, scoutId),
+          eq(investorPitch.pitchId, pitchId),
+          eq(investorPitch.investorId, currentUserId)
+        )
+      )
+      .limit(1);
+
+    const hasSubmitted = userAnalysis.length > 0;
+
+    // If user hasn't submitted, return empty array
+    if (!hasSubmitted) {
+      return NextResponse.json({ analysis: [] }, { status: 200 });
+    }
+
     // Fetch all analyses for this pitch with user and daftar info
     const result = await db
       .select({

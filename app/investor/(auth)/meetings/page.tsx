@@ -66,8 +66,8 @@ export default function MeetingsPage() {
   // Get meetings for selected date
   const selectedDateMeetings = selectedDate
     ? meetings.filter(
-        (m) => new Date(m.startTime).toDateString() === selectedDate.toDateString()
-      )
+      (m) => new Date(m.startTime).toDateString() === selectedDate.toDateString()
+    )
     : [];
 
   // Get all dates that have meetings
@@ -99,10 +99,10 @@ export default function MeetingsPage() {
       if (!response.ok) {
         throw new Error('Failed to accept meeting');
       }
-      
+
       // Refresh meetings list
       await fetchMeetings();
-      
+
       toast({
         title: 'Success',
         description: 'Meeting accepted successfully',
@@ -125,10 +125,10 @@ export default function MeetingsPage() {
       if (!response.ok) {
         throw new Error('Failed to reject meeting');
       }
-      
+
       // Refresh meetings list
       await fetchMeetings();
-      
+
       toast({
         title: 'Success',
         description: 'Meeting rejected successfully',
@@ -144,11 +144,7 @@ export default function MeetingsPage() {
   };
 
   const handleDateSelect = (date: Date | undefined) => {
-    if (date && selectedDate && date.toDateString() === selectedDate.toDateString()) {
-      setSelectedDate(undefined);
-    } else {
-      setSelectedDate(date);
-    }
+    setSelectedDate(date || new Date());
   };
 
   return (
@@ -242,7 +238,7 @@ export default function MeetingsPage() {
                   <div className="space-y-2">
                     <h2 className="text-lg font-semibold">{selectedMeeting.title}</h2>
                     <Badge variant="secondary">
-                      {selectedMeeting.status}
+                      {selectedMeeting.status[0].toUpperCase() + selectedMeeting.status.slice(1)}
                     </Badge>
                   </div>
                 </div>
@@ -260,9 +256,9 @@ export default function MeetingsPage() {
                   {selectedMeeting.meetLink ? (
                     <>
                       <Video className="h-4 w-4 text-muted-foreground" />
-                      <a 
-                        href={selectedMeeting.meetLink} 
-                        target="_blank" 
+                      <a
+                        href={selectedMeeting.meetLink}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline"
                       >

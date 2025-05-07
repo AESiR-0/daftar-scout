@@ -41,7 +41,20 @@ export async function GET(req: NextRequest) {
 
     // Fetch pitches only where user is on the team
     const userPitches = await db
-      .select()
+      .select({
+        id: pitch.id,
+        pitchName: pitch.pitchName,
+        location: pitch.location,
+        scoutId: pitch.scoutId,
+        demoLink: pitch.demoLink,
+        stage: pitch.stage,
+        askForInvestor: pitch.askForInvestor,
+        createdAt: pitch.createdAt,
+        status: pitch.status,
+        isCompleted: pitch.isCompleted,
+        teamSize: pitch.teamSize,
+        isPaid: pitch.isPaid,
+      })
       .from(pitch)
       .where(inArray(pitch.id, pitchIds));
 

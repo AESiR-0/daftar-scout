@@ -3,18 +3,23 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function LoginClient({ role }: { role: string }) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
       localStorage.setItem("user_role", role);
-      await signIn("google");
+      const callbackUrl = role === "founder" ? "/founder" : "/investor";
+      const result = await signIn("google", {
+        callbackUrl,
+        redirect: true
+      });
     } catch (error) {
       console.error("Sign in error:", error);
-    } finally {
       setIsLoading(false);
     }
   };

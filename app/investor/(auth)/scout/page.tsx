@@ -43,6 +43,7 @@ export default function ScoutPage() {
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [showMeetings, setShowMeetings] = useState(false);
   const [createScoutOpen, setCreateScoutOpen] = useState(false);
+  const [meetingsCount, setMeetingsCount] = useState(0);
   const [scoutStatus, setScoutStatus] = useState<ScoutStatus>({
     planning: [],
     scheduled: [],
@@ -51,6 +52,23 @@ export default function ScoutPage() {
   });
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchMeetingsCount = async () => {
+      try {
+        const res = await fetch('/api/endpoints/calendar/meetings');
+        if (!res.ok) {
+          throw new Error('Failed to fetch meetings');
+        }
+        const meetings = await res.json();
+        setMeetingsCount(meetings.length);
+      } catch (error) {
+        console.error('Error fetching meetings count:', error);
+      }
+    };
+
+    fetchMeetingsCount();
+  }, []);
 
   useEffect(() => {
     const fetchScoutStatus = async () => {
@@ -187,7 +205,7 @@ export default function ScoutPage() {
             variant="secondary"
             className="text-xs bg-muted text-muted-foreground"
           >
-            {scoutStatus.active.length}
+            {meetingsCount}
           </Badge>
         </Button>
 
