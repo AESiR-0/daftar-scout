@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -92,6 +91,118 @@ export default function InvestorStudioPage() {
   const [questionsOpen, setQuestionsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const [isLoading, setIsLoading] = useState(false);
+
+  const getVideoSource = (language: string, questionId: string) => {
+    if (language === "Assamese" && questionId === "problem") {
+      return "/videos/Q1_Assamese - BristyBorah.MOV"
+    }
+    if (language === "Assamese" && questionId === "solution") {
+      return "/videos/Q2_Assamese - BristyBorah.MOV"
+    }
+    if (language === "Assamese" && questionId === "market") {
+      return "/videos/Q3_Assamese - BristyBorah.mov"
+    }
+    if (language === "Assamese" && questionId === "business") {
+      return "/videos/Q4_Assamese - BristyBorah.mov"
+    }
+    if (language === "Assamese" && questionId === "future") {
+      return "/videos/Q5_Assamese - BristyBorah.MOV"
+    }
+    if (language === "Assamese" && questionId === "help") {
+      return "/videos/Q6_Assamese - BristyBorah.mov"
+    }
+    if (language === "Assamese" && questionId === "challenges") {
+      return "/videos/Q7_Assamese - BristyBorah.mov"
+    }
+    if (language === "Hindi" && questionId === "problem") {
+      return "/videos/Q1_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "solution") {
+      return "/videos/Q2_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "market") {
+      return "/videos/Q3_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "business") {
+      return "/videos/Q4_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "future") {
+      return "/videos/Q5_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "help") {
+      return "/videos/Q6_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Hindi" && questionId === "challenges") {
+      return "/videos/Q7_Hindi-VanditaVerma.mov"
+    }
+    if (language === "Punjabi" && questionId === "problem") {
+      return "/videos/Q1_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "solution") {
+      return "/videos/Q2_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "market") {
+      return "/videos/Q3_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "business") {
+      return "/videos/Q4_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "future") {
+      return "/videos/Q5_punjabi - Manav Maini.mp4"
+    }
+    if (language === "Punjabi" && questionId === "help") {
+      return "/videos/Q6_punjabi - Manav Maini.mov"
+    }
+    if (language === "Punjabi" && questionId === "challenges") {
+      return "/videos/Q7_punjabi - Manav Maini.mov"
+    }
+    if (language === "Sindhi" && questionId === "problem") {
+      return "/videos/Q1_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "solution") {
+      return "/videos/Q2_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "market") {
+      return "/videos/Q3_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "business") {
+      return "/videos/Q4_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "future") {
+      return "/videos/Q5_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "help") {
+      return "/videos/Q6_Sindhi.mov"
+    }
+    if (language === "Sindhi" && questionId === "challenges") {
+      return "/videos/Q7_Sindhi.mov"
+    }
+    if (language === "Gujarati" && questionId === "problem") {
+      return "/videos/Q1_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "solution") {
+      return "/videos/Q2_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "market") {
+      return "/videos/Q3_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "business") {
+      return "/videos/Q4_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "future") {
+      return "/videos/Q5_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "help") {
+      return "/videos/Q6_Gujarati.mp4"
+    }
+    if (language === "Gujarati" && questionId === "challenges") {
+      return "/videos/Q7_Gujarati.mp4"
+    }
+    if (language === "Odia" && questionId === "problem") {
+      return "/videos/Q1_Odia.mp4"
+    }
+    return "/videos/sample-pitch.mp4" // Default video
+  }
 
   // Sample languages and questions for the new dialog section
   const languages = [
@@ -310,7 +421,7 @@ export default function InvestorStudioPage() {
                       <Card className="overflow-hidden border-0 bg-muted/50">
                         <div className="aspect-[9/16] max-h-[500px] w-full flex items-center justify-center">
                           <video
-                            src="/videos/sample-pitch.mp4"
+                            src={getVideoSource(selectedLanguage, selectedQuestion.id?.toString() || "problem")}
                             poster="/assets/video-poster.jpg"
                             controls
                             className="w-full h-full object-cover rounded-[0.35rem]"

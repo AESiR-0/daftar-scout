@@ -56,7 +56,7 @@ export function TopNavRoot() {
       : "/login/investor";
 
   // Determine button text based on auth status
-  const buttonText = !isAuthenticated ? "Home" : "Try it for Free";
+  const buttonText = isAuthenticated ? "Home" : "Try it for Free";
 
   return (
     <div>

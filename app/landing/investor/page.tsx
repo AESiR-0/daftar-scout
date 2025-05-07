@@ -158,14 +158,14 @@ export default function InvestorPage() {
                 {study.content}
               </p>
             </div>
-            <div className="flex justify-between items-center">
+            {/* <div className="flex justify-between items-center">
               <p className="text-lg font-serif text-black/70">
                 {study.investment}
               </p>
               <span className="text-sm text-black/70 italic">
                 {study.source}
               </span>
-            </div>
+            </div> */}
           </article>
         ))}
       </div>
