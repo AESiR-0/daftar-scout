@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { NotificationPayload } from "@/lib/notifications/type";
-import { db } from "@/backend/database";
-import { users } from "@/backend/drizzle/models/users";
-import { eq } from "drizzle-orm";
 
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
@@ -243,15 +240,46 @@ function generateStandardNotificationEmail(
 ) {
   return {
     to: userEmail,
-    subject: "New Notification",
+    subject: "New Notification from DaftarOS",
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>New Notification</h2>
-        <p>${notification.message || ""}</p>
-        ${notification.url
-        ? `<a href="${notification.url}" style="color: #2196F3;">View Details</a>`
-        : ""
-      }
+      <div style="background-color: #f4f4f4; padding: 40px 20px; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          
+          <!-- Header -->
+          <div style="background-color: #0e0e0e; padding: 20px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 22px; margin: 0;">Daftar OS Technology</h1>
+          </div>
+  
+          <!-- Notification Content -->
+          <div style="padding: 30px;">
+            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${"New Notification"}</h2>
+            
+            <p style="color: #555555; font-size: 15px; margin-top: 20px; line-height: 1.6;">
+              ${notification.message || ""}
+            </p>
+  
+            ${notification.url ? `
+              <!-- CTA Button -->
+              <div style="text-align: center; margin: 40px 0 20px;">
+                <a href="${notification.url}" 
+                  style="background-color: #ff5a5f; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
+                  View Details
+                </a>
+              </div>
+            ` : ''}
+  
+            <!-- Footer Info -->
+            <div style="color: #999999; font-size: 13px; text-align: center; margin-top: 30px;">
+              DaftarOS Team<br/>
+              Building the Future of Startup Collaboration
+            </div>
+          </div>
+        </div>
+  
+        <!-- Bottom Footer -->
+        <div style="text-align: center; color: #aaaaaa; font-size: 12px; margin-top: 20px;">
+          © ${new Date().getFullYear()} Daftar OS Technology. All rights reserved.
+        </div>
       </div>
     `,
   };
@@ -262,16 +290,47 @@ function generateWelcomeEmail(userEmail: string, userName: string) {
     to: userEmail,
     subject: 'Welcome to DaftarOS!',
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Welcome to DaftarOS!</h2>
-        <p>Hello ${userName},</p>
-        <p>Thank you for joining DaftarOS. We're excited to have you on board!</p>
-        <p>Get started by exploring our platform and connecting with other members.</p>
-        <div style="margin-top: 20px;">
-          <a href="${BASE_URL}/dashboard" 
-             style="background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none;">
-            Go to Dashboard
-          </a>
+      <div style="background-color: #f4f4f4; padding: 40px 20px; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          
+          <!-- Header -->
+          <div style="background-color: #0e0e0e; padding: 20px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 22px; margin: 0;">Daftar OS Technology</h1>
+          </div>
+  
+          <!-- Welcome Message -->
+          <div style="padding: 30px;">
+            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">Welcome to DaftarOS!</h2>
+            
+            <p style="color: #555555; font-size: 16px; margin-top: 20px;">
+              Hello ${userName},
+            </p>
+  
+            <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
+              We're thrilled to have you join our community of innovators and entrepreneurs. DaftarOS is your platform to connect, collaborate, and create the next big thing.
+              <br /><br />
+              Get started by exploring our platform and connecting with other members. We're here to help you succeed!
+            </p>
+  
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 40px 0 20px;">
+              <a href="${BASE_URL}/dashboard" 
+                style="background-color: #ff5a5f; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
+                Go to Dashboard
+              </a>
+            </div>
+  
+            <!-- Footer Info -->
+            <div style="color: #999999; font-size: 13px; text-align: center; margin-top: 30px;">
+              DaftarOS Team<br/>
+              Building the Future of Startup Collaboration
+            </div>
+          </div>
+        </div>
+  
+        <!-- Bottom Footer -->
+        <div style="text-align: center; color: #aaaaaa; font-size: 12px; margin-top: 20px;">
+          © ${new Date().getFullYear()} Daftar OS Technology. All rights reserved.
         </div>
       </div>
     `,
