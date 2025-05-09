@@ -17,11 +17,14 @@ if (!SMTP2GO_USER || !SMTP2GO_PASSWORD) {
 const transporter = nodemailer.createTransport({
   host: 'mail.smtp2go.com',
   port: 2525,
-  secure: true,
+  secure: false,
   auth: {
     user: SMTP2GO_USER,
     pass: SMTP2GO_PASSWORD,
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 interface EmailOptions {
@@ -61,21 +64,54 @@ export function generatePitchTeamInviteEmail(
 
   return {
     to: userEmail,
-    subject: 'Pitch Team Invitation',
+    subject: `${notification.pitchName} invited you to join Daftar OS`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>Pitch Team Invitation</h2>
-        <p>You have been invited to join a pitch team as ${notification.designation}.</p>
-        <p>${notification.message || ''}</p>
-        <div style="margin-top: 20px;">
-          <a href="${acceptUrl}" 
-             style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; margin-right: 10px;">
-            Accept Invitation
-          </a>
-          <a href="${rejectUrl}" 
-             style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none;">
-            Decline Invitation
-          </a>
+      <div style="background-color: #f4f4f4; padding: 40px 20px; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          
+          <!-- Header -->
+          <div style="background-color: #0e0e0e; padding: 20px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 22px; margin: 0;">Daftar OS Technology</h1>
+          </div>
+  
+          <!-- Invitation Message -->
+          <div style="padding: 30px;">
+            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${notification.currentUsername} has invited you to the team as <span style="color: #ff5a5f;">${notification.designation}</span></h2>
+            
+            <p style="color: #555555; font-size: 16px; margin-top: 20px;">
+              Hey ${notification.invitedUsername},
+            </p>
+  
+            <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
+              I'm inviting you to join my pitch.
+              <br /><br />
+              I'm applying to the investor who's scouting startups. Check out their deal – I believe my startup idea can actually win here. I'm inviting you to join my team and pitch. Let's build the next big startup together.
+            </p>
+  
+            <!-- CTA Buttons -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${acceptUrl}" 
+                style="background-color: #ff5a5f; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block; margin-right: 10px;">
+                Join My Team
+              </a>
+              <a href="${rejectUrl}" 
+                style="background-color: #666666; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
+                Decline
+              </a>
+            </div>
+  
+            <!-- Footer Info -->
+            <div style="color: #999999; font-size: 13px; text-align: center; margin-top: 20px;">
+              ${notification.currentUsername}<br/>
+              ${notification.currentUserDesignation || notification.designation}<br/>
+              On Daftar Since ${notification.joinedTime || "2024"}
+            </div>
+          </div>
+        </div>
+  
+        <!-- Bottom Footer -->
+        <div style="text-align: center; color: #aaaaaa; font-size: 12px; margin-top: 20px;">
+          © ${new Date().getFullYear()} Daftar OS Technology. All rights reserved.
         </div>
       </div>
     `,

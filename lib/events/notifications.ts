@@ -29,7 +29,7 @@ export const notificationEvents: NotificationEvent[] = [
     channels: ["mail"],
     category: "none",
     audience: "invited_user",
-    description: "You’ve been invited to join a Daftar",
+    description: "You've been invited to join a Daftar",
   },
   {
     key: "daftar_member_added",
@@ -87,7 +87,7 @@ export const notificationEvents: NotificationEvent[] = [
     channels: ["popup", "mail"],
     category: "request",
     audience: "invited_daftars",
-    description: "You’ve been invited to collaborate on a scout",
+    description: "You've been invited to collaborate on a scout",
   },
   {
     key: "scout_collab_sent",
@@ -246,29 +246,29 @@ export const notificationEvents: NotificationEvent[] = [
     description: "Offer accepted by founder",
   },
 
-  // 🕒 Meetings (Both)
-  {
-    key: "meeting_requested",
-    roles: ["investor", "founder"],
-    channels: ["popup", "mail"],
-    category: "request",
-    audience: "meeting_members",
-    description: "Meeting scheduled and waiting for approval",
-  },
-  {
-    key: "meeting_declined",
-    roles: ["investor", "founder"],
-    channels: ["popup", "mail"],
-    category: "updates",
-    audience: "meeting_members",
-    description: "Meeting declined",
-  },
-  {
-    key: "meeting_deleted",
-    roles: ["investor", "founder"],
-    channels: ["popup", "mail"],
-    category: "updates",
-    audience: "meeting_members",
-    description: "Meeting deleted",
-  }
+  // // 🕒 Meetings (Both)
+  // {
+  //   key: "meeting_requested",
+  //   roles: ["investor", "founder"],
+  //   channels: ["popup", "mail"],
+  //   category: "request",
+  //   audience: "meeting_members",
+  //   description: "Meeting scheduled and waiting for approval",
+  // },
+  // {
+  //   key: "meeting_declined",
+  //   roles: ["investor", "founder"],
+  //   channels: ["popup", "mail"],
+  //   category: "updates",
+  //   audience: "meeting_members",
+  //   description: "Meeting declined",
+  // },
+  // {
+  //   key: "meeting_deleted",
+  //   roles: ["investor", "founder"],
+  //   channels: ["popup", "mail"],
+  //   category: "updates",
+  //   audience: "meeting_members",
+  //   description: "Meeting deleted",
+  // }
 ];

@@ -163,6 +163,7 @@ export const pitchTeam = pgTable("pitch_team", {
   userId: text("user_id").references(() => users.id, {
     onDelete: "cascade",
   }),
+  invitationAccepted: boolean("invitation_accepted"),
   designation: text("designation").notNull(),
   hasApproved: boolean("has_approved").default(false),
   pitchId: text("pitchId").references(() => pitch.id, { onDelete: "cascade" }),

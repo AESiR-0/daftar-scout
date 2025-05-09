@@ -58,6 +58,7 @@ export async function GET(req: NextRequest) {
         pitchId: pitchTeam.pitchId,
         designation: pitchTeam.designation,
         hasApproved: pitchTeam.hasApproved,
+        invitationAccepted: pitchTeam.invitationAccepted,
         firstName: users.name,
         lastName: users.lastName,
         email: users.email,
@@ -99,7 +100,7 @@ export async function GET(req: NextRequest) {
     const enrichedTeamData = teamData.map((member) => ({
       ...member,
       language: member.userId ? languagesByUser[member.userId] || [] : [],
-      status: member.hasApproved ? "active" : "pending",
+      status: member.invitationAccepted ? "active" : "pending",
     }));
 
     return NextResponse.json(
@@ -143,6 +144,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Get invited user details
     const userExist = await db
       .select()
       .from(users)
@@ -157,7 +159,9 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = userExist[0].id;
+    const invitedUserName = `${userExist[0].name || ''} ${userExist[0].lastName || ''}`.trim();
 
+    // Get pitch details
     const pitchExists = await db
       .select({ name: pitch.pitchName })
       .from(pitch)
@@ -170,6 +174,16 @@ export async function POST(req: NextRequest) {
 
     const { name: pitchName } = pitchExists[0];
 
+    // Get existing team members
+    const existingTeamMembers = await db
+      .select({ userId: pitchTeam.userId })
+      .from(pitchTeam)
+      .where(eq(pitchTeam.pitchId, pitchId));
+
+    const teamMemberIds = existingTeamMembers
+      .map(member => member.userId)
+      .filter((id): id is string => id !== null && id !== userId);
+
     const newTeamMember = await db
       .insert(pitchTeam)
       .values({
@@ -179,29 +193,25 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
-    // Notification for invited user
-    const notification = await createNotification({
+    // Notification for invited user (email with accept/reject)
+    await createNotification({
       type: "updates",
       subtype: "team_join",
-      title: "Pitch Invitation",
-      description: `You are invited to join the pitch team for ${pitchName} as ${
-        designation || "Team Member"
-      }`,
+      title: "Pitch Team Invitation",
+      description: `You have been invited to join ${pitchName} as ${designation || "Team Member"}`,
       targeted_users: [userId],
       role: "founder",
       payload: {
         pitchId,
         designation: designation || "Team Member",
-        message: `You have been invited to join the pitch team for ${pitchName} as ${
-          designation || "Team Member"
-        }`,
+        message: `You have been invited to join ${pitchName} as ${designation || "Team Member"}`,
         action: "invite",
         action_by: user.id,
         action_at: new Date().toISOString(),
       },
     });
 
-    // Send email notification
+    // Send email notification to invited user
     await sendNotificationEmail(
       {
         type: "updates",
@@ -210,9 +220,7 @@ export async function POST(req: NextRequest) {
         payload: {
           pitchId,
           designation: designation || "Team Member",
-          message: `You have been invited to join the pitch team for ${pitchName} as ${
-            designation || "Team Member"
-          }`,
+          message: `You have been invited to join ${pitchName} as ${designation || "Team Member"}`,
           action: "invite",
           action_by: user.id,
           action_at: new Date().toISOString(),
@@ -222,6 +230,26 @@ export async function POST(req: NextRequest) {
       },
       userId
     );
+
+    // Notification for existing team members
+    if (teamMemberIds.length > 0) {
+      await createNotification({
+        type: "updates",
+        subtype: "team_invite",
+        title: "New Team Member Invited",
+        description: `${invitedUserName} was invited to ${pitchName} as ${designation || "Team Member"}`,
+        targeted_users: teamMemberIds,
+        role: "founder",
+        payload: {
+          pitchId,
+          designation: designation || "Team Member",
+          message: `${invitedUserName} was invited to ${pitchName} as ${designation || "Team Member"}`,
+          action: "team_invite",
+          action_by: user.id,
+          action_at: new Date().toISOString(),
+        },
+      });
+    }
 
     return NextResponse.json(
       {

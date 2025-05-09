@@ -3,7 +3,7 @@ import { db } from "@/backend/database";
 import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { auth } from "@/auth";
 import { users } from "@/backend/drizzle/models/users";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     const userPitchTeams = await db
       .select({ pitchId: pitchTeam.pitchId })
       .from(pitchTeam)
-      .where(eq(pitchTeam.userId, dbUser.id));
+      .where(and(eq(pitchTeam.userId, dbUser.id), eq(pitchTeam.invitationAccepted, true)));
 
     const pitchIds = userPitchTeams
       .map((team) => team.pitchId)

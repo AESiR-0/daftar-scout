@@ -71,14 +71,6 @@ function generatePitchTeamInviteEmail(
               I'm applying to the investor who's scouting startups. Check out their deal – I believe my startup idea can actually win here. I'm inviting you to join my team and pitch. Let's build the next big startup together.
             </p>
   
-            <!-- Video Thumbnail -->
-            <div style="margin: 30px 0; text-align: center;">
-              <a href="${notification.videoUrl
-      }" target="_blank" style="display: inline-block;">
-                <img src="${notification.videoThumbnail || "/path/to/thumbnail.jpg"
-      }" alt="Investor Pitch Video" style="width: 100%; max-width: 500px; border-radius: 8px;">
-              </a>
-            </div>
   
             <!-- CTA Button -->
             <div style="text-align: center; margin-bottom: 30px;">

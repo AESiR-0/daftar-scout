@@ -9,10 +9,12 @@ import {
   sessions,
   verificationTokens,
 } from "@/backend/drizzle/models/users";
+import { sendWelcomeEmail } from "@/lib/notifications/listen";
 
 const ALLOWED_EMAILS = [
   "workbyprat@gmail.com",
   "pratiechellani@gmail.com",
+  "cyborgkiller1008@gmail.com",
   "ladraunak@gmail.com",
   "shuklarohit2105@gmail.com",
   "tech.kaushalya1@gmail.com",
@@ -90,38 +92,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
         
         // Create demo content for existing user if they don't have it
-      } else {
-        // Create a new temp user if no user exists
-        const [newUser] = await db
-          .insert(users)
-          .values({
-            name: user.name as string,
-            email: user.email,
-            role: "temp", // Assign a temporary role
-            image: user.image,
-          })
-          .returning();
-
-        // Link the new user with the OAuth account
-        await db.insert(accounts).values({
-          userId: newUser.id,
-          provider: account.provider,
-          providerAccountId: account.providerAccountId,
-          access_token: account.access_token,
-          refresh_token: account.refresh_token,
-          expires_at: account.expires_at,
-          token_type: account.token_type,
-          scope: account.scope,
-          type: "oauth",
-        });
-        
-        // Create demo content for the new user once they set their role
-        // Note: We can't create demo content here because the user role is still "temp"
-        // Demo content will be created when the user updates their role
-
         return true;
       }
 
+      // Create a new temp user if no user exists
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          name: user.name as string,
+          email: user.email,
+          role: "temp", // Assign a temporary role
+          image: user.image,
+        })
+        .returning();
+
+      // Link the new user with the OAuth account
+      await db.insert(accounts).values({
+        userId: newUser.id,
+        provider: account.provider,
+        providerAccountId: account.providerAccountId,
+        access_token: account.access_token,
+        refresh_token: account.refresh_token,
+        expires_at: account.expires_at,
+        token_type: account.token_type,
+        scope: account.scope,
+        type: "oauth",
+      });
+
+      // Send welcome email to new user
+      await sendWelcomeEmail(user.email, user.name || "");
+      
       return true;
     },
 

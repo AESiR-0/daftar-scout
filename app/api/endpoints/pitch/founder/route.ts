@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
   await db.insert(pitchTeam).values({
     pitchId: pitchId,
     userId: userId,
-    designation: 'Founder',
-    hasApproved: true,
+    designation: 'Founder', 
+    invitationAccepted: true,
   })
 
   return NextResponse.json({ pitchId });

@@ -204,12 +204,7 @@ export const emailTemplates = {
           <p>Hello ${notification.userName},</p>
           <p>Thank you for joining DaftarOS. We're excited to have you on board!</p>
           <p>Get started by exploring our platform and connecting with other members.</p>
-          <div style="margin-top: 20px;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL}/dashboard" 
-               style="background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none;">
-              Go to Dashboard
-            </a>
-          </div>
+        
         </div>
       `,
     }),
