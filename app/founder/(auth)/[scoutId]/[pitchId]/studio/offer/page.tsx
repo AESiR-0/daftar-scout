@@ -27,21 +27,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePitch } from "@/contexts/PitchContext";
 import { usePathname } from "next/navigation";
 
+interface ActionHistory {
+  action: string;
+  timestamp: string;
+  takenBy: {
+    name: string;
+    lastName: string | null;
+  };
+}
+
 interface Offer {
   id: string;
   pitchId: string;
-  scoutName: string; // Mapped from investor_id
-  collaboration: string; // Mapped from offer_desc
+  userName: string;
+  userLastName: string | null;
+  collaboration: string;
   status: "pending" | "accepted" | "rejected" | "withdrawn";
-  date: string; // Mapped from offer_sent_at
-  responses?: ActionLog[];
-}
-
-interface ActionLog {
-  action: "accepted" | "rejected" | "withdrawn" | "Offer Received";
-  reason: string;
-  timestamp: string;
-  user: FounderProfileProps;
+  date: string;
+  actions: ActionHistory[];
 }
 
 export default function OffersPage() {
@@ -58,19 +61,6 @@ export default function OffersPage() {
   const [currentAction, setCurrentAction] = useState<"withdraw" | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Dummy user for action logs (replace with auth user later)
-  const currentUser: FounderProfileProps = {
-    founder: {
-      name: "Alex Johnson",
-      age: "25",
-      designation: "Founder",
-      email: "alex.johnson@example.com",
-      phone: "1234567890",
-      gender: "Male",
-      location: "New York, NY",
-      language: ["English"],
-    },
-  };
 
   // Fetch offers on mount
   useEffect(() => {
@@ -92,21 +82,12 @@ export default function OffersPage() {
       const mappedOffers: Offer[] = data.map((offer: any) => ({
         id: offer.id.toString(),
         pitchId: offer.pitch_id,
-        scoutName: offer.investor_id, // Replace with actual investor name if available
+        userName: offer.userName,
+        userLastName: offer.userLastName,
         collaboration: offer.offer_desc,
-        status:
-          offer.status === "accepted" || offer.status === "rejected"
-            ? offer.status
-            : "pending",
+        status: offer.status || "pending",
         date: formatDate(offer.offer_sent_at),
-        responses: [
-          {
-            action: "Offer Received",
-            reason: "",
-            timestamp: formatDate(offer.created_at),
-            user: currentUser, // Placeholder; fetch actual user if available
-          },
-        ],
+        actions: offer.actions || [],
       }));
 
       setOffers(mappedOffers);
@@ -134,10 +115,9 @@ export default function OffersPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
-          offerId: 2,
+          offerId: id,
           action,
           notes: reason,
-          actionTakenBy: currentUser.founder.email, // Replace with auth user ID
         }),
       });
 
@@ -146,24 +126,8 @@ export default function OffersPage() {
         throw new Error(errorData.error || "Failed to update offer");
       }
 
-      const newResponse: ActionLog = {
-        action,
-        reason,
-        timestamp: formatDate(new Date().toISOString()),
-        user: currentUser,
-      };
-
-      setOffers((prev) =>
-        prev.map((offer) =>
-          offer.id === id
-            ? {
-                ...offer,
-                status: action,
-                responses: [...(offer.responses || []), newResponse],
-              }
-            : offer
-        )
-      );
+      // Refresh offers after update
+      await fetchOffers();
 
       toast({
         title: `Offer ${action === "accepted" ? "Accepted" : "Declined"}`,
@@ -186,15 +150,14 @@ export default function OffersPage() {
   const handleWithdraw = async (id: string, reason: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/endpoints/pitch/founder/offers", {
+      const response = await fetch("/api/endpoints/pitch/founder/offer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
           offerId: id,
-          action: "rejected", // Withdraw maps to "rejected" in API
-          notes: `Withdrawn: ${reason}`,
-          actionTakenBy: currentUser.founder.email,
+          action: "withdrawn",
+          notes: reason,
         }),
       });
 
@@ -203,24 +166,8 @@ export default function OffersPage() {
         throw new Error(errorData.error || "Failed to withdraw offer");
       }
 
-      const newResponse: ActionLog = {
-        action: "withdrawn",
-        reason,
-        timestamp: formatDate(new Date().toISOString()),
-        user: currentUser,
-      };
-
-      setOffers((prev) =>
-        prev.map((offer) =>
-          offer.id === id
-            ? {
-                ...offer,
-                status: "withdrawn",
-                responses: [...(offer.responses || []), newResponse],
-              }
-            : offer
-        )
-      );
+      // Refresh offers after update
+      await fetchOffers();
 
       toast({
         title: "Offer Withdrawn",
@@ -323,44 +270,36 @@ Offers from investors will be shared here."</p>
                     <div className="flex flex-col gap-2">
                       <div className="bg-muted/5 rounded-[0.35rem] p-4">
                         <p className="text-sm text-muted-foreground">
-                          Offer from {offer.scoutName}: {offer.collaboration}
+                          Offer from {offer.userName} {offer.userLastName || ''}
                         </p>
-                        <time className="text-xs text-muted-foreground self-end">
+                        <p className="text-sm text-muted-foreground mt-2">
+                          {offer.collaboration}
+                        </p>
+                        <time className="text-xs text-muted-foreground block mt-2">
                           {offer.date}
                         </time>
                       </div>
                     </div>
 
-                    {offer.responses && offer.responses.length > 0 && (
-                      <div className="mt-6 space-y-4">
-                        {offer.responses
-                          .filter(
-                            (response) => response.action !== "Offer Received"
-                          )
-                          .map((response, index) => (
-                            <div key={index} className="flex flex-col gap-2">
-                              <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
-                                <p className="text-sm text-muted-foreground">
-                                  {response.reason}
-                                </p>
-                                <div className="items-center gap-2 text-xs text-muted-foreground">
-                                  <span className="capitalize">
-                                    {response.action} by
-                                  </span>
-                                  <FounderProfile
-                                    founder={response.user.founder}
-                                  />
-                                </div>
-                                <time className="text-xs text-muted-foreground self-end">
-                                  {response.timestamp}
-                                </time>
+                    {offer.actions && offer.actions.length > 0 && (
+                      <div className=" space-y-4">
+                        {offer.actions.map((action, index) => (
+                          <div key={index} className="flex flex-col gap-2">
+                            <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <span className="capitalize">{action.action} by</span>
+                                <span>{action.takenBy.name} {action.takenBy.lastName || ''}</span>
                               </div>
+                              <time className="text-xs text-muted-foreground">
+                                {formatDate(action.timestamp)}
+                              </time>
                             </div>
-                          ))}
+                          </div>
+                        ))}
                       </div>
                     )}
 
-                    {offer.status === "accepted" && (
+                    {/* {offer.status === "accepted" && (
                       <div className="flex justify-start mt-4">
                         <Button
                           className="bg-muted hover:bg-muted/50"
@@ -374,7 +313,7 @@ Offers from investors will be shared here."</p>
                           Withdraw
                         </Button>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 ))}
               </div>
@@ -393,7 +332,7 @@ Offers from investors will be shared here."</p>
             <div className="space-y-4">
               <div className="space-y-2">
                 <h3 className="font-semibold">Scout Information</h3>
-                <p className="text-lg">{selectedOffer.scoutName}</p>
+                <p className="text-lg">{selectedOffer.userName} {selectedOffer.userLastName || ''}</p>
                 <p className="text-sm text-muted-foreground">
                   Submitted on {selectedOffer.date}
                 </p>
@@ -406,17 +345,17 @@ Offers from investors will be shared here."</p>
 
               <div className="space-y-2">
                 <h3 className="font-semibold">Responses</h3>
-                {selectedOffer.responses?.map((response, index) => (
+                {selectedOffer.actions?.map((action, index) => (
                   <div key={index} className="text-sm">
                     <span className="text-muted-foreground">
-                      {response.timestamp}
+                      {formatDate(action.timestamp)}
                     </span>
                     <p>
-                      {response.action} by{" "}
-                      <FounderProfile founder={response.user.founder} />
+                      {action.action} by{" "}
+                      <span>{action.takenBy.name} {action.takenBy.lastName || ''}</span>
                     </p>
-                    {response.reason && (
-                      <p className="text-muted-foreground">{response.reason}</p>
+                    {action.action !== "withdrawn" && (
+                      <p className="text-muted-foreground">{action.takenBy.name} {action.takenBy.lastName || ''}</p>
                     )}
                   </div>
                 ))}
@@ -455,9 +394,7 @@ function OfferCard({
   onWithdraw: (reason: string) => void;
 }) {
   const [showActionDialog, setShowActionDialog] = useState(false);
-  const [currentAction, setCurrentAction] = useState<
-    "decline" | "withdraw" | null
-  >(null);
+  const [currentAction, setCurrentAction] = useState<"decline" | "withdraw" | null>(null);
 
   const handleAction = (action: "accept" | "decline" | "withdraw") => {
     if (action === "accept") {
@@ -485,31 +422,29 @@ function OfferCard({
     <div className="flex flex-col gap-4">
       <div className="bg-muted/50 rounded-[0.35rem] p-4">
         <p className="text-sm text-muted-foreground">
-          Offer from {offer.scoutName}: {offer.collaboration}
+          Offer from {offer.userName} {offer.userLastName || ''}
         </p>
-        <time className="text-xs text-muted-foreground">{offer.date}</time>
+        <p className="text-sm text-muted-foreground mt-2">
+          {offer.collaboration}
+        </p>
+        <time className="text-xs text-muted-foreground block mt-2">{offer.date}</time>
       </div>
 
-      {offer.responses && offer.responses.length > 0 && (
+      {offer.actions && offer.actions.length > 0 && (
         <div className="space-y-4">
-          {offer.responses
-            .filter((response) => response.action !== "Offer Received")
-            .map((response, index) => (
-              <div key={index} className="flex flex-col gap-2">
-                <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="capitalize">{response.action} by</span>
-                    <FounderProfile founder={response.user.founder} />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {response.reason}
-                  </p>
+          {offer.actions.map((action, index: number) => (
+            <div key={index} className="flex flex-col gap-2">
+              <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="capitalize">{action.action} by</span>
+                  <span>{action.takenBy.name} {action.takenBy.lastName || ''}</span>
                 </div>
                 <time className="text-xs text-muted-foreground">
-                  {response.timestamp}
+                  {formatDate(action.timestamp)}
                 </time>
               </div>
-            ))}
+            </div>
+          ))}
         </div>
       )}
 

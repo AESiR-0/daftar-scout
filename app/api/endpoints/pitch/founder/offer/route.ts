@@ -9,16 +9,19 @@ import {
   pitchFocusSectors,
   focusSectors,
 } from "@/backend/drizzle/models/pitch";
+import { scouts } from "@/backend/drizzle/models/scouts";
 import { users } from "@/backend/drizzle/models/users";
+import { daftarScouts } from "@/backend/drizzle/models/scouts";
+import { daftarInvestors } from "@/backend/drizzle/models/daftar";
 import { eq, and, inArray } from "drizzle-orm";
 import { createNotification } from "@/lib/notifications/insert";
+import { alias } from "drizzle-orm/pg-core";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const pitchId = searchParams.get("pitchId");
 
-    // Fetch offers for the pitch
     if (!pitchId) {
       return NextResponse.json(
         { error: "pitchId is required" },
@@ -26,7 +29,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const pitchOffers = await db
+    const actionTaker = alias(users, "actionTaker");
+
+    // Get offers with user details and actions
+    const result = await db
       .select({
         id: offers.id,
         pitch_id: offers.pitchId,
@@ -35,11 +41,51 @@ export async function GET(req: NextRequest) {
         status: offers.offerStatus,
         offer_sent_at: offers.offeredAt,
         created_at: offers.offeredAt,
+        userName: users.name,
+        userLastName: users.lastName,
+        action: offerActions.action,
+        actionTakenAt: offerActions.actionTakenAt,
+        actionTakerName: actionTaker.name,
+        actionTakerLastName: actionTaker.lastName,
       })
       .from(offers)
+      .leftJoin(users, eq(users.id, offers.offerBy))
+      .leftJoin(offerActions, eq(offerActions.offerId, offers.id))
+      .leftJoin(actionTaker, eq(actionTaker.id, offerActions.actionTakenBy))
       .where(eq(offers.pitchId, pitchId));
 
-    return NextResponse.json(pitchOffers, { status: 200 });
+    // Group actions by offer
+    const offersMap = result.reduce((acc, row) => {
+      if (!acc[row.id]) {
+        acc[row.id] = {
+          id: row.id,
+          pitch_id: row.pitch_id,
+          investor_id: row.investor_id,
+          offer_desc: row.offer_desc,
+          status: row.status,
+          offer_sent_at: row.offer_sent_at,
+          created_at: row.created_at,
+          userName: row.userName,
+          userLastName: row.userLastName,
+          actions: [],
+        };
+      }
+
+      if (row.action && row.actionTakenAt && row.actionTakerName) {
+        acc[row.id].actions.push({
+          action: row.action,
+          timestamp: row.actionTakenAt,
+          takenBy: {
+            name: row.actionTakerName,
+            lastName: row.actionTakerLastName,
+          },
+        });
+      }
+
+      return acc;
+    }, {} as Record<string, any>);
+
+    return NextResponse.json(Object.values(offersMap));
   } catch (error) {
     console.error("Error fetching offers:", error);
     return NextResponse.json(
@@ -65,192 +111,164 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const userId = await db
-      .select({ id: users.id })
+
+    // Get user details
+    const userDetails = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        lastName: users.lastName,
+      })
       .from(users)
-      .where(eq(users.email, user.email));
-    if (!userId.length) {
+      .where(eq(users.email, user.email))
+      .limit(1);
+
+    if (!userDetails.length) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-    const actionTakenBy = userId[0].id;
+
+    const actionTakenBy = userDetails[0].id;
     const body = await req.json();
     const { offerId, action, notes, pitchId } = body;
 
-    // Validate path parameter
-    if (!pitchId) {
+    // Validate input
+    if (!pitchId || !offerId || !action || !actionTakenBy) {
       return NextResponse.json(
-        { error: "pitch_id is required" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Parse request body
-
-    // Manual validation
-    if (!offerId || !Number.isInteger(offerId) || offerId < 1) {
-      return NextResponse.json(
-        { error: "offerId is required and must be a positive integer" },
-        { status: 400 }
-      );
-    }
-    if (!action || (action !== "accepted" && action !== "rejected")) {
-      return NextResponse.json(
-        { error: "action is required and must be 'accepted' or 'rejected'" },
-        { status: 400 }
-      );
-    }
-    if (!actionTakenBy) {
-      return NextResponse.json(
-        { error: "actionTakenBy is required" },
-        { status: 400 }
-      );
-    }
-
-    // Verify the offer belongs to this pitch
-    const offerCheck = await db
-      .select()
+    // Get the offer details
+    const offerDetails = await db
+      .select({
+        id: offers.id,
+        offerBy: offers.offerBy,
+      })
       .from(offers)
-      .where(and(eq(offers.id, offerId), eq(offers.pitchId, pitchId)))
+      .where(eq(offers.id, offerId))
       .limit(1);
 
-    if (offerCheck.length === 0) {
+    if (!offerDetails.length) {
       return NextResponse.json(
         { error: "Offer not found or not associated with this pitch" },
         { status: 404 }
       );
     }
 
-    // Insert or update the offer action
-    const existingAction = await db
-      .select()
-      .from(offerActions)
-      .where(eq(offerActions.offerId, offerId))
-      .limit(1);
-
-    if (existingAction.length > 0) {
-      // Update existing action
-      await db
-        .update(offerActions)
-        .set({
-          isActionTaken: true,
-          action,
-          actionTakenBy,
-          actionTakenAt: new Date(),
-        })
-        .where(eq(offerActions.offerId, offerId));
-    } else {
-      // Insert new action
-      await db.insert(offerActions).values({
-        offerId,
-        isActionTaken: true,
-        action,
-        actionTakenBy,
-        actionTakenAt: new Date(),
-      });
-    }
-
-    if (action === "accepted" || action === "Accepted") {
-      const userInPitch = await db
-        .select({ id: pitchTeam.userId })
-        .from(pitchTeam)
-        .where(eq(pitchTeam.pitchId, pitchId));
-
-      const userIds = userInPitch
-        .map((user) => user.id)
-        .filter((id) => id !== null);
-      const userNameAge = await db
-        .select({ name: users.name, lastName: users.lastName, age: users.dob })
-        .from(users)
-        .where(inArray(users.id, userIds));
-      const userNameAgeArray = userNameAge.map((user) => {
-        const age = user.age ? parseInt(user.age, 10) : 0;
-        return `${user.name} ${user.lastName} (${age} yrs)`;
-      });
-      const pitchDetails = await db
-        .select({ location: pitch.location, stage: pitch.stage, pitchName: pitch.pitchName })
-        .from(pitch)
-        .where(eq(pitch.id, pitchId));
-      if (pitchDetails.length === 0) {
-        return NextResponse.json({ error: "Pitch not found" }, { status: 404 });
-      }
-      await createNotification({
-        type: "news",
-        subtype: "offer_accepted",
-        title: ` Congratulations to ${userNameAgeArray} from ${pitchDetails[0].location}.`,
-        description: `Their pitch is now backed by Daftar, disrupting the [Sector] at the ${pitchDetails[0].stage}. Team Daftar OS is excited to see the incredible value they'll bring to their stakeholders.`,
-        payload: {
-          pitchId,
-          pitchName: pitchDetails[0].pitchName,
-          stage: pitchDetails[0].stage ?? '',
-        }
-      });
-    }
-
-    // Update offer status in offers table
+    // Update offer status
     await db
       .update(offers)
       .set({
         offerStatus: action,
-        offerDescription: notes
-          ? `${offerCheck[0].offerDescription} | Notes: ${notes}`
-          : offerCheck[0].offerDescription,
       })
       .where(eq(offers.id, offerId));
-    if (action === "accepted" || action === "Accepted") {
-      const userInPitch = await db
-        .select({ id: pitchTeam.userId })
-        .from(pitchTeam)
-        .where(eq(pitchTeam.pitchId, pitchId));
 
-      const userIds = userInPitch
-        .map((user) => user.id)
-        .filter((id) => id !== null);
-      const userNameAge = await db
-        .select({ name: users.name, lastName: users.lastName, age: users.dob })
-        .from(users)
-        .where(inArray(users.id, userIds));
-      const userNameAgeArray = userNameAge.map((user) => {
-        const age = user.age ? parseInt(user.age, 10) : 0;
-        return `${user.name} ${user.lastName} (${age} yrs)`;
-      });
+    // Record the action
+    await db.insert(offerActions).values({
+      offerId,
+      isActionTaken: true,
+      action,
+      actionTakenBy,
+      actionTakenAt: new Date(),
+    });
+
+    let targetedUsers: string[] = [];
+
+    if (action === "accepted") {
+      // For accepted offers, notify everyone (empty array means all users)
+      targetedUsers = [];
+    } else {
+      // Get pitch details to find scoutId
       const pitchDetails = await db
-        .select({ location: pitch.location, stage: pitch.stage, pitchName: pitch.pitchName })
+        .select({
+          scoutId: pitch.scoutId,
+          pitchName: pitch.pitchName,
+        })
         .from(pitch)
-        .where(eq(pitch.id, pitchId));
+        .where(eq(pitch.id, pitchId))
+        .limit(1);
 
-      const sectorList = await db
-        .select({ sectorName: focusSectors.sectorName })
-        .from(pitchFocusSectors)
-        .innerJoin(
-          focusSectors,
-          eq(pitchFocusSectors.focusSectorId, focusSectors.id)
-        )
-        .where(eq(pitchFocusSectors.pitchId, pitchId));
+      if (pitchDetails.length > 0 && pitchDetails[0].scoutId) {
+        // Get scout details
+        const scoutDetails = await db
+          .select({
+            scoutName: scouts.scoutName,
+          })
+          .from(scouts)
+          .where(eq(scouts.scoutId, pitchDetails[0].scoutId))
+          .limit(1);
 
-      await createNotification({
-        type: "news",
-        subtype: "offer_accepted",
-        title: ` Congratulations to ${userNameAgeArray} from ${pitchDetails[0].location}.`,
-        description: `Their pitch is now backed by Daftar, disrupting the ${sectorList
-          .map((sector) => sector.sectorName)
-          .join(", ")} sector(s) at the ${pitchDetails[0].stage
-          }. Team Daftar OS is excited to see the incredible value they'll bring to their stakeholders.`,
-        payload: {
-          pitchId,
-          pitchName: pitchDetails[0].pitchName || "undefined",
-          stage: pitchDetails[0].stage || "undefined",
-          sector: sectorList.map(sector => sector.sectorName),
-        }
-      });
+        // Get all Daftar IDs associated with the scout
+        const daftarIds = await db
+          .select({
+            daftarId: daftarScouts.daftarId,
+          })
+          .from(daftarScouts)
+          .where(eq(daftarScouts.scoutId, pitchDetails[0].scoutId));
+
+        // Filter out any null daftarIds
+        const validDaftarIds = daftarIds
+          .map(d => d.daftarId)
+          .filter((id): id is string => id !== null);
+
+        // Get all investors from these Daftar groups
+        const investors = validDaftarIds.length > 0
+          ? await db
+              .select({
+                investorId: daftarInvestors.investorId,
+              })
+              .from(daftarInvestors)
+              .where(inArray(daftarInvestors.daftarId, validDaftarIds))
+          : [];
+
+        // Get pitch team members
+        const pitchTeamMembers = await db
+          .select({
+            userId: pitchTeam.userId,
+          })
+          .from(pitchTeam)
+          .where(eq(pitchTeam.pitchId, pitchId));
+
+        // Combine all users, filter nulls, and remove duplicates
+        targetedUsers = [
+          ...new Set([
+            ...pitchTeamMembers.map((m) => m.userId),
+            ...investors.map((i) => i.investorId),
+            offerDetails[0].offerBy,
+          ].filter((id): id is string => id !== null)),
+        ];
+
+        // Create notification
+        await createNotification({
+          type: action === "accepted" ? "news" : "alert",
+          subtype: action === "accepted" ? "offer_accepted" : "offer_rejected",
+          title: `Offer for pitch "${pitchDetails[0].pitchName}" ${action}`,
+          description: `Offer for pitch "${pitchDetails[0].pitchName}" has been ${action} by ${
+            userDetails[0].name
+          } ${userDetails[0].lastName || ""} via ${scoutDetails[0]?.scoutName || "scout"}`,
+          role: "investor",
+          targeted_users: targetedUsers,
+          payload: {
+            action_at: new Date().toISOString(),
+            message: notes,
+            pitchId,
+            pitchName: pitchDetails[0].pitchName,
+            scout_id: pitchDetails[0].scoutId,
+            scoutName: scoutDetails[0]?.scoutName,
+          },
+        });
+      }
     }
-    return NextResponse.json(
-      { status: "success", message: "Offer action taken successfully" },
-      { status: 200 }
-    );
+
+    return NextResponse.json({
+      status: "success",
+      message: "Offer action recorded successfully",
+    });
   } catch (error) {
-    console.error("Error processing offer action:", error);
+    console.error("Error updating offer:", error);
     return NextResponse.json(
-      { error: "Failed to process offer action" },
+      { error: "Failed to update offer" },
       { status: 500 }
     );
   }

@@ -49,7 +49,7 @@ export async function GET() {
         type: "scout_link",
         title: "Scout is now live",
         description: `${scout.scoutName} just got active. Share with your friends.`,
-        role: "both",
+        role: "investor",
         targeted_users: userIds,
         payload: {
           message: `${scout.scoutName} just got active. Share with your friends.`,

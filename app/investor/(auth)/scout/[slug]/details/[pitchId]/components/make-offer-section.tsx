@@ -30,14 +30,14 @@ interface Offer {
   id: string;
   scoutName: string;
   collaboration: string[];
-  status: "pending" | "completed" | "declined" | "withdrawn";
-  type: "sent" | "accepted" | "withdrawn";
+  status: "pending" | "accepted" | "rejected" | "withdrawn";
+  type: "sent" | "accepted" | "withdrawn" | "rejected";
   date: string;
   responses?: ActionLog[];
 }
 
 interface ActionLog {
-  action: "accepted" | "declined" | "withdrawn" | "Offer Sent";
+  action: "accepted" | "withdrawn" | "Offer Sent" | "rejected";
   reason: string;
   timestamp: string;
   user: {
@@ -68,7 +68,7 @@ export function MakeOfferSection({
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const { toast } = useToast();
   const [historyFilter, setHistoryFilter] = useState<
-    "all" | "pending" | "completed" | "declined" | "withdrawn"
+    "all" | "pending" | "accepted" | "rejected" | "withdrawn"
   >("all");
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -92,14 +92,8 @@ export function MakeOfferSection({
         id: offer.id.toString(),
         scoutName: "Scout Name",
         collaboration: ["Collaboration Partner"],
-        status:
-          offer.offerStatus === "accepted" ? "completed" : offer.offerStatus,
-        type:
-          offer.offerStatus === "accepted"
-            ? "accepted"
-            : offer.offerStatus === "withdrawn"
-            ? "withdrawn"
-            : "sent",
+        status: offer.offerStatus,
+        type: offer.offerStatus,
         date: formatDate(offer.offeredAt),
         responses: [
           {
@@ -337,8 +331,8 @@ export function MakeOfferSection({
                   value:
                     | "all"
                     | "pending"
-                    | "completed"
-                    | "declined"
+                    | "accepted"
+                    | "rejected"
                     | "withdrawn"
                 ) => setHistoryFilter(value)}
               >
@@ -348,8 +342,8 @@ export function MakeOfferSection({
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="completed">Accepted</SelectItem>
-                  <SelectItem value="declined">Declined</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
                   <SelectItem value="withdrawn">Withdrawn</SelectItem>
                 </SelectContent>
               </Select>
@@ -376,17 +370,24 @@ export function MakeOfferSection({
                               {offer.responses?.[0].reason}
                             </p>
                             <time className="text-xs text-muted-foreground self-end">
-                              {offer.type === "withdrawn" ? "Withdrawn at: " : ""}{offer.date}
+                              {offer.status === "withdrawn"
+                                ? "Withdrawn at: "
+                                : offer.status === "accepted"
+                                  ? "Accepted at: "
+                                  : offer.status === "rejected"
+                                    ? "Rejected at: "
+                                    : ""}{offer.date}
                             </time>
                           </div>
                         </div>
 
                         {offer.responses && offer.responses.length > 1 && (
                           <div className="mt-6 space-y-4">
-                            {offer.responses
+                            {[...offer.responses]
                               .filter(
                                 (response) => response.action !== "Offer Sent"
                               )
+                              .reverse()
                               .map((response, index) => (
                                 <div key={index} className="flex flex-col gap-2">
                                   <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
@@ -403,7 +404,13 @@ export function MakeOfferSection({
                                       />
                                     </div>
                                     <time className="text-xs text-muted-foreground self-end">
-                                      {response.action === "withdrawn" ? "Withdrawn at: " : ""}{response.timestamp}
+                                      {response.action === "withdrawn"
+                                        ? "Withdrawn at: "
+                                        : response.action === "accepted"
+                                          ? "Accepted at: "
+                                          : response.action === "rejected"
+                                            ? "Rejected at: "
+                                            : ""}{response.timestamp}
                                     </time>
                                   </div>
                                 </div>
@@ -555,14 +562,14 @@ function OfferCard({
     if (!lastLog?.user?.founder) return null;
 
     switch (offer.status) {
-      case "completed":
+      case "accepted":
         return {
           text: "Accepted by: ",
           user: lastLog.user.founder,
         };
-      case "declined":
+      case "rejected":
         return {
-          text: "Declined by: ",
+          text: "Rejected by: ",
           user: lastLog.user.founder,
         };
       case "withdrawn":

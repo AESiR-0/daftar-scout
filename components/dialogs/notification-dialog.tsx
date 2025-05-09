@@ -38,7 +38,15 @@ export interface NotificationPayload {
   action_at?: string;
   scout_id?: string;
   url?: string;
+  pitchName?: string;
+  pitchId?: string;
 }
+
+type NotificationDetails = {
+  pitchName?: string;
+  scoutName?: string;
+  daftarName?: string;
+};
 
 type Notification = {
   id: string;
@@ -78,6 +86,7 @@ export function NotificationDialog({
     role === "investor" ? "scout-requests" : "updates"
   );
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationDetails, setNotificationDetails] = useState<Record<string, NotificationDetails>>({});
 
   const pathname = usePathname();
   const scoutId =
@@ -247,6 +256,41 @@ export function NotificationDialog({
     }
   };
 
+  // Fetch details for notifications
+  useEffect(() => {
+    const fetchNotificationDetails = async (notification: Notification) => {
+      if (!notification.payload.scout_id && !notification.payload.pitchId) return;
+
+      try {
+        const res = await fetch(
+          `/api/endpoints/notifications/details?${
+            notification.payload.scout_id ? `scoutId=${notification.payload.scout_id}` : ''
+          }${
+            notification.payload.pitchId ? `&pitchId=${notification.payload.pitchId}` : ''
+          }${
+            notification.payload.daftar_id ? `&daftarId=${notification.payload.daftar_id}` : ''
+          }`
+        );
+        
+        if (!res.ok) throw new Error('Failed to fetch details');
+        
+        const data = await res.json();
+        setNotificationDetails(prev => ({
+          ...prev,
+          [notification.id]: data
+        }));
+      } catch (error) {
+        console.error('Error fetching notification details:', error);
+      }
+    };
+
+    notifications.forEach(notification => {
+      if (notification.type === 'request' || notification.type === 'updates' || notification.type === 'scout_link') {
+        fetchNotificationDetails(notification);
+      }
+    });
+  }, [notifications]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl p-0 flex gap-0">
@@ -290,6 +334,11 @@ export function NotificationDialog({
                         <div className="p-4 space-y-4">
                           <div className="space-y-2">
                             <h1>Collaboration</h1>
+                            {notificationDetails[notification.id]?.scoutName && (
+                              <p className="text-sm text-muted-foreground">
+                                Scout: {notificationDetails[notification.id].scoutName}
+                              </p>
+                            )}
                           </div>
 
                           <p className="text-sm text-muted-foreground">
@@ -298,16 +347,11 @@ export function NotificationDialog({
                               : notification.payload.action}
                           </p>
                           <div className="space-y-1">
-                            <p className="text-xs text-muted-foreground">
-                              {notification.payload.daftar_id
-                                ? `Scout for Daftar ${notification.payload.daftar_id}`
-                                : "Scout : Unknown"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Daftar:{" "}
-                              {notification.payload.daftar_id ||
-                                "Unknown Daftar"}
-                            </p>
+                            {notificationDetails[notification.id]?.daftarName && (
+                              <p className="text-xs text-muted-foreground">
+                                Daftar: {notificationDetails[notification.id].daftarName}
+                              </p>
+                            )}
                             <time className="text-xs text-muted-foreground block">
                               Requested on {formatDate(notification.created_at)}
                             </time>
@@ -375,20 +419,20 @@ export function NotificationDialog({
                         <div className="p-4 space-y-2">
                           <div className="flex items-center justify-between">
                             <h4 className="text-sm font-medium">
-                              {notification.payload.daftar_id
-                                ? `Scout Link : ${notification.payload.scout_id}`
-                                : "Unknown Scout"}
+                              {notificationDetails[notification.id]?.scoutName
+                                ? `Scout Link: ${notificationDetails[notification.id].scoutName}`
+                                : "Scout Link"}
                             </h4>
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            Daftar:{" "}
-                            {notification.payload.daftar_id || "Unknown Daftar"}
-                          </p>
+                          {notificationDetails[notification.id]?.daftarName && (
+                            <p className="text-xs text-muted-foreground">
+                              Daftar: {notificationDetails[notification.id].daftarName}
+                            </p>
+                          )}
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>
                               Created on {formatDate(notification.created_at)}
                             </span>
-                            <span>0 collaborators</span>
                           </div>
                           <div className="flex gap-2 mt-2">
                             <Button
@@ -441,6 +485,20 @@ export function NotificationDialog({
                               ? notification.description
                               : "No additional details"}
                           </p>
+                          {notificationDetails[notification.id] && (
+                            <div className="space-y-1 mt-2">
+                              {notificationDetails[notification.id].pitchName && (
+                                <p className="text-xs text-muted-foreground">
+                                  Pitch: {notificationDetails[notification.id].pitchName}
+                                </p>
+                              )}
+                              {notificationDetails[notification.id].scoutName && (
+                                <p className="text-xs text-muted-foreground">
+                                  Scout: {notificationDetails[notification.id].scoutName}
+                                </p>
+                              )}
+                            </div>
+                          )}
                           <time className="text-xs text-muted-foreground">
                             {formatDate(notification.created_at)}
                           </time>

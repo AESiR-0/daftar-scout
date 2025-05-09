@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       process.env.GOOGLE_CLIENT_SECRET,
       process.env.GOOGLE_REDIRECT_URI
     );
-    
+
     oauth2Client.setCredentials({
       access_token: account.access_token,
       refresh_token: account.refresh_token,

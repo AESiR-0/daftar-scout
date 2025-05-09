@@ -3,6 +3,9 @@ import { db } from "@/backend/database";
 import { offers, pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 import { createNotification } from "@/lib/notifications/insert";
+import { users } from "@/backend/drizzle/models/users";
+import { scouts } from "@/backend/drizzle/models/scouts";
+import { NotificationPayload } from "@/lib/notifications/type";
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,7 +23,11 @@ export async function GET(req: NextRequest) {
 
     // Verify pitch exists and matches scoutId
     const pitchCheck = await db
-      .select()
+      .select({
+        id: pitch.id,
+        scoutId: pitch.scoutId,
+        pitchName: pitch.pitchName,
+      })
       .from(pitch)
       .where(and(eq(pitch.id, pitchId), eq(pitch.scoutId, scoutId)))
       .limit(1);
@@ -83,12 +90,17 @@ export async function POST(req: NextRequest) {
 
     // Verify pitch exists and matches scoutId
     const pitchCheck = await db
-      .select()
+      .select({
+        id: pitch.id,
+        scoutId: pitch.scoutId,
+        pitchName: pitch.pitchName,
+      })
       .from(pitch)
       .where(and(eq(pitch.id, pitchId), eq(pitch.scoutId, scoutId)))
       .limit(1);
+
     const usersList = await db
-      .select({ id: pitchTeam.pitchId })
+      .select({ id: pitchTeam.userId })
       .from(pitchTeam)
       .where(eq(pitchTeam.pitchId, pitchId));
 
@@ -96,6 +108,39 @@ export async function POST(req: NextRequest) {
     if (pitchCheck.length === 0) {
       return NextResponse.json(
         { error: "Pitch not found for this scoutId and pitchId" },
+        { status: 404 }
+      );
+    }
+
+    // Get investor details
+    const investorDetails = await db
+      .select({
+        name: users.name,
+        lastName: users.lastName,
+      })
+      .from(users)
+      .where(eq(users.id, investorId))
+      .limit(1);
+
+    if (!investorDetails.length) {
+      return NextResponse.json(
+        { error: "Investor not found" },
+        { status: 404 }
+      );
+    }
+
+    // Get scout details
+    const scoutDetails = await db
+      .select({
+        scoutName: scouts.scoutName,
+      } as const)
+      .from(scouts)
+      .where(eq(scouts.scoutId, scoutId))
+      .limit(1);
+
+    if (!scoutDetails.length || !scoutDetails[0].scoutName) {
+      return NextResponse.json(
+        { error: "Scout not found or scout name missing" },
         { status: 404 }
       );
     }
@@ -120,9 +165,20 @@ export async function POST(req: NextRequest) {
       });
     await createNotification({
       type: "updates",
+      subtype: "offer_shared",
       title: "New Offer received",
-      description: `You have received a new offer for your pitch "${pitchCheck[0].pitchName}"`,
+      description: `Offer received from ${investorDetails[0].name} ${investorDetails[0].lastName || ''} via ${scoutDetails[0].scoutName}`,
+      role: "founder",
       targeted_users: userIds.filter((id): id is string => id !== null),
+      payload: {
+        action_at: new Date().toISOString(),
+        pitchId,
+        pitchName: pitchCheck[0].pitchName,
+        action_by: investorId,
+        scout_id: scoutId,
+        scoutName: scoutDetails[0].scoutName,
+        message: offerDescription,
+      } satisfies NotificationPayload,
     });
     return NextResponse.json(
       {
