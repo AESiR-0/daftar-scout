@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { investorPitch } from "@/backend/drizzle/models/pitch";
-import { eq, and } from "drizzle-orm";
+import { investorPitch, pitch } from "@/backend/drizzle/models/pitch";
+import { eq, and, isNotNull } from "drizzle-orm";
 import { auth } from "@/auth";
 import { users } from "@/backend/drizzle/models/users";
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
+import { scouts } from "@/backend/drizzle/models/scouts";
+import { createNotification } from "@/lib/notifications/insert";
 
 export async function GET(req: NextRequest) {
   try {
@@ -129,15 +131,26 @@ export async function POST(req: NextRequest) {
     if (!session || !session.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const user = await db
-      .select({ investorId: users.id })
-      .from(users)
-      .where(eq(users.email, session.user.email));
-    const { investorId } = await user[0];
 
-    if (!scoutId || !pitchId || !investorId) {
+    // Get current user details
+    const currentUser = await db
+      .select({
+        id: users.id,
+        name: users.name
+      })
+      .from(users)
+      .where(eq(users.email, session.user.email))
+      .limit(1);
+
+    if (!currentUser.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userId = currentUser[0].id;
+
+    if (!scoutId || !pitchId || !userId) {
       return NextResponse.json(
-        { error: "scoutId, pitchId, and investorId are required" },
+        { error: "scoutId, pitchId, and userId are required" },
         { status: 400 }
       );
     }
@@ -145,6 +158,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "analysis must be a string" },
         { status: 400 }
+      );
+    }
+
+    // Get pitch and scout details
+    const details = await db
+      .select({
+        pitchName: pitch.pitchName,
+        scoutName: scouts.scoutName,
+        daftarId: scouts.daftarId
+      })
+      .from(pitch)
+      .innerJoin(scouts, eq(pitch.scoutId, scouts.scoutId))
+      .where(
+        and(
+          eq(pitch.id, pitchId),
+          eq(scouts.scoutId, scoutId)
+        )
+      )
+      .limit(1);
+
+    if (!details.length) {
+      return NextResponse.json(
+        { error: "Pitch or scout not found" },
+        { status: 404 }
+      );
+    }
+
+    const { pitchName, scoutName, daftarId } = details[0];
+
+    // Check if daftarId is null
+    if (!daftarId) {
+      return NextResponse.json(
+        { error: "Scout's daftar not found" },
+        { status: 404 }
       );
     }
 
@@ -156,7 +203,7 @@ export async function POST(req: NextRequest) {
         and(
           eq(investorPitch.scoutId, scoutId),
           eq(investorPitch.pitchId, pitchId),
-          eq(investorPitch.investorId, investorId)
+          eq(investorPitch.investorId, userId)
         )
       )
       .limit(1);
@@ -173,7 +220,7 @@ export async function POST(req: NextRequest) {
           and(
             eq(investorPitch.scoutId, scoutId),
             eq(investorPitch.pitchId, pitchId),
-            eq(investorPitch.investorId, investorId)
+            eq(investorPitch.investorId, userId)
           )
         );
     } else {
@@ -181,9 +228,44 @@ export async function POST(req: NextRequest) {
       await db.insert(investorPitch).values({
         scoutId,
         pitchId,
-        investorId,
+        investorId: userId,
         analysis,
         lastActionTakenOn: new Date(),
+      });
+    }
+
+    // Get all active daftar members
+    const daftarMembers = await db
+      .select({
+        investorId: daftarInvestors.investorId
+      })
+      .from(daftarInvestors)
+      .where(
+        and(
+          eq(daftarInvestors.daftarId, daftarId),
+          eq(daftarInvestors.status, "active"),
+          isNotNull(daftarInvestors.investorId)
+        )
+      );
+
+    // Send notification to all daftar members
+    const validDaftarIds = daftarMembers
+      .map(member => member.investorId)
+      .filter((id): id is string => id !== null);
+
+    if (validDaftarIds.length > 0) {
+      await createNotification({
+        type: "updates",
+        subtype: "pitch_analysis",
+        title: "New Analysis Shared",
+        description: `${currentUser[0].name} has shared their analysis for "${pitchName}" at "${scoutName}". Share yours if you have not already.`,
+        role: "investor",
+        targeted_users: validDaftarIds,
+        payload: {
+          pitchId,
+          scout_id: scoutId,
+          message: `${currentUser[0].name} has shared their analysis for "${pitchName}" at "${scoutName}". Share yours if you have not already.`
+        }
       });
     }
 

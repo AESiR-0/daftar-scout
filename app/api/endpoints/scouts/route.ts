@@ -6,10 +6,11 @@ import {
   scoutApproved,
   scoutQuestions,
 } from "@/backend/drizzle/models/scouts";
-import { eq, inArray, or, not, and, sql } from "drizzle-orm";
+import { eq, inArray, or, not, and, sql, isNotNull } from "drizzle-orm";
 import { auth } from "@/auth"; // Assuming you have an auth utility
 import { users } from "@/backend/drizzle/models/users"; // Assuming you have a users table
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar"; // Assuming you have an investordaftar table
+import { createNotification } from "@/lib/notifications/insert";
 
 const defaultQuestions = [
   {
@@ -120,13 +121,15 @@ export async function GET() {
           daftarInvestors,
           eq(users.id, daftarInvestors.investorId)
         )
-        .where(eq(users.email, session.user.email));
+        .where(
+          and(
+            eq(users.email, session.user.email),
+            eq(daftarInvestors.status, "active")  // Only get daftars where user is active
+          )
+        );
 
       if (!userDaftars.length) {
-        return NextResponse.json(
-          { error: "User not associated with any daftar" },
-          { status: 404 }
-        );
+        return NextResponse.json([], { status: 200 });  // Return empty array instead of 404
       }
 
       // Filter out null values and create the daftar IDs array
@@ -145,13 +148,17 @@ export async function GET() {
         })
         .from(scouts)
         .where(
-          or(
-            inArray(scouts.daftarId, userDaftarIds),
-            sql`${scouts.scoutId} IN (
-              SELECT ${daftarScouts.scoutId}
-              FROM ${daftarScouts}
-              WHERE ${inArray(daftarScouts.daftarId, userDaftarIds)}
-            )`
+          and(
+            or(
+              inArray(scouts.daftarId, userDaftarIds),
+              sql`${scouts.scoutId} IN (
+                SELECT ${daftarScouts.scoutId}
+                FROM ${daftarScouts}
+                WHERE ${inArray(daftarScouts.daftarId, userDaftarIds)}
+              )`
+            ),
+            not(eq(scouts.status, "deleted")),  // Don't show deleted scouts
+            eq(scouts.status, "active")  // Only show active scouts
           )
         );
     }
@@ -217,8 +224,31 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const { scoutName, daftarId } = body;
+
+    // Get current user
+    const currentUser = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.email, session.user.email))
+      .limit(1);
+
+    if (!currentUser.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
     const scoutId = await generateScoutId(scoutName);
 
@@ -240,9 +270,27 @@ export async function POST(req: NextRequest) {
 
     // Fetch all investors for the given daftarId
     const daftarMembers = await db
-      .select({ investorId: daftarInvestors.investorId })
+      .select({
+        investorId: daftarInvestors.investorId,
+      })
       .from(daftarInvestors)
-      .where(eq(daftarInvestors.daftarId, daftarId));
+      .where(
+        and(
+          eq(daftarInvestors.daftarId, daftarId),
+          eq(daftarInvestors.status, "active"),
+          isNotNull(daftarInvestors.investorId)
+        )
+      );
+
+    // Get daftar details
+    const daftarDetails = await db
+      .select({
+        id: daftar.id,
+        name: daftar.name,
+      })
+      .from(daftar)
+      .where(eq(daftar.id, daftarId))
+      .limit(1);
 
     // Insert all members into scoutApproved
     if (daftarMembers.length > 0) {
@@ -254,6 +302,26 @@ export async function POST(req: NextRequest) {
       }));
 
       await db.insert(scoutApproved).values(approvedInserts);
+
+      // Send notification to all active daftar members
+      const validDaftarIds = daftarMembers
+        .map(m => m.investorId)
+        .filter((id): id is string => id !== null);
+
+      if (validDaftarIds.length > 0) {
+        await createNotification({
+          type: "scout_link",
+          subtype: "scout_created",
+          title: "New Scout Created",
+          description: `A new scout "${scoutName}" has been created`,
+          role: "investor",
+          targeted_users: validDaftarIds,
+          payload: {
+            scout_id: scoutId,
+            message: `${currentUser[0].name} has created a new scout "${scoutName}"`
+          }
+        });
+      }
     }
 
     // Insert default questions for English language
@@ -275,6 +343,228 @@ export async function POST(req: NextRequest) {
     console.error("Error creating scout:", error);
     return NextResponse.json(
       { message: "Error creating scout", error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId");
+
+    if (!scoutId) {
+      return NextResponse.json(
+        { error: "Scout ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Get current user
+    const currentUser = await db
+      .select({
+        id: users.id,
+        name: users.name,
+      })
+      .from(users)
+      .where(eq(users.email, session.user.email))
+      .limit(1);
+
+    if (!currentUser.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Get scout details before deletion
+    const scout = await db
+      .select({
+        scoutName: scouts.scoutName,
+        daftarId: scouts.daftarId,
+      })
+      .from(scouts)
+      .where(eq(scouts.scoutId, scoutId))
+      .limit(1);
+
+    if (!scout.length) {
+      return NextResponse.json({ error: "Scout not found" }, { status: 404 });
+    }
+
+    // Get all active members of the daftar
+    const daftarMembers = await db
+      .select({
+        investorId: daftarInvestors.investorId,
+      })
+      .from(daftarInvestors)
+      .where(
+        and(
+          eq(daftarInvestors.daftarId, scout[0].daftarId || ""),
+          eq(daftarInvestors.status, "active"),
+          isNotNull(daftarInvestors.investorId)
+        )
+      );
+
+    // Delete the scout
+    await db
+      .update(scouts)
+      .set({ 
+        status: "deleted",
+        deletedOn: new Date(),
+      })
+      .where(eq(scouts.scoutId, scoutId));
+
+    // Notify all active daftar members
+    const validDaftarIds = daftarMembers
+      .map(m => m.investorId)
+      .filter((id): id is string => id !== null);
+
+    if (validDaftarIds.length > 0) {
+      await createNotification({
+        type: "alert",
+        subtype: "scout_deleted",
+        title: "Scout Deleted",
+        description: `Scout "${scout[0].scoutName}" has been deleted`,
+        role: "investor",
+        targeted_users: validDaftarIds,
+        payload: {
+          scout_id: scoutId,
+          message: `${currentUser[0].name} has deleted the scout "${scout[0].scoutName}"`
+        }
+      });
+    }
+
+    return NextResponse.json(
+      { message: "Scout deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Error deleting scout:", error);
+    return NextResponse.json(
+      { message: "Error deleting scout", error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    const { scoutId, status } = body;
+
+    if (!scoutId || !status) {
+      return NextResponse.json(
+        { error: "Scout ID and status are required" },
+        { status: 400 }
+      );
+    }
+
+    // Get current user
+    const currentUser = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        role: users.role,
+      })
+      .from(users)
+      .where(eq(users.email, session.user.email))
+      .limit(1);
+
+    if (!currentUser.length) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Get scout details
+    const scout = await db
+      .select({
+        scoutName: scouts.scoutName,
+        daftarId: scouts.daftarId,
+      })
+      .from(scouts)
+      .where(eq(scouts.scoutId, scoutId))
+      .limit(1);
+
+    if (!scout.length) {
+      return NextResponse.json({ error: "Scout not found" }, { status: 404 });
+    }
+
+    // Get all active members of the daftar
+    const daftarMembers = await db
+      .select({
+        investorId: daftarInvestors.investorId,
+      })
+      .from(daftarInvestors)
+      .where(
+        and(
+          isNotNull(daftarInvestors.investorId),
+          eq(daftarInvestors.status, "active"),
+          eq(daftarInvestors.daftarId, scout[0].daftarId || "")
+        )
+      );
+
+    // Update scout status
+    await db
+      .update(scouts)
+      .set({ 
+        status: status,
+      })
+      .where(eq(scouts.scoutId, scoutId));
+
+    // Get daftar details
+    const daftarDetails = await db
+      .select({
+        id: daftar.id,
+        name: daftar.name,
+      })
+      .from(daftar)
+      .where(eq(daftar.id, scout[0].daftarId || ""))
+      .limit(1);
+
+    // Send notification to all active daftar members
+    const validDaftarIds = daftarMembers
+      .map(m => m.investorId)
+      .filter((id): id is string => id !== null);
+
+    if (validDaftarIds.length > 0) {
+      const notificationType = status === "closed" ? "updates" : "scout_link";
+      const notificationSubtype = status === "closed" ? "scouting_closed" : "scouting_started";
+      const notificationTitle = status === "closed" ? "Scouting Closed" : "Scouting Started";
+
+      await createNotification({
+        type: notificationType,
+        subtype: notificationSubtype,
+        title: notificationTitle,
+        description: `Scouting for "${scout[0].scoutName}" has been ${status}`,
+        role: "investor",
+        targeted_users: validDaftarIds,
+        payload: {
+          scout_id: scoutId,
+          message: `${currentUser[0].name} has ${status} the scouting for "${scout[0].scoutName}"`
+        }
+      });
+    }
+
+    return NextResponse.json(
+      { message: "Scout status updated successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Error updating scout status:", error);
+    return NextResponse.json(
+      { message: "Error updating scout status", error: error.message },
       { status: 500 }
     );
   }

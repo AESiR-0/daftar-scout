@@ -40,6 +40,7 @@ export interface NotificationPayload {
   url?: string;
   pitchName?: string;
   pitchId?: string;
+  publishMessageForScout?: string;
 }
 
 type NotificationDetails = {
@@ -441,8 +442,9 @@ export function NotificationDialog({
                               className="text-xs rounded-[0.35rem]"
                               onClick={() => {
                                 const link =
-                                  notification.payload.url ||
-                                  `https://daftar.com/scout/${notification.id}`;
+                                      notification.payload.publishMessageForScout ||
+                                      notification.payload.url ||
+                                      `https://daftar.com/scout/${notification.id}`;
                                 navigator.clipboard.writeText(link);
                                 toast({
                                   title: "Link copied",

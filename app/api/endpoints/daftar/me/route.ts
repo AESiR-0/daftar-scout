@@ -9,6 +9,7 @@ import { structure } from "@/backend/drizzle/models/daftar";
 import { users } from "@/backend/drizzle/models/users";
 import { auth } from "@/auth";
 import { eq, inArray, and } from "drizzle-orm";
+import { createNotification } from "@/lib/notifications/insert";
 
 interface DaftarAddress {
     street: string;
@@ -108,6 +109,35 @@ export async function PATCH(req: NextRequest) {
                 bigPicture: updateData.vision,
             })
             .where(eq(daftar.id, daftarId));
+
+        // Get all team members to notify them
+        const teamMembers = await db
+            .select({
+                id: users.id,
+                name: users.name,
+                lastName: users.lastName,
+            })
+            .from(daftarInvestors)
+            .innerJoin(users, eq(users.id, daftarInvestors.investorId))
+            .where(eq(daftarInvestors.daftarId, daftarId));
+
+        // Create notification for all team members
+        await createNotification({
+            type: "updates",
+            subtype: "daftar_updated",
+            title: "Daftar Details Updated",
+            description: `${session.user.name || 'A team member'} has updated the Daftar details`,
+            role: "investor",
+            targeted_users: teamMembers.map(member => member.id),
+            payload: {
+                action: "daftar_updated",
+                daftar_id: daftarId,
+                action_by: userId,
+                action_at: new Date().toISOString(),
+                message: `${session.user.name || 'A team member'} has updated the Daftar details`,
+                daftarName: updateData.name
+            }
+        });
 
         return NextResponse.json({ message: "Daftar updated successfully" }, { status: 200 });
     } catch (error) {

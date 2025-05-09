@@ -3,8 +3,11 @@ import { db } from "@/backend/database";
 import { pitch } from "@/backend/drizzle/models/pitch";
 import { users } from "@/backend/drizzle/models/users";
 import { pitchTeam } from "@/backend/drizzle/models/pitch"; // Assuming pitchTeam model is defined
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { auth } from "@/auth";
+import { createNotification } from "@/lib/notifications/insert";
+import { daftarInvestors } from "@/backend/drizzle/models/daftar";
+import { scouts } from "@/backend/drizzle/models/scouts";
 
 export async function GET(req: NextRequest) {
   try {
@@ -108,6 +111,36 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not authorized to modify this pitch" }, { status: 403 });
     }
 
+    // Get pitch details
+    const pitchDetails = await db
+      .select({
+        id: pitch.id,
+        pitchName: pitch.pitchName,
+        scoutId: pitch.scoutId
+      })
+      .from(pitch)
+      .where(eq(pitch.id, pitchId))
+      .limit(1);
+
+    if (!pitchDetails.length) {
+      return NextResponse.json({ error: "Pitch not found" }, { status: 404 });
+    }
+
+    // Get scout details
+    const scoutDetails = await db
+      .select({
+        scoutId: scouts.scoutId,
+        scoutName: scouts.scoutName,
+        daftarId: scouts.daftarId
+      })
+      .from(scouts)
+      .where(eq(scouts.scoutId, pitchDetails[0].scoutId || ""))
+      .limit(1);
+
+    if (!scoutDetails.length) {
+      return NextResponse.json({ error: "Scout not found" }, { status: 404 });
+    }
+
     // Update pitch details
     const updatedPitch = await db
       .update(pitch)
@@ -120,6 +153,85 @@ export async function POST(req: NextRequest) {
 
     if (!updatedPitch.length) {
       return NextResponse.json({ error: "Failed to update pitch" }, { status: 500 });
+    }
+
+    // Get pitch team members
+    const pitchTeamMembers = await db
+      .select({
+        userId: pitchTeam.userId
+      })
+      .from(pitchTeam)
+      .where(
+        and(
+          eq(pitchTeam.pitchId, pitchId),
+          isNotNull(pitchTeam.userId)
+        )
+      );
+
+    // Get scout daftar members
+    const daftarMembers = await db
+      .select({
+        investorId: daftarInvestors.investorId
+      })
+      .from(daftarInvestors)
+      .where(
+        and(
+          eq(daftarInvestors.daftarId, scoutDetails[0].daftarId || ""),
+          eq(daftarInvestors.status, "active"),
+          isNotNull(daftarInvestors.investorId)
+        )
+      );
+
+    // Get current user details
+    const currentUser = await db
+      .select({
+        id: users.id,
+        name: users.name
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    // Send notification to pitch team members
+    const validPitchTeamIds = pitchTeamMembers
+      .map(member => member.userId)
+      .filter((id): id is string => id !== null);
+
+    if (validPitchTeamIds.length > 0) {
+      await createNotification({
+        type: "updates",
+        subtype: "pitch_submitted",
+        title: "Pitch Submitted to Scout",
+        description: `Your pitch "${pitchDetails[0].pitchName}" has been submitted to scout "${scoutDetails[0].scoutName}"`,
+        role: "founder",
+        targeted_users: validPitchTeamIds,
+        payload: {
+          pitchId: pitchId,
+          scout_id: scoutDetails[0].scoutId,
+          message: `${currentUser[0].name} has submitted the pitch "${pitchDetails[0].pitchName}" to scout "${scoutDetails[0].scoutName}"`
+        }
+      });
+    }
+
+    // Send notification to scout daftar members
+    const validDaftarIds = daftarMembers
+      .map(member => member.investorId)
+      .filter((id): id is string => id !== null);
+
+    if (validDaftarIds.length > 0) {
+      await createNotification({
+        type: "updates",
+        subtype: "pitch_received",
+        title: "New Pitch Received",
+        description: `A new pitch "${pitchDetails[0].pitchName}" has been submitted to your scout "${scoutDetails[0].scoutName}"`,
+        role: "investor",
+        targeted_users: validDaftarIds,
+        payload: {
+          pitchId: pitchId,
+          scout_id: scoutDetails[0].scoutId,
+          message: `${currentUser[0].name} has submitted a new pitch "${pitchDetails[0].pitchName}" to your scout "${scoutDetails[0].scoutName}"`
+        }
+      });
     }
 
     return NextResponse.json({

@@ -55,6 +55,7 @@ interface TeamMember {
   isCurrentUser?: boolean
   joinDate: string
   phone: string
+  approvesDelete: boolean
 }
 
 interface DeletionApproval {
@@ -119,7 +120,8 @@ const dummyTeamMembers: TeamMember[] = [
     status: 'active',
     isCurrentUser: true,
     joinDate: '2024-01-15',
-    phone: '+971526374859'
+    phone: '+971526374859',
+    approvesDelete: true
   },
   {
     id: '2',
@@ -133,7 +135,8 @@ const dummyTeamMembers: TeamMember[] = [
     language: ['English', 'Arabic', 'French'],
     status: 'active',
     joinDate: '2024-02-01',
-    phone: '+971526374859'
+    phone: '+971526374859',
+    approvesDelete: true
   },
   {
     id: '3',
@@ -147,7 +150,8 @@ const dummyTeamMembers: TeamMember[] = [
     language: ['English', 'Spanish'],
     status: 'pending',
     joinDate: '2024-03-10',
-    phone: '+971526374859'
+    phone: '+971526374859',
+    approvesDelete: false
   }
 ]
 
@@ -515,16 +519,57 @@ export function DaftarDialog({
     })
   }
 
-  const handleDeleteClick = () => {
-    setShowDeletionApprovals(true)
-    const approvals = members.map(member => ({
-      memberId: member.id,
-      memberName: `${member.firstName} ${member.lastName}`,
-      designation: member.designation,
-      status: 'pending' as const
-    }))
-    setDeletionApprovals(approvals)
-  }
+  const handleDeleteClick = async () => {
+    if (!userConsent) {
+      toast({
+        title: "Error",
+        description: "Please confirm that you want to delete the Daftar",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/endpoints/daftar/delete?daftarId=${daftarId}`, {
+        method: 'POST'
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to process deletion request');
+      }
+
+      const data = await response.json();
+      
+      if (data.status === 'archived') {
+        toast({
+          title: "Success",
+          description: "Daftar has been archived as all team members approved the deletion"
+        });
+        onOpenChange(false);
+        onSuccess();
+      } else {
+        toast({
+          title: "Success",
+          description: "Your approval for deletion has been recorded"
+        });
+        // Refresh the deletion approvals
+        const updatedApprovals = deletionApprovals.map(approval => 
+          approval.memberId === members.find(m => m.isCurrentUser)?.id
+            ? { ...approval, status: 'approved' as const, date: new Date().toISOString() }
+            : approval
+        );
+        setDeletionApprovals(updatedApprovals);
+      }
+    } catch (error) {
+      console.error('Error processing deletion request:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to process deletion request",
+        variant: "destructive"
+      });
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -792,72 +837,71 @@ export function DaftarDialog({
         return renderTeamContent();
 
       case "delete":
+        const currentUser = members.find(m => m.isCurrentUser);
+        const activeMembers = members.filter(m => m.status === 'active');
+        
         return (
           <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
-            <div className="space-y-4 mb-4">
-              <p className="text-sm text-muted-foreground">All data related to the Daftar will be deleted, and the offer will be withdrawn. An email will be sent to all stakeholders to notify them of this change.</p>
-            </div>
-            <div className="flex items-start gap-2 mb-4">
-              <Checkbox
-                id="user-consent"
-                checked={userConsent}
-                onCheckedChange={(checked) => setUserConsent(checked as boolean)}
-                className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-              />
-              <label
-                htmlFor="user-consent"
-                className="text-sm text-muted-foreground"
-              >
-                I agree to delete the Daftar
-              </label>
-            </div>
-
-            <Button
-              variant="outline"
-              className="rounded-[0.35rem]"
-              onClick={handleDeleteClick}
-            >
-              Delete
-            </Button>
-
-            <div className="space-y-4 mt-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Team&apos;s Approval Required</h3>
-                <div className="text-sm text-muted-foreground">
-                  {deletionApprovals.filter(a => a.status === 'approved').length} of {members.length}
-                </div>
+            <div className="space-y-4">
+              <div className="border rounded-lg p-4">
+                <p className="text-sm">
+                  All data related to the Daftar will be permanently deleted. This action cannot be undone.
+                  All team members must approve for the deletion to proceed.
+                </p>
               </div>
 
-              <div>
-                {members.map((member) => {
-                  const approval = deletionApprovals.find(a => a.memberId === member.id) || {
-                    status: 'not_requested',
-                    date: undefined
-                  }
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="user-consent"
+                  checked={userConsent}
+                  onCheckedChange={(checked) => setUserConsent(checked as boolean)}
+                  className="h-5 w-5 mt-0.5"
+                  disabled={currentUser?.approvesDelete}
+                />
+                <label htmlFor="user-consent" className="text-sm">
+                  I understand and agree to delete this Daftar
+                </label>
+              </div>
 
-                  return (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleDeleteClick}
+                disabled={!userConsent || currentUser?.approvesDelete}
+              >
+                {currentUser?.approvesDelete ? 'Deletion Approved' : 'Request Deletion'}
+              </Button>
+
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium">Approvals Required</h3>
+                  <span className="text-sm text-muted-foreground">
+                    {activeMembers.filter(m => m.approvesDelete).length} of {activeMembers.length}
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {activeMembers.map((member) => (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                      className="flex items-center justify-between p-3 border rounded-lg"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback>{member.firstName[0]}{member.lastName[0]}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-sm font-medium">
-                            {member.firstName} {member.lastName}
-                          </p>
+                          <p className="text-sm">{member.firstName} {member.lastName}</p>
+                          <p className="text-xs text-muted-foreground">{member.designation}</p>
                         </div>
                       </div>
-                      <div className="flex items-center">
-                        {getStatusIcon(approval.status)}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {member.approvesDelete ? 'Approved' : 'Pending'}
+                        </span>
                       </div>
                     </div>
-                  )
-                })}
-                <div className="pt-4">
-                  <span className="text-xs text-muted-foreground"><strong> Deleted Daftar On </strong> <br /> {formatDate(new Date().toISOString())}</span>
+                  ))}
                 </div>
               </div>
             </div>

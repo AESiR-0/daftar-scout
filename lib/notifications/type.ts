@@ -29,6 +29,7 @@ export interface NotificationPayload {
   videoUrl?: string;
   videoThumbnail?: string;
   joinedTime?: string;
+  publishMessageForScout?: string;
   daftarName?: string;
   scoutName?: string;
 }

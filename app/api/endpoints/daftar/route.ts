@@ -8,7 +8,7 @@ import {
 import { structure } from "@/backend/drizzle/models/daftar";
 import { users } from "@/backend/drizzle/models/users";
 import { auth } from "@/auth";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 // Function to generate a unique alphanumeric daftarId
 async function generateDaftarId(name: string): Promise<string> {
@@ -61,13 +61,21 @@ export async function GET(req: NextRequest) {
 
     const currentUser = await dbUser[0];
 
-    // 2. Get all daftarInvestors entries where investorId = current user ID
+    // 2. Get all daftarInvestors entries where investorId = current user ID and status is active
     const investorEntries = await db
       .select({
-        daftarId: daftarInvestors.daftarId,
+        daftarId: daftar.id,
       })
       .from(daftarInvestors)
-      .where(eq(daftarInvestors.investorId, currentUser.id));
+      .leftJoin(daftar, eq(daftarInvestors.daftarId, daftar.id))
+      .where(
+        and(
+          eq(daftarInvestors.investorId, currentUser.id),
+          eq(daftarInvestors.status, "active"),
+          eq(daftar.isActive, true),
+          isNull(daftar.deletedOn)
+        )
+      );
 
     const daftarIds = investorEntries
       .map((entry) => entry.daftarId)
@@ -85,7 +93,13 @@ export async function GET(req: NextRequest) {
         description: daftar.bigPicture,
       })
       .from(daftar)
-      .where(inArray(daftar.id, daftarIds));
+      .where(
+        and(
+          inArray(daftar.id, daftarIds),
+          eq(daftar.isActive, true),
+          isNull(daftar.deletedOn)
+        )
+      );
 
     return NextResponse.json(daftars, { status: 200 });
   } catch (error) {

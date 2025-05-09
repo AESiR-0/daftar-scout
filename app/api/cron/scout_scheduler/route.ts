@@ -53,6 +53,7 @@ export async function GET() {
         targeted_users: userIds,
         payload: {
           message: `${scout.scoutName} just got active. Share with your friends.`,
+          publishMessageForScout: `We Just created a new scout for you. Check it out here: https://daftar.com/founder/scout/${scoutId}`,
           daftar_id: daftarIds.join(","),
         },
       });

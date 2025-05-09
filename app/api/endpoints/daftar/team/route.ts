@@ -7,6 +7,7 @@ import {
 import { users } from "@/backend/drizzle/models/users";
 import { auth } from "@/auth";
 import { eq, and } from "drizzle-orm";
+import { createNotification } from "@/lib/notifications/insert";
 
 interface TeamMemberResponse {
     id: string;
@@ -96,14 +97,17 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Daftar ID not given" }, { status: 404 })
 
     // Get user ID and verify access
-    const user = await db.select({ userId: users.id }).from(users).where(eq(users.email, session.user.email))
+    const user = await db.select({ userId: users.id, name: users.name, lastName: users.lastName }).from(users).where(eq(users.email, session.user.email))
     if (user.length == 0)
         return NextResponse.json({ error: "User does not exist" }, { status: 500 })
-    const { userId } = user[0]
+    const { userId, name: currentUserName, lastName: currentUserLastName } = user[0]
 
     // Verify user has access to this Daftar
     const daftarInvestor = await db
-        .select()
+        .select({
+            daftarId: daftarInvestors.daftarId,
+            designation: daftarInvestors.designation
+        })
         .from(daftarInvestors)
         .where(and(
             eq(daftarInvestors.daftarId, daftarId),
@@ -114,6 +118,8 @@ export async function POST(req: NextRequest) {
     if (daftarInvestor.length === 0) {
         return NextResponse.json({ error: "Daftar not found or unauthorized" }, { status: 404 });
     }
+
+    const currentUserDesignation = daftarInvestor[0].designation;
 
     try {
         const { email, designation }: AddTeamMemberRequest = await req.json()
@@ -143,6 +149,19 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "User is already a team member" }, { status: 400 });
         }
 
+        // Get Daftar details
+        const daftarDetails = await db
+            .select({
+                name: daftar.name
+            })
+            .from(daftar)
+            .where(eq(daftar.id, daftarId))
+            .limit(1);
+
+        if (daftarDetails.length === 0) {
+            return NextResponse.json({ error: "Daftar not found" }, { status: 404 });
+        }
+
         // Add new team member
         await db.insert(daftarInvestors).values({
             daftarId,
@@ -150,6 +169,62 @@ export async function POST(req: NextRequest) {
             designation,
             status: 'pending',
             joinType: 'invite',
+        });
+
+        // Get all existing team members
+        const teamMembers = await db
+            .select({
+                id: users.id
+            })
+            .from(daftarInvestors)
+            .innerJoin(users, eq(users.id, daftarInvestors.investorId))
+            .where(and(
+                eq(daftarInvestors.daftarId, daftarId),
+                eq(daftarInvestors.status, 'active')
+            ));
+
+        // Notify the invited user
+        await createNotification({
+            type: "updates",
+            subtype: "daftar_invite_received",
+            title: "Daftar Team Invitation",
+            description: `You've been invited to join ${daftarDetails[0].name} as ${designation}`,
+            role: "investor",
+            targeted_users: [newMember[0].id],
+            payload: {
+                action: "daftar_invite_received",
+                daftar_id: daftarId,
+                action_by: userId,
+                action_at: new Date().toISOString(),
+                message: `You've been invited to join ${daftarDetails[0].name} as ${designation}`,
+                designation: designation,
+                daftarName: daftarDetails[0].name,
+                currentUsername: `${currentUserName} ${currentUserLastName}`.trim(),
+                invitedUsername: `${newMember[0].name} ${newMember[0].lastName || ''}`.trim(),
+                invitedUserDesignation: designation
+            }
+        });
+
+        // Notify existing team members
+        await createNotification({
+            type: "updates",
+            subtype: "daftar_member_invited",
+            title: "New Team Member Invited",
+            description: `${currentUserName} ${currentUserLastName} invited ${newMember[0].name} ${newMember[0].lastName || ''} as ${designation}`,
+            role: "investor",
+            targeted_users: teamMembers.map(member => member.id),
+            payload: {
+                action: "daftar_member_invited",
+                daftar_id: daftarId,
+                action_by: userId,
+                action_at: new Date().toISOString(),
+                message: `${currentUserName} ${currentUserLastName} invited ${newMember[0].name} ${newMember[0].lastName || ''} as ${designation}`,
+                designation: designation,
+                daftarName: daftarDetails[0].name,
+                currentUsername: `${currentUserName} ${currentUserLastName}`.trim(),
+                invitedUsername: `${newMember[0].name} ${newMember[0].lastName || ''}`.trim(),
+                invitedUserDesignation: designation
+            }
         });
 
         return NextResponse.json({ message: "Team member invited successfully" });
