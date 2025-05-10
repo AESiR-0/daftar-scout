@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/dialog";
 import {
   uploadAnswersPitchVideo,
-  uploadInvestorsPitchVideo,
 } from "@/lib/actions/video";
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
+import { Progress } from "@/components/ui/progress";
 
 interface Question {
   id: number;
@@ -46,6 +46,8 @@ export default function InvestorQuestionsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<string>("");
 
   // Sample languages and questions for the dialog
   const languages = [
@@ -175,8 +177,29 @@ export default function InvestorQuestionsPage() {
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
+    setUploadStatus("Starting upload...");
+
     try {
-      const url = await uploadAnswersPitchVideo(file, pitchId, scoutId);
+      const url = await uploadAnswersPitchVideo(
+        file, 
+        pitchId, 
+        scoutId,
+        (progress) => {
+          setUploadProgress(progress);
+          // Update status message based on progress
+          if (progress <= 0.3) {
+            setUploadStatus("Compressing video...");
+          } else if (progress <= 0.5) {
+            setUploadStatus("Authenticating...");
+          } else if (progress <= 0.8) {
+            setUploadStatus("Uploading to server...");
+          } else {
+            setUploadStatus("Finalizing...");
+          }
+        }
+      );
+      
       setPreviewUrl(url);
 
       const postRes = await fetch("/api/endpoints/pitch/founder/answers", {
@@ -209,6 +232,8 @@ export default function InvestorQuestionsPage() {
       });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
+      setUploadStatus("");
     }
   };
 
@@ -317,7 +342,7 @@ export default function InvestorQuestionsPage() {
                       <video
                         src={previewUrl}
                         controls
-                        className="w-[300px] h-[533px] rounded-[0.35rem]  aspect-[9/16] "
+                        className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16]"
                       />
                       <div className="flex gap-2">
                         <Button
@@ -350,6 +375,12 @@ export default function InvestorQuestionsPage() {
                           )}
                         </Button>
                       </div>
+                      {isUploading && (
+                        <div className="w-full space-y-2">
+                          <Progress value={uploadProgress * 100} className="w-full" />
+                          <p className="text-sm text-gray-500">{uploadStatus}</p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div

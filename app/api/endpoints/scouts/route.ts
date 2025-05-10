@@ -158,7 +158,7 @@ export async function GET() {
               )`
             ),
             not(eq(scouts.status, "deleted")),  // Don't show deleted scouts
-            eq(scouts.status, "active")  // Only show active scouts
+            not(eq(scouts.deleteIsAgreedByAll, true))  // Only show active scouts
           )
         );
     }

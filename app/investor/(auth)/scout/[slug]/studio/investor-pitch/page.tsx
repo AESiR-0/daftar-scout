@@ -7,6 +7,7 @@ import { Play, Upload, Trash2, Video, Info, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { uploadInvestorsPitchVideo } from "@/lib/actions/video";
+import { Progress } from "@/components/ui/progress";
 
 const LANGUAGES = {
   indian: [
@@ -40,6 +41,10 @@ export default function InvestorPitchPage() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [showSample, setShowSample] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<string>("");
+
   async function fetchInvestorsPitch() {
     const res = await fetch(
       `/api/endpoints/scouts/investor_pitch?scoutId=${scoutId}`
@@ -67,11 +72,11 @@ export default function InvestorPitchPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 20 * 1024 * 1024) {
-        // 20MB limit
+      if (file.size > 50 * 1024 * 1024) {
+        // 50MB limit
         toast({
           title: "File too large",
-          description: "Please upload a video smaller than 20MB",
+          description: "Please upload a video smaller than 50MB",
           variant: "destructive",
         });
         return;
@@ -91,38 +96,29 @@ export default function InvestorPitchPage() {
   const handleUploadVideo = async () => {
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("scoutId", scoutId);
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    setUploadStatus("Starting upload...");
 
     try {
-      // const res = await fetch("/api/endpoints/compress", {
-      //   method: "POST",
-      //   body: formData,
-      // });
-
-      // const data = await res.json();
-      // if (!data.file) throw new Error("Compression failed");
-
-      // // Convert base64 back to File object
-      // const byteCharacters = atob(data.file);
-      // const byteArrays = [];
-
-      // for (let i = 0; i < byteCharacters.length; i += 512) {
-      //   const slice = byteCharacters.slice(i, i + 512);
-      //   const byteNumbers = new Array(slice.length);
-      //   for (let j = 0; j < slice.length; j++) {
-      //     byteNumbers[j] = slice.charCodeAt(j);
-      //   }
-      //   const byteArray = new Uint8Array(byteNumbers);
-      //   byteArrays.push(byteArray);
-      // }
-
-      // const compressedBlob = new Blob(byteArrays, { type: "video/mp4" });
-      // const compressedFile = new File([compressedBlob], file.name, {
-      //   type: "video/mp4",
-      // });
-      const url = await uploadInvestorsPitchVideo(file, scoutId); // `scoutId` must be in scope
+      const url = await uploadInvestorsPitchVideo(
+        file,
+        scoutId,
+        (progress) => {
+          setUploadProgress(progress);
+          // Update status message based on progress
+          if (progress <= 0.3) {
+            setUploadStatus("Compressing video...");
+          } else if (progress <= 0.5) {
+            setUploadStatus("Authenticating...");
+          } else if (progress <= 0.8) {
+            setUploadStatus("Uploading to server...");
+          } else {
+            setUploadStatus("Finalizing...");
+          }
+        }
+      );
 
       const res2 = await fetch("/api/endpoints/scouts/investor_pitch", {
         method: "POST",
@@ -150,6 +146,10 @@ export default function InvestorPitchPage() {
         description: err.message,
         variant: "destructive",
       });
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      setUploadStatus("");
     }
   };
 
@@ -167,7 +167,7 @@ export default function InvestorPitchPage() {
                       src={videoUrl || "/dummyVideo.mp4"}
                       controls
                       poster="/images/sample-pitch-thumbnail.jpg"
-                      className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16] "
+                      className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16]"
                     >
                       Your browser does not support the video tag.
                     </video>
@@ -180,24 +180,43 @@ export default function InvestorPitchPage() {
                       <video
                         src={videoUrl}
                         controls
-                        className="w-[300px] h-[533px] rounded-[0.35rem]  aspect-[9/16] "
+                        className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16]"
                       />
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
                           onClick={clearVideo}
                           className="w-full"
+                          disabled={isUploading}
                         >
+                          <X className="h-4 w-4 mr-2" />
                           Remove Video
                         </Button>
                         <Button
                           variant="outline"
                           onClick={handleUploadVideo}
                           className="w-full"
+                          disabled={isUploading}
                         >
-                          Upload Video
+                          {isUploading ? (
+                            <>
+                              <div className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent border-white rounded-full" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Video
+                            </>
+                          )}
                         </Button>
                       </div>
+                      {isUploading && (
+                        <div className="w-full space-y-2">
+                          <Progress value={uploadProgress * 100} className="w-full" />
+                          <p className="text-sm text-gray-500">{uploadStatus}</p>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div
@@ -215,7 +234,7 @@ export default function InvestorPitchPage() {
                           Click to upload or drag and drop
                         </p>
                         <p className="text-xs text-gray-500">
-                          MP4, WebM or Ogg (max. 20MB)
+                          MP4, WebM or Ogg (max. 50MB)
                         </p>
                       </div>
                     </div>
@@ -233,6 +252,7 @@ export default function InvestorPitchPage() {
                 variant="outline"
                 className="w-full rounded-[0.3rem]"
                 onClick={() => setShowSample(!showSample)}
+                disabled={isUploading}
               >
                 {showSample ? "Upload Your Pitch" : "Back to Sample"}
               </Button>
