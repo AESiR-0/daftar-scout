@@ -16,10 +16,6 @@ import { usePathname } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase/createClient";
 import { useDaftar } from "@/lib/context/daftar-context";
-import { sendNotificationEmail } from "@/lib/notifications/listen";
-import { db } from "@/backend/database";
-import { users } from "@/backend/drizzle/models/users";
-import { eq } from "drizzle-orm";
 
 export type NotificationType =
   | "news"
