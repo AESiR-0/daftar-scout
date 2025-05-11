@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     detectSessionInUrl: true,
   },
 });
-const compreession_URL = process.env.COMPRESSION_URL || "http://127.0.0.1:8000";
+const compression_URL = "http://ec2-13-126-145-26.ap-south-1.compute.amazonaws.com";
 const DUMMY_EMAIL = process.env.DUMMY_EMAIL || "pratham@daftaros.com";
 const DUMMY_PASSWORD = process.env.DUMMY_PASSWORD || "Daftarcore123$"; // make sure this user exists in Supabase
 
@@ -27,7 +27,7 @@ export async function uploadInvestorsPitchVideo(
 
     onProgress?.(0.1); // 10% - Starting compression
     
-    const compressionResponse = await fetch(`${compreession_URL}/compress-mp4`, {
+    const compressionResponse = await fetch(`${compression_URL}/compress-mp4`, {
       method: 'POST',
       body: formData
     });
@@ -106,7 +106,7 @@ export async function uploadAnswersPitchVideo(
 
     onProgress?.(0.1); // 10% - Starting compression
 
-    const compressionResponse = await fetch('http://127.0.0.1:8000/compress-mp4', {
+    const compressionResponse = await fetch(`${compression_URL}/compress-mp4`, {
       method: 'POST',
       body: formData
     });
