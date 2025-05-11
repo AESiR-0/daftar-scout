@@ -266,6 +266,7 @@ export async function POST(req: NextRequest) {
     await db.insert(daftarScouts).values({
       scoutId,
       daftarId,
+      isPending: false,
     });
 
     // Fetch all investors for the given daftarId

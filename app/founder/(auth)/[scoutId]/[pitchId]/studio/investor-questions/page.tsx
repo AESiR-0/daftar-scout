@@ -19,7 +19,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
 import { Progress } from "@/components/ui/progress";
-
+import Link from "next/link";
 interface Question {
   id: number;
   question: string;
@@ -157,6 +157,20 @@ export default function InvestorQuestionsPage() {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (20MB limit)
+      const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+      if (file.size > maxSize) {
+        toast({
+          title: "Error",
+          description: "File is too large. Maximum file size is 20MB.",
+          variant: "destructive",
+        });
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
@@ -182,8 +196,8 @@ export default function InvestorQuestionsPage() {
 
     try {
       const url = await uploadAnswersPitchVideo(
-        file, 
-        pitchId, 
+        file,
+        pitchId,
         scoutId,
         (progress) => {
           setUploadProgress(progress);
@@ -199,7 +213,7 @@ export default function InvestorQuestionsPage() {
           }
         }
       );
-      
+
       setPreviewUrl(url);
 
       const postRes = await fetch("/api/endpoints/pitch/founder/answers", {
@@ -220,7 +234,7 @@ export default function InvestorQuestionsPage() {
         description: "Your video answer has been saved.",
         variant: "success",
       });
-      
+
       // Refresh questions to get updated data
       await fetchQuestions();
     } catch (error) {
@@ -277,11 +291,10 @@ export default function InvestorQuestionsPage() {
                     {languages.map((language) => (
                       <div
                         key={language}
-                        className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                          selectedLanguage === language
+                        className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedLanguage === language
                             ? "text-blue-600"
                             : "hover:bg-muted"
-                        }`}
+                          }`}
                         onClick={() => setSelectedLanguage(language)}
                       >
                         <span className="text-sm">{language}</span>
@@ -398,7 +411,12 @@ export default function InvestorQuestionsPage() {
                           Click to upload or drag and drop
                         </p>
                         <p className="text-xs text-gray-500">
-                          MP4, WebM or Ogg (max. 20MB)
+                          MP4, MOV, WebM or Ogg
+                          The max file size is 20MB. Please compress your video before uploading.
+                          You can Compress your video <Link href={"https://www.freeconvert.com/video-compressor"} target="_blank" className="text-blue-500">here</Link>
+                          or use any other video compressor.
+                          <br />
+                          (Please note that we are not affiliated with freeconvert.com and we are not responsible for any issues that may occur while using their service or any other video compressor.)
                         </p>
                       </div>
                     </div>
@@ -433,11 +451,10 @@ export default function InvestorQuestionsPage() {
                       <div
                         key={item.id}
                         onClick={() => handleQuestionSelect(item)}
-                        className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                          selectedQuestion?.id === item.id
+                        className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedQuestion?.id === item.id
                             ? "text-blue-600"
                             : "hover:bg-muted"
-                        }`}
+                          }`}
                       >
                         <span className="text-sm">{item.question}</span>
                       </div>

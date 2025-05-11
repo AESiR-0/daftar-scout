@@ -262,6 +262,11 @@ export async function createNotification({
       payload,
     }).returning();
 
+    // Skip email generation for scout_link notifications
+    if (type === "scout_link") {
+      return notification;
+    }
+
     // Send email for each targeted user
     for (const userId of targeted_users) {
       try {

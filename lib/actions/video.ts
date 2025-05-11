@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     detectSessionInUrl: true,
   },
 });
-const compression_URL = "https://compression.daftaros.com";
+
 const DUMMY_EMAIL = process.env.DUMMY_EMAIL || "pratham@daftaros.com";
 const DUMMY_PASSWORD = process.env.DUMMY_PASSWORD || "Daftarcore123$"; // make sure this user exists in Supabase
 
@@ -19,41 +19,19 @@ export async function uploadInvestorsPitchVideo(
   onProgress?: (progress: number) => void
 ) {
   try {
-    // 1. Compress the video
-    const formData = new FormData();
-    formData.append('video', file);
-    formData.append('target_size_mb', '10'); // You can adjust this value
-    formData.append('maintain_aspect_ratio', 'true');
-
-    onProgress?.(0.1); // 10% - Starting compression
-    
-    const compressionResponse = await fetch(`${compression_URL}/compress-mp4`, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!compressionResponse.ok) {
-      throw new Error('Video compression failed');
-    }
-
-    onProgress?.(0.3); // 30% - Compression complete
-
-    const compressedBlob = await compressionResponse.blob();
-    const compressedFile = new File([compressedBlob], file.name, { type: 'video/mp4' });
-
-    // 2. Sign in the dummy user
+    // 1. Sign in the dummy user
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: DUMMY_EMAIL,
       password: DUMMY_PASSWORD,
     });
 
-    onProgress?.(0.4); // 40% - Authentication complete
+    onProgress?.(0.3); // 30% - Authentication complete
 
     if (signInError) {
       throw new Error("Failed to sign in: " + signInError.message);
     }
 
-    // 3. Check session
+    // 2. Check session
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (!sessionData.session || sessionError) {
       throw new Error("No session available.");
@@ -61,12 +39,12 @@ export async function uploadInvestorsPitchVideo(
 
     onProgress?.(0.5); // 50% - Session verified
 
-    // 4. Upload
+    // 3. Upload
     const filePath = `investor-pitch/${scoutId}-${Date.now()}-${file.name}`;
 
     const { data, error } = await supabase.storage
       .from("videos")
-      .upload(filePath, compressedFile, {
+      .upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
       });
@@ -77,7 +55,7 @@ export async function uploadInvestorsPitchVideo(
       throw new Error(error.message);
     }
 
-    // 5. Get public URL
+    // 4. Get public URL
     const { data: publicUrlData } = supabase.storage
       .from("videos")
       .getPublicUrl(filePath);
@@ -98,41 +76,19 @@ export async function uploadAnswersPitchVideo(
   onProgress?: (progress: number) => void
 ) {
   try {
-    // 1. Compress the video
-    const formData = new FormData();
-    formData.append('video', file);
-    formData.append('target_size_mb', '10'); // You can adjust this value
-    formData.append('maintain_aspect_ratio', 'true');
-
-    onProgress?.(0.1); // 10% - Starting compression
-
-    const compressionResponse = await fetch(`${compression_URL}/compress-mp4`, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!compressionResponse.ok) {
-      throw new Error('Video compression failed');
-    }
-
-    onProgress?.(0.3); // 30% - Compression complete
-
-    const compressedBlob = await compressionResponse.blob();
-    const compressedFile = new File([compressedBlob], file.name, { type: 'video/mp4' });
-
-    // 2. Sign in the dummy user
+    // 1. Sign in the dummy user
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: DUMMY_EMAIL,
       password: DUMMY_PASSWORD,
     });
 
-    onProgress?.(0.4); // 40% - Authentication complete
+    onProgress?.(0.3); // 30% - Authentication complete
 
     if (signInError) {
       throw new Error("Failed to sign in: " + signInError.message);
     }
 
-    // 3. Check session
+    // 2. Check session
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (!sessionData.session || sessionError) {
       throw new Error("No session available.");
@@ -140,12 +96,12 @@ export async function uploadAnswersPitchVideo(
 
     onProgress?.(0.5); // 50% - Session verified
 
-    // 4. Upload
+    // 3. Upload
     const filePath = `founder-pitch/${pitchId}/${scoutId}-${Date.now()}-${file.name}`;
 
     const { data, error } = await supabase.storage
       .from("videos")
-      .upload(filePath, compressedFile, {
+      .upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
       });
@@ -156,7 +112,7 @@ export async function uploadAnswersPitchVideo(
       throw new Error(error.message);
     }
 
-    // 5. Get public URL
+    // 4. Get public URL
     const { data: publicUrlData } = supabase.storage
       .from("videos")
       .getPublicUrl(filePath);

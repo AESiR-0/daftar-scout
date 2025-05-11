@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { Play, Upload, Trash2, Video, Info, X } from "lucide-react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { uploadInvestorsPitchVideo } from "@/lib/actions/video";
@@ -221,21 +222,33 @@ export default function InvestorPitchPage() {
                   ) : (
                     <div
                       onClick={handleUpload}
-                      className="cursor-pointer space-y-4"
+                      className="cursor-pointer  space-y-4"
                     >
-                      <div className="mx-auto w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                        <Video className="h-6 w-6 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">
-                          Upload your pitch video
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Click to upload or drag and drop
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          MP4, WebM or Ogg (max. 50MB)
-                        </p>
+                      <div className="flex h-72 justify-evenly flex-col ">
+                        <div className="flex flex-col gap-2">
+                          <div className="mx-auto w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+                            <Video className="h-6 w-6 text-blue-500" />
+                          </div>
+                          <p className="text-sm font-medium">
+                            Upload your pitch video
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Click to upload or drag and drop
+                          </p>
+                          <p className="text-xs flex flex-col   text-gray-500">
+                            <span>
+                              MP4, WebM, MOV or Ogg
+                              The max file size is 50MB. <br /> <br /> Compress your video before uploading.
+                              You can compress your video <Link href={"https://www.freeconvert.com/video-compressor"} target="_blank" className="text-blue-500">here {" "}</Link>
+                              or use any other video compressor.
+                            </span>
+                            <br />
+                          </p>
+                        </div>
+                        <span className="text-xs justify-self-end  text-gray-500">
+                          (Please note that we are not affiliated with freeconvert.com and we are not responsible for any issues that may occur while using their service or any other video compressor.)
+                        </span>
+
                       </div>
                     </div>
                   )}
