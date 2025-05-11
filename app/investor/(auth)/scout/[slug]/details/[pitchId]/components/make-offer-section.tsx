@@ -43,6 +43,7 @@ interface ActionLog {
   user: {
     founder: {
       name: string;
+      lastName: string;
       age: string;
       designation: string;
       email: string;
@@ -90,25 +91,23 @@ export function MakeOfferSection({
       const data = await response.json();
       const mappedOffers: Offer[] = data.map((offer: any) => ({
         id: offer.id.toString(),
-        scoutName: "Scout Name",
+        scoutName: offer.creatorName + (offer.creatorLastName ? ` ${offer.creatorLastName}` : ''),
         collaboration: ["Collaboration Partner"],
-        status: offer.offerStatus,
-        type: offer.offerStatus,
-        date: formatDate(offer.offeredAt),
+        status: offer.status,
+        type: offer.status,
+        date: formatDate(offer.offer_sent_at),
         responses: [
           {
-            action:
-              offer.offerStatus === "pending"
-                ? "Offer Sent"
-                : offer.offerStatus,
-            reason: offer.offerDescription,
-            timestamp: formatDate(offer.offeredAt),
+            action: offer.status === "pending" ? "Offer Sent" : offer.status,
+            reason: offer.offer_desc,
+            timestamp: formatDate(offer.offer_sent_at),
             user: {
               founder: {
-                name: "Investor Name",
+                name: offer.creatorName,
+                lastName: offer.creatorLastName,
                 age: "30",
-                designation: "Investor",
-                email: "investor@example.com",
+                designation: offer.creatorRole || "Investor",
+                email: offer.creatorEmail || "investor@example.com",
                 phone: "1234567890",
                 gender: "Unknown",
                 location: "Unknown",
@@ -116,6 +115,24 @@ export function MakeOfferSection({
               },
             },
           },
+          ...(offer.actions || []).map((action: any) => ({
+            action: action.action,
+            reason: action.notes || "",
+            timestamp: formatDate(action.actionTakenAt),
+            user: {
+              founder: {
+                name: action.actionTakerName,
+                lastName: action.actionTakerLastName,
+                age: "30",
+                designation: action.actionTakerRole || "User",
+                email: action.actionTakerEmail || "user@example.com",
+                phone: "1234567890",
+                gender: "Unknown",
+                location: "Unknown",
+                language: ["English"],
+              },
+            },
+          })),
         ],
       }));
       setOffers(mappedOffers);
@@ -366,27 +383,26 @@ export function MakeOfferSection({
                       <div key={offer.id} className="p-4">
                         <div className="flex flex-col gap-2">
                           <div className="bg-muted/5 rounded-[0.35rem] p-4">
+                            <div className="flex flex-col gap-1 mb-5">
+                              <p className="text-xs text-muted-foreground">
+                                Created by: {offer.responses?.[0].user.founder.name} {offer.responses?.[0].user.founder.lastName}
+                                <time className="text-xs text-muted-foreground">
+                                  {" "}at {offer.responses?.[0].timestamp}
+                                </time>
+                              </p>
+
+                            </div>
                             <p className="text-sm text-muted-foreground">
                               {offer.responses?.[0].reason}
                             </p>
-                            <time className="text-xs text-muted-foreground self-end">
-                              {offer.status === "withdrawn"
-                                ? "Withdrawn at: "
-                                : offer.status === "accepted"
-                                  ? "Accepted at: "
-                                  : offer.status === "rejected"
-                                    ? "Rejected at: "
-                                    : ""}{offer.date}
-                            </time>
+
                           </div>
                         </div>
 
                         {offer.responses && offer.responses.length > 1 && (
-                          <div className="mt-6 space-y-4">
+                          <div className="-mt-5 space-y-4">
                             {[...offer.responses]
-                              .filter(
-                                (response) => response.action !== "Offer Sent"
-                              )
+                              .filter((response) => response.action !== "Offer Sent")
                               .reverse()
                               .map((response, index) => (
                                 <div key={index} className="flex flex-col gap-2">
@@ -394,24 +410,15 @@ export function MakeOfferSection({
                                     <p className="text-sm text-muted-foreground">
                                       {response.reason}
                                     </p>
-                                    <div className="items-center gap-2 text-xs text-muted-foreground">
-                                      <span className="capitalize">
-                                        {response.action} by
-                                      </span>
-                                      <br />
-                                      <FounderProfile
-                                        founder={response.user.founder}
-                                      />
+                                    <div className="flex flex-col gap-1">
+                                      <p className="text-xs text-muted-foreground">
+                                        {response.action[0].toUpperCase() + response.action.slice(1)} by: {response.user.founder.name} {response.user.founder.lastName}
+
+                                      </p>
+                                      <time className="text-xs text-muted-foreground">
+                                        {response.action} at: {response.timestamp}
+                                      </time>
                                     </div>
-                                    <time className="text-xs text-muted-foreground self-end">
-                                      {response.action === "withdrawn"
-                                        ? "Withdrawn at: "
-                                        : response.action === "accepted"
-                                          ? "Accepted at: "
-                                          : response.action === "rejected"
-                                            ? "Rejected at: "
-                                            : ""}{response.timestamp}
-                                    </time>
                                   </div>
                                 </div>
                               ))}

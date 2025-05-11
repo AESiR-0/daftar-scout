@@ -215,11 +215,11 @@ export async function POST(req: NextRequest) {
         // Get all investors from these Daftar groups
         const investors = validDaftarIds.length > 0
           ? await db
-              .select({
-                investorId: daftarInvestors.investorId,
-              })
-              .from(daftarInvestors)
-              .where(inArray(daftarInvestors.daftarId, validDaftarIds))
+            .select({
+              investorId: daftarInvestors.investorId,
+            })
+            .from(daftarInvestors)
+            .where(inArray(daftarInvestors.daftarId, validDaftarIds))
           : [];
 
         // Get pitch team members
@@ -244,9 +244,8 @@ export async function POST(req: NextRequest) {
           type: action === "accepted" ? "news" : "alert",
           subtype: action === "accepted" ? "offer_accepted" : "offer_rejected",
           title: `Offer for pitch "${pitchDetails[0].pitchName}" ${action}`,
-          description: `Offer for pitch "${pitchDetails[0].pitchName}" has been ${action} by ${
-            userDetails[0].name
-          } ${userDetails[0].lastName || ""} via ${scoutDetails[0]?.scoutName || "scout"}`,
+          description: `Offer for pitch "${pitchDetails[0].pitchName}" has been ${action} by ${userDetails[0].name
+            } ${userDetails[0].lastName || ""} via ${scoutDetails[0]?.scoutName || "scout"}`,
           role: "investor",
           targeted_users: targetedUsers,
           payload: {

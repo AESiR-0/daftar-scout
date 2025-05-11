@@ -43,16 +43,16 @@ export default function DetailsPage() {
           name: data.data.scoutName || "",
           description: data.data.scoutVision || "",
         });
-        const canEditStatus = canEditScout(data.data);
-        setCanEdit(canEditStatus);
+        // const canEditStatus = canEditScout(data.data);
+        // setCanEdit(canEditStatus);
         
-        if (!canEditStatus) {
-          toast({
-            title: "Access Restricted",
-            description: "This scout is no longer in the planning phase. Editing is restricted.",
-            variant: "destructive",
-          });
-        }
+        // if (!canEditStatus) {
+        //   toast({
+        //     title: "Access Restricted",
+        //     description: "This scout is no longer in the planning phase. Editing is restricted.",
+        //     variant: "destructive",
+        //   });
+        // }
       }
     };
 

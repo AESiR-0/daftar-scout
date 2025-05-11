@@ -179,7 +179,7 @@ export function NotificationDialog({
   useEffect(() => {
     const fetchDetails = async () => {
       const res = fetch(
-        `/api/endpoints/notifications?userId=${userId}&scoutId=${notifications[0]?.payload?.scout_id}&daftarId=${notifications[0]?.payload?.daftar_id}`
+        `/api/endpoints/notifications?userId=${userId}&scoutId=${notifications[0]?.payload?.scout_id ? notifications[0]?.payload?.scout_id : ""}&daftarId=${notifications[0]?.payload?.daftar_id ? notifications[0]?.payload?.daftar_id : ""}&pitchId=${notifications[0]?.payload?.pitchId ? notifications[0]?.payload?.pitchId : ""}`
       );
     };
   });
@@ -256,31 +256,46 @@ export function NotificationDialog({
   // Fetch details for notifications
   useEffect(() => {
     const fetchNotificationDetails = async (notification: Notification) => {
-      if (!notification.payload.scout_id && !notification.payload.pitchId) return;
+      // Skip if no relevant IDs are present
+      if (!notification.payload.scout_id && !notification.payload.pitchId && !notification.payload.daftar_id) {
+        return;
+      }
 
       try {
-        const res = await fetch(
-          `/api/endpoints/notifications/details?${
-            notification.payload.scout_id ? `scoutId=${notification.payload.scout_id}` : ''
-          }${
-            notification.payload.pitchId ? `&pitchId=${notification.payload.pitchId}` : ''
-          }${
-            notification.payload.daftar_id ? `&daftarId=${notification.payload.daftar_id}` : ''
-          }`
-        );
-        
-        if (!res.ok) throw new Error('Failed to fetch details');
-        
+        const queryParams = new URLSearchParams();
+
+        if (notification.payload.scout_id) {
+          queryParams.append('scoutId', notification.payload.scout_id ? notification.payload.scout_id : "");
+        }
+        if (notification.payload.pitchId) {
+          queryParams.append('pitchId', notification.payload.pitchId ? notification.payload.pitchId : "");
+        }
+        if (notification.payload.daftar_id) {
+          queryParams.append('daftarId', notification.payload.daftar_id ? notification.payload.daftar_id : "");
+        }
+
+        const res = await fetch(`/api/endpoints/notifications/details?${queryParams.toString()}`);
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch details: ${res.statusText}`);
+        }
+
         const data = await res.json();
-        setNotificationDetails(prev => ({
-          ...prev,
-          [notification.id]: data
-        }));
+
+        if (data && (data.pitchName || data.scoutName || data.daftarName)) {
+          setNotificationDetails(prev => ({
+            ...prev,
+            [notification.id]: data
+          }));
+        }
       } catch (error) {
         console.error('Error fetching notification details:', error);
+        // Don't show toast for every failed notification detail fetch
+        // as it could be noisy if many notifications fail
       }
     };
 
+    // Only fetch details for relevant notification types
     notifications.forEach(notification => {
       if (notification.type === 'request' || notification.type === 'updates' || notification.type === 'scout_link') {
         fetchNotificationDetails(notification);
@@ -438,9 +453,9 @@ export function NotificationDialog({
                               className="text-xs rounded-[0.35rem]"
                               onClick={() => {
                                 const link =
-                                      notification.payload.publishMessageForScout ||
-                                      notification.payload.url ||
-                                      `https://daftar.com/scout/${notification.id}`;
+                                  notification.payload.publishMessageForScout ||
+                                  notification.payload.url ||
+                                  `https://daftar.com/scout/${notification.id}`;
                                 navigator.clipboard.writeText(link);
                                 toast({
                                   title: "Link copied",

@@ -20,44 +20,49 @@ export async function GET(req: NextRequest) {
 
     // Fetch pitch details if pitchId is provided
     if (pitchId) {
-      const pitchDetails = await db
+      const [pitchDetails] = await db
         .select({ pitchName: pitch.pitchName })
         .from(pitch)
         .where(eq(pitch.id, pitchId))
         .limit(1);
 
-      if (pitchDetails.length > 0) {
-        details.pitchName = pitchDetails[0].pitchName;
+      if (pitchDetails?.pitchName) {
+        details.pitchName = pitchDetails.pitchName;
       }
     }
 
     // Fetch scout details if scoutId is provided
     if (scoutId) {
-      const scoutDetails = await db
+      const [scoutDetails] = await db
         .select({ scoutName: scouts.scoutName })
         .from(scouts)
         .where(eq(scouts.scoutId, scoutId))
         .limit(1);
 
-      if (scoutDetails.length > 0) {
-        details.scoutName = scoutDetails[0].scoutName;
+      if (scoutDetails?.scoutName) {
+        details.scoutName = scoutDetails.scoutName;
       }
     }
 
     // Fetch daftar details if daftarId is provided
     if (daftarId) {
-      const daftarDetails = await db
+      const [daftarDetails] = await db
         .select({ daftarName: daftar.name })
         .from(daftar)
         .where(eq(daftar.id, daftarId))
         .limit(1);
 
-      if (daftarDetails.length > 0) {
-        details.daftarName = daftarDetails[0].daftarName;
+      if (daftarDetails?.daftarName) {
+        details.daftarName = daftarDetails.daftarName;
       }
     }
 
-    return NextResponse.json(details, { status: 200 });
+    // Only return if we have at least one piece of data
+    if (Object.keys(details).length > 0) {
+      return NextResponse.json(details, { status: 200 });
+    }
+
+    return NextResponse.json({}, { status: 200 });
   } catch (error) {
     console.error("Error fetching notification details:", error);
     return NextResponse.json(
