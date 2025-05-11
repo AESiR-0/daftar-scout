@@ -113,7 +113,7 @@ export async function GET(req: Request) {
     const response = documents.map((doc) => ({
       id: doc.docId,
       docName: doc.docName,
-      docType: doc.docType,
+      docType: doc.docType || "regular",
       docUrl: doc.docUrl,
       size: doc.size,
       isPrivate: doc.isPrivate,
@@ -121,7 +121,8 @@ export async function GET(req: Request) {
       uploadedBy: doc.uploadedBy
         ? {
           id: doc.uploadedBy,
-          ...userMap.get(doc.uploadedBy),
+          firstName: userMap.get(doc.uploadedBy)?.firstName,
+          lastName: userMap.get(doc.uploadedBy)?.lastName,
         }
         : null,
       daftar: doc.daftarId

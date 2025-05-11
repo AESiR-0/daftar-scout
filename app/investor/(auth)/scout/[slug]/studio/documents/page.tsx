@@ -34,7 +34,7 @@ interface Document {
   uploadedAt: string;
   type: "private" | "received" | "sent";
   documentType: "regular" | "pitchDocument";
-  visibility: "public" | "investors_only" | "private";
+  visibility: "private" | "investors_only";
   size: string;
   logs?: {
     action: string;
@@ -54,13 +54,22 @@ interface ActivityLog {
 
 interface ApiDocument {
   docId: string;
-  docType: string;
+  docName: string;
   docUrl: string;
+  docType: "regular" | "pitchDocument";
   size: number;
+  scoutId: string;
+  daftarId: string;
+  uploadedBy: {
+    id: string;
+    name: string;
+    lastName: string;
+    daftarId: string;
+    daftarName: string;
+  };
   isPrivate: boolean;
   uploadedAt: string;
-  uploadedBy: { id: string; firstName: string; lastName: string } | null;
-  daftarName: string | null;
+  daftarName: string;
 }
 
 const emptyStateMessages: Record<string, string> = {
@@ -73,12 +82,17 @@ export default function DocumentsPage() {
   const { toast } = useToast();
   const daftarId = useDaftar().selectedDaftar;
   const pathname = usePathname();
-  const pitchId = pathname.split("/")[5]; // Get pitchId from URL
+  const pitchId = pathname.split("/")[5];
   const [documentsList, setDocumentsList] = useState<Document[]>([]);
   const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([]);
   const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("private");
+  const [isPrivate, setIsPrivate] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    setIsPrivate(activeTab === "private");
+  }, [activeTab]);
 
   const fetchDocuments = async () => {
     try {
@@ -106,15 +120,13 @@ export default function DocumentsPage() {
         return;
       }
 
-      console.log('Raw data from API:', data);
-
-      const mappedDocuments: Document[] = data.map((doc: any) => ({
-        id: doc.id,
+      const mappedDocuments: Document[] = data.map((doc: ApiDocument) => ({
+        id: doc.docId,
         name: doc.docName,
         uploadedBy: {
           id: doc.uploadedBy?.id || "unknown",
           name: doc.uploadedBy ? `${doc.uploadedBy.name || ''} ${doc.uploadedBy.lastName || ''}`.trim() || "Unknown User" : "Unknown User",
-          daftarId: doc.daftarId
+          daftarId: doc.uploadedBy?.daftarId || "unknown"
         },
         daftar: {
           id: doc.daftarId,
@@ -123,13 +135,12 @@ export default function DocumentsPage() {
         url: doc.docUrl,
         uploadedAt: formatDate(doc.uploadedAt),
         type: doc.isPrivate ? "private" : "sent",
-        size: doc.size ? `${(doc.size / (1024 * 1024)).toFixed(1)} MB` : "0 MB",
+        size: `${(doc.size / (1024 * 1024)).toFixed(3)} MB`,
         isHidden: false,
-        documentType: doc.docType,
-        visibility: doc.visibility || (doc.isPrivate ? "private" : "investors_only")
+        documentType: doc.docType as "regular" | "pitchDocument",
+        visibility: doc.isPrivate ? "private" : "investors_only"
       }));
 
-      console.log('Mapped documents:', mappedDocuments); // Debug log
       setDocumentsList(mappedDocuments);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -138,7 +149,7 @@ export default function DocumentsPage() {
         description: "Failed to load documents",
         variant: "destructive",
       });
-      setDocumentsList([]); // Set empty array on error
+      setDocumentsList([]);
     } finally {
       setIsLoading(false);
     }
@@ -207,6 +218,8 @@ export default function DocumentsPage() {
               throw new Error("Failed to get upload URL");
             }
 
+            console.log('Uploading with isPrivate:', isPrivate); // Debug log
+
             const response = await fetch("/api/endpoints/pitch/investor/documents", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -218,9 +231,9 @@ export default function DocumentsPage() {
                 pitchId: pathname.split("/")[5],
                 daftarId,
                 docUrl: url,
-                isPrivate: activeTab === "private",
+                isPrivate,
                 documentType: "regular",
-                visibility: activeTab === "private" ? "private" : "investors_only",
+                visibility: isPrivate ? "private" : "investors_only",
                 accessLevel: "investor"
               }),
               credentials: "include",
@@ -342,9 +355,10 @@ export default function DocumentsPage() {
           <CardContent className="space-y-6">
             <Tabs
               defaultValue="private"
-              onValueChange={(value: string) =>
-                setActiveTab(value as typeof activeTab)
-              }
+              onValueChange={(value: string) => {
+                setActiveTab(value as typeof activeTab);
+                setIsPrivate(value === "private");
+              }}
             >
               <div className="flex items-center justify-between mb-6">
                 <TabsList>

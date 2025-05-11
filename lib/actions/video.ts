@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     detectSessionInUrl: true,
   },
 });
-const compression_URL = "http://ec2-13-126-145-26.ap-south-1.compute.amazonaws.com";
+const compression_URL = "https://compression.daftaros.com";
 const DUMMY_EMAIL = process.env.DUMMY_EMAIL || "pratham@daftaros.com";
 const DUMMY_PASSWORD = process.env.DUMMY_PASSWORD || "Daftarcore123$"; // make sure this user exists in Supabase
 
