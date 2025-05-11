@@ -50,7 +50,7 @@ export async function GET(req: Request) {
 
     // Fetch documents with visibility rules:
     // 1. Public documents (isPrivate = false)
-    // 2. Private documents from user's own daftar
+    // 2. Private documents from the requested daftar
     const documents = await db
       .select({
         docId: scoutDocuments.docId,
@@ -71,7 +71,7 @@ export async function GET(req: Request) {
             eq(scoutDocuments.isPrivate, false),
             and(
               eq(scoutDocuments.isPrivate, true),
-              eq(scoutDocuments.daftarId, userDaftarId as string)
+              eq(scoutDocuments.daftarId, daftarId)
             )
           )
         )
@@ -131,6 +131,7 @@ export async function GET(req: Request) {
           name: daftarMap.get(doc.daftarId)?.name || "Unknown Daftar",
         }
         : null,
+      isUploadedByCurrentUser: doc.uploadedBy === userResult[0].id
     }));
 
     return NextResponse.json(response, { status: 200 });

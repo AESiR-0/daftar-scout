@@ -42,6 +42,8 @@ interface Document {
     user: string;
   }[];
   isHidden?: boolean;
+  isPrivate: boolean;
+  isUploadedByCurrentUser: boolean;
 }
 
 interface ActivityLog {
@@ -53,7 +55,7 @@ interface ActivityLog {
 }
 
 interface ApiDocument {
-  docId: string;
+  id: string;
   docName: string;
   docUrl: string;
   docType: "regular" | "pitchDocument";
@@ -62,10 +64,8 @@ interface ApiDocument {
   daftarId: string;
   uploadedBy: {
     id: string;
-    name: string;
+    firstName: string;
     lastName: string;
-    daftarId: string;
-    daftarName: string;
   };
   isPrivate: boolean;
   uploadedAt: string;
@@ -80,9 +80,9 @@ const emptyStateMessages: Record<string, string> = {
 
 export default function DocumentsPage() {
   const { toast } = useToast();
-  const daftarId = useDaftar().selectedDaftar;
+  const { selectedDaftar: daftarId } = useDaftar();
   const pathname = usePathname();
-  const pitchId = pathname.split("/")[5];
+  const scoutId = pathname.split("/")[3];
   const [documentsList, setDocumentsList] = useState<Document[]>([]);
   const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([]);
   const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("private");
@@ -98,7 +98,7 @@ export default function DocumentsPage() {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/endpoints/pitch/investor/documents?scoutId=${pathname.split("/")[3]}`,
+        `/api/endpoints/scouts/documents?scoutId=${scoutId}&daftarId=${daftarId}`,
         {
           method: "GET",
           headers: {
@@ -121,12 +121,12 @@ export default function DocumentsPage() {
       }
 
       const mappedDocuments: Document[] = data.map((doc: ApiDocument) => ({
-        id: doc.docId,
+        id: doc.id,
         name: doc.docName,
         uploadedBy: {
           id: doc.uploadedBy?.id || "unknown",
-          name: doc.uploadedBy ? `${doc.uploadedBy.name || ''} ${doc.uploadedBy.lastName || ''}`.trim() || "Unknown User" : "Unknown User",
-          daftarId: doc.uploadedBy?.daftarId || "unknown"
+          name: doc.uploadedBy ? `${doc.uploadedBy.firstName || ''} ${doc.uploadedBy.lastName || ''}`.trim() || "Unknown User" : "Unknown User",
+          daftarId: doc.daftarId
         },
         daftar: {
           id: doc.daftarId,
@@ -138,7 +138,9 @@ export default function DocumentsPage() {
         size: `${(doc.size / (1024 * 1024)).toFixed(3)} MB`,
         isHidden: false,
         documentType: doc.docType as "regular" | "pitchDocument",
-        visibility: doc.isPrivate ? "private" : "investors_only"
+        visibility: doc.isPrivate ? "private" : "investors_only",
+        isPrivate: doc.isPrivate,
+        isUploadedByCurrentUser: true
       }));
 
       setDocumentsList(mappedDocuments);
@@ -156,39 +158,30 @@ export default function DocumentsPage() {
   };
 
   useEffect(() => {
-    if (pathname.split("/")[5]) {
+    if (scoutId) {
       fetchDocuments();
     }
-  }, [pathname]);
-
-  const privateCount = documentsList.filter(
-    (doc) => doc.visibility === "private"
-  ).length;
-  const receivedCount = documentsList.filter(
-    (doc) => doc.visibility === "investors_only" && doc.uploadedBy.daftarId !== daftarId
-  ).length;
-  const sentCount = documentsList.filter(
-    (doc) => doc.visibility === "investors_only" && doc.uploadedBy.daftarId === daftarId
-  ).length;
-
-  console.log('Counts:', { privateCount, receivedCount, sentCount });
-  console.log('Active Tab:', activeTab);
+  }, [scoutId, daftarId]);
 
   const filteredDocuments = documentsList.filter((doc) => {
-    console.log('Filtering doc:', doc, 'activeTab:', activeTab, 'daftarId:', daftarId);
     switch (activeTab) {
       case "private":
-        return doc.visibility === "private" && doc.uploadedBy.daftarId === daftarId;
+        return doc.isPrivate;
       case "received":
-        return doc.visibility === "investors_only" && doc.uploadedBy.daftarId !== daftarId;
+        return !doc.isPrivate && !doc.isUploadedByCurrentUser;
       case "sent":
-        return doc.visibility === "investors_only" && doc.uploadedBy.daftarId === daftarId;
+        return !doc.isPrivate && doc.isUploadedByCurrentUser;
       default:
         return false;
     }
   });
 
-  console.log('Filtered Documents:', filteredDocuments);
+  const privateCount = documentsList.filter(doc => doc.isPrivate).length;
+  const receivedCount = documentsList.filter(doc => !doc.isPrivate && !doc.isUploadedByCurrentUser).length;
+  const sentCount = documentsList.filter(doc => !doc.isPrivate && doc.isUploadedByCurrentUser).length;
+
+  console.log('Counts:', { privateCount, receivedCount, sentCount });
+  console.log('Active Tab:', activeTab);
 
   const addActivityLog = (newActivity: Omit<ActivityLog, "id">) => {
     const activity: ActivityLog = {
@@ -212,29 +205,23 @@ export default function DocumentsPage() {
         setIsUploading(true);
         for (const file of Array.from(files)) {
           try {
-            const url = await uploadInvestorPitchDocument(file, pitchId);
+            const url = await uploadInvestorPitchDocument(file, scoutId);
 
             if (!url) {
               throw new Error("Failed to get upload URL");
             }
 
-            console.log('Uploading with isPrivate:', isPrivate); // Debug log
-
-            const response = await fetch("/api/endpoints/pitch/investor/documents", {
+            const response = await fetch("/api/endpoints/scouts/documents", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 size: file.size,
-                docType: file.type || file.name.split(".").pop(),
+                docType: file.type || file.name.split(".").pop() || "unknown",
                 docName: file.name,
-                scoutId: pathname.split("/")[3],
-                pitchId: pathname.split("/")[5],
+                scoutId,
                 daftarId,
-                docUrl: url,
-                isPrivate,
-                documentType: "regular",
-                visibility: isPrivate ? "private" : "investors_only",
-                accessLevel: "investor"
+                url: url,
+                isPrivate: activeTab === "private"
               }),
               credentials: "include",
             });
@@ -300,6 +287,7 @@ export default function DocumentsPage() {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
+          
         },
         credentials: "include",
       });
@@ -516,7 +504,9 @@ function DocumentsList({
 
   return (
     <div className="space-y-4">
-      {documents.map((doc) => (
+      {documents.map((doc) => {
+        console.log(doc);
+        return (
         <div
           key={doc.id}
           className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${doc.isHidden ? "opacity-50" : ""
@@ -569,7 +559,7 @@ function DocumentsList({
             {renderMetadata(doc)}
           </div>
         </div>
-      ))}
+      )})}
     </div>
   );
 }
