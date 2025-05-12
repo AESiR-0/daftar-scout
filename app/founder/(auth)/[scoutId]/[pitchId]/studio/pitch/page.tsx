@@ -66,14 +66,16 @@ export default function PitchPage() {
       },
     },
   ]);
+  const [submitted, setSubmitted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [currentUserId] = useState("1"); // Demo: John Smith as current userName
+  const [pitchApproved, setPitchApproved] = useState(false);
 
   useEffect(() => {
     if (pitchId) {
       fetchTeamDetails();
     }
-  }, [pitchId]);
+  }, []);
 
   const fetchTeamDetails = async () => {
     try {
@@ -83,6 +85,8 @@ export default function PitchPage() {
       if (!response.ok) throw new Error("Failed to fetch team details");
       const data = await response.json();
       setApprovalRequests(data.team); // Assuming the team data is in the response
+      setPitchApproved(data.pitchApproved);
+      setSubmitted(data.submitted);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching team details:", error);
@@ -176,11 +180,10 @@ export default function PitchPage() {
       });
       return;
     }
-
-    if (approvedCount < totalMembers) {
+    if (pitchApproved) {
       toast({
         title: "Error",
-        description: "All team members must approve before submission",
+        description: "Pitch is already approved",
         variant: "destructive",
       });
       return;
@@ -226,7 +229,6 @@ export default function PitchPage() {
   const approvedCount = approvalRequests.filter(
     (req) => req.hasApproved === true
   ).length;
-
   return (
     <div className="px-10 container mx-auto py-5 space-y-6 flex gap-8">
       {/* Left Section: Pitch & Questions */}
@@ -237,6 +239,7 @@ export default function PitchPage() {
             <Label>Do you have any specific ask from the Investor?</Label>
             <Textarea
               value={specificAsks}
+              disabled={pitchApproved}
               onChange={(e) => setSpecificAsks(e.target.value)}
               className="min-h-[100px] bg-muted/50 resize-none rounded-xl"
             />
@@ -247,6 +250,7 @@ export default function PitchPage() {
             <Checkbox
               id="terms"
               checked={termsAccepted}
+              disabled={pitchApproved}
               className="h-5 w-5 border-2 mt-1 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
               onCheckedChange={(checked: boolean) => {
                 setTermsAccepted(checked);
@@ -314,18 +318,20 @@ export default function PitchPage() {
           className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
           size="lg"
           onClick={handlePitchSubmission}
-          disabled={isLoading || !termsAccepted || approvedCount < totalMembers}
+          disabled={isLoading || !termsAccepted || pitchApproved || submitted}
         >
           Pitch Now
         </Button>
 
         <Card className="p-4 border bg-muted/10">
-          <h3 className="text-sm font-medium mb-2">Pitch not shared</h3>
-          <p className="text-xs text-muted-foreground">Reason</p>
+          <h3 className="text-sm font-medium mb-2">{submitted ? "Pitch already submitted" : "Pitch not shared"}</h3>
+          <p className="text-xs text-muted-foreground">{submitted ? "" : "Reason"}</p>
           <p className="text-xs text-muted-foreground">
-            {approvedCount < totalMembers
+            {!pitchApproved
               ? "Please check your team's approval and ensure all members have approved the pitch."
-              : "Pitch is ready but not yet submitted."}
+              : submitted
+                ? "Pitch is already submitted"
+                : "Pitch is ready but not submitted."}
           </p>
         </Card>
       </div>
