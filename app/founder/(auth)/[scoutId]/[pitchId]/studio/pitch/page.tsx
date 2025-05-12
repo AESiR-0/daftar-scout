@@ -330,7 +330,7 @@ export default function PitchPage() {
             {!pitchApproved
               ? "Please check your team's approval and ensure all members have approved the pitch."
               : submitted
-                ? "Pitch is already submitted"
+                ? ""
                 : "Pitch is ready but not submitted."}
           </p>
         </Card>
