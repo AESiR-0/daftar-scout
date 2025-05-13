@@ -198,11 +198,23 @@ export default function UserProfileClient({
   }, [languageData]);
 
   const handleChange = (field: string, value: string) => {
-    if (field === "number" && value && !/^\d*$/.test(value)) {
-      return;
+    if (field === "number") {
+      // Only allow digits and limit length based on country code
+      const digitsOnly = value.replace(/\D/g, '');
+      if (formState.countryCode === "+91") {
+        // For India, limit to 10 digits
+        if (digitsOnly.length <= 10) {
+          setFormState((prev) => ({ ...prev, [field]: digitsOnly }));
+        }
+      } else {
+        // For other countries, allow up to 15 digits
+        if (digitsOnly.length <= 15) {
+          setFormState((prev) => ({ ...prev, [field]: digitsOnly }));
+        }
+      }
+    } else {
+      setFormState((prev) => ({ ...prev, [field]: value }));
     }
-
-    setFormState((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
 
     if (field === "role") {
@@ -289,14 +301,15 @@ export default function UserProfileClient({
     if (!validateCurrentStep()) return;
 
     setIsSubmitting(true);
-    const formDataWithPhone = {
+    const formData = {
       ...formState,
-      phoneNumber: `${formState.countryCode}${formState.number}`,
+      countryCode: formState.countryCode,
+      phoneNumber: formState.number,
     };
     const res = await fetch(`/api/endpoints/users/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ formData: formDataWithPhone, email: userMail }),
+      body: JSON.stringify({ formData, email: userMail }),
     });
     if (res.status == 200) {
       toast({ title: "Success", description: "Profile updated successfully!" });
@@ -480,6 +493,8 @@ export default function UserProfileClient({
                 onChange={(e) => handleChange("number", e.target.value)}
                 disabled={isSubmitting}
                 className="bg-[#2a2a2a] border-[#3a3a3a] text-white h-12"
+                placeholder={formState.countryCode === "+91" ? "10 digits" : "Enter phone number"}
+                maxLength={formState.countryCode === "+91" ? 10 : 15}
               />
               {errors.number && (
                 <p className="text-red-500 text-xs max-w-full">
