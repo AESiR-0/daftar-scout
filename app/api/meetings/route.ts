@@ -32,7 +32,11 @@ export async function GET() {
     return new Response("Missing Google token", { status: 400 });
   }
 
-  const oauth2Client = new google.auth.OAuth2();
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.NEXTAUTH_URL
+  );
   oauth2Client.setCredentials({
     access_token: googleAccount.access_token,
     refresh_token: googleAccount.refresh_token,
@@ -97,7 +101,11 @@ export async function POST(req: Request) {
     return new Response("Missing Google token", { status: 400 });
   }
 
-  const oauth2Client = new google.auth.OAuth2();
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.NEXTAUTH_URL
+  );
   oauth2Client.setCredentials({
     access_token: googleAccount.access_token,
     refresh_token: googleAccount.refresh_token,

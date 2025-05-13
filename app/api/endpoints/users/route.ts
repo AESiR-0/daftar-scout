@@ -12,7 +12,7 @@ export async function PATCH(req: Request) {
     const { formData, email } = await req.json();
     console.log("Form state", formData, email);
 
-    const { name, lastName, phoneNumber, gender, dob, location, role } =
+    const { name, lastName, phoneNumber, countryCode, gender, dob, location, role } =
       formData;
 
     if (!email) {
@@ -22,17 +22,6 @@ export async function PATCH(req: Request) {
     }
 
     const formattedDob = dob ? new Date(dob).toISOString().split("T")[0] : null;
-
-    // Extract country code and number from phoneNumber
-    let countryCode = null;
-    let number = null;
-    if (phoneNumber?.startsWith("+")) {
-      const match = phoneNumber.match(/^(\+\d{1,4})(.*)$/);
-      if (match) {
-        countryCode = match[1];
-        number = match[2].trim();
-      }
-    }
 
     // Fetch the userId based on the provided email
     const user = await db
@@ -86,7 +75,7 @@ export async function PATCH(req: Request) {
         name: name,
         lastName: lastName,
         countryCode: countryCode,
-        number: number,
+        number: phoneNumber,
         gender: gender,
         dob: formattedDob,
         location: location,

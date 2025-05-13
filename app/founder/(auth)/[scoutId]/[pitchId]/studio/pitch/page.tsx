@@ -85,6 +85,11 @@ export default function PitchPage() {
       if (!response.ok) throw new Error("Failed to fetch team details");
       const data = await response.json();
       setApprovalRequests(data.team); // Assuming the team data is in the response
+      data.team.forEach((member: ApprovalRequest) => {
+        if (member.hasApproved) {
+          setTermsAccepted(true);
+        }
+      });
       setPitchApproved(data.pitchApproved);
       setSubmitted(data.submitted);
       setIsLoading(false);
@@ -170,6 +175,53 @@ export default function PitchPage() {
     });
   };
 
+  // Handle pitch approval
+  const handlePitchApproval = async () => {
+    if (!termsAccepted) {
+      toast({
+        title: "Error",
+        description: "Please accept terms before approving",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/endpoints/pitch/founder/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pitchId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to approve pitch");
+      }
+
+      const data = await response.json();
+      if (data.allApproved) {
+        setPitchApproved(true);
+      }
+
+      toast({
+        title: "Success",
+        description: "Pitch approval updated successfully",
+      });
+    } catch (error: any) {
+      console.error("Error approving pitch:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to approve pitch",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Handle pitch submission
   const handlePitchSubmission = async () => {
     if (!termsAccepted) {
@@ -180,10 +232,10 @@ export default function PitchPage() {
       });
       return;
     }
-    if (pitchApproved) {
+    if (!pitchApproved) {
       toast({
         title: "Error",
-        description: "Pitch is already approved",
+        description: "Pitch must be approved before submitting",
         variant: "destructive",
       });
       return;
@@ -196,7 +248,7 @@ export default function PitchPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
-          pitchName: "Current Pitch", // Required field
+          pitchName: "Current Pitch",
           askForInvestor: specificAsks,
           status: "submitted",
           isCompleted: true,
@@ -207,6 +259,8 @@ export default function PitchPage() {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to submit pitch");
       }
+
+      setSubmitted(true);
       toast({
         title: "Success",
         description: "Pitch submitted successfully",
@@ -271,6 +325,15 @@ export default function PitchPage() {
             </label>
           </div>
 
+          <Button
+            className="w-full rounded-[0.35rem] bg-primary hover:bg-primary/90"
+            size="lg"
+            onClick={handlePitchApproval}
+            disabled={isLoading || !termsAccepted || pitchApproved || submitted}
+          >
+            {pitchApproved ? "Pitch Approved" : "Approve Pitch"}
+          </Button>
+
           <div className="space-y-4 mt-4">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium">Team's Approval Required</h3>
@@ -280,33 +343,35 @@ export default function PitchPage() {
             </div>
 
             <div>
-              {approvalRequests.map((member, index) => (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between p-4 border rounded-lg bg-background"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>{index + 1}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">
-                        {member.userName} {member.userLastName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {member.designation[0].toUpperCase()}
-                        {member.designation.slice(1)}
-                      </p>
+              {approvalRequests.map((member, index) => {
+                return (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>{index + 1}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {member.userName} {member.userLastName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {member.designation[0].toUpperCase()}
+                          {member.designation.slice(1)}
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className="flex items-center cursor-pointer"
+                      onClick={() => handleApprovalToggle(member.id)}
+                    >
+                      {getStatusIcon(member.hasApproved)}
                     </div>
                   </div>
-                  <div
-                    className="flex items-center cursor-pointer"
-                    onClick={() => handleApprovalToggle(member.id)}
-                  >
-                    {getStatusIcon(member.hasApproved)}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </ScrollArea>
@@ -318,7 +383,7 @@ export default function PitchPage() {
           className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
           size="lg"
           onClick={handlePitchSubmission}
-          disabled={isLoading || !termsAccepted || pitchApproved || submitted}
+          disabled={isLoading || !termsAccepted || !pitchApproved || submitted}
         >
           Pitch Now
         </Button>
