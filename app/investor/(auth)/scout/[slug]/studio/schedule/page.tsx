@@ -230,7 +230,6 @@ export default function SchedulePage() {
                   </>
                 ) : (
                   <div className="text-center py-6">
-                    <Check className="h-8 w-8 text-green-500 mx-auto mb-2" />
                     <p className="text-sm text-foreground">
                       No schedule issues
                     </p>

@@ -262,7 +262,7 @@ export default function ScoutPage() {
 
                 <div className="space-y-5">
                   {scouts.length === 0 ? (
-                    <div className="text-center py-8 text-sm text-muted-foreground bg-background/5 rounded-[0.35rem] border border-border">
+                    <div className="py-6 px-4 text-sm text-muted-foreground bg-background/5 rounded-[0.35rem] border border-border">
                       {emptyStateMessages[status]}
                     </div>
                   ) : (

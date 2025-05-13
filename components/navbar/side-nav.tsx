@@ -50,9 +50,9 @@ export function AppSidebar({ role }: { role: string }) {
   };
 
   return (
-    <>
-      <div className="border-r bg-[#0e0e0e] w-[60px] min-h-screen">
-        <div className="flex h-full justify-between pb-10 flex-col">
+    <div className="flex flex-col">
+      <div className="border-r bg-[#0e0e0e] w-[60px] h-full">
+        <div className="flex h-full justify-between flex-col">
           {/* Top Section */}
           <div>
             {/* Header */}
@@ -85,7 +85,7 @@ export function AppSidebar({ role }: { role: string }) {
         </div>
       </div>
       {role === "investor" && (
-        <div className="absolute bottom-[90px] left-4">
+        <div className="mx-auto">
           <Button
             size="icon"
             // style={{
@@ -111,6 +111,6 @@ export function AppSidebar({ role }: { role: string }) {
         onOpenChange={setCreateDaftarOpen}
         onSuccess={() => setSelectDaftarOpen(true)}
       />
-    </>
+    </div>
   );
 }

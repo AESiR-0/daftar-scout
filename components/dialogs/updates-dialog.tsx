@@ -220,10 +220,9 @@ export function UpdatesDialog({
         <div className="space-y-4">
           {/* New Update Form */}
           <div className="space-y-2 flex flex-col items-center gap-2 rounded-md">
-            <MenuBar editor={editor} />
-            <EditorContent
-              editor={editor}
-              className="w-full border rounded-lg bg-background"
+            <textarea
+              className="w-full border rounded-xl bg-[#1a1a1a] p-2 resize-none min-h-[150px]"
+              placeholder="Write your update here..."
             />
             <div className="p-2 w-full flex justify-start">
               <Button
@@ -239,7 +238,7 @@ export function UpdatesDialog({
 
           {/* Updates List */}
           <ScrollArea className="h-[300px] rounded-md">
-            <div className="space-y-3 p-4">
+            <div className="space-y-3">
               {isLoading ? (
                 <div className="text-center text-sm text-muted-foreground">
                   Loading updates...
@@ -268,7 +267,7 @@ export function UpdatesDialog({
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(update.id)}
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="h-8 w-8 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>

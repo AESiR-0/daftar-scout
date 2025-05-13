@@ -824,6 +824,9 @@ export function DaftarDialog({
                       </>
                     )}
                   </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">What's the big picture you're working on:</span> {daftarData.vision}
+                  </p>
                   <div className="text-xs pt-4">
                     <span className="text-muted-foreground">On Daftar Since <br /> {formatDate(daftarData.joinedDate)}</span>
                   </div>
