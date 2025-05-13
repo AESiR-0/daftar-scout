@@ -51,11 +51,18 @@ export async function GET(req: NextRequest) {
       .innerJoin(users, eq(pitchTeam.userId, users.id))
       .where(eq(pitchTeam.pitchId, pitchId));
 
+    const totalTeamMembers = pitchTeamDetails.length;
+    const approvedMembers = pitchTeamDetails.filter(member => member.hasApproved).length;
+    const pitchApproved = totalTeamMembers === approvedMembers;
+    const pitchStatus = await db.select({ status: pitch.status }).from(pitch).where(eq(pitch.id, pitchId));
     // Combine pitch and team details
+    const submitted = pitchStatus[0].status ? true : false;
     return NextResponse.json(
       {
         pitch: pitchDetails[0],
         team: pitchTeamDetails,
+        pitchApproved: pitchApproved,
+        submitted: submitted
       },
       { status: 200 }
     );
@@ -111,6 +118,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not authorized to modify this pitch" }, { status: 403 });
     }
 
+    // Update team member's approval
+    await db.update(pitchTeam).set({
+      hasApproved: true
+    }).where(
+      and(
+        eq(pitchTeam.pitchId, pitchId),
+        eq(pitchTeam.userId, userId)
+      )
+    );
+
+    // Get all team members and their approval status
+    const allTeamMembers = await db
+      .select({
+        hasApproved: pitchTeam.hasApproved
+      })
+      .from(pitchTeam)
+      .where(eq(pitchTeam.pitchId, pitchId));
+
+    const totalTeamMembers = allTeamMembers.length;
+    const approvedMembers = allTeamMembers.filter(member => member.hasApproved).length;
+    const allApproved = totalTeamMembers === approvedMembers;
+
     // Get pitch details
     const pitchDetails = await db
       .select({
@@ -141,18 +170,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Scout not found" }, { status: 404 });
     }
 
-    // Update pitch details
-    const updatedPitch = await db
-      .update(pitch)
-      .set({
-        askForInvestor: askForInvestor || null,
-        status: status || "draft"
-      })
-      .where(eq(pitch.id, pitchId))
-      .returning();
+    // Only update pitch status if all team members have approved
+    let updatedPitch = pitchDetails[0];
+    if (allApproved) {
+      const result = await db
+        .update(pitch)
+        .set({
+          askForInvestor: askForInvestor || null,
+          status: status || "draft"
+        })
+        .where(eq(pitch.id, pitchId))
+        .returning();
 
-    if (!updatedPitch.length) {
-      return NextResponse.json({ error: "Failed to update pitch" }, { status: 500 });
+      if (!result.length) {
+        return NextResponse.json({ error: "Failed to update pitch" }, { status: 500 });
+      }
+      updatedPitch = result[0];
     }
 
     // Get pitch team members
@@ -236,7 +269,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       message: "Pitch updated successfully",
-      pitch: updatedPitch[0]
+      pitch: updatedPitch
     });
 
   } catch (error) {
