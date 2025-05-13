@@ -27,6 +27,7 @@ interface TeamAnalysis {
   id: string;
   nps: number;
   analyst: {
+    id: string;
     name: string;
     role: string;
     avatar: string;
@@ -64,7 +65,16 @@ export function TeamAnalysisSection({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>(initialTeamAnalysis);
+  const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>(() => {
+    // Filter out duplicates based on analyst ID when initializing state
+    const uniqueEntries = new Map();
+    initialTeamAnalysis.forEach(entry => {
+      if (!uniqueEntries.has(entry.analyst.id)) {
+        uniqueEntries.set(entry.analyst.id, entry);
+      }
+    });
+    return Array.from(uniqueEntries.values());
+  });
   const [loading, setLoading] = useState(false);
 
   // Check if the user has already submitted an analysis
@@ -150,17 +160,20 @@ export function TeamAnalysisSection({
       }
 
       setHasSubmitted(true);
-      setTeamAnalysis((prev) => [
-        {
+      // Add new analysis to the beginning of the array, ensuring no duplicates
+      setTeamAnalysis(prev => {
+        const newAnalysis = {
           id: Date.now().toString(),
           nps: formState.nps!,
           analyst: currentProfile,
           belief: formState.belief!,
           note: formState.note,
           date: new Date().toISOString(),
-        },
-        ...prev,
-      ]);
+        };
+        // Filter out any existing entry for this analyst
+        const filteredPrev = prev.filter(entry => entry.analyst.id !== currentProfile.id);
+        return [newAnalysis, ...filteredPrev];
+      });
 
       // Reset form state
       setFormState({

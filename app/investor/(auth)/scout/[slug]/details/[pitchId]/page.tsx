@@ -72,6 +72,7 @@ interface Analysis {
 interface TeamAnalysis {
   id: string;
   analyst: {
+    id: string;
     name: string;
     role: string;
     avatar: string;
@@ -738,6 +739,7 @@ export default function PitchDetailsPage() {
             teamAnalysis={pitchDetails?.fields.teamAnalysis.map(analysis => ({
               id: analysis.id,
               analyst: {
+                id: analysis.analyst.id,
                 name: analysis.analyst.name,
                 role: analysis.analyst.role,
                 avatar: analysis.analyst.avatar || "/avatars/default.jpg",

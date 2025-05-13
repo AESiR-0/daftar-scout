@@ -282,6 +282,7 @@ export function FoundersPitchSection({
                   <select
                     id="language"
                     value={selectedLanguage}
+                    disabled
                     onChange={(e) => setSelectedLanguage(e.target.value)}
                     className="bg-[#1a1a1a] border border-gray-700 rounded-[0.35rem] text-sm px-2 py-1"
                   >

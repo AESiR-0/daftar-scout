@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
         }
       })
       .from(investorPitch)
-      .leftJoin(users, eq(users.id, investorPitch.investorId))
+      .innerJoin(users, eq(users.id, investorPitch.investorId))
       .leftJoin(
         daftarInvestors,
         and(
@@ -94,6 +94,18 @@ export async function GET(req: NextRequest) {
           eq(investorPitch.scoutId, scoutId),
           eq(investorPitch.pitchId, pitchId)
         )
+      )
+      .groupBy(
+        investorPitch.id,
+        investorPitch.analysis,
+        investorPitch.believeRating,
+        investorPitch.shouldMeet,
+        investorPitch.lastActionTakenOn,
+        users.id,
+        users.name,
+        users.role,
+        daftar.id,
+        daftar.name
       );
 
     // Transform the data to match the expected format
@@ -126,7 +138,7 @@ export async function POST(req: NextRequest) {
     const scoutId = searchParams.get("scoutId");
     const pitchId = searchParams.get("pitchId");
     const body = await req.json();
-    const { analysis } = body;
+    const { analysis, believeRating, shouldMeet } = body;
     const session = await auth();
     if (!session || !session.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -214,6 +226,8 @@ export async function POST(req: NextRequest) {
         .update(investorPitch)
         .set({
           analysis,
+          believeRating,
+          shouldMeet,
           lastActionTakenOn: new Date(),
         })
         .where(
@@ -230,6 +244,8 @@ export async function POST(req: NextRequest) {
         pitchId,
         investorId: userId,
         analysis,
+        believeRating,
+        shouldMeet,
         lastActionTakenOn: new Date(),
       });
     }

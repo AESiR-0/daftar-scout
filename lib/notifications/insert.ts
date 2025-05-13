@@ -263,7 +263,7 @@ export async function createNotification({
     }).returning();
 
     // Skip email generation for scout_link notifications
-    if (type === "scout_link") {
+    if (type === "scout_link" || subtype === "offer_withdrawn") {
       return notification;
     }
 
