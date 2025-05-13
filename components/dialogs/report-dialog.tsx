@@ -25,17 +25,42 @@ const reportReasons = [
 interface ReportDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  pitchId: string
+  scoutId: string
 }
 
-export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
+export function ReportDialog({ open, onOpenChange, pitchId, scoutId }: ReportDialogProps) {
   const [selectedReasons, setSelectedReasons] = useState<string[]>([])
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [customReason, setCustomReason] = useState("")
   const [customReasons, setCustomReasons] = useState<string[]>([])
 
-  const handleSubmit = () => {
-    console.log("Reported reasons:", selectedReasons)
-    setIsSubmitted(true)
+  const handleSubmit = async () => {
+    if (selectedReasons.length === 0) {
+      return
+    }
+
+    try {
+      const response = await fetch("/api/endpoints/pitch/investor/report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pitchId,
+          scoutId,
+          reportDescription: selectedReasons.join(", "),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to report pitch")
+      }
+
+      setIsSubmitted(true)
+    } catch (error) {
+      console.error("Error reporting pitch:", error)
+    }
   }
 
   const handleClose = () => {
@@ -138,7 +163,8 @@ export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
                 <Button 
                   onClick={handleSubmit}
                   variant="destructive"
-                  className=" rounded-[0.35rem] text-white"
+                  className="rounded-[0.35rem] text-white"
+                  disabled={selectedReasons.length === 0}
                 >
                   Report
                 </Button>
@@ -148,7 +174,7 @@ export function ReportDialog({ open, onOpenChange }: ReportDialogProps) {
         ) : (
           <div className="space-y-6 py-4">
             <p className="text-sm leading-relaxed">
-            We are carefully analyzing the data patterns that led to this startup being red-flagged. As we continue enhancing our intelligence to help you connect with better founders in the future, we hope you find our software valuable.<br/><br/>If not, we'd love to hear your feedback, we're always listening
+              We are carefully analyzing the data patterns that led to this startup being red-flagged. As we continue enhancing our intelligence to help you connect with better founders in the future, we hope you find our software valuable.<br/><br/>If not, we'd love to hear your feedback, we're always listening
             </p>
           </div>
         )}
