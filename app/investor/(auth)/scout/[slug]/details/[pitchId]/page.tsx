@@ -642,6 +642,8 @@ export default function PitchDetailsPage() {
         <ReportDialog
           open={reportDialogOpen}
           onOpenChange={setReportDialogOpen}
+          pitchId={pitchId}
+          scoutId={scoutId}
         />
       </div>
       <div className="container mx-auto mt-10">
