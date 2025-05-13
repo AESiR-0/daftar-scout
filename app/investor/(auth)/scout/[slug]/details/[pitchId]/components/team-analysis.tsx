@@ -356,7 +356,7 @@ export function TeamAnalysisSection({
                       </div>
                     </div>
 
-                    <ScrollArea className="h-[350px] pr-2">
+                    <ScrollArea className="h-[calc(100vh-300px)] pr-2">
                       <div className="space-y-4">
                         {teamAnalysis.map((entry) => (
                           <div
@@ -368,7 +368,7 @@ export function TeamAnalysisSection({
                                 <img
                                   src={entry.analyst.avatar}
                                   alt={entry.analyst.name.charAt(0)}
-                                  className="w-8 h-8 rounded-full"
+                                  className="w-8 h-8 rounded-xl"
                                 />
                                 <div>
                                   <p className="text-sm font-medium">
@@ -378,30 +378,24 @@ export function TeamAnalysisSection({
                                     {entry.analyst.role} –{" "}
                                     {entry.analyst.daftarName}
                                   </p>
+                                  <div className="flex gap-2">
+                                    <p className="text-xs text-muted-foreground">
+                                      Belief: {entry.nps}/10
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      Should Meet: {entry.belief === "yes" ? "Yes" : "No"}
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
                               <div className="text-xs text-muted-foreground">
                                 {formatDate(entry.date)}
                               </div>
                             </div>
-                            <div className="text-sm whitespace-pre-wrap">
+                            <div className="text-sm text-justify whitespace-pre-wrap">
                               {entry.note}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-2 flex gap-4">
-                              <span>Belief: {entry.nps}/10</span>
-                              <span>
-                                Should Meet:{" "}
-                                <span
-                                  className={
-                                    entry.belief === "yes"
-                                      ? "text-green-500"
-                                      : "text-red-500"
-                                  }
-                                >
-                                  {entry.belief.toUpperCase()}
-                                </span>
-                              </span>
-                            </div>
+                            
                           </div>
                         ))}
                       </div>

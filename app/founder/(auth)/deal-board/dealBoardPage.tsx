@@ -168,7 +168,7 @@ export default function PitchBoardPage({ pitches }: PitchBoardPageProps) {
                     {statusPitches.length === 0 && emptyStateMessages[status] ? (
                       <div className="flex flex-col items-center justify-center h-full text-center">
                         <Card className="w-full p-4 bg-muted/50 rounded-[0.35rem]">
-                          <h4 className="text-md text-muted-foreground">
+                          <h4 className="text-md text-left text-muted-foreground">
                             {emptyStateMessages[status].title}
                           </h4>
                           <p className="text-xs text-left text-muted-foreground mt-2">

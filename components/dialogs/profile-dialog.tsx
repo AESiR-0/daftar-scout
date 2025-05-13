@@ -680,7 +680,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       Date of Birth:
                     </span>{" "}
                     {profileData.dateOfBirth
-                      ? new Date(profileData.dateOfBirth).toLocaleDateString()
+                      ? formatDate(new Date(profileData.dateOfBirth))
                       : "Not specified"}
                   </p>
                   <p className="text-sm">
@@ -877,12 +877,12 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
             <ScrollArea className="min-h-[500px]">
               {privacySections.map((section) => (
-                <div key={section.title}>
-                  <div className="flex items-center gap-2 mt-4">
+                <div key={section.title} className="space-y-1 mb-4">
+                  <div className="flex items-center gap-2">
                     <section.icon className="h-4 w-4" />
                     <h4 className="font-medium">{section.title}</h4>
                   </div>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  <p className="text-sm text-muted-foreground leading-1 text-justify whitespace-pre-line">
                     {section.content}
                   </p>
                 </div>
@@ -897,10 +897,9 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
               {pledge.map((section) => (
                 <div key={section.title} className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <section.icon className="h-4 w-4" />
                     <h4 className="font-medium">{section.title}</h4>
                   </div>
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  <p className="text-sm text-muted-foreground leading-1 text-justify whitespace-pre-line">
                     {section.content}
                   </p>
                 </div>

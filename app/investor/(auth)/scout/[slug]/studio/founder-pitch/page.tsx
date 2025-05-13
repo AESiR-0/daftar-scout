@@ -29,51 +29,30 @@ const questionsData = {
     {
       id: 1,
       question: "Introduce yourself and the problem you are solving",
-      videoUrl: "/videos/problem.mp4",
-      previewImage:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 2,
       question: "What are you building",
-      videoUrl: "/videos/market.mp4",
-      previewImage:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 3,
       question: "Why do you really want to solve the problem",
-      videoUrl: "/videos/solution.mp4",
-      previewImage:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 4,
       question: "Who are your customers, and how are they dealing with this problem today",
-      videoUrl: "/videos/customer.mp4",
-      previewImage:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 5,
       question: "Why will your customers switch from competitors to your product",
-      videoUrl: "/videos/business.mp4",
-      previewImage:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 6,
       question: "How will you make money",
-      videoUrl: "/videos/team.mp4",
-      previewImage:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
     {
       id: 7,
       question: "What is the growth here (development, traction, or revenue), and challenges you are facing",
-      videoUrl: "/videos/vision.mp4",
-      previewImage:
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
     },
   ],
 };
@@ -92,114 +71,111 @@ export default function InvestorStudioPage() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const [isLoading, setIsLoading] = useState(false);
 
-  const getVideoSource = (language: string, questionId: string) => {
-    if (language === "Assamese" && questionId === "problem") {
+  const getVideoSource = (language: string, questionId?: number) => {
+    if (language === "Assamese" && questionId === 1) {
       return "/videos/Q1_Assamese - BristyBorah.mov"
     }
-    if (language === "Assamese" && questionId === "solution") {
+    if (language === "Assamese" && questionId === 2) {
       return "/videos/Q2_Assamese - BristyBorah.mov"
     }
-    if (language === "Assamese" && questionId === "market") {
+    if (language === "Assamese" && questionId === 3) {
       return "/videos/Q3_Assamese - BristyBorah.mov"
     }
-    if (language === "Assamese" && questionId === "business") {
+    if (language === "Assamese" && questionId === 4) {
       return "/videos/Q4_Assamese - BristyBorah.mov"
     }
-    if (language === "Assamese" && questionId === "future") {
+    if (language === "Assamese" && questionId === 5) {
       return "/videos/Q5_Assamese - BristyBorah.MOV"
     }
-    if (language === "Assamese" && questionId === "help") {
+    if (language === "Assamese" && questionId === 6) {
       return "/videos/Q6_Assamese - BristyBorah.mov"
     }
-    if (language === "Assamese" && questionId === "challenges") {
+    if (language === "Assamese" && questionId === 7) {
       return "/videos/Q7_Assamese - BristyBorah.mov"
     }
-    if (language === "Hindi" && questionId === "problem") {
+    if (language === "Hindi" && questionId === 1) {
       return "/videos/Q1_Hindi-VanditaVerma.mov"
     }
-    if (language === "Hindi" && questionId === "solution") {
+    if (language === "Hindi" && questionId === 2) {
       return "/videos/Q2_Hindi-VanditaVerma.mov"
     }
-    if (language === "Hindi" && questionId === "market") {
+    if (language === "Hindi" && questionId === 3) {
       return "/videos/Q3_Hindi-VanditaVerma.mov"
     }
-    if (language === "Hindi" && questionId === "business") {
+    if (language === "Hindi" && questionId === 4) {
       return "/videos/Q4_Hindi-VanditaVerma.mov"
     }
-    if (language === "Hindi" && questionId === "future") {
+    if (language === "Hindi" && questionId === 5) {
       return "/videos/Q5_Hindi-VanditaVerma.mov"
     }
-    if (language === "Hindi" && questionId === "help") {
+    if (language === "Hindi" && questionId === 6) {
       return "/videos/Q6_Hindi-VanditaVerma.mov"
     }
-    if (language === "Hindi" && questionId === "challenges") {
+    if (language === "Hindi" && questionId === 7) {
       return "/videos/Q7_Hindi-VanditaVerma.mov"
     }
-    if (language === "Punjabi" && questionId === "problem") {
+    if (language === "Punjabi" && questionId === 1) {
       return "/videos/Q1_punjabi - Manav Maini.mov"
     }
-    if (language === "Punjabi" && questionId === "solution") {
+    if (language === "Punjabi" && questionId === 2) {
       return "/videos/Q2_punjabi - Manav Maini.mov"
     }
-    if (language === "Punjabi" && questionId === "market") {
+    if (language === "Punjabi" && questionId === 3) {
       return "/videos/Q3_punjabi - Manav Maini.mov"
     }
-    if (language === "Punjabi" && questionId === "business") {
+    if (language === "Punjabi" && questionId === 4) {
       return "/videos/Q4_punjabi - Manav Maini.mov"
     }
-    if (language === "Punjabi" && questionId === "future") {
+    if (language === "Punjabi" && questionId === 5) {
       return "/videos/Q5_punjabi - Manav Maini.mp4"
     }
-    if (language === "Punjabi" && questionId === "help") {
+    if (language === "Punjabi" && questionId === 6) {
       return "/videos/Q6_punjabi - Manav Maini.mov"
     }
-    if (language === "Punjabi" && questionId === "challenges") {
+    if (language === "Punjabi" && questionId === 7) {
       return "/videos/Q7_punjabi - Manav Maini.mov"
     }
-    if (language === "Sindhi" && questionId === "problem") {
+    if (language === "Sindhi" && questionId === 1) {
       return "/videos/Q1_Sindhi.mov"
     }
-    if (language === "Sindhi" && questionId === "solution") {
+    if (language === "Sindhi" && questionId === 2) {
       return "/videos/Q2_Sindhi.mov"
     }
-    if (language === "Sindhi" && questionId === "market") {
+    if (language === "Sindhi" && questionId === 3) {
       return "/videos/Q3_Sindhi.mov"
     }
-    if (language === "Sindhi" && questionId === "business") {
+    if (language === "Sindhi" && questionId === 4) {
       return "/videos/Q4_Sindhi.mov"
     }
-    if (language === "Sindhi" && questionId === "future") {
+    if (language === "Sindhi" && questionId === 5) {
       return "/videos/Q5_Sindhi.mov"
     }
-    if (language === "Sindhi" && questionId === "help") {
+    if (language === "Sindhi" && questionId === 6) {
       return "/videos/Q6_Sindhi.mov"
     }
-    if (language === "Sindhi" && questionId === "challenges") {
+    if (language === "Sindhi" && questionId === 7) {
       return "/videos/Q7_Sindhi.mov"
     }
-    if (language === "Gujarati" && questionId === "problem") {
+    if (language === "Gujarati" && questionId === 1) {
       return "/videos/Q1_Gujarati.mp4"
     }
-    if (language === "Gujarati" && questionId === "solution") {
+    if (language === "Gujarati" && questionId === 2) {
       return "/videos/Q2_Gujarati.mp4"
     }
-    if (language === "Gujarati" && questionId === "market") {
+    if (language === "Gujarati" && questionId === 3) {
       return "/videos/Q3_Gujarati.mp4"
     }
-    if (language === "Gujarati" && questionId === "business") {
+    if (language === "Gujarati" && questionId === 4) {
       return "/videos/Q4_Gujarati.mp4"
     }
-    if (language === "Gujarati" && questionId === "future") {
+    if (language === "Gujarati" && questionId === 5) {
       return "/videos/Q5_Gujarati.mp4"
     }
-    if (language === "Gujarati" && questionId === "help") {
+    if (language === "Gujarati" && questionId === 6) {
       return "/videos/Q6_Gujarati.mp4"
     }
-    if (language === "Gujarati" && questionId === "challenges") {
+    if (language === "Gujarati" && questionId === 7) {
       return "/videos/Q7_Gujarati.mp4"
-    }
-    if (language === "Odia" && questionId === "problem") {
-      return "/videos/Q1_Odia.mp4"
     }
     return "/videos/sample-pitch.mp4" // Default video
   }
@@ -397,7 +373,7 @@ export default function InvestorStudioPage() {
                   <DialogHeader>
                     <DialogTitle>Sample Screening Questions</DialogTitle>
                   </DialogHeader>
-                  <div className="grid grid-cols-12 gap-6 mt-10">
+                  <div className="grid grid-cols-10 gap-6 mt-10">
                     {/* Language Column */}
                     <div className="col-span-2 space-y-4">
                       <h3 className="text-lg font-semibold">Languages</h3>
@@ -417,14 +393,23 @@ export default function InvestorStudioPage() {
                     </div>
 
                     {/* Video Preview Column */}
-                    <div className="col-span-6">
-                      <Card className="overflow-hidden border-0 bg-muted/50">
-                        <div className="aspect-[9/16] max-h-[500px] w-full flex items-center justify-center">
+                    <div className="col-span-4">
+                      <Card className="overflow-hidden border-0 w-[300px] h-[533px] bg-muted/50">
+                        <div className="aspect-[9/16]  flex items-center justify-center">
                           <video
-                            src={getVideoSource(selectedLanguage, selectedQuestion.id?.toString() || "problem")}
+                            key={`${selectedLanguage}-${selectedQuestion.id}`}
+                            src={getVideoSource(selectedLanguage, selectedQuestion.id)}
                             poster="/assets/video-poster.jpg"
                             controls
                             className="w-full h-full object-cover rounded-[0.35rem]"
+                            onError={(e) => {
+                              console.error('Error loading video:', e);
+                              toast({
+                                title: "Error",
+                                description: "Failed to load video. Please try another language or question.",
+                                variant: "error",
+                              });
+                            }}
                           />
                         </div>
                       </Card>

@@ -93,7 +93,13 @@ export function TopNav({ role }: { role: string }) {
 
   // Update the back button handler
   const handleBack = () => {
-    router.back();
+    if (pathname.includes("/founder/studio/pitch-name")) {
+      router.push("/founder/pitch");
+    } else if (pathname.includes("/investor/studio/details")) {
+      router.push("/investor/scout");
+    } else {
+      router.back();
+    }
   };
   useEffect(() => {
     async function fetchUserId() {
