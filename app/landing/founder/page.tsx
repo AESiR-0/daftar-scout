@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
 import { useState } from "react"
+import ReactPlayer from "react-player"
 
 export default function FounderPage() {
   const [selectedQuestion, setSelectedQuestion] = useState("problem")
@@ -220,11 +221,13 @@ export default function FounderPage() {
             <div className="col-span-6">
               <Card className="overflow-hidden border-0 bg-muted/50">
                 <div className="aspect-[9/16] max-h-[700px] w-full flex items-center justify-center">
-                  <video
-                    src={getVideoSource(selectedLanguage, selectedQuestion)}
-                    poster="/assets/video-poster.jpg"
+                  <ReactPlayer
+                    url={getVideoSource(selectedLanguage, selectedQuestion)}
+                    width="100%"
+                    height="100%"
                     controls
-                    className="w-full h-full object-cover rounded-[0.35rem]"
+                    playing={false}
+                    style={{ aspectRatio: '9/16' }}
                   />
                 </div>
               </Card>

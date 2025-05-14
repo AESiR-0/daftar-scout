@@ -6,6 +6,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Scroll } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ReactPlayer from "react-player";
 
 type StoryTab = "economy" | "case-studies";
 
@@ -128,13 +129,14 @@ export default function InvestorPage() {
     if (activeStory === "economy") {
       return (
         <div className=" aspect-video  max-h-[65vh] bg-muted rounded-sm overflow-hidden mx-auto">
-          <video
-            className="w-full h-full object-cover rounded-sm"
+          <ReactPlayer
+            url={"/assets/economy.mp4"}
+            width="100%"
+            height="100%"
             controls
-            poster="/assets/torricke-barton.jpg"
-          >
-            <source src="/assets/torricke-barton.mp4" type="video/mp4" />
-          </video>
+            light="/assets/torricke-barton.jpg"
+            playing={false}
+          />
         </div>
       );
     }

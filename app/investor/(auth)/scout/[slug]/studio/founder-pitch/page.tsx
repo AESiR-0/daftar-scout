@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-
+import ReactPlayer from "react-player";
 interface Question {
   id?: number;
   question: string;
@@ -177,21 +177,43 @@ export default function InvestorStudioPage() {
     if (language === "Gujarati" && questionId === 7) {
       return "/videos/Q7_Gujarati.mp4"
     }
+    if(language === "Savji" && questionId === 1){
+      return "/videos/Q1_Savji.mp4"
+    }
+    if(language === "Savji" && questionId === 2){
+      return "/videos/Q2_Savji.mp4"
+    }
+    if(language === "Savji" && questionId === 3){
+      return "/videos/Q3_Savji.mp4"
+    }
+    if(language === "Savji" && questionId === 4){
+      return "/videos/Q4_Savji.mp4"
+    }
+    if(language === "Savji" && questionId === 5){
+      return "/videos/Q5_Savji.mp4"
+    }
+    if(language === "Savji" && questionId === 6){
+      return "/videos/Q6_Savji.mp4"
+    }
+    if(language === "Savji" && questionId === 7){
+      return "/videos/Q7_Savji.mp4"
+    }
+
     return "/videos/sample-pitch.mp4" // Default video
   }
 
   // Sample languages and questions for the new dialog section
   const languages = [
     "Hindi",
-    "Kannada",
-    "Bengali",
-    "Pahadi",
-    "Nepali",
+    "Savji",
+    "Sindhi",
+    "Punjabi",
     "Assamese",
     "Gujarati",
     "English",
-    "Sindhi",
-    "Punjabi",
+    "Bengali",
+    "Pahadi",
+    "Nepali",
     "Urdu",
     "Odia",
   ]
@@ -396,20 +418,13 @@ export default function InvestorStudioPage() {
                     <div className="col-span-4">
                       <Card className="overflow-hidden border-0 w-[300px] h-[533px] bg-muted/50">
                         <div className="aspect-[9/16]  flex items-center justify-center">
-                          <video
-                            key={`${selectedLanguage}-${selectedQuestion.id}`}
-                            src={getVideoSource(selectedLanguage, selectedQuestion.id)}
-                            poster="/assets/video-poster.jpg"
+                          <ReactPlayer
+                            url={getVideoSource(selectedLanguage, selectedQuestion.id)}
+                            width="100%"
+                            height="100%"
                             controls
-                            className="w-full h-full object-cover rounded-[0.35rem]"
-                            onError={(e) => {
-                              console.error('Error loading video:', e);
-                              toast({
-                                title: "Error",
-                                description: "Failed to load video. Please try another language or question.",
-                                variant: "error",
-                              });
-                            }}
+                            playing={false}
+                            style={{ aspectRatio: '9/16' }}
                           />
                         </div>
                       </Card>

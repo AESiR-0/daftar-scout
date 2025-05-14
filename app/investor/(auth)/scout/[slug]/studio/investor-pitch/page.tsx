@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { uploadInvestorsPitchVideo } from "@/lib/actions/video";
 import { Progress } from "@/components/ui/progress";
+import ReactPlayer from "react-player";
 
 const LANGUAGES = {
   indian: [
@@ -164,24 +165,33 @@ export default function InvestorPitchPage() {
               {showSample ? (
                 <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-6">
                   <div className="space-y-4 animate-in fade-in-50 duration-300">
-                    <video
-                      src={videoUrl || "/dummyVideo.mp4"}
+                    
+
+                    <ReactPlayer
+                      url={videoUrl || "/dummyVideo.mp4"}
                       controls
-                      poster="/images/sample-pitch-thumbnail.jpg"
-                      className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16]"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
+                      width="300px"
+                      height="533px"
+                      style={{
+                        borderRadius: "0.35rem",
+                        aspectRatio: "16/9",
+                      }}
+                    />
                   </div>
                 </div>
               ) : (
                 <div className="border-2 flex flex-col min-h-[533px] items-center justify-center border-dashed border-gray-700 rounded-lg p-6 text-center">
                   {videoUrl ? (
                     <div className="space-y-4">
-                      <video
-                        src={videoUrl}
+                      <ReactPlayer
+                        url={videoUrl}
                         controls
-                        className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16]"
+                        width="300px"
+                        height="533px"
+                        style={{
+                          borderRadius: "0.35rem",
+                          aspectRatio: "16/9",
+                        }}
                       />
                       <div className="flex gap-2">
                         <Button
@@ -190,7 +200,6 @@ export default function InvestorPitchPage() {
                           className="w-full"
                           disabled={isUploading}
                         >
-                          <X className="h-4 w-4 mr-2" />
                           Remove Video
                         </Button>
                         <Button
@@ -206,7 +215,6 @@ export default function InvestorPitchPage() {
                             </>
                           ) : (
                             <>
-                              <Upload className="h-4 w-4 mr-2" />
                               Upload Video
                             </>
                           )}

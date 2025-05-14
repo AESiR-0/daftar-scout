@@ -17,6 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import ReactPlayer from "react-player";
 
 interface Collaboration {
   image: string;
@@ -188,17 +189,12 @@ export default function ScoutDetailsPage() {
           <Card className="flex-1 bg-[#0e0e0e] border-none p-4">
             <div className="mx-auto relative aspect-[9/16] w-[300px] h-[533px]">
               {transformedScout.videoUrl ? (
-                <video
-                  key={transformedScout.videoUrl}
-                  src={transformedScout.videoUrl}
+                <ReactPlayer
+                  url={transformedScout.videoUrl}
+                  width="100%"
+                  height="100%"
                   controls
-                  className="w-full h-full object-cover rounded-[0.35rem]"
-                  onError={(e) => {
-                    console.error("Error loading video:", e);
-                    const target = e.target as HTMLVideoElement;
-                    target.style.display = 'none';
-                    target.parentElement?.querySelector('.video-error')?.classList.remove('hidden');
-                  }}
+                  playing={false}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted rounded-[0.35rem]">

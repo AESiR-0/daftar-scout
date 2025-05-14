@@ -10,6 +10,7 @@ import { X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { InvestorProfile } from "@/components/InvestorProfile";
 import { usePathname } from "next/navigation";
+import ReactPlayer from "react-player";
 
 type CollaborationStatus = "Pending" | "Accepted" | "Declined";
 
@@ -221,9 +222,13 @@ export default function CollaborationPage() {
             <CardContent className="space-y-6">
               {/* Video at the Top */}
               <div className="w-full">
-                <video
-                  src="example.mp4"
-                  className="w-full h-auto object-cover rounded-lg"
+                <ReactPlayer
+                  url="example.mp4"
+                  width="100%"
+                  height="auto"
+                  style={{
+                    borderRadius: "0.35rem",
+                  }}
                   controls
                 />
               </div>

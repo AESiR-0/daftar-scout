@@ -25,6 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import Link from "next/link";
+import ReactPlayer from "react-player";
 
 const reportReasons = [
   { id: "false-claims", label: "False Claims" },
@@ -262,11 +263,14 @@ export function FoundersPitchSection({
           <div className="flex h-fit gap-10">
             <div className="w-1/2">
               {selectedQuestion ? (
-                <div className="space-y-4">
-                  <video
-                    src={selectedQuestion.videoUrl}
+                <div className="space-y-4 rounded-[0.35rem] ml-20 w-[300px] h-[533px]">
+                  <ReactPlayer
+                    url={selectedQuestion.videoUrl}
+                    width="100%"
+                    height="100%"
                     controls
-                    className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16] ml-20 bg-muted"
+                    playing={false}
+                    style={{ aspectRatio: '9/16' }}
                   />
                 </div>
               ) : (
