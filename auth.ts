@@ -22,6 +22,7 @@ const ALLOWED_EMAILS = [
   "jatinvidhani94@gmail.com",
   "jatincs117@gmail.com",
   "mhdumar115@gmail.com",
+  "ayushya2002@gmail.com",
   "programmified7@gmail.com",
 ];
 
