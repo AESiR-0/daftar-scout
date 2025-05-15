@@ -58,7 +58,7 @@ export default function FounderPage() {
       return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q7_Assamese%20-%20BristyBorah.mov"
     }
     if (language === "Hindi" && questionId === "problem") {
-      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q1_Hindi-VanditaVerma.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q2_Hindi-VanditaVerma.mp4"
     }
     if (language === "Hindi" && questionId === "solution") {
       return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q2_Hindi-VanditaVerma.mov"
