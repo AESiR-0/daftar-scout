@@ -37,130 +37,130 @@ export default function FounderPage() {
 
   const getVideoSource = (language: string, questionId: string) => {
     if (language === "Assamese" && questionId === "problem") {
-      return "/videos/Q1_Assamese - BristyBorah.MOV"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q1_Assamese%20-%20BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "solution") {
-      return "/videos/Q2_Assamese - BristyBorah.MOV"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q2_Assamese%20-%20BristyBorah.MOV"
     }
     if (language === "Assamese" && questionId === "market") {
-      return "/videos/Q3_Assamese - BristyBorah.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q3_Assamese%20-%20BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "business") {
-      return "/videos/Q4_Assamese - BristyBorah.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q4_Assamese%20-%20BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "future") {
-      return "/videos/Q5_Assamese - BristyBorah.MOV"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q5_Assamese%20-%20BristyBorah.MOV"
     }
     if (language === "Assamese" && questionId === "help") {
-      return "/videos/Q6_Assamese - BristyBorah.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q6_Assamese%20-%20BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "challenges") {
-      return "/videos/Q7_Assamese - BristyBorah.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q7_Assamese%20-%20BristyBorah.mov"
     }
     if (language === "Hindi" && questionId === "problem") {
-      return "/videos/Q1_Hindi-VanditaVerma.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q1_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "solution") {
-      return "/videos/Q2_Hindi-VanditaVerma.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q2_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "market") {
-      return "/videos/Q3_Hindi-VanditaVerma.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q3_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "business") {
-      return "/videos/Q4_Hindi-VanditaVerma.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q4_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "future") {
-      return "/videos/Q5_Hindi-VanditaVerma.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q5_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "help") {
-      return "/videos/Q6_Hindi-VanditaVerma.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q6_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "challenges") {
-      return "/videos/Q7_Hindi-VanditaVerma.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q7_Hindi-VanditaVerma.mov"
     }
     if (language === "Punjabi" && questionId === "problem") {
-      return "/videos/Q1_punjabi - Manav Maini.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q1_punjabi%20-%20Manav%20Maini.mov"
     }
     if (language === "Punjabi" && questionId === "solution") {
-      return "/videos/Q2_punjabi - Manav Maini.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q2_punjabi%20-%20Manav%20Maini.mov"
     }
     if (language === "Punjabi" && questionId === "market") {
-      return "/videos/Q3_punjabi - Manav Maini.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q3_punjabi%20-%20Manav%20Maini.mov"
     }
     if (language === "Punjabi" && questionId === "business") {
-      return "/videos/Q4_punjabi - Manav Maini.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q4_punjabi%20-%20Manav%20Maini.mov"
     }
     if (language === "Punjabi" && questionId === "future") {
-      return "/videos/Q5_punjabi - Manav Maini.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q5_punjabi%20-%20Manav%20Maini.mp4"
     }
     if (language === "Punjabi" && questionId === "help") {
-      return "/videos/Q6_punjabi - Manav Maini.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q6_punjabi%20-%20Manav%20Maini.mov"
     }
     if (language === "Punjabi" && questionId === "challenges") {
-      return "/videos/Q7_punjabi - Manav Maini.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q7_punjabi%20-%20Manav%20Maini.mov"
     }
     if (language === "Sindhi" && questionId === "problem") {
-      return "/videos/Q1_Sindhi.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q1_Sindhi.mp4"
     }
     if (language === "Sindhi" && questionId === "solution") {
-      return "/videos/Q2_Sindhi.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q2_Sindhi.mp4"
     }
     if (language === "Sindhi" && questionId === "market") {
-      return "/videos/Q3_Sindhi.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q3_Sindhi.mov"
     }
     if (language === "Sindhi" && questionId === "business") {
-      return "/videos/Q4_Sindhi.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q4_Sindhi.mov"
     }
     if (language === "Sindhi" && questionId === "future") {
-      return "/videos/Q5_Sindhi.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q5_Sindhi.mov"
     }
     if (language === "Sindhi" && questionId === "help") {
-      return "/videos/Q6_Sindhi.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q6_Sindhi.mov"
     }
     if (language === "Sindhi" && questionId === "challenges") {
-      return "/videos/Q7_Sindhi.mov"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q7_Sindhi.mov"
     }
     if (language === "Gujarati" && questionId === "problem") {
-      return "/videos/Q1_Gujarati.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q1_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "solution") {
-      return "/videos/Q2_Gujarati.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q2_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "market") {
-      return "/videos/Q3_Gujarati.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q3_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "business") {
-      return "/videos/Q4_Gujarati.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q4_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "future") {
-      return "/videos/Q5_Gujarati.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q5_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "help") {
-      return "/videos/Q6_Gujarati.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q6_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "challenges") {
-      return "/videos/Q7_Gujarati.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q7_Gujarati.mp4"
     }
     if (language === "Savji" && questionId === "problem") {
-      return "/videos/Q1_Savji.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q1_Savji.mp4"
     }
     if (language === "Savji" && questionId === "solution") {
-      return "/videos/Q2_Savji.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q2_Savji.mp4"
     }
     if (language === "Savji" && questionId === "market") {
-      return "/videos/Q3_Savji.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q3_Savji.mp4"
     }
     if (language === "Savji" && questionId === "business") {
-      return "/videos/Q4_Savji.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q4_Savji.mp4"
     }
     if (language === "Savji" && questionId === "future") {
-      return "/videos/Q5_Savji.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q5_Savji.mp4"
     }
     if (language === "Savji" && questionId === "help") {
-      return "/videos/Q6_Savji.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q6_Savji.mp4"
     }
     if (language === "Savji" && questionId === "challenges") {
-      return "/videos/Q7_Savji.mp4"
+      return "https://yvaoyubwynyvqfelhzcd.supabase.co/storage/v1/object/public/videos/sample-landing/Q7_Savji.mp4"
     }
 
     return "/videos/sample-pitch.mp4" // Default video
