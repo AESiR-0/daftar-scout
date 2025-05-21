@@ -12,25 +12,10 @@ interface ShareButtonProps {
 export function ShareButton({ title, description }: ShareButtonProps) {
     const { toast } = useToast()
     const handleShare = async () => {
-        const shareData = {
-            title,
-            text: description,
-            url: window.location.href
-        }
-
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData)
-            } else {
-                await navigator.clipboard.writeText(window.location.href)
-                toast({
-                    title: "Link copied to clipboard",
-                    description: "You can now share it with others"
-                })
-            }
-        } catch (error) {
-            console.error("Error sharing:", error)
-        }
+        const currentUrl = window.location.href;
+        const postText = `${title}\n\n${description}\n\n${currentUrl}`;
+        const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(postText)}`;
+        window.open(linkedInUrl, '_blank');
     }
 
     return (
