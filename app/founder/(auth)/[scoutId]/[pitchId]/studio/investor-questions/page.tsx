@@ -322,6 +322,7 @@ export default function InvestorQuestionsPage() {
               <Button
                 variant="outline"
                 className="bg-[#2a2a2a] hover:bg-gray-600 rounded-[0.35rem] border-gray-600 text-white"
+                disabled={isLocked}
               >
                 Sample Pitch
               </Button>
@@ -339,8 +340,8 @@ export default function InvestorQuestionsPage() {
                       <div
                         key={language}
                         className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedLanguage === language
-                            ? "text-blue-600"
-                            : "hover:bg-muted"
+                          ? "text-blue-600"
+                          : "hover:bg-muted"
                           }`}
                         onClick={() => setSelectedLanguage(language)}
                       >
@@ -408,7 +409,7 @@ export default function InvestorQuestionsPage() {
                         <Button
                           variant="outline"
                           onClick={clearVideo}
-                          className="w-full"
+                          className={`w-full ${isLocked ? 'opacity-100' : ''}`}
                           disabled={isLocked}
                         >
                           <X className="h-4 w-4 mr-2" />
@@ -421,7 +422,7 @@ export default function InvestorQuestionsPage() {
                             handleUploadVideo(e, selectedQuestion.id)
                           }
                           disabled={isUploading || isLocked}
-                          className="w-full"
+                          className={`w-full ${isLocked ? 'opacity-100' : ''}`}
                         >
                           {isUploading ? (
                             <>
@@ -446,7 +447,7 @@ export default function InvestorQuestionsPage() {
                   ) : (
                     <div
                       onClick={() => !isLocked && fileInputRef.current?.click()}
-                      className={`cursor-pointer space-y-4 ${isLocked ? 'opacity-50' : ''}`}
+                      className={`cursor-pointer space-y-4 ${isLocked ? 'opacity-100' : ''}`}
                     >
                       <div className="mx-auto w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
                         <Video className="h-6 w-6 text-blue-500" />
@@ -502,8 +503,8 @@ export default function InvestorQuestionsPage() {
                         key={item.id}
                         onClick={() => handleQuestionSelect(item)}
                         className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedQuestion?.id === item.id
-                            ? "text-blue-600"
-                            : "hover:bg-muted"
+                          ? "text-blue-600"
+                          : "hover:bg-muted"
                           }`}
                       >
                         <span className="text-sm">{item.question}</span>
