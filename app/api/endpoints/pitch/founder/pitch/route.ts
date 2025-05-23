@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { pitch } from "@/backend/drizzle/models/pitch";
+import { pitch, founderAnswers } from "@/backend/drizzle/models/pitch";
 import { users } from "@/backend/drizzle/models/users";
 import { pitchTeam } from "@/backend/drizzle/models/pitch"; // Assuming pitchTeam model is defined
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, eq, isNotNull, count } from "drizzle-orm";
 import { auth } from "@/auth";
 import { createNotification } from "@/lib/notifications/insert";
 import { daftarInvestors } from "@/backend/drizzle/models/daftar";
@@ -55,6 +55,15 @@ export async function GET(req: NextRequest) {
     const approvedMembers = pitchTeamDetails.filter(member => member.hasApproved).length;
     const pitchApproved = totalTeamMembers === approvedMembers;
     const pitchStatus = await db.select({ status: pitch.status }).from(pitch).where(eq(pitch.id, pitchId));
+
+    // Count founder answers
+    const founderAnswersCount = await db
+      .select({ count: count() })
+      .from(founderAnswers)
+      .where(eq(founderAnswers.pitchId, pitchId));
+
+    const hasIncompleteAnswers = founderAnswersCount[0].count < 7;
+
     // Combine pitch and team details
     const submitted = pitchStatus[0].status ? true : false;
     return NextResponse.json(
@@ -62,7 +71,9 @@ export async function GET(req: NextRequest) {
         pitch: pitchDetails[0],
         team: pitchTeamDetails,
         pitchApproved: pitchApproved,
-        submitted: submitted
+        submitted: submitted,
+        hasIncompleteAnswers: hasIncompleteAnswers,
+        answersCount: founderAnswersCount[0].count
       },
       { status: 200 }
     );
@@ -170,14 +181,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Scout not found" }, { status: 404 });
     }
 
-    // Only update pitch status if all team members have approved
     let updatedPitch = pitchDetails[0];
     if (allApproved) {
       const result = await db
         .update(pitch)
         .set({
           askForInvestor: askForInvestor || null,
-          status: status || "draft"
+          status: status || "draft",
+          isLocked: true
         })
         .where(eq(pitch.id, pitchId))
         .returning();

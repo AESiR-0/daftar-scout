@@ -6,9 +6,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/format-date";
-import { Clock, MinusCircle, Check } from "lucide-react";
+import { Clock, MinusCircle, Check, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { usePitch } from "@/contexts/PitchContext";
+import { useIsLocked } from "@/contexts/isLockedContext";
 import { usePathname } from "next/navigation";
 
 interface TeamMember {
@@ -45,6 +45,7 @@ export default function DeletePage() {
   const pitchId = pathname.split("/")[3];
   const scoutId = pathname.split("/")[2];
   const { toast } = useToast();
+  const { isLocked, isLoading: isLockLoading } = useIsLocked();
   const [approvals, setApprovals] = useState<TeamMember[]>([]);
   const [userConsent, setUserConsent] = useState(false);
   const [deleteClicked, setDeleteClicked] = useState(false);
@@ -57,6 +58,17 @@ export default function DeletePage() {
       fetchDeleteRequests();
     }
   }, [pitchId, scoutId]);
+
+  // Show locked toast when pitch becomes locked
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Pitch is Locked",
+        description: "This pitch is currently locked and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
 
   const fetchDeleteRequests = async () => {
     if (isLoading) return;
@@ -220,7 +232,7 @@ export default function DeletePage() {
     }
   };
 
-  if (!currentUser) {
+  if (!currentUser || isLockLoading) {
     return null; // Or loading state
   }
 
@@ -231,6 +243,13 @@ export default function DeletePage() {
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
           <div className="flex flex-col p-4 rounded-lg space-y-6">
+            {isLocked && (
+              <div className="flex items-center gap-2 text-destructive mb-4">
+                <Lock className="h-5 w-5" />
+                <p className="text-sm font-medium">This pitch is locked and cannot be modified</p>
+              </div>
+            )}
+
             <p className="text-sm text-muted-foreground">
               All data related to the pitch will be deleted, and the offer will be withdrawn.
               An email will be sent to all stakeholders to notify them of this change.
@@ -242,7 +261,7 @@ export default function DeletePage() {
                 checked={userConsent}
                 onCheckedChange={(checked: boolean) => setUserConsent(checked)}
                 className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                disabled={isDeleting}
+                disabled={isDeleting || isLocked}
               />
               <label htmlFor="user-consent" className="text-sm text-muted-foreground">
                 I agree to delete the pitch
@@ -252,7 +271,12 @@ export default function DeletePage() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={!userConsent || isDeleting || (deleteClicked && approvals.find(m => m.founderId === currentUser.founderId)?.isApproved)}
+              disabled={
+                !userConsent || 
+                isDeleting || 
+                isLocked || 
+                (deleteClicked && approvals.find(m => m.founderId === currentUser.founderId)?.isApproved)
+              }
               className="w-[12%] rounded-[0.35rem]"
             >
               {isDeleting ? "Processing..." : deleteClicked ? "Approved" : "Delete"}
