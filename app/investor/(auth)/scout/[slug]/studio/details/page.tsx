@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { z } from "zod";
 import debounce from "lodash.debounce";
-import { canEditScout } from "@/lib/utils/scout";
+import { Lock } from "lucide-react";
+import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 import { useToast } from "@/hooks/use-toast";
 
 // Zod schema for validation
@@ -21,8 +22,8 @@ type ScoutDetails = z.infer<typeof scoutSchema>;
 export default function DetailsPage() {
   const pathname = usePathname();
   const ScoutId = pathname.split("/")[3];
+  const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
   const { toast } = useToast();
-  const [canEdit, setCanEdit] = useState(true);
 
   const [details, setDetails] = useState<ScoutDetails>({
     name: "",
@@ -31,7 +32,16 @@ export default function DetailsPage() {
 
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Fetch details and check edit permissions
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Scout is Locked",
+        description: "This scout is not in planning stage anymore and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
+
   useEffect(() => {
     const fetchDetails = async () => {
       const res = await fetch(
@@ -43,26 +53,16 @@ export default function DetailsPage() {
           name: data.data.scoutName || "",
           description: data.data.scoutVision || "",
         });
-        // const canEditStatus = canEditScout(data.data);
-        // setCanEdit(canEditStatus);
-        
-        // if (!canEditStatus) {
-        //   toast({
-        //     title: "Access Restricted",
-        //     description: "This scout is no longer in the planning phase. Editing is restricted.",
-        //     variant: "destructive",
-        //   });
-        // }
       }
     };
 
     fetchDetails();
-  }, [ScoutId, toast]);
+  }, [ScoutId]);
 
   // Debounced save function
   const debouncedSave = useCallback(
     debounce(async (data: ScoutDetails) => {
-      if (!canEdit) return;
+      if (isLocked) return;
       
       const parsed = scoutSchema.safeParse(data);
       if (!parsed.success) return;
@@ -79,7 +79,7 @@ export default function DetailsPage() {
         }),
       });
     }, 800),
-    [ScoutId, canEdit]
+    [ScoutId, isLocked]
   );
 
   // Trigger save on change
@@ -91,9 +91,19 @@ export default function DetailsPage() {
     }
   }, [details, debouncedSave]);
 
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
+
   return (
     <Card className="border-none mt-4 container mx-auto px-3 bg-[#0e0e0e]">
       <CardContent>
+        {isLocked && (
+          <div className="flex items-center gap-2 text-destructive mb-4">
+            <Lock className="h-5 w-5" />
+            <p className="text-sm font-medium">The scout is not in planning stage anymore</p>
+          </div>
+        )}
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Scout Name</Label>
@@ -103,7 +113,7 @@ export default function DetailsPage() {
                 setDetails((prev) => ({ ...prev, name: e.target.value }))
               }
               placeholder="Enter Scout name"
-              disabled={!canEdit}
+              disabled={isLocked}
             />
           </div>
 
@@ -120,7 +130,7 @@ export default function DetailsPage() {
                   }))
                 }
                 placeholder="Use this space to explain why you're scouting this startup and what specific value you're hoping it adds to your portfolio. This helps your team understand your thinking and stay focused while scouting."
-                disabled={!canEdit}
+                disabled={isLocked}
               ></textarea>
             </div>
           </div>

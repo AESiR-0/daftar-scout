@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2 } from "lucide-react";
+import { Trash2, Lock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePathname, useRouter } from "next/navigation";
+import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface FAQ {
   id: string;
@@ -17,11 +19,23 @@ interface FAQ {
 function FaqsContent() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
+  const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
+  const { toast } = useToast();
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [newQuestion, setNewQuestion] = useState("");
   const [newAnswer, setNewAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Scout is Locked",
+        description: "This scout is not in planning stage anymore and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
 
   useEffect(() => {
     fetchFAQs(scoutId);
@@ -77,8 +91,18 @@ function FaqsContent() {
     router.push("/investor/studio/invite");
   };
 
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
+
   return (
     <div className="space-y-6 container mx-auto px-10 mt-10">
+      {isLocked && (
+        <div className="flex items-center gap-2 text-destructive mb-4">
+          <Lock className="h-5 w-5" />
+          <p className="text-sm font-medium">The scout is not in planning stage anymore</p>
+        </div>
+      )}
       <ScrollArea className="gap-8 h-[calc(100vh-11rem)]">
         <div className="max-w-6xl">
           <div className="space-y-4">
@@ -87,12 +111,14 @@ function FaqsContent() {
               value={newQuestion}
               onChange={(e) => setNewQuestion(e.target.value)}
               className="h-9"
+              disabled={isLocked}
             />
             <Textarea
               placeholder="Enter FAQ answer"
               value={newAnswer}
               onChange={(e) => setNewAnswer(e.target.value)}
               className="min-h-[100px] resize-none"
+              disabled={isLocked}
             />
           </div>
 
@@ -123,6 +149,7 @@ function FaqsContent() {
                       size="icon"
                       onClick={() => handleDeleteFAQ(faq.id)}
                       className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                      disabled={isLocked}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -137,6 +164,7 @@ function FaqsContent() {
               onClick={handleAddFAQ}
               variant="secondary"
               className="rounded-[0.3rem] text-white"
+              disabled={isLocked}
             >
               Add FAQ
             </Button>
@@ -148,3 +176,4 @@ function FaqsContent() {
 }
 
 export default FaqsContent;
+

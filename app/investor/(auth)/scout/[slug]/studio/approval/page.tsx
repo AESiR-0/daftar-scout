@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Check, Clock, MinusCircle, AlertCircle } from "lucide-react";
+import { Check, Clock, MinusCircle, AlertCircle, Lock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { usePathname } from "next/navigation";
+import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 
 interface ApprovalRequest {
   scoutId: string;
@@ -38,12 +39,23 @@ const getStatusIcon = (status: boolean) => {
 export default function ApprovalPage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
+  const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
 
   const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>();
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [userApproved, setUserApproved] = useState(false);
   const [issues, setIssues] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Scout is Locked",
+        description: "This scout is not in planning stage anymore and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked]);
 
   useEffect(() => {
     const fetchScoutStatus = async () => {
@@ -141,9 +153,19 @@ export default function ApprovalPage() {
   const approvedCount =
     approvalRequests?.filter((req) => req.isApproved).length || 0;
 
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
+
   return (
     <div className="flex">
       <div className="container mx-auto px-5 mt-2">
+        {isLocked && (
+          <div className="flex items-center gap-2 text-destructive mb-4">
+            <Lock className="h-5 w-5" />
+            <p className="text-sm font-medium">The scout is not in planning stage anymore</p>
+          </div>
+        )}
         <div className="grid grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="col-span-2">
@@ -159,12 +181,12 @@ export default function ApprovalPage() {
                         onCheckedChange={(checked: boolean) =>
                           setTermsAccepted(checked as boolean)
                         }
-                        disabled={loading || issues.length > 0}
+                        disabled={loading || issues.length > 0 || isLocked}
                       />
                       <label
                         htmlFor="terms"
                         className={`text-sm text-muted-foreground ${
-                          issues.length > 0 ? "opacity-50" : ""
+                          issues.length > 0 || isLocked ? "opacity-50" : ""
                         }`}
                       >
                         All the data looks good to me. We can take the Scout
@@ -177,7 +199,7 @@ export default function ApprovalPage() {
                     variant="outline"
                     className="w-fit rounded-[0.3rem]"
                     disabled={
-                      !termsAccepted || userApproved || issues.length > 0 || loading
+                      !termsAccepted || userApproved || issues.length > 0 || loading || isLocked
                     }
                     onClick={handleApprove}
                   >
