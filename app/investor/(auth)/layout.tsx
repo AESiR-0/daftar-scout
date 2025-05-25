@@ -9,6 +9,8 @@ import { SearchProvider } from "@/lib/context/search-context";
 import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
+import { ErrorBoundary } from "@/components/error-boundary";
+
 export default async function Layout({
   children,
 }: {
@@ -32,24 +34,24 @@ export default async function Layout({
     redirect("/founder");
   }
   return (
-    <>
-      <BookmarkProvider>
-        <SearchProvider>
-          <DaftarProvider>
-            <ClientSessionProvider>
+    <BookmarkProvider>
+      <SearchProvider>
+        <DaftarProvider>
+          <ClientSessionProvider>
+            <ErrorBoundary>
               <div className="flex font-poppins bg-[#0e0e0e]">
                 <AppSidebar role="investor" />
-                <div className="w-screen flex flex-col ">
+                <div className="w-screen flex flex-col">
                   <div className="px-10 border-b">
                     <TopNav role="investor" />
                   </div>
                   <div>{children}</div>
                 </div>
               </div>
-            </ClientSessionProvider>
-          </DaftarProvider>
-        </SearchProvider>
-      </BookmarkProvider>
-    </>
+            </ErrorBoundary>
+          </ClientSessionProvider>
+        </DaftarProvider>
+      </SearchProvider>
+    </BookmarkProvider>
   );
 }

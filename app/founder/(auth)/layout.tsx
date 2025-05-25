@@ -8,6 +8,7 @@ import { BookmarkProvider } from "@/lib/context/bookmark-context";
 import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export default async function Layout({
   children,
@@ -34,15 +35,17 @@ export default async function Layout({
     <BookmarkProvider>
       <SearchProvider>
         <ClientSessionProvider>
-          <div className="flex  font-poppins bg-[#0e0e0e]">
-            <AppSidebar role="founder" />
-            <div className="w-screen  flex flex-col">
-              <div className="px-10 border-b">
-                <TopNav role="founder" />
+          <ErrorBoundary>
+            <div className="flex font-poppins bg-[#0e0e0e]">
+              <AppSidebar role="founder" />
+              <div className="w-screen flex flex-col">
+                <div className="px-10 border-b">
+                  <TopNav role="founder" />
+                </div>
+                <div>{children}</div>
               </div>
-              <div>{children}</div>
             </div>
-          </div>
+          </ErrorBoundary>
         </ClientSessionProvider>
       </SearchProvider>
     </BookmarkProvider>
