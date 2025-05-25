@@ -13,7 +13,6 @@ import formatDate from "@/lib/formatDate";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { usePitch } from "@/contexts/PitchContext";
 
 interface ApprovalRequest {
   id: string;
