@@ -284,8 +284,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   };
 
   const handleLogout = () => {
-    signOut();
     onOpenChange(false);
+    window.location.href = "/logout";
   };
 
   const handleSubmitFeature = async () => {

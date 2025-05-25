@@ -3,6 +3,7 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Footer } from "@/components/footer";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export const metadata: Metadata = {
   title: "Simplifying Startup Pitching",
@@ -36,10 +37,12 @@ export default function RootLayout({
       </head>
       <body className="subpixel-antialiased font-poppins">
         <ToastProvider>
-          <div className="flex min-h-screen bg-[#0e0e0e] flex-col">
-            {children}
-            <Footer />
-          </div>
+          <ErrorBoundary>
+            <div className="flex min-h-screen bg-[#0e0e0e] flex-col">
+              {children}
+              <Footer />
+            </div>
+          </ErrorBoundary>
         </ToastProvider>
         <Toaster />
       </body>
