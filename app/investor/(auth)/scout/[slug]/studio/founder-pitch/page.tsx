@@ -16,6 +16,9 @@ import { Input } from "@/components/ui/input";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import ReactPlayer from "react-player";
+import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
+import { Lock } from "lucide-react";
+
 interface Question {
   id?: number;
   question: string;
@@ -70,6 +73,13 @@ export default function InvestorStudioPage() {
   const [questionsOpen, setQuestionsOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("English");
   const [isLoading, setIsLoading] = useState(false);
+  const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
+
+  const [pitchName, setPitchName] = useState("");
+  const [pitchDescription, setPitchDescription] = useState("");
+  const [pitchProblem, setPitchProblem] = useState("");
+  const [pitchSolution, setPitchSolution] = useState("");
+  const [pitchValue, setPitchValue] = useState("");
 
   const getVideoSource = (language: string, questionId?: number) => {
     if (language === "Assamese" && questionId === 1) {
@@ -257,6 +267,17 @@ export default function InvestorStudioPage() {
     fetchQuestions();
   }, [scoutId]);
 
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Scout is Locked",
+        description: "This scout is not in planning stage anymore and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
+
+
   const handleOptionChange = (option: "sample" | "custom") => {
     if (selectedOption === option) {
       setSelectedOption("sample"); // Default to sample if unchecking current option
@@ -352,6 +373,11 @@ export default function InvestorStudioPage() {
     return () => clearTimeout(timeoutId);
   }, [selectedOption, customQuestions, selectedLanguage]);
 
+
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
+
   return (
     <div className="min-h-screen px-8 text-white">
       <div className="container mx-auto py-8">
@@ -362,6 +388,8 @@ export default function InvestorStudioPage() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="sample"
+                    disabled={isLocked}
+
                     className="border-gray-500"
                     checked={selectedOption === "sample"}
                     onCheckedChange={() => handleOptionChange("sample")}
@@ -373,6 +401,7 @@ export default function InvestorStudioPage() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="custom"
+                    disabled={isLocked}
                     className="border-gray-500"
                     checked={selectedOption === "custom"}
                     onCheckedChange={() => handleOptionChange("custom")}
@@ -483,6 +512,7 @@ export default function InvestorStudioPage() {
                             {index + 1}.
                           </span>
                           <Input
+                            disabled={isLocked}
                             value={question.question}
                             onChange={(e) => {
                               const updatedQuestions = [...customQuestions];

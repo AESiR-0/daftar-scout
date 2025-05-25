@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePathname } from "next/navigation";
-import { Upload, Video, X } from "lucide-react";
+import { Upload, Video, X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Combobox } from "@/components/ui/combobox";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
+import { useIsLocked } from "@/contexts/isLockedContext";
+
 interface Question {
   id: number;
   question: string;
@@ -34,10 +36,9 @@ export default function InvestorQuestionsPage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[2];
   const pitchId = pathname.split("/")[3];
+  const { isLocked, isLoading: isLockLoading } = useIsLocked();
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
-    null
-  );
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [language, setLanguage] = useState("English");
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -106,6 +107,16 @@ export default function InvestorQuestionsPage() {
   ];
 
   useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Pitch is Locked",
+        description: "This pitch is currently locked and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
+
+  useEffect(() => {
     fetchQuestions();
   }, []);
 
@@ -155,6 +166,15 @@ export default function InvestorQuestionsPage() {
     e: React.ChangeEvent<HTMLInputElement>,
     questionId: number
   ) => {
+    if (isLocked) {
+      toast({
+        title: "Pitch is Locked",
+        description: "Cannot modify videos while the pitch is locked.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (file) {
       // Check file size (20MB limit)
@@ -180,6 +200,15 @@ export default function InvestorQuestionsPage() {
     e: React.MouseEvent<HTMLButtonElement>,
     questionId: number
   ) => {
+    if (isLocked) {
+      toast({
+        title: "Pitch is Locked",
+        description: "Cannot upload videos while the pitch is locked.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const file = fileInputRef.current?.files?.[0];
     if (!file || !selectedQuestion) {
       toast({
@@ -252,6 +281,14 @@ export default function InvestorQuestionsPage() {
   };
 
   const clearVideo = () => {
+    if (isLocked) {
+      toast({
+        title: "Pitch is Locked",
+        description: "Cannot remove videos while the pitch is locked.",
+        variant: "destructive",
+      });
+      return;
+    }
     setPreviewUrl("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -266,15 +303,26 @@ export default function InvestorQuestionsPage() {
     }
   };
 
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
+
   return (
     <Card className="w-full border-none mt-10 px-4 bg-[#0e0e0e] container mx-auto">
       <CardContent className="border-none">
+        {isLocked && (
+          <div className="flex items-center gap-2 text-destructive mb-4">
+            <Lock className="h-5 w-5" />
+            <p className="text-sm font-medium">This pitch is locked and cannot be modified</p>
+          </div>
+        )}
         <div className="flex justify-end mb-4">
           <Dialog open={questionsOpen} onOpenChange={setQuestionsOpen}>
             <DialogTrigger asChild>
               <Button
                 variant="outline"
                 className="bg-[#2a2a2a] hover:bg-gray-600 rounded-[0.35rem] border-gray-600 text-white"
+                disabled={isLocked}
               >
                 Sample Pitch
               </Button>
@@ -292,8 +340,8 @@ export default function InvestorQuestionsPage() {
                       <div
                         key={language}
                         className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedLanguage === language
-                            ? "text-blue-600"
-                            : "hover:bg-muted"
+                          ? "text-blue-600"
+                          : "hover:bg-muted"
                           }`}
                         onClick={() => setSelectedLanguage(language)}
                       >
@@ -361,7 +409,8 @@ export default function InvestorQuestionsPage() {
                         <Button
                           variant="outline"
                           onClick={clearVideo}
-                          className="w-full"
+                          className={`w-full ${isLocked ? 'opacity-100' : ''}`}
+                          disabled={isLocked}
                         >
                           <X className="h-4 w-4 mr-2" />
                           Remove Video
@@ -372,8 +421,8 @@ export default function InvestorQuestionsPage() {
                             selectedQuestion &&
                             handleUploadVideo(e, selectedQuestion.id)
                           }
-                          disabled={isUploading}
-                          className="w-full"
+                          disabled={isUploading || isLocked}
+                          className={`w-full ${isLocked ? 'opacity-100' : ''}`}
                         >
                           {isUploading ? (
                             <>
@@ -397,8 +446,8 @@ export default function InvestorQuestionsPage() {
                     </div>
                   ) : (
                     <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="cursor-pointer space-y-4"
+                      onClick={() => !isLocked && fileInputRef.current?.click()}
+                      className={`cursor-pointer space-y-4 ${isLocked ? 'opacity-100' : ''}`}
                     >
                       <div className="mx-auto w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
                         <Video className="h-6 w-6 text-blue-500" />
@@ -430,6 +479,7 @@ export default function InvestorQuestionsPage() {
                       selectedQuestion &&
                       handleFileChange(e, selectedQuestion.id)
                     }
+                    disabled={isLocked}
                   />
                   <div className="mt-5">
                     <Combobox
@@ -437,6 +487,7 @@ export default function InvestorQuestionsPage() {
                       value={language}
                       options={languages}
                       onSelect={(value) => setLanguage(value)}
+                      disabled={isLocked}
                     />
                   </div>
                 </div>
@@ -452,8 +503,8 @@ export default function InvestorQuestionsPage() {
                         key={item.id}
                         onClick={() => handleQuestionSelect(item)}
                         className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedQuestion?.id === item.id
-                            ? "text-blue-600"
-                            : "hover:bg-muted"
+                          ? "text-blue-600"
+                          : "hover:bg-muted"
                           }`}
                       >
                         <span className="text-sm">{item.question}</span>

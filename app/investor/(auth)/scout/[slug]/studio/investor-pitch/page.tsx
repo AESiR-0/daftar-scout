@@ -3,13 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
-import { Play, Upload, Trash2, Video, Info, X } from "lucide-react";
+import { Play, Upload, Trash2, Video, Info, X, Lock } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { uploadInvestorsPitchVideo } from "@/lib/actions/video";
 import { Progress } from "@/components/ui/progress";
 import ReactPlayer from "react-player";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 
 const LANGUAGES = {
   indian: [
@@ -38,6 +42,7 @@ const LANGUAGES = {
 export default function InvestorPitchPage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
+  const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -46,6 +51,11 @@ export default function InvestorPitchPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<string>("");
+  const [pitchName, setPitchName] = useState("");
+  const [pitchDescription, setPitchDescription] = useState("");
+  const [pitchProblem, setPitchProblem] = useState("");
+  const [pitchSolution, setPitchSolution] = useState("");
+  const [pitchValue, setPitchValue] = useState("");
 
   async function fetchInvestorsPitch() {
     const res = await fetch(
@@ -63,9 +73,39 @@ export default function InvestorPitchPage() {
       });
     }
   }
+
   useEffect(() => {
     fetchInvestorsPitch();
   }, []);
+
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Scout is Locked",
+        description: "This scout is not in planning stage anymore and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
+
+  useEffect(() => {
+    const fetchPitchDetails = async () => {
+      try {
+        const res = await fetch(`/api/endpoints/scouts/investor-pitch?scoutId=${scoutId}`);
+        if (!res.ok) throw new Error("Failed to fetch pitch details");
+        const data = await res.json();
+        setPitchName(data.pitchName || "");
+        setPitchDescription(data.pitchDescription || "");
+        setPitchProblem(data.pitchProblem || "");
+        setPitchSolution(data.pitchSolution || "");
+        setPitchValue(data.pitchValue || "");
+      } catch (error) {
+        console.error("Error fetching pitch details:", error);
+      }
+    };
+
+    fetchPitchDetails();
+  }, [scoutId]);
 
   const handleUpload = () => {
     fileInputRef.current?.click();
@@ -155,6 +195,40 @@ export default function InvestorPitchPage() {
     }
   };
 
+  const handleSave = async () => {
+    try {
+      const res = await fetch("/api/endpoints/scouts/investor-pitch", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scoutId,
+          pitchName,
+          pitchDescription,
+          pitchProblem,
+          pitchSolution,
+          pitchValue,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to save pitch details");
+      
+      toast({
+        title: "Success",
+        description: "Pitch details saved successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save pitch details",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
+
   return (
     <Card className="border-none mt-4 container mx-auto px-4 bg-[#0e0e0e]">
       <CardContent className="pt-6">
@@ -198,7 +272,7 @@ export default function InvestorPitchPage() {
                           variant="outline"
                           onClick={clearVideo}
                           className="w-full"
-                          disabled={isUploading}
+                          disabled={isUploading || isLocked}
                         >
                           Remove Video
                         </Button>
@@ -206,7 +280,7 @@ export default function InvestorPitchPage() {
                           variant="outline"
                           onClick={handleUploadVideo}
                           className="w-full"
-                          disabled={isUploading}
+                          disabled={isUploading || isLocked}
                         >
                           {isUploading ? (
                             <>
@@ -273,7 +347,7 @@ export default function InvestorPitchPage() {
                 variant="outline"
                 className="w-full rounded-[0.3rem]"
                 onClick={() => setShowSample(!showSample)}
-                disabled={isUploading}
+                disabled={isUploading || isLocked}
               >
                 {showSample ? "Upload Your Pitch" : "Back to Sample"}
               </Button>
@@ -295,6 +369,7 @@ export default function InvestorPitchPage() {
                 </p>
               </div>
             </div>
+          
           </div>
         </div>
       </CardContent>

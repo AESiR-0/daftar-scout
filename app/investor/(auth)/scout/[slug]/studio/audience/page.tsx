@@ -7,7 +7,7 @@ import L, { LatLngTuple } from "leaflet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Lock } from "lucide-react";
 import { z } from "zod";
 import {
   Dialog,
@@ -18,6 +18,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
+import { useToast } from "@/hooks/use-toast";
 import "leaflet/dist/leaflet.css";
 
 // Custom Leaflet marker icon using online URLs
@@ -135,6 +137,8 @@ function debounce(fn: Function, delay: number) {
 export default function AudiencePage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
+  const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
+  const { toast } = useToast();
   const [targetAudLocation, setTargetAudLocation] = useState<string>("");
   const [location, setLocation] = useState<{
     country: string;
@@ -165,12 +169,14 @@ export default function AudiencePage() {
     onSelect,
     placeholder,
     multiple = false,
+    disabled = false,
   }: {
     options: { value: string; label: string }[];
     value: string | string[];
     onSelect: (value: string) => void;
     placeholder: string;
     multiple?: boolean;
+    disabled?: boolean;
   }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -192,6 +198,7 @@ export default function AudiencePage() {
           onBlur={() => setTimeout(() => setOpen(false), 200)}
           placeholder={placeholder}
           className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
+          disabled={disabled}
         />
         {open && (
           <div className="absolute z-20 mt-1 w-full bg-[#1a1a1a] border border-gray-700 rounded-[0.35rem] max-h-60 overflow-auto">
@@ -226,11 +233,13 @@ export default function AudiencePage() {
     maxAge,
     onMinChange,
     onMaxChange,
+    disabled = false,
   }: {
     minAge: string;
     maxAge: string;
     onMinChange: (value: string) => void;
     onMaxChange: (value: string) => void;
+    disabled?: boolean;
   }) => (
     <div className="flex gap-2">
       <Input
@@ -239,6 +248,7 @@ export default function AudiencePage() {
         onChange={(e) => onMinChange(e.target.value)}
         placeholder="Min"
         className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
+        disabled={disabled}
       />
       <Input
         type="number"
@@ -246,6 +256,7 @@ export default function AudiencePage() {
         onChange={(e) => onMaxChange(e.target.value)}
         placeholder="Max"
         className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
+        disabled={disabled}
       />
     </div>
   );
@@ -320,6 +331,16 @@ export default function AudiencePage() {
     fetchSectorsData();
     fetchInitialData();
   }, [scoutId]);
+
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Scout is Locked",
+        description: "This scout is not in planning stage anymore and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
 
   // Handle location input and coordinates
   const handleLocationInput = (value: string) => {
@@ -441,8 +462,18 @@ export default function AudiencePage() {
     setTempAgeRange([18, 65]);
   };
 
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
+
   return (
     <div className="container px-10 mx-auto py-6">
+      {isLocked && (
+        <div className="flex items-center gap-2 text-destructive mb-4">
+          <Lock className="h-5 w-5" />
+          <p className="text-sm font-medium">The scout is not in planning stage anymore</p>
+        </div>
+      )}
       <div className="space-y-6">
         <div className="space-y-4">
           <Label>Pin Location</Label>
@@ -452,6 +483,7 @@ export default function AudiencePage() {
             onChange={(e) => handleLocationInput(e.target.value)}
             onBlur={handleLocationBlur}
             className="text-white rounded-[0.35rem]"
+            disabled={isLocked}
           />
           <div className="w-full h-[400px] rounded-lg overflow-hidden border">
             {typeof window !== "undefined" ? (
@@ -481,7 +513,10 @@ export default function AudiencePage() {
         <div className="z-10">
           <Dialog open={openFilters} onOpenChange={setOpenFilters}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="rounded-[0.35rem]">
+              <Button 
+                variant="outline" 
+                className="rounded-[0.35rem]"
+              >
                 Edit Audience Filters
               </Button>
             </DialogTrigger>
@@ -491,17 +526,16 @@ export default function AudiencePage() {
               </DialogHeader>
               <div className="space-y-6 py-4">
                 <div>
-                  {/* <Label>Community</Label> */}
                   <Combobox
                     options={communities}
                     value={tempScoutCommunity}
                     onSelect={(value) => setTempScoutCommunity(value)}
                     placeholder="Select a Community"
+                    disabled={isLocked}
                   />
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    {/* <Label>Age Range</Label> */}
                     <AgeRange
                       minAge={tempAgeRange[0].toString()}
                       maxAge={tempAgeRange[1].toString()}
@@ -511,45 +545,46 @@ export default function AudiencePage() {
                       onMaxChange={(value) =>
                         setTempAgeRange([tempAgeRange[0], Number(value)])
                       }
+                      disabled={isLocked}
                     />
                   </div>
                   <div className="flex-1">
-                    {/* <Label>Gender</Label> */}
                     <Combobox
                       options={genders}
                       value={tempTargetedGender}
                       onSelect={(value) => setTempTargetedGender(value)}
                       placeholder="Select Gender"
+                      disabled={isLocked}
                     />
                   </div>
                 </div>
                 <div>
-                  {/* <Label>Stage</Label> */}
                   <Combobox
                     options={stages}
                     value={tempScoutStage}
                     onSelect={(value) => setTempScoutStage(value)}
                     placeholder="Select a Startup Stage"
+                    disabled={isLocked}
                   />
                 </div>
                 <div className="space-y-2">
-                  {/* <Label>Focus Sectors (Multiple Select)</Label> */}
                   <Combobox
                     options={sectors}
                     value={tempScoutSector}
                     onSelect={handleSectorSelect}
                     placeholder="Add Sectors (Multiple Select)"
                     multiple
+                    disabled={isLocked}
                   />
                   <div className="flex flex-wrap gap-2 mt-3">
                     {tempScoutSector.map((sector, index) => (
                       <Badge
                         key={index}
                         variant="secondary"
-                        className="text-xs cursor-pointer hover:bg-muted bg-[#2a2a2a] text-white rounded-[0.35rem]"
-                        onClick={() => handleSectorSelect(sector)}
+                        className={`text-xs ${!isLocked ? 'cursor-pointer hover:bg-muted' : ''} bg-[#2a2a2a] text-white rounded-[0.35rem]`}
+                        onClick={() => !isLocked && handleSectorSelect(sector)}
                       >
-                        {sector} <X className="h-3 w-3 ml-1" />
+                        {sector} {!isLocked && <X className="h-3 w-3 ml-1" />}
                       </Badge>
                     ))}
                   </div>
@@ -560,12 +595,14 @@ export default function AudiencePage() {
                   variant="outline"
                   className="rounded-[0.35rem]"
                   onClick={clearFilters}
+                  disabled={isLocked}
                 >
                   Clear Filters
                 </Button>
                 <Button
                   className="bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
                   onClick={applyFilters}
+                  disabled={isLocked}
                 >
                   Apply
                 </Button>

@@ -70,6 +70,8 @@ export default function PitchPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [currentUserId] = useState("1"); // Demo: John Smith as current userName
   const [pitchApproved, setPitchApproved] = useState(false);
+  const [hasIncompleteAnswers, setHasIncompleteAnswers] = useState(false);
+  const [answersCount, setAnswersCount] = useState(0);
 
   useEffect(() => {
     if (pitchId) {
@@ -84,7 +86,7 @@ export default function PitchPage() {
       );
       if (!response.ok) throw new Error("Failed to fetch team details");
       const data = await response.json();
-      setApprovalRequests(data.team); // Assuming the team data is in the response
+      setApprovalRequests(data.team);
       data.team.forEach((member: ApprovalRequest) => {
         if (member.hasApproved) {
           setTermsAccepted(true);
@@ -92,6 +94,8 @@ export default function PitchPage() {
       });
       setPitchApproved(data.pitchApproved);
       setSubmitted(data.submitted);
+      setHasIncompleteAnswers(data.hasIncompleteAnswers);
+      setAnswersCount(data.answersCount);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching team details:", error);
@@ -283,6 +287,14 @@ export default function PitchPage() {
   const approvedCount = approvalRequests.filter(
     (req) => req.hasApproved === true
   ).length;
+
+  const getIncompleteAnswersMessage = () => {
+    if (hasIncompleteAnswers) {
+      return `Please complete all pitch questions (${answersCount}/7 answered)`;
+    }
+    return "";
+  };
+
   return (
     <div className="px-10 container mx-auto py-5 space-y-6 flex gap-8">
       {/* Left Section: Pitch & Questions */}
@@ -329,7 +341,7 @@ export default function PitchPage() {
             className="w-full rounded-[0.35rem] bg-primary hover:bg-primary/90"
             size="lg"
             onClick={handlePitchApproval}
-            disabled={isLoading || !termsAccepted || pitchApproved || submitted}
+            disabled={isLoading || !termsAccepted || pitchApproved || submitted || hasIncompleteAnswers}
           >
             {pitchApproved ? "Pitch Approved" : "Approve Pitch"}
           </Button>
@@ -383,7 +395,7 @@ export default function PitchPage() {
           className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
           size="lg"
           onClick={handlePitchSubmission}
-          disabled={isLoading || !termsAccepted || !pitchApproved || submitted}
+          disabled={isLoading || !termsAccepted || !pitchApproved || submitted || hasIncompleteAnswers}
         >
           Pitch Now
         </Button>
@@ -392,11 +404,13 @@ export default function PitchPage() {
           <h3 className="text-sm font-medium mb-2">{submitted ? "Pitch already submitted" : "Pitch not shared"}</h3>
           <p className="text-xs text-muted-foreground">{submitted ? "" : "Reason"}</p>
           <p className="text-xs text-muted-foreground">
-            {!pitchApproved
-              ? "Please check your team's approval and ensure all members have approved the pitch."
-              : submitted
-                ? ""
-                : "Pitch is ready but not submitted."}
+            {hasIncompleteAnswers 
+              ? getIncompleteAnswersMessage()
+              : !pitchApproved
+                ? "Please check your team's approval and ensure all members have approved the pitch."
+                : submitted
+                  ? ""
+                  : "Pitch is ready but not submitted."}
           </p>
         </Card>
       </div>

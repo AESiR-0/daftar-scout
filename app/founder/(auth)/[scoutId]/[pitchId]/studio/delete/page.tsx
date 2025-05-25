@@ -6,9 +6,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/format-date";
-import { Clock, MinusCircle, Check } from "lucide-react";
+import { Clock, MinusCircle, Check, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { usePitch } from "@/contexts/PitchContext";
 import { usePathname } from "next/navigation";
 
 interface TeamMember {
@@ -58,13 +57,15 @@ export default function DeletePage() {
     }
   }, [pitchId, scoutId]);
 
+  // Show locked toast when pitch becomes locked
+
   const fetchDeleteRequests = async () => {
     if (isLoading) return;
 
     setIsLoading(true);
     try {
       console.log('Fetching delete requests for:', { pitchId, scoutId });
-      
+
       const response = await fetch(`/api/endpoints/pitch/founder/delete?pitchId=${pitchId}&scoutId=${scoutId}`, {
         method: "GET",
         headers: {
@@ -86,13 +87,13 @@ export default function DeletePage() {
 
       // Get team members and current user from response
       const { teamMembers, currentUser: apiCurrentUser } = data;
-      
+
       if (!Array.isArray(teamMembers)) {
         throw new Error('Expected teamMembers array in response');
       }
 
       console.log('Processing team members:', teamMembers);
-      
+
       // Transform API data to match our interface
       const processedMembers = teamMembers.map((member: {
         name: string;
@@ -148,7 +149,7 @@ export default function DeletePage() {
         scoutId,
         message: error instanceof Error ? error.message : 'Unknown error'
       });
-      
+
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to load deletion requests. Please try again.",
@@ -231,6 +232,8 @@ export default function DeletePage() {
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
           <div className="flex flex-col p-4 rounded-lg space-y-6">
+
+
             <p className="text-sm text-muted-foreground">
               All data related to the pitch will be deleted, and the offer will be withdrawn.
               An email will be sent to all stakeholders to notify them of this change.
@@ -252,7 +255,11 @@ export default function DeletePage() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={!userConsent || isDeleting || (deleteClicked && approvals.find(m => m.founderId === currentUser.founderId)?.isApproved)}
+              disabled={
+                !userConsent ||
+                isDeleting ||
+                (deleteClicked && approvals.find(m => m.founderId === currentUser.founderId)?.isApproved)
+              }
               className="w-[12%] rounded-[0.35rem]"
             >
               {isDeleting ? "Processing..." : deleteClicked ? "Approved" : "Delete"}

@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Lock } from "lucide-react";
 import { Combobox } from "@/components/ui/combobox";
 import { useToast } from "@/hooks/use-toast";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import L, { LatLngTuple } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useIsLocked } from "@/contexts/isLockedContext";
 
 // Custom Leaflet marker icon using online URLs
 const customIcon = new L.Icon({
@@ -165,6 +166,7 @@ export default function PitchNameForm() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[2];
   const pitchId = pathname.split("/")[3];
+  const { isLocked, isLoading: isLockLoading } = useIsLocked();
   const [pitchName, setPitchName] = useState("");
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
@@ -180,6 +182,16 @@ export default function PitchNameForm() {
     state: "",
     city: "",
   });
+
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Pitch is Locked",
+        description: "This pitch is currently locked and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
 
   const fetchPitchDetails = async () => {
     try {
@@ -227,6 +239,14 @@ export default function PitchNameForm() {
   }, []);
 
   const handleLocationInput = (value: string) => {
+    if (isLocked) {
+      toast({
+        title: "Pitch is Locked",
+        description: "Cannot modify location while the pitch is locked.",
+        variant: "destructive",
+      });
+      return;
+    }
     setLocationInput(value);
     debounceLocation(value);
   };
@@ -269,6 +289,8 @@ export default function PitchNameForm() {
   );
 
   const autoSave = useCallback(async () => {
+    if (isLocked) return;
+
     const pitchData = {
       pitchName,
       location: locationInput || null,
@@ -301,11 +323,22 @@ export default function PitchNameForm() {
     selectedStage,
     selectedSectors,
     pitchId,
+    isLocked,
   ]);
+
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
 
   return (
     <Card className="w-full border-none bg-[#0e0e0e] mx-auto">
       <CardContent>
+        {isLocked && (
+          <div className="flex items-center gap-2 text-destructive mb-4">
+            <Lock className="h-5 w-5" />
+            <p className="text-sm font-medium">This pitch is locked and cannot be modified</p>
+          </div>
+        )}
         <form className="space-y-6">
           <div className="space-y-2">
             <Label>Pitch Name</Label>
@@ -313,10 +346,11 @@ export default function PitchNameForm() {
               type="text"
               value={pitchName}
               maxLength={100}
-              onChange={(e) => setPitchName(e.target.value)}
+              onChange={(e) => !isLocked && setPitchName(e.target.value)}
               onBlur={autoSave}
               placeholder="Enter your pitch name (max 100 characters)"
-              className="rounded w-full"
+              className={`rounded w-full ${isLocked ? 'opacity-100' : ''}`}
+              disabled={isLocked}
             />
           </div>
 
@@ -327,6 +361,8 @@ export default function PitchNameForm() {
               value={locationInput}
               onChange={(e) => handleLocationInput(e.target.value)}
               onBlur={autoSave}
+              className={isLocked ? 'opacity-100' : ''}
+              disabled={isLocked}
             />
             <div className="w-full h-[400px] rounded-lg overflow-hidden border">
               <MapComponent coordinates={coordinates} />
@@ -339,9 +375,10 @@ export default function PitchNameForm() {
               <Input
                 type="text"
                 value={demoLink}
-                onChange={(e) => setDemoLink(e.target.value)}
+                onChange={(e) => !isLocked && setDemoLink(e.target.value)}
                 onBlur={autoSave}
                 placeholder="Enter your demo link"
+                disabled={isLocked}
               />
             </div>
             <div className="flex-1 space-y-2">
@@ -349,11 +386,14 @@ export default function PitchNameForm() {
               <Combobox
                 options={stages}
                 value={selectedStage}
-                onSelect={(value) => {
-                  setSelectedStage(value);
-                  autoSave();
+                onSelect={(value) => {  
+                  if (!isLocked) {
+                    setSelectedStage(value);
+                    autoSave();
+                  }
                 }}
                 placeholder="Select Stage"
+                disabled={isLocked}
               />
             </div>
           </div>
@@ -363,34 +403,38 @@ export default function PitchNameForm() {
             <Combobox
               options={sectors}
               onSelect={(value) => {
+                if (isLocked) {
+                  toast({
+                    title: "Pitch is Locked",
+                    description: "Cannot modify sectors while the pitch is locked.",
+                    variant: "destructive",
+                  });
+                  return;
+                }
                 if (!selectedSectors.includes(value)) {
-                  console.log("Selected sector:", value);
                   setSelectedSectors([...selectedSectors, value]);
                   autoSave();
                 }
-                console.log("Selected sector:", value);
-                setSelectedSectors((prev) => prev.filter((s) => s !== value));
-                setSelectedSectors([...selectedSectors, value]);
-                console.log("Selected sectors:", selectedSectors);
-
-                autoSave();
               }}
               placeholder="Add sectors"
+              disabled={isLocked}
             />
             <div className="flex flex-wrap gap-2 mt-3">
               {selectedSectors.map((sector, index) => (
                 <Badge
                   key={index}
                   variant="secondary"
-                  className="text-xs cursor-pointer hover:bg-muted"
+                  className={`text-xs ${!isLocked ? 'cursor-pointer hover:bg-muted' : 'opacity-100'}`}
                   onClick={() => {
-                    setSelectedSectors((prev) =>
-                      prev.filter((s) => s !== sector)
-                    );
-                    autoSave();
+                    if (!isLocked) {
+                      setSelectedSectors((prev) =>
+                        prev.filter((s) => s !== sector)
+                      );
+                      autoSave();
+                    }
                   }}
                 >
-                  {sector} <X className="h-3 w-3 ml-1" />
+                  {sector} {!isLocked && <X className="h-3 w-3 ml-1" />}
                 </Badge>
               ))}
             </div>

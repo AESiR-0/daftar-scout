@@ -6,11 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import formatDate from "@/lib/formatDate";
-import { X } from "lucide-react";
+import { X, Lock } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { InvestorProfile } from "@/components/InvestorProfile";
 import { usePathname } from "next/navigation";
 import ReactPlayer from "react-player";
+import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 
 type CollaborationStatus = "Pending" | "Accepted" | "Declined";
 
@@ -33,7 +34,18 @@ export default function CollaborationPage() {
   const [daftarId, setDaftarId] = useState("");
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const pathname = usePathname();
-  const scoutId = pathname.split("/")[3]; // Replace with dynamic value if needed
+  const scoutId = pathname.split("/")[3];
+  const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
+
+  useEffect(() => {
+    if (isLocked) {
+      toast({
+        title: "Scout is Locked",
+        description: "This scout is not in planning stage anymore and cannot be modified.",
+        variant: "destructive",
+      });
+    }
+  }, [isLocked, toast]);
 
   useEffect(() => {
     const fetchCollaborators = async () => {
@@ -134,8 +146,18 @@ export default function CollaborationPage() {
     });
   };
 
+  if (isLockLoading) {
+    return <p className="text-muted-foreground">Loading...</p>;
+  }
+
   return (
     <div className="container px-4 mt-4 mx-auto py-6">
+      {isLocked && (
+        <div className="flex items-center gap-2 text-destructive mb-4">
+          <Lock className="h-5 w-5" />
+          <p className="text-sm font-medium">The scout is not in planning stage anymore</p>
+        </div>
+      )}
       <div className="grid grid-cols-3 gap-6">
         {/* Left Column - Collaborators (2/3 width) */}
         <div className="col-span-2">
@@ -148,8 +170,9 @@ export default function CollaborationPage() {
                   value={daftarId}
                   onChange={(e) => setDaftarId(e.target.value.toUpperCase())}
                   maxLength={6}
+                  disabled={isLocked}
                 />
-                <Button onClick={handleInvite} variant="outline">
+                <Button onClick={handleInvite} variant="outline" disabled={isLocked}>
                   Invite
                 </Button>
               </div>
@@ -171,7 +194,6 @@ export default function CollaborationPage() {
                             location: collaborator.daftarDetails.location,
                             bigPicture: collaborator.daftarDetails.bigPicture,
                             onDaftarSince: collaborator.addedAt,
-                            // imageUrl: "https://github.com/shadcn.png",
                           }}
                         />
                         <p className="text-xs text-muted-foreground">
@@ -185,6 +207,7 @@ export default function CollaborationPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => removeCollaborator(collaborator.id)}
+                        disabled={isLocked}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -244,13 +267,32 @@ export default function CollaborationPage() {
               </p>
 
               <div className="space-y-4">
-                <Textarea placeholder="How can we help you?" className="h-24" />
-                <Input placeholder="When should we call you? e.g. 2:00 PM IST" />
+                <Textarea 
+                  placeholder="How can we help you?" 
+                  className="h-24"
+                  disabled={isLocked}
+                />
+                <Input 
+                  placeholder="When should we call you? e.g. 2:00 PM IST"
+                  disabled={isLocked}
+                />
                 <div className="flex gap-2">
-                  <Input className="w-20" placeholder="+91" />
-                  <Input className="flex-1" placeholder="Enter phone number" />
+                  <Input 
+                    className="w-20" 
+                    placeholder="+91"
+                    disabled={isLocked}
+                  />
+                  <Input 
+                    className="flex-1" 
+                    placeholder="Enter phone number"
+                    disabled={isLocked}
+                  />
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  disabled={isLocked}
+                >
                   Schedule a Meeting
                 </Button>
               </div>

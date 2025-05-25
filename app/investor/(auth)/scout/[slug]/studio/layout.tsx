@@ -1,5 +1,6 @@
 import { StudioSidebar } from "@/components/navbar/studio-sidebar";
 import { DaftarProvider } from "@/lib/context/daftar-context";
+import { IsScoutLockedProvider } from "@/contexts/isScoutLockedContext";
 
 export default function StudioLayout({
   children,
@@ -9,8 +10,10 @@ export default function StudioLayout({
   return (
     <div className="flex min-h-screen">
       <DaftarProvider>
-        <StudioSidebar />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <IsScoutLockedProvider>
+          <StudioSidebar />
+          <main className="flex-1 overflow-y-auto">{children}</main>
+        </IsScoutLockedProvider>
       </DaftarProvider>
     </div>
   );
