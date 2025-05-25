@@ -8,10 +8,9 @@ import { CalendarClock } from "lucide-react"
 interface LaunchProgramDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSubmitFeedback: (feedback: string) => void
 }
 
-export function LaunchProgramDialog({ open, onOpenChange, onSubmitFeedback }: LaunchProgramDialogProps) {
+export function LaunchProgramDialog({ open, onOpenChange }: LaunchProgramDialogProps) {
   const [response, setResponse] = useState<"accept" | "decline" | null>(null)
 
   return (

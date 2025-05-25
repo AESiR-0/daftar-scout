@@ -11,11 +11,14 @@ if (!SMTP2GO_USER || !SMTP2GO_PASSWORD) {
 const transporter = nodemailer.createTransport({
   host: 'mail.smtp2go.com',
   port: 2525,
-  secure: true,
+  secure: false,
   auth: {
     user: SMTP2GO_USER,
     pass: SMTP2GO_PASSWORD,
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 interface EmailOptions {

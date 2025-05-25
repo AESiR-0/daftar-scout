@@ -144,23 +144,9 @@ export default function InvestorPitchPage() {
     setUploadStatus("Starting upload...");
 
     try {
-      const url = await uploadInvestorsPitchVideo(
-        file,
-        scoutId,
-        (progress) => {
-          setUploadProgress(progress);
-          // Update status message based on progress
-          if (progress <= 0.3) {
-            setUploadStatus("Compressing video...");
-          } else if (progress <= 0.5) {
-            setUploadStatus("Authenticating...");
-          } else if (progress <= 0.8) {
-            setUploadStatus("Uploading to server...");
-          } else {
-            setUploadStatus("Finalizing...");
-          }
-        }
-      );
+      const url = await uploadInvestorsPitchVideo(file, scoutId);
+      setUploadProgress(1);
+      setUploadStatus("Upload complete");
 
       const res2 = await fetch("/api/endpoints/scouts/investor_pitch", {
         method: "POST",
