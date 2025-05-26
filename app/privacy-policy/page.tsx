@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-[80%] bg-[#0e0e0e] text-white font-poppins py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[80%] bg-[#0e0e0e] text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Card className="bg-[#1a1a1a] border-[#2a2a2a] shadow-lg">
           <CardHeader>
@@ -38,12 +38,12 @@ export default function PrivacyPolicy() {
                   using the authentication data needed for your login experience.
                 </p>
                 <p className="text-base leading-relaxed mt-4">
-                  Additionally, we host our software on Vercel to provide a
+                  Additionally, we host our software on AWS to provide a
                   scalable and secure environment for our users. As part of our
                   ongoing development, user interactions with the software may be
                   logged for analysis and optimization purposes. However, we
                   ensure that this data is handled by Google’s Privacy Policy and
-                  Vercel’s Privacy Practices, adhering to industry standards for
+                  AWS’s Privacy Practices, adhering to industry standards for
                   data protection.
                 </p>
               </section>
@@ -113,7 +113,7 @@ export default function PrivacyPolicy() {
                 </h2>
                 <p className="text-base leading-relaxed">
                   As part of our commitment to security, Daftar is hosted on
-                  Vercel, which provides a secure cloud infrastructure. Vercel
+                  AWS, which provides a secure cloud infrastructure. AWS
                   ensures that data is stored in an encrypted environment using
                   industry-standard encryption methods.
                 </p>
@@ -220,21 +220,19 @@ export default function PrivacyPolicy() {
                   </a>
                   .
                 </p>
-                <h3 className="text-xl font-medium mb-2 mt-4">Vercel:</h3>
+                <h3 className="text-xl font-medium mb-2 mt-4">AWS:</h3>
                 <p className="text-base leading-relaxed">
-                  Daftar is hosted on Vercel, a trusted platform that provides
-                  cloud hosting services. Vercel’s policies govern how your data
-                  is stored and processed. We ensure that Vercel follows industry
+                  Daftar is hosted on AWS, a trusted platform that provides
+                  cloud hosting services. AWS’s policies govern how your data
+                  is stored and processed. We ensure that AWS follows industry
                   standards for data protection and privacy.
                 </p>
-                <h3 className="text-xl font-medium mb-2 mt-4">Supabase:</h3>
-                <p className="text-base leading-relaxed">
-                  We use Supabase as our backend infrastructure for storing user
-                  data and session information. Supabase provides a scalable and
-                  secure database and authentication service. Supabase processes
-                  your data in accordance with its own privacy policies, and we
-                  ensure that Supabase complies with industry-standard data
-                  protection measures.
+                <p className="text-base leading-relaxed mt-2">
+                  We use AWS as our backend infrastructure for storing user
+                  data and session information. AWS provides a scalable and
+                  secure database. AWS processes your data in accordance with 
+                  its own privacy policies, and we ensure that AWS complies with 
+                  industry-standard data protection measures.
                 </p>
               </section>
 
@@ -268,7 +266,36 @@ export default function PrivacyPolicy() {
 
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">
-                  8. Cookies & Tracking
+                  8. Sharing, Transfer, or Disclosure of Google User Data
+                </h2>
+                <p className="text-base leading-relaxed">
+                  Daftar does not sell, share, or disclose your Google user data to third parties, except as required to operate and improve our services, and only under the conditions described below:
+                </p>
+                <ul className="list-disc pl-6 text-base leading-relaxed mt-2">
+                <li className="mb-2">
+                  <strong>Cloud Infrastructure (AWS):</strong> We use Amazon Web Services (AWS EC2 and S3) to host our application and store session-related data. Your Google authentication data (such as your name and email address) is processed and stored securely on our AWS servers, solely for the purposes of providing access and managing sessions. AWS complies with industry-standard data protection regulations and does not access your data for any purpose outside of providing cloud services.
+                </li>
+                <li className="mb-2">
+                  <strong>No Unauthorized Third Parties:</strong> We do not share or transfer your Google user data to any unauthorized third parties. Only Daftar’s authorized internal personnel have access to this data, and only for the purpose of operating the service.
+                </li>
+                <li className="mb-2">
+                  <strong>Legal Compliance:</strong> We may disclose your Google user data if legally required (e.g., court order, legal process, or government request), and only when necessary to comply with applicable laws, protect our rights, or ensure the safety of users.
+                </li>
+                <li className="mb-2">
+                  <strong>No Third-Party Advertising:</strong> Daftar does not use, disclose, or share your Google user data for advertising or marketing purposes, nor do we allow any third-party advertisers access to this data.
+                </li>
+                <li className="mb-2">
+                  <strong>No Cross-Border Transfers Without Safeguards:</strong> If data needs to be processed or accessed outside your country, it is done only through trusted infrastructure providers like AWS with appropriate legal safeguards and compliance measures in place.
+                </li>
+                <li className="mb-2">
+                  <strong>Internal Data Access Controls:</strong> We strictly enforce internal data access controls and ensure that all data handlers within Daftar follow confidentiality agreements and security protocols.
+                </li>
+                </ul>
+              </section>
+
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold mb-4">
+                  9. Cookies & Tracking
                 </h2>
                 <p className="text-base leading-relaxed">
                   We may use cookies and session tracking technologies for the
@@ -280,7 +307,7 @@ export default function PrivacyPolicy() {
 
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">
-                  9. Security Measures
+                  10. Security Measures
                 </h2>
                 <p className="text-base leading-relaxed">
                   We employ standard data protection practices, including
@@ -294,7 +321,7 @@ export default function PrivacyPolicy() {
 
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">
-                  10. Changes to This Policy
+                  11. Changes to This Policy
                 </h2>
                 <p className="text-base leading-relaxed">
                   Since Daftar is currently in beta, this policy may be updated
@@ -306,7 +333,7 @@ export default function PrivacyPolicy() {
 
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">
-                  11. Grievance Redressal
+                  12. Grievance Redressal
                 </h2>
                 <p className="text-base leading-relaxed">
                   If you have any grievances or concerns about your data or this
