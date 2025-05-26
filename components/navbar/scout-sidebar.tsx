@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import { Badge } from "../ui/badge";
@@ -11,6 +11,7 @@ import { UpdatesDialog } from "../dialogs/updates-dialog";
 import { LaunchProgramDialog } from "../dialogs/launch-program-dialog";
 import { InsightsDialog } from "../dialogs/insights-dialog";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface Pitch {
   pitchId: string;
@@ -42,9 +43,11 @@ export function ScoutSidebar({
   const [insightsOpen, setInsightsOpen] = useState(false);
   const [isShowScroll, setIsShowScroll] = useState(true);
   const [sections, setSections] = useState<Section[]>([]);
+  const [sendingReport, setSendingReport] = useState(false);
   const pathname = usePathname();
   const isStudio = pathname.includes("studio");
   const scoutId = pathname.split("/")[3];
+  const { data: session } = useSession();
 
   useEffect(() => {
     if (pathname.includes("planning") || pathname.includes("scheduled")) {
@@ -102,6 +105,43 @@ export function ScoutSidebar({
     );
   };
 
+  const handleSendReport = async () => {
+    if (!session?.user?.email) {
+      alert("You must be logged in to send a report");
+      return;
+    }
+
+    if (isPlanning || isScheduling) {
+      alert("Reports are only available after scouting has begun");
+      return;
+    }
+
+    setSendingReport(true);
+    try {
+      const response = await fetch("/api/scout/report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          scoutId,
+          email: session.user.email,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send report");
+      }
+
+      alert("Report has been sent to your email");
+    } catch (error) {
+      console.error("Failed to send report:", error);
+      alert("Failed to send report. Please try again.");
+    } finally {
+      setSendingReport(false);
+    }
+  };
+
   const scoutName = scoutSlug === undefined ? "Test" : scoutSlug[0];
 
   if (isStudio) return null;
@@ -124,6 +164,15 @@ export function ScoutSidebar({
                   Studio
                 </Button>
               </Link>
+              <Button
+                variant="link"
+                size="sm"
+                className="w-full text-white px-0 justify-start opacity-50 cursor-not-allowed"
+                onClick={handleSendReport}
+                disabled={true}
+              >
+                Send Report
+              </Button>
             </div>
           </div>
           <div className="flex-1" />
@@ -139,6 +188,17 @@ export function ScoutSidebar({
           <div className="border-b shrink-0">
             <div className="border-b px-4 py-4">
               <h2 className="text-[14px] font-semibold">{scoutName}</h2>
+            </div>
+            <div className="px-4 py-2">
+              <Button
+                variant="link"
+                size="sm"
+                className="w-full text-white px-0 justify-start opacity-50 cursor-not-allowed"
+                onClick={handleSendReport}
+                disabled={true}
+              > 
+                Send Report
+              </Button>
             </div>
           </div>
           <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm" />
@@ -171,6 +231,15 @@ export function ScoutSidebar({
               onClick={() => setUpdatesOpen(true)}
             >
               Updates
+            </Button>
+            <Button
+              variant="link"
+              size="sm"
+              className="w-full text-white px-0 justify-start"
+              onClick={handleSendReport}
+              disabled={sendingReport}
+            >
+              {sendingReport ? "Sending..." : "Send Report"}
             </Button>
           </div>
         </div>
@@ -259,19 +328,13 @@ export function ScoutSidebar({
           open={endScoutingOpen}
           onOpenChange={setEndScoutingOpen}
           onConfirm={() => {
-            console.log("Ending scouting process...");
+            // Add any additional logic here if needed
           }}
         />
-        <UpdatesDialog
-          open={updatesOpen}
-          onOpenChange={setUpdatesOpen}
-        />
+        <UpdatesDialog open={updatesOpen} onOpenChange={setUpdatesOpen} />
         <LaunchProgramDialog
           open={launchProgramOpen}
           onOpenChange={setLaunchProgramOpen}
-          onSubmitFeedback={(feedback: string) => {
-            console.log("Submitting feedback:", feedback);
-          }}
         />
         <InsightsDialog open={insightsOpen} onOpenChange={setInsightsOpen} />
       </div>

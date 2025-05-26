@@ -224,25 +224,9 @@ export default function InvestorQuestionsPage() {
     setUploadStatus("Starting upload...");
 
     try {
-      const url = await uploadAnswersPitchVideo(
-        file,
-        pitchId,
-        scoutId,
-        (progress) => {
-          setUploadProgress(progress);
-          // Update status message based on progress
-          if (progress <= 0.3) {
-            setUploadStatus("Compressing video...");
-          } else if (progress <= 0.5) {
-            setUploadStatus("Authenticating...");
-          } else if (progress <= 0.8) {
-            setUploadStatus("Uploading to server...");
-          } else {
-            setUploadStatus("Finalizing...");
-          }
-        }
-      );
-
+      const url = await uploadAnswersPitchVideo(file, pitchId, scoutId);
+      setUploadProgress(1);
+      setUploadStatus("Upload complete");
       setPreviewUrl(url);
 
       const postRes = await fetch("/api/endpoints/pitch/founder/answers", {
