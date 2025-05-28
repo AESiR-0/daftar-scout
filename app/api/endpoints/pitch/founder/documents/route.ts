@@ -83,11 +83,7 @@ export async function GET(req: NextRequest) {
       .select()
       .from(pitchDocs)
       .where(eq(pitchDocs.pitchId, pitchId));
-    // All scout documents = received
-    const scoutDocs = await db
-      .select()
-      .from(scoutDocuments)
-      .where(eq(scoutDocuments.scoutId, scoutId));
+   
     const investorUsers = await db
       .select({ id: users.id })
       .from(users)
@@ -100,7 +96,7 @@ export async function GET(req: NextRequest) {
           .from(pitchDocs)
           .where((row) => inArray(row.uploadedBy, investorIds))
       : [];
-    const receivedDocs = [...scoutDocs, ...investorPitchDocs];
+    const receivedDocs = [ ...investorPitchDocs];
 
     return NextResponse.json({
       sent: sentDocs,
