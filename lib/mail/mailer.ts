@@ -21,19 +21,26 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+interface Attachment {
+  filename: string;
+  content: Buffer;
+}
+
 interface EmailOptions {
   to: string;
   subject: string;
   html: string;
+  attachments?: Attachment[];
 }
 
-export async function sendEmail({ to, subject, html }: EmailOptions) {
+export async function sendEmail({ to, subject, html, attachments }: EmailOptions) {
   try {
     await transporter.sendMail({
       from: 'notifications@daftaros.com',
       to,
       subject,
       html,
+      attachments,
     });
   } catch (error) {
     console.error('Failed to send email:', error);
