@@ -190,7 +190,8 @@ export async function POST(req: Request) {
     // Generate HTML content
     const currentDate = new Date();
     const monthYear = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-
+    const formattedDate = currentDate.toLocaleString('default', { month: 'long', day: 'numeric', year: 'numeric' });
+    
     const htmlContent = `
       <html>
         <head>
@@ -225,10 +226,26 @@ export async function POST(req: Request) {
               background: #f0f0f0;
               border-radius: 5px;
             }
+            .header-info {
+              text-align: center;
+              margin-bottom: 30px;
+              padding: 20px;
+              background: #f9f9f9;
+              border-radius: 5px;
+            }
+            .header-info p {
+              margin: 5px 0;
+              font-size: 14px;
+            }
           </style>
         </head>
         <body>
-          <h1>Scout Report</h1>
+          <div class="header-info">
+            <h1>${scout[0].scoutName}_${monthYear}_by_Daftar_OS_Technology</h1>
+            <p><strong>Publish By:</strong> ${daftarTeam[0]?.name || 'N/A'}</p>
+            <p><strong>Software Stage:</strong> Beta</p>
+            <p><strong>Publish Date:</strong> ${formattedDate}</p>
+          </div>
 
           <div class="section">
             <h2>Scout Details</h2>
