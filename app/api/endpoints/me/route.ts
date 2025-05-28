@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const body = await req.json();
   const {
-    userId,
+    email,
     firstName,
     lastName,
     gender,
@@ -72,7 +72,7 @@ export async function PATCH(req: NextRequest) {
     languages: languageList = [], // list of language names
   } = body;
 
-  if (!userId) {
+  if (!email) {
     return NextResponse.json({ error: "User ID required" }, { status: 400 });
   }
 
@@ -99,9 +99,11 @@ export async function PATCH(req: NextRequest) {
         countryCode,
         number,
       })
-      .where(eq(users.id, userId));
+      .where(eq(users.email, email));
 
     // Get language IDs
+    const user = await db.select().from(users).where(eq(users.email, email));
+    const userId = user[0].id;
     const languageRecords = await db
       .select({ id: languages.id })
       .from(languages)
@@ -110,7 +112,7 @@ export async function PATCH(req: NextRequest) {
     const languageIds = languageRecords.map((l) => l.id);
 
     // Delete existing userLanguages
-    await db.delete(userLanguages).where(eq(userLanguages.userId, userId));
+      await db.delete(userLanguages).where(eq(userLanguages.userId, userId));
 
     // Insert new userLanguages
     await db.insert(userLanguages).values(

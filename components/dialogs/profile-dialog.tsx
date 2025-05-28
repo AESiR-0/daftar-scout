@@ -167,10 +167,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   };
 
   const handleSaveProfile = async () => {
-    if (!profileData || !session?.user?.id) {
+    if (!profileData) {
       toast({
         title: "Error",
-        description: "Unable to save profile",
+        description: `"Unable to save profile`,
         variant: "destructive",
       });
       return;
@@ -182,7 +182,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: session.user.id,
+          email: session?.user?.email,
           firstName: profileData.firstName,
           lastName: profileData.lastName,
           phone: profileData.phone,
