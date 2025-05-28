@@ -1042,15 +1042,15 @@ const privacySections = [
   {
     title: "Introduction",
     icon: FileText,
-    content: `At Daftar, we take your privacy seriously. As part of our commitment to transparency and security, this Privacy Policy outlines how we collect, process, and protect your data. As we are still in beta, our practices and software are evolving. By using Daftar, you agree to the terms described below.
+    content: `continually improving the software to provide the best experience.
 
-Daftar is in beta, which means we are continually improving the software to provide the best experience.
+We use Google authentication solely At Daftar, we take your privacy seriously. As part of our commitment to transparency and security, this Privacy Policy outlines how we collect, process, and protect your data. As we are still in beta, our practices and software are evolving. By using Daftar, you agree to the terms described below.
 
-We use Google authentication solely to verify your identity and store only the necessary data for user sessions. We do not explore or access any additional details from your Google account. Your privacy and security are our priority, and we are committed to only using the authentication data needed for your login experience.
+Daftar is in beta, which means we are to verify your identity and store only the necessary data for user sessions. We do not explore or access any additional details from your Google account. Your privacy and security are our priority, and we are committed to only using the authentication data needed for your login experience.
 
-Additionally, we host our software on Vercel to provide a scalable and secure environment for our users. As part of our ongoing development, user interactions with the software may be logged for analysis and optimization purposes.
+Additionally, we host our software on AWS to provide a scalable and secure environment for our users. As part of our ongoing development, user interactions with the software may be logged for analysis and optimization purposes.
 
-However, we ensure that this data is handled by Google's Privacy Policy and Vercel's Privacy Practices, adhering to industry standards for data protection.`,
+However, we ensure that this data is handled by Google's Privacy Policy and AWS's Privacy Practices, adhering to industry standards for data protection.`,
   },
   {
     title: "Data We Collect",
@@ -1076,7 +1076,7 @@ We collect session data (such as your IP address) for diagnostics, troubleshooti
   {
     title: "Data Storage & Security",
     icon: Lock,
-    content: `As part of our commitment to security, Daftar is hosted on Vercel, which provides a secure cloud infrastructure. Vercel ensures that data is stored in an encrypted environment using industry-standard encryption methods.
+    content: `As part of our commitment to security, Daftar is hosted on AWS, which provides a secure cloud infrastructure. AWS ensures that data is stored in an encrypted environment using industry-standard encryption methods.
 
 Data Encryption:
 All data, including your session data, is encrypted in transit using TLS 1.2 or higher, and at rest using AES-256 encryption.
@@ -1093,11 +1093,10 @@ We conduct regular security audits and apply security patches to ensure that the
     content: `Google:
 Your authentication data is processed by Google through OAuth 2.0. Google's privacy policies govern how your data is handled during authentication. We don't store or process any further sensitive data through Google beyond what is required for the authentication process.
 
-Vercel:
-Daftar is hosted on Vercel, a trusted platform that provides cloud hosting services. While we utilize Vercel for hosting, Vercel's policies govern how your data is stored and processed. We ensure that Vercel follows industry standards for data protection and privacy.
+AWS:
+Daftar is hosted on AWS, a trusted platform that provides cloud hosting services. While we utilize AWS for hosting, AWS's policies govern how your data is stored and processed. We ensure that AWS follows industry standards for data protection and privacy.
 
-Supabase:
-We use Supabase as our backend infrastructure for storing user data and session information. Supabase provides a scalable and secure database and authentication service. Supabase processes your data in accordance with its own privacy policies, and we ensure that Supabase complies with industry-standard data protection measures. Supabase also uses encryption both in transit and at rest to protect your data.`,
+We use AWS as our backend infrastructure for storing user data and session information. AWS provides a scalable and secure database. AWS processes your data in accordance with its own privacy policies, and we ensure that AWS complies with industry-standard data protection measures. AWS also uses encryption both in transit and at rest to protect your data.`,
   },
   {
     title: "Data Retention",
@@ -1112,6 +1111,24 @@ Logs will be retained for no more than 100 days for debugging and performance an
     title: "Your Rights Over Your Data",
     icon: Users,
     content: `As a user, you have all the rights regarding your data. You maintain ownership of your data at all times. Daftar acts as a data processor and processes your data only for the purposes specified in this Privacy Policy.`,
+  },
+  {
+    title: "Data Sharing, Transfer, or Disclosure",
+    icon: Share2,
+    content: `Daftar does not sell, share, or disclose your Google user data to third parties, except as required to operate and improve our services, and only under the conditions described below:
+
+Cloud Infrastructure (AWS): We use Amazon Web Services (AWS EC2 and S3) to host our application and store session-related data. Your Google authentication data (such as your name and email address) is processed and stored securely on our AWS servers, solely for the purposes of providing access and managing sessions. AWS complies with industry-standard data protection regulations and does not access your data for any purpose outside of providing cloud services.
+
+No Unauthorized Third Parties: We do not share or transfer your Google user data to any unauthorized third parties. Only Daftar’s authorized internal personnel have access to this data, and only for the purpose of operating the service.
+
+Legal Compliance: We may disclose your Google user data if legally required (e.g., court order, legal process, or government request), and only when necessary to comply with applicable laws, protect our rights, or ensure the safety of users.
+
+No Third-Party Advertising: Daftar does not use, disclose, or share your Google user data for advertising or marketing purposes, nor do we allow any third-party advertisers access to this data.
+
+No Cross-Border Transfers Without Safeguards: If data needs to be processed or accessed outside your country, it is done only through trusted infrastructure providers like AWS with appropriate legal safeguards and compliance measures in place.
+
+We strictly enforce internal data access controls and ensure that all data handlers within Daftar follow confidentiality agreements and security protocols.
+    `
   },
   {
     title: "Cookies & Tracking",

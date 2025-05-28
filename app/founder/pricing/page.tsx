@@ -5,7 +5,7 @@ export default function PricingPage() {
     <div className="min-h-screen flex flex-col items-center justify-center p-6">
       <div className="text-center space-y-6 max-w-4xl">
         <div className="bg-muted/50 p-8 rounded-xl border shadow-md text-left max-w-2xl mx-auto">
-          <p className="text-lg text-muted-foreground">
+          <p className="text-md">
             Hey Founder,
             <br />
             <br />
