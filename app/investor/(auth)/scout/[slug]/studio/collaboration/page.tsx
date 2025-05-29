@@ -155,7 +155,7 @@ export default function CollaborationPage() {
       {isLocked && (
         <div className="flex items-center gap-2 text-destructive mb-4">
           <Lock className="h-5 w-5" />
-          <p className="text-sm font-medium">The scout is not in planning stage anymore</p>
+          <p className="text-sm font-medium">The scout is locked. You can not make any changes to it.</p>
         </div>
       )}
       <div className="grid grid-cols-3 gap-6">
