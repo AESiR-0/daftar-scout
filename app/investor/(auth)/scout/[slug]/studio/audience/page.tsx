@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
@@ -471,7 +472,7 @@ export default function AudiencePage() {
       {isLocked && (
         <div className="flex items-center gap-2 text-destructive mb-4">
           <Lock className="h-5 w-5" />
-          <p className="text-sm font-medium">The scout is not in planning stage anymore</p>
+          <p className="text-sm font-medium">The scout is locked. You can not make any changes to it.</p>
         </div>
       )}
       <div className="space-y-6">
@@ -523,6 +524,11 @@ export default function AudiencePage() {
             <DialogContent className="max-w-md bg-[#1a1a1a] text-white border-none rounded-[0.35rem]">
               <DialogHeader>
                 <DialogTitle>Audience Filters</DialogTitle>
+                <DialogDescription>
+                  <p className="text-sm text-muted-foreground">
+                  If you a community, sector, or stage that you are specifically scouting for is not available in our list, just message us through support in your profile. We’ll update it within 12 hours.( notification will be sent to you )
+                  </p>
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-6 py-4">
                 <div>
