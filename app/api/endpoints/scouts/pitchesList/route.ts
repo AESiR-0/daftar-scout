@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/backend/database";
-import { sql, and, eq, isNull } from "drizzle-orm";
+import { sql, and, eq, isNull, inArray } from "drizzle-orm";
 import { investorPitch, pitch } from "@/backend/drizzle/models/pitch";
 import { users } from "@/backend/drizzle/models/users";
 import { daftarInvestors, daftar } from "@/backend/drizzle/models/daftar";
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       )
     );
 
-  const daftarIds = scoutDaftars.map(d => d.daftarId);
+  const daftarIds = scoutDaftars.map(d => d.daftarId).filter((id): id is string => id !== null);
 
   // Step 3: For each pitch, get interested investors and averageBelieveRating
   const result = await Promise.all(
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
             isNull(users.archivedOn),
             eq(daftar.isActive, true),
             isNull(daftar.deletedOn),
-            sql`${daftarInvestors.daftarId} = ANY(${daftarIds})`
+            inArray(daftarInvestors.daftarId, daftarIds)
           )
         );
 
