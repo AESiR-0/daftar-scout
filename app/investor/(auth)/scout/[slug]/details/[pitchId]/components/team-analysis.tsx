@@ -65,16 +65,7 @@ export function TeamAnalysisSection({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>(() => {
-    // Filter out duplicates based on analyst ID when initializing state
-    const uniqueEntries = new Map();
-    initialTeamAnalysis.forEach(entry => {
-      if (!uniqueEntries.has(entry.analyst.id)) {
-        uniqueEntries.set(entry.analyst.id, entry);
-      }
-    });
-    return Array.from(uniqueEntries.values());
-  });
+  const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>(initialTeamAnalysis);
   const [loading, setLoading] = useState(false);
 
   // Check if the user has already submitted an analysis
