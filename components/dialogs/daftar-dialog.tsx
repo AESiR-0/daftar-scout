@@ -495,9 +495,42 @@ export function DaftarDialog({
     setShowAddMember(true)
   }
 
-  const handleRemoveMember = (id: string) => {
-    setMembers(members.filter(member => member.id !== id))
-  }
+  const handleRemoveMember = async (id: string) => {
+    const memberToRemove = members.find(m => m.id === id);
+    if (!memberToRemove) return;
+
+    try {
+      const response = await fetch('/api/endpoints/daftar/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: memberToRemove.email,
+          daftarId: daftarId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove member');
+      }
+
+      // Update local state
+      setMembers(members.filter(member => member.id !== id));
+      
+      toast({
+        title: "Success",
+        description: "Member removed successfully"
+      });
+    } catch (error) {
+      console.error('Error removing member:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove member",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
