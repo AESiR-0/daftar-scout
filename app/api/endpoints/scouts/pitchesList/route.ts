@@ -5,6 +5,7 @@ import { sql, and, eq, isNull } from "drizzle-orm";
 import { investorPitch, pitch } from "@/backend/drizzle/models/pitch";
 import { users } from "@/backend/drizzle/models/users";
 import { daftarInvestors, daftar } from "@/backend/drizzle/models/daftar";
+import { daftarScouts } from "@/backend/drizzle/models/scouts";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -32,7 +33,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ data: [], status: 200 });
   }
 
-  // Step 2: For each pitch, get interested investors and averageBelieveRating
+  // Step 2: Get all daftar IDs associated with the scout
+  const scoutDaftars = await db
+    .select({
+      daftarId: daftarScouts.daftarId,
+    })
+    .from(daftarScouts)
+    .where(
+      and(
+        eq(daftarScouts.scoutId, scoutId),
+        eq(daftarScouts.isPending, false)
+      )
+    );
+
+  const daftarIds = scoutDaftars.map(d => d.daftarId);
+
+  // Step 3: For each pitch, get interested investors and averageBelieveRating
   const result = await Promise.all(
     pitches.map(async ({ pitchId, pitchName, status }) => {
       const interestedInvestors = await db
@@ -62,7 +78,8 @@ export async function GET(req: NextRequest) {
             eq(users.isArchived, false),
             isNull(users.archivedOn),
             eq(daftar.isActive, true),
-            isNull(daftar.deletedOn)
+            isNull(daftar.deletedOn),
+            sql`${daftarInvestors.daftarId} = ANY(${daftarIds})`
           )
         );
 
