@@ -176,14 +176,7 @@ function InviteContent() {
                   >
                     <Download className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleView(file.id)}
-                    className="text-xs"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+
                   <Button
                     variant="ghost"
                     size="sm"
