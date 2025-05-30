@@ -30,7 +30,6 @@ export async function uploadVideoToS3(file: File, key: string) {
       Key: key,
       Body: buffer,
       ContentType: file.type,
-      ACL: 'public-read' // Make the object publicly readable
     });
 
     await s3Client.send(command);
