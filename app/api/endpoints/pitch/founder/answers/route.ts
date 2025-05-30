@@ -64,13 +64,14 @@ export async function POST(
         { status: 404 }
       );
     }
-
+    const compressedVideoUrl = pitchAnswerUrl.replace(process.env.AWS_S3_BUCKET_NAME!, process.env.AWS_S3_COMPRESSION_BUCKET_NAME!) ?? pitchAnswerUrl;
     // Insert new founder answer
     const newAnswer = await db
       .insert(founderAnswers)
       .values({
         pitchId,
         pitchAnswerUrl,
+        compressedPitchAnswerUrl: compressedVideoUrl,
         questionId,
         answerLanguage,
       })

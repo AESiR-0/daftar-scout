@@ -26,6 +26,7 @@ interface Question {
   id: number;
   question: string;
   videoUrl: string;
+  compressedVideoUrl: string;
   scoutId?: string;
   language?: string;
   isCustom?: boolean;
@@ -49,6 +50,7 @@ export default function InvestorQuestionsPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<string>("");
+  const [compressedVideoUrl, setCompressedVideoUrl] = useState<string | null>(null);
 
   // Sample languages and questions for the dialog
   const languages = [
@@ -70,39 +72,46 @@ export default function InvestorQuestionsPage() {
       id: 1,
       question: "Introduce yourself and the problem you are solving",
       videoUrl: "/videos/problem.mp4",
+      compressedVideoUrl: "/videos/problem.mp4",
     },
     {
       id: 2,
       question: "What are you building",
       videoUrl: "/videos/market.mp4",
+      compressedVideoUrl: "/videos/market.mp4",
     },
     {
       id: 3,
       question: "Why do you really want to solve the problem",
       videoUrl: "/videos/solution.mp4",
+      compressedVideoUrl: "/videos/solution.mp4",
     },
     {
       id: 4,
       question:
         "Who are your customers, and how are they dealing with this problem today",
       videoUrl: "/videos/customer.mp4",
+      compressedVideoUrl: "/videos/customer.mp4",
     },
     {
       id: 5,
       question:
         "Why will your customers switch from competitors to your product",
       videoUrl: "/videos/business.mp4",
+      compressedVideoUrl: "/videos/business.mp4",
     },
     {
       id: 6,
       question: "How will you make money",
       videoUrl: "/videos/team.mp4",
+      compressedVideoUrl: "/videos/team.mp4",
     },
     {
       id: 7,
       question:
         "What is the growth here (development, traction, or revenue), and challenges you are facing",
       videoUrl: "/videos/vision.mp4",
+      compressedVideoUrl: "/videos/vision.mp4",
     },
   ];
 
@@ -137,6 +146,7 @@ export default function InvestorQuestionsPage() {
         id: q.id,
         question: q.scoutQuestion,
         videoUrl: q.answerUrl || "",
+        compressedVideoUrl: q.compressedAnswerUrl || "",
         scoutId: q.scoutId,
         language: q.answerLanguage || "English",
         isCustom: q.isCustom,
@@ -147,6 +157,7 @@ export default function InvestorQuestionsPage() {
       const firstQuestion = fetchedQuestions[0] || null;
       setSelectedQuestion(firstQuestion);
       setPreviewUrl(firstQuestion?.videoUrl || "");
+      setCompressedVideoUrl(firstQuestion?.compressedVideoUrl || null);
       if (firstQuestion?.language) {
         setLanguage(firstQuestion.language);
       }
@@ -282,6 +293,7 @@ export default function InvestorQuestionsPage() {
   const handleQuestionSelect = (question: Question) => {
     setSelectedQuestion(question);
     setPreviewUrl(question.videoUrl);
+    setCompressedVideoUrl(question.compressedVideoUrl);
     if (question.language) {
       setLanguage(question.language);
     }
@@ -385,9 +397,18 @@ export default function InvestorQuestionsPage() {
                   {previewUrl ? (
                     <div className="space-y-4 flex flex-col items-center justify-center">
                       <video
-                        src={previewUrl}
+                        src={compressedVideoUrl || previewUrl}
                         controls
                         className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16]"
+                        onError={(e) => {
+                          if (compressedVideoUrl && previewUrl) {
+                            setCompressedVideoUrl(null);
+                            toast({
+                              title: "Compressed video unavailable",
+                              description: "Falling back to original video",
+                            });
+                          }
+                        }}
                       />
                       <div className="flex gap-2">
                         <Button
