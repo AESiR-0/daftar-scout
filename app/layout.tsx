@@ -40,8 +40,8 @@ export default function RootLayout({
           <ErrorBoundary>
             <div className="flex min-h-screen bg-[#0e0e0e] flex-col">
               {children}
-              <Footer />
             </div>
+            <Footer />
           </ErrorBoundary>
         </ToastProvider>
         <Toaster />
