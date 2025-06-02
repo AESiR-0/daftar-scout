@@ -7,6 +7,8 @@ import { eq, and } from "drizzle-orm";
 import { sendEmail } from "@/lib/mail/mailer";
 import puppeteer from 'puppeteer-core';
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
+import { offers } from "@/backend/drizzle/models/pitch";
+import { inArray } from "drizzle-orm";
 
 
 export async function POST(req: Request) {
@@ -55,6 +57,7 @@ export async function POST(req: Request) {
         daftarStructure: daftar.structure,
         daftarWebsite: daftar.website,
         daftarLocation: daftar.location,
+        daftarCreated: daftar.createdAt,
         daftarBigPicture: daftar.bigPicture,
         isPending: daftarScouts.isPending,
         addedAt: daftarScouts.addedAt,
@@ -102,6 +105,17 @@ export async function POST(req: Request) {
       );
     }
 
+    // Fetch offers for all pitches
+    const pitchIds = pitches.map(p => p.id);
+    const offersData = await db
+      .select({
+        id: offers.id,
+        pitchId: offers.pitchId,
+        offerStatus: offers.offerStatus,
+      })
+      .from(offers)
+      .where(inArray(offers.pitchId, pitchIds));
+
     // Fetch pitch team members
     const pitchTeams = await db
       .select({
@@ -133,6 +147,16 @@ export async function POST(req: Request) {
       .from(userLanguages)
       .innerJoin(languages, eq(userLanguages.languageId, languages.id))
       .where(eq(userLanguages.userId, pitchTeams[0]?.userId || ''));
+
+    // Fetch all users for gender ratio calculation
+    const  usersAll = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        gender: users.gender,
+        dob: users.dob,
+      })
+      .from(users);
 
     // Calculate age from dob
     const calculateAge = (dob: string | Date | null) => {
@@ -237,254 +261,344 @@ export async function POST(req: Request) {
               margin: 5px 0;
               font-size: 14px;
             }
+            .cover-page {
+              text-align: center;
+              padding: 40px 20px;
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              position: relative;
+            }
+            .cover-image {
+              width: 250px;
+              height: 250px;
+              margin: 0 auto;
+            }
+            .cover-title {
+              color: #11574f;
+              margin: 40px 0;
+            }
+            .cover-details {
+              text-align: left;
+              margin: 20px auto;
+              max-width: 600px;
+            }
+            .cover-details p {
+              margin: 10px 0;
+              font-size: 16px;
+            }
+            .cover-footer {
+              position: absolute;
+              bottom: 40px;
+              width: 100%;
+              text-align: center;
+            }
+            .cover-footer p {
+              margin: 5px 0;
+            }
+            .page-break {
+              page-break-after: always;
+            }
           </style>
         </head>
         <body>
-          <div class="header-info">
-            <h1>${scout[0].scoutName}_${monthYear}_by_Daftar_OS_Technology</h1>
-            <p><strong>Publish By:</strong> ${daftarTeam[0]?.name || 'N/A'}</p>
-            <p><strong>Software Stage:</strong> Beta</p>
+          <!-- Cover Page -->
+          <div class="cover-page">
+            <div>
+              <img src="https://res.cloudinary.com/dnqkxuume/image/upload/v1748519250/WhatsApp_Image_2025-05-29_at_09.40.54_39ea4402_miir2b.jpg" 
+                   alt="Daftar OS" 
+                   class="cover-image" />
+              <br/><br/>
+              <h1 class="cover-title">Startup Scouting Summary</h1>
+              <div class="cover-details">
+                <p><strong>Scout name:</strong> ${scout[0].scoutName}</p>
+                <p><strong>Collaboration Daftars:</strong> ${daftarCollaborations.map(c => c.daftarName).join(', ')}</p>
             <p><strong>Publish Date:</strong> ${formattedDate}</p>
-          </div>
-
-          <div class="section">
-            <h2>Scout Details</h2>
-            <div class="stats-grid">
-              <div class="stat-item">
-                <h3>Vision</h3>
-                <p>${scout[0].scoutDetails || 'N/A'}</p>
+                <p><strong>Pages:</strong> <span id="total-pages">Calculating...</span></p>
               </div>
-              <div class="stat-item">
-                <h3>Live Status</h3>
-                <p>${scout[0].status || 'N/A'}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Last Date to Pitch</h3>
-                <p>${scout[0].lastDayToPitch ? new Date(scout[0].lastDayToPitch).toLocaleDateString() : 'N/A'}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Program Launch Date</h3>
-                <p>${scout[0].programLaunchDate ? new Date(scout[0].programLaunchDate).toLocaleDateString() : 'N/A'}</p>
+               <div class="cover-footer">
+              <p><strong>Published By</strong></p>
+              <p>Daftar OS Technology</p>
+              <p>www.daftaros.com</p>
               </div>
             </div>
+           
+          </div>
+
+          <div class="page-break"></div>
+
+          <!-- Page 2 Content -->
+          <div class="section">
+            <h1 style="color: #11574f;">Scout Vision</h1>
+            <p>${scout[0].scoutDetails || 'N/A'}</p>
           </div>
 
           <div class="section">
-            <h2>Daftar Collaboration Details</h2>
-            ${daftarCollaborations.map(collab => `
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <h3>Daftar Name</h3>
-                  <p>${collab.daftarName || 'N/A'}</p>
-                </div>
-                <div class="stat-item">
-                  <h3>Structure</h3>
-                  <p>${collab.daftarStructure || 'N/A'}</p>
-                </div>
-                <div class="stat-item">
-                  <h3>Website</h3>
-                  <p>${collab.daftarWebsite || 'N/A'}</p>
-                </div>
-                <div class="stat-item">
-                  <h3>Location</h3>
-                  <p>${collab.daftarLocation || 'N/A'}</p>
-                </div>
-                <div class="stat-item">
-                  <h3>Big Picture</h3>
-                  <p>${collab.daftarBigPicture || 'N/A'}</p>
-                </div>
-                <div class="stat-item">
-                  <h3>Collaboration Status</h3>
-                  <p>${collab.isPending ? 'Pending' : 'Active'}</p>
-                </div>
-                <div class="stat-item">
-                  <h3>Added At</h3>
-                  <p>${collab.addedAt ? new Date(collab.addedAt).toLocaleDateString() : 'N/A'}</p>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="section">
-            <h2>Daftar Team</h2>
-            <div class="stats-grid">
-              ${daftarTeam.map(member => `
-                <div class="stat-item">
-                  <h3>${member.name || 'N/A'}</h3>
-                  <p><strong>Email:</strong> ${member.email || 'N/A'}</p>
-                  <p><strong>Designation:</strong> ${member.designation || 'N/A'}</p>
-                  <p><strong>Status:</strong> ${member.status || 'N/A'}</p>
-                  <p><strong>Join Date:</strong> ${member.joinDate ? new Date(member.joinDate).toLocaleDateString() : 'N/A'}</p>
-                  <p><strong>Join Type:</strong> ${member.joinType || 'N/A'}</p>
-                </div>
+            <h1 style="color: #11574f;">Daftar's Collaboration</h1>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <thead>
+                <tr style="background-color: #f5f5f5;">
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Daftar Name</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Location</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Team Size</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${daftarCollaborations.map(collab => `
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">
+                      ${collab.daftarName || 'N/A'}<br/>
+                      <span style="color: #666; font-size: 0.9em;">on Daftar since ${collab.daftarCreated ? new Date(collab.daftarCreated).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${collab.daftarLocation || 'N/A'}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${daftarTeam.filter(member => member.status === 'active').length}</td>
+                  </tr>
               `).join('')}
-            </div>
+              </tbody>
+            </table>
           </div>
 
-          <div class="section">
-            <h2>Target Audience</h2>
-            <div class="stats-grid">
-              <div class="stat-item">
-                <h3>Community</h3>
-                <p>${scout[0].scoutCommunity || 'N/A'}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Location</h3>
-                <p>${scout[0].targetAudLocation || 'N/A'}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Age Range</h3>
-                <p>${scout[0].targetAudAgeStart || 'N/A'} - ${scout[0].targetAudAgeEnd || 'N/A'}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Gender</h3>
-                <p>${scout[0].targetedGender || 'N/A'}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Stage</h3>
-                <p>${scout[0].scoutStage || 'N/A'}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Sector</h3>
-                <p>${scout[0].scoutSector ? (Array.isArray(scout[0].scoutSector) ? scout[0].scoutSector.join(', ') : scout[0].scoutSector) : 'N/A'}</p>
-              </div>
-            </div>
-          </div>
 
+          <div class="page-break"></div>
+
+          <!-- Page 3 Content -->
           <div class="section">
-            <h2>Pitch Analysis</h2>
-            <div class="stats-grid">
-              <div class="stat-item">
-                <h3>Stage Distribution</h3>
-                ${Object.entries(pitches.reduce((acc: Record<string, number>, p) => {
-      acc[p.stage || 'Unknown'] = (acc[p.stage || 'Unknown'] || 0) + 1;
-      return acc;
-    }, {})).map(([stage, count]) =>
-      `<p>${stage}: ${count}</p>`
-    ).join('')}
-              </div>
-              <div class="stat-item">
-                <h3>Location Distribution</h3>
-                ${Object.entries(pitches.reduce((acc: Record<string, number>, p) => {
-      acc[p.location || 'Unknown'] = (acc[p.location || 'Unknown'] || 0) + 1;
-      return acc;
-    }, {})).map(([location, count]) =>
-      `<p>${location}: ${count}</p>`
-    ).join('')}
-              </div>
-              <div class="stat-item">
-                <h3>Preferred Languages</h3>
-                ${Object.entries(userLangs.reduce((acc: Record<string, number>, l) => {
-      acc[l.languageName] = (acc[l.languageName] || 0) + 1;
-      return acc;
-    }, {})).map(([lang, count]) =>
-      `<p>${lang}: ${count}</p>`
-    ).join('')}
-              </div>
-              <div class="stat-item">
-                <h3>Age Range</h3>
-                <p>${Math.min(...teamMembers.map(m => calculateAge(m.dob) || 0))} - ${Math.max(...teamMembers.map(m => calculateAge(m.dob) || 0))}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Gender Ratio</h3>
+            <h1 style="color: #11574f;">Startups Pitched</h1>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <thead>
+                <tr style="background-color: #f5f5f5;">
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Location</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">#Startups</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg Team</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg Age</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg NPS</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Gender Ratio</th>
+                </tr>
+              </thead>
+              <tbody>
                 ${(() => {
-        const ratio = calculateGenderRatio(teamMembers);
-        return `
-                    <p>Male: ${ratio.male.toFixed(1)}%</p>
-                    <p>Female: ${ratio.female.toFixed(1)}%</p>
-                    <p>Trans: ${ratio.trans.toFixed(1)}%</p>
-                  `;
+        const allPitches = pitches;
+        const locations = Array.from(new Set(allPitches.map(p => p.location || 'Unknown')));
+        return locations.map(location => {
+          const locPitches = allPitches.filter(p => (p.location || 'Unknown') === location);
+          const numStartups = locPitches.length;
+          const avgTeam = numStartups ? (locPitches.reduce((acc, p) => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            return acc + team.length;
+          }, 0) / numStartups).toFixed(0) : '-';
+          const ages = locPitches.flatMap(p => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            return team.map(pt => {
+              const userMember = usersAll.find(m => m.id === pt.userId);
+              return userMember ? calculateAge(userMember.dob) : null;
+            }).filter(a => a !== null);
+          });
+          const avgAge = ages.length ? (ages.reduce((a, b) => a! + (b as number), 0) / ages.length).toFixed(0) : '-';
+          const npsArr = locPitches.map(p => {
+            const inv = investorData.find(d => d.pitchId === p.id);
+            return inv?.believeRating || null;
+          }).filter(n => n !== null);
+          const avgNps = npsArr.length ? (npsArr.reduce((a, b) => a! + (b as number), 0) / npsArr.length).toFixed(1) : '-';
+          const genderCounts = { male: 0, female: 0, trans: 0 };
+          locPitches.forEach(p => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            team.forEach(pt => {
+              const member = usersAll.find(m => m.id === pt.userId);
+              if (member) {
+                if (member.gender === 'male') genderCounts.male++;
+                else if (member.gender === 'female') genderCounts.female++;
+                else if (member.gender === 'trans') genderCounts.trans++;
+              }
+            });
+          });
+          const genderRatio = `Male:${genderCounts.male}, Female:${genderCounts.female} & Trans:${genderCounts.trans}`;
+          return `<tr>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${location}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${numStartups}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgTeam}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgAge}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgNps}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${genderRatio}</td>
+                    </tr>`;
+        }).join('');
       })()}
-              </div>
-            </div>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="page-break"></div>
+
+          <!-- Page 4 Content -->
+          <div class="section">
+            <h1 style="color: #11574f;">Startup Selected</h1>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <thead>
+                <tr style="background-color: #f5f5f5;">
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Location</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">#Startups</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg Team</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg Age</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg NPS</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Gender Ratio</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(() => {
+        const acceptedPitches = pitches.filter(p => p.status === 'accepted');
+        const locations = Array.from(new Set(acceptedPitches.map(p => p.location || 'Unknown')));
+        return locations.map(location => {
+          const locPitches = acceptedPitches.filter(p => (p.location || 'Unknown') === location);
+          const numStartups = locPitches.length;
+          const avgTeam = numStartups ? (locPitches.reduce((acc, p) => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            return acc + team.length;
+          }, 0) / numStartups).toFixed(0) : '-';
+          const ages = locPitches.flatMap(p => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            return team.map(pt => {
+              const userMember = usersAll.find(m => m.id === pt.userId);
+              return userMember ? calculateAge(userMember.dob) : null;
+            }).filter(a => a !== null);
+          });
+          const avgAge = ages.length ? (ages.reduce((a, b) => a! + (b as number), 0) / ages.length).toFixed(0) : '-';
+          const npsArr = locPitches.map(p => {
+            const inv = investorData.find(d => d.pitchId === p.id);
+            return inv?.believeRating || null;
+          }).filter(n => n !== null);
+          const avgNps = npsArr.length ? (npsArr.reduce((a, b) => a! + (b as number), 0) / npsArr.length).toFixed(1) : '-';
+          const genderCounts = { male: 0, female: 0, trans: 0 };
+          locPitches.forEach(p => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            team.forEach(pt => {
+              const member = usersAll.find(m => m.id === pt.userId);
+              if (member) {
+                if (member.gender === 'male') genderCounts.male++;
+                else if (member.gender === 'female') genderCounts.female++;
+                else if (member.gender === 'trans') genderCounts.trans++;
+              }
+            });
+          });
+          const genderRatio = `Male:${genderCounts.male}, Female:${genderCounts.female} & Trans:${genderCounts.trans}`;
+          return `<tr>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${location}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${numStartups}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgTeam}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgAge}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgNps}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${genderRatio}</td>
+                    </tr>`;
+        }).join('');
+      })()}
+              </tbody>
+            </table>
           </div>
 
           <div class="section">
-            <h2>Investor Analysis</h2>
-            <div class="stats-grid">
-              <div class="stat-item">
-                <h3>NPS Distribution</h3>
-                <p>High: ${npsCategories.high}</p>
-                <p>Average: ${npsCategories.average}</p>
-                <p>Low: ${npsCategories.low}</p>
-              </div>
-              <div class="stat-item">
-                <h3>Meeting Statistics</h3>
-                <p>Total Startups to Meet: ${investorData.filter(d => d.shouldMeet).length}</p>
-              </div>
-            </div>
+            <h1 style="color: #11574f;">Startup Not Selected</h1>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <thead>
+                <tr style="background-color: #f5f5f5;">
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Location</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">#Startups</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg Team</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg Age</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Avg NPS</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Gender Ratio</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${(() => {
+        const rejectedPitches = pitches.filter(p => p.status === 'rejected');
+        const locations = Array.from(new Set(rejectedPitches.map(p => p.location || 'Unknown')));
+        return locations.map(location => {
+          const locPitches = rejectedPitches.filter(p => (p.location || 'Unknown') === location);
+          const numStartups = locPitches.length;
+          const avgTeam = numStartups ? (locPitches.reduce((acc, p) => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            return acc + team.length;
+          }, 0) / numStartups).toFixed(0) : '-';
+          const ages = locPitches.flatMap(p => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            return team.map(pt => {
+              const userMember = usersAll.find(m => m.id === pt.userId);
+              return userMember ? calculateAge(userMember.dob) : null;
+            }).filter(a => a !== null);
+          });
+          const avgAge = ages.length ? (ages.reduce((a, b) => a! + (b as number), 0) / ages.length).toFixed(0) : '-';
+          const npsArr = locPitches.map(p => {
+            const inv = investorData.find(d => d.pitchId === p.id);
+            return inv?.believeRating || null;
+          }).filter(n => n !== null);
+          const avgNps = npsArr.length ? (npsArr.reduce((a, b) => a! + (b as number), 0) / npsArr.length).toFixed(1) : '-';
+          const genderCounts = { male: 0, female: 0, trans: 0 };
+          locPitches.forEach(p => {
+            const team = pitchTeams.filter(pt => pt.pitchId === p.id);
+            team.forEach(pt => {
+              const member = usersAll.find(m => m.id === pt.userId);
+              if (member) {
+                if (member.gender === 'male') genderCounts.male++;
+                else if (member.gender === 'female') genderCounts.female++;
+                else if (member.gender === 'trans') genderCounts.trans++;
+              }
+            });
+          });
+          const genderRatio = `Male:${genderCounts.male}, Female:${genderCounts.female} & Trans:${genderCounts.trans}`;
+          return `<tr>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${location}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${numStartups}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgTeam}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgAge}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${avgNps}</td>
+                      <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${genderRatio}</td>
+                    </tr>`;
+        }).join('');
+      })()}
+              </tbody>
+            </table>
           </div>
 
-          ${Object.entries(pitchCategories).map(([category, categoryPitches]) => `
-            <div class="category-section">
-              <h2>${category.charAt(0).toUpperCase() + category.slice(1)} Pitches</h2>
-              <p>Total: ${categoryPitches.length}</p>
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <h3>Average NPS</h3>
-                  <p>${(categoryPitches.reduce((acc, p) => {
-        const pitchData = investorData.find(d => d.pitchId === p.id);
-        return acc + (pitchData?.believeRating || 0);
-      }, 0) / categoryPitches.length).toFixed(1)}</p>
-                </div>
-                <div class="stat-item">
-                  <h3>Investor Interest</h3>
-                  <p>Want to Meet: ${categoryPitches.filter(p => {
-        const pitchData = investorData.find(d => d.pitchId === p.id);
-        return pitchData?.shouldMeet;
-      }).length}</p>
-                  <p>Don't Want to Meet: ${categoryPitches.filter(p => {
-        const pitchData = investorData.find(d => d.pitchId === p.id);
-        return pitchData && !pitchData.shouldMeet;
-      }).length}</p>
-                </div>
-              </div>
-              ${categoryPitches.map(pitch => {
-        const pitchInvestorData = investorData.find(d => d.pitchId === pitch.id);
-        const pitchTeamMembers = teamMembers.filter(m =>
-          pitchTeams.find(pt => pt.pitchId === pitch.id && pt.userId === m.id)
-        );
-        const pitchUserLangs = userLangs.filter(l =>
-          pitchTeamMembers.some(m => m.id === l.userId)
-        );
-        return `
-                  <div class="pitch">
-                    <h3>${pitch.pitchName}</h3>
-                    <p>Location: ${pitch.location || 'N/A'}</p>
-                    <p>Stage: ${pitch.stage || 'N/A'}</p>
-                    <p>Team Size: ${pitch.teamSize || 'N/A'}</p>
-                    <h4>Team Members</h4>
-                    ${pitchTeamMembers.map(member => `
-                      <div class="team-member">
-                        <p>Name: ${member.name || 'N/A'}</p>
-                        <p>Location: ${member.location || 'N/A'}</p>
-                        <p>Age: ${calculateAge(member.dob) || 'N/A'}</p>
-                        <p>Gender: ${member.gender || 'N/A'}</p>
-                        <p>Preferred Languages: ${pitchUserLangs
-            .filter(l => l.userId === member.id)
-            .map(l => l.languageName)
-            .join(', ') || 'N/A'}</p>
-                      </div>
-                    `).join('')}
-                    ${pitchInvestorData ? `
-                      <h4>Investor Data</h4>
-                      <p>NPS: ${pitchInvestorData.believeRating || 'N/A'}</p>
-                      <p>Should Meet: ${pitchInvestorData.shouldMeet ? 'Yes' : 'No'}</p>
-                    ` : ''}
-                  </div>
-                `;
-      }).join('')}
-            </div>
-          `).join('')}
+          <div class="page-break"></div>
 
-          <div class="disclaimer">
-            <h2>Confidential Disclaimer</h2>
-            <p>This report is private and only shared with users who have been added to the project. Daftar OS respects your privacy and does not share this information with any third parties.</p>
-            <p><strong>Daftar Brief:</strong> Daftar OS Technology: Simplifying Startup - Scouting and Pitching with Data and Intelligence</p>
+          <!-- Page 5 Content -->
+          <div class="section">
+            <h1 style="color: #11574f;">Communication: Founder's Preferred Language to Speak with the Investors</h1>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <thead>
+                <tr style="background-color: #f5f5f5;">
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Founder</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Preferred Language(s)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${teamMembers.map(member => {
+        const langs = userLangs.filter(l => l.userId === member.id).map(l => l.languageName).join(', ') || 'N/A';
+        return `<tr>
+                    <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${member.name || 'N/A'}</td>
+                    <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${langs}</td>
+                  </tr>`;
+      }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section" style="margin-top: 40px;">
+            <h2 style="color: #11574f;">Report End</h2>
+            <div style="margin: 20px 0; font-size: 16px;">
+              <p>This is a short summary of the scout your team has launched on Daftar OS. It is shared for team members who are not yet on Daftar.<br>
+              To access the full report, please request your team to add you in the software. Daftar gives you a live experience of the startup's journey, your team's decisions, and all related documents.</p>
+              <p><strong>Feedback</strong><br>
+              Daftar OS is currently in beta. Your experience and feedback are invaluable to us. Kindly share your insights via your profile in Daftar.</p>
+              <p><strong>Daftar OS</strong><br>
+              Simplifying startup scouting and pitching through data and intelligence.<br>
+              <a href="https://www.daftaros.com" target="_blank">www.daftaros.com</a></p>
+              <p style="font-size: 14px; color: #888;"><strong>Disclaimer</strong><br>
+              This report is confidential and shared only with authorized team members. We respect your privacy and do not share information outside the team.</p>
+            </div>
           </div>
         </body>
       </html>
-    `;
+    `
 
     // Launch browser
     const browser = await puppeteer.launch({
@@ -512,20 +626,40 @@ export async function POST(req: Request) {
       }
     });
 
+    // Calculate total pages
+    const totalPages = await page.evaluate(() => {
+      const pages = document.querySelectorAll('.page-break').length + 1;
+      const totalPagesElement = document.getElementById('total-pages');
+      if (totalPagesElement) {
+        totalPagesElement.textContent = pages.toString();
+      }
+      return pages;
+    });
+
+    // Generate final PDF with page count
+    const finalPdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20px',
+        right: '20px',
+        bottom: '20px',
+        left: '20px'
+      }
+    });
+
     // Close browser
     await browser.close();
 
-    // Send email with PDF attachment
     await sendEmail({
       to: email,
       subject: "Scout Report",
       html: "Please find attached the scout report.",
       attachments: [{
         filename: `Daftar_OS_${scout[0].scoutName}_${currentDate.toLocaleString('default', { month: 'short' })}_${currentDate.getFullYear()}.pdf`,
-        content: Buffer.from(pdfBuffer)
+        content: Buffer.from(finalPdfBuffer)
       }]
     });
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to send report:", error);
@@ -534,4 +668,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-} 
+}

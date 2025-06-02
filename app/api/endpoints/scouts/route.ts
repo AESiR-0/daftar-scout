@@ -258,6 +258,7 @@ export async function POST(req: NextRequest) {
       .values({
         scoutId,
         scoutName,
+        status: "planning",
         daftarId: daftarId,
       })
       .returning();

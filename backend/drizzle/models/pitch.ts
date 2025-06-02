@@ -112,6 +112,7 @@ export const founderAnswers = pgTable("founder_answers", {
     onDelete: "cascade",
   }),
   pitchAnswerUrl: text("pitch_answer_url").notNull(),
+  compressedPitchAnswerUrl: text("compressed_pitch_answer_url"),
   questionId: integer("question_id").references(() => scoutQuestions.id, {
     onDelete: "cascade",
   }),

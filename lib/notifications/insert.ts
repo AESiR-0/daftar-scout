@@ -57,6 +57,28 @@ export const emailTemplates = {
         </div>
       `,
     }),
+    daftar_invite_received: (notification: any, userEmail: string) => ({
+      to: userEmail,
+      subject: 'Daftar Invitation',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f0f0f0; padding: 20px; border-radius: 10px;border: 1px solid #ccc;">
+          <h2>Daftar Invitation</h2>
+          <p>${notification.userName},</p>
+          <p>You have been invited to join ${notification.payload.daftarName} on Daftar OS.</p>
+          <div style="margin-top: 20px;">
+            <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
+               style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; margin-right: 10px;">
+              Accept
+            </a>
+            <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/reject?mail=${userEmail}" 
+               style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none;">
+              Reject
+            </a>
+          </div>
+          <p>Best regards,<br>Daftar OS</p>
+        </div>
+      `,
+    }),
     team_leave: (notification: any, userEmail: string) => ({
       to: userEmail,
       subject: 'Team Member Update',

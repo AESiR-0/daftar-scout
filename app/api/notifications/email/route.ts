@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { NotificationPayload } from "@/lib/notifications/type";
+import { db } from "@/backend/database";
+import { eq } from "drizzle-orm";
+import { users } from "@/backend/drizzle/models/users";
+import { daftar } from "@/backend/drizzle/models/daftar";
 
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
@@ -329,6 +333,63 @@ function generateWelcomeEmail(userEmail: string, userName: string) {
   };
 }
 
+function generateDaftarInviteEmail(
+  userEmail: string,
+  notification: NotificationPayload
+) {
+  return {
+    to: userEmail,
+    subject: 'Daftar Invitation',
+    html: `
+      <div style="background-color: #f4f4f4; padding: 40px 20px; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          
+          <!-- Header -->
+          <div style="background-color: #0e0e0e; padding: 20px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 22px; margin: 0;">Daftar OS Technology</h1>
+          </div>
+  
+          <!-- Invitation Content -->
+          <div style="padding: 30px;">
+            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">Daftar Invitation</h2>
+            
+            <p style="color: #555555; font-size: 16px; margin-top: 20px;">
+              Hello ${notification.userName},
+            </p>
+  
+            <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
+              You have been invited to join ${notification.payload.daftarName} on Daftar OS.
+            </p>
+  
+            <!-- CTA Buttons -->
+            <div style="text-align: center; margin: 40px 0 20px;">
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
+                style="background-color: #4CAF50; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block; margin-right: 10px;">
+                Accept
+              </a>
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/reject?mail=${userEmail}" 
+                style="background-color: #f44336; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
+                Reject
+              </a>
+            </div>
+  
+            <!-- Footer Info -->
+            <div style="color: #999999; font-size: 13px; text-align: center; margin-top: 30px;">
+              DaftarOS Team<br/>
+              Building the Future of Startup Collaboration
+            </div>
+          </div>
+        </div>
+  
+        <!-- Bottom Footer -->
+        <div style="text-align: center; color: #aaaaaa; font-size: 12px; margin-top: 20px;">
+          © ${new Date().getFullYear()} Daftar OS Technology. All rights reserved.
+        </div>
+      </div>
+    `,
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const { notification, userId, type, userEmail, userName } = await request.json();
@@ -344,7 +405,41 @@ export async function POST(request: Request) {
     }
 
     // Handle notification emails
-    if (notification.type === "updates" && notification.payload.pitchId) {
+    if (notification.type === "updates" && notification.subtype === "daftar_invite_received") {
+      // Fetch user details from database
+      const [user] = await db
+        .select({ name: users.name })
+        .from(users)
+        .where(eq(users.email, userEmail))
+        .limit(1);
+
+      // Fetch daftar details from database
+      const [daftarInfo] = await db
+        .select({ name: daftar.name })
+        .from(daftar)
+        .where(eq(daftar.id, notification.payload.daftarId))
+        .limit(1);
+
+      // Create a new notification object with the user's name and daftar name
+      const notificationWithDetails = {
+        ...notification,
+        userName: user?.name || 'User',
+        payload: {
+          ...notification.payload,
+          daftarName: daftarInfo?.name || 'Daftar'
+        }
+      };
+
+      const emailOptions = generateDaftarInviteEmail(
+        userEmail,
+        notificationWithDetails
+      );
+
+      await transporter.sendMail({
+        from: "notifications@daftaros.com",
+        ...emailOptions,
+      });
+    } else if (notification.type === "updates" && notification.payload.pitchId) {
       const acceptToken = generateActionToken(
         userId,
         notification.payload.pitchId,

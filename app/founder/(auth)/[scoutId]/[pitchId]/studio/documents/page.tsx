@@ -538,14 +538,7 @@ function DocumentsList({
                 >
                   <Download className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onView(doc)}
-                  className="hover:bg-muted/50"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
+               
                 {canDelete && (
                   <Button
                     variant="ghost"

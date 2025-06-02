@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/backend/database";
-import { sql, and, eq } from "drizzle-orm";
+import { sql, and, eq, isNull } from "drizzle-orm";
 import { investorPitch, pitch } from "@/backend/drizzle/models/pitch";
 import { users } from "@/backend/drizzle/models/users";
-import { daftarInvestors, daftar } from "@/backend/drizzle/models/daftar";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -43,19 +42,19 @@ export async function GET(req: NextRequest) {
           email: users.email,
           image: users.image,
           believeRating: investorPitch.believeRating,
-          designation: daftarInvestors.designation,
-          daftarId: daftarInvestors.daftarId,
-          daftarName: daftar.name,
         })
         .from(investorPitch)
         .innerJoin(users, eq(users.id, investorPitch.investorId))
-        .innerJoin(daftarInvestors, eq(users.id, daftarInvestors.investorId))
-        .innerJoin(daftar, eq(daftar.id, daftarInvestors.daftarId))
         .where(
           and(
             eq(investorPitch.pitchId, pitchId),
             eq(investorPitch.scoutId, scoutId),
-            eq(investorPitch.shouldMeet, true)
+            eq(investorPitch.shouldMeet, true),
+            eq(investorPitch.isActive, true),
+            isNull(investorPitch.deletedOn),
+            eq(users.isActive, true),
+            eq(users.isArchived, false),
+            isNull(users.archivedOn)
           )
         );
 
@@ -67,7 +66,9 @@ export async function GET(req: NextRequest) {
         .where(
           and(
             eq(investorPitch.pitchId, pitchId),
-            eq(investorPitch.scoutId, scoutId)
+            eq(investorPitch.scoutId, scoutId),
+            eq(investorPitch.isActive, true),
+            isNull(investorPitch.deletedOn)
           )
         );
 

@@ -3,33 +3,32 @@ export type NotificationType =
   | "updates"
   | "alert"
   | "scout_link"
-  | "request";
+  | "request"
+  | "welcome";
 
 export type NotificationRole = "founder" | "investor" | "both";
 
 export interface NotificationPayload {
-  action?: string;
-  by_user_id?: string;
-  scout_id?: string;
-  openScoutUrl?: string;
-  daftar_id?: string;
-  action_by?: string;
+  userName?: string;
+  daftarName?: string;
   pitchId?: string;
-  action_at?: string;
-  stage?: string;
-  message?: string;
-  designation?: string;
-  sector?: string[];
-  url?: string;
   pitchName?: string;
+  scoutId?: string;
+  scoutName?: string;
   currentUsername?: string;
   currentUserDesignation?: string;
   invitedUsername?: string;
   invitedUserDesignation?: string;
-  videoUrl?: string;
-  videoThumbnail?: string;
+  designation?: string;
   joinedTime?: string;
-  publishMessageForScout?: string;
-  daftarName?: string;
-  scoutName?: string;
+  openScoutUrl?: string;
+  message?: string;
+  url?: string;
+  action_by?: string;
+  documentName?: string;
+  founderName?: string;
+  location?: string;
+  sector?: string;
+  stage?: string;
+  [key: string]: any; // Allow for additional properties
 }

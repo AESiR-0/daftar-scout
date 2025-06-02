@@ -24,11 +24,13 @@ export async function POST(req: NextRequest) {
     if (existingScout.length === 0) {
       return NextResponse.json({ error: "Scout not found" }, { status: 404 });
     }
-
+    const compressedVideoUrl = videoUrl.replace(process.env.AWS_S3_BUCKET_NAME!, process.env.AWS_S3_COMPRESSION_BUCKET_NAME!) ?? videoUrl;
+    
     const updatedScout = await db
       .update(scouts)
       .set({
         investorPitch: videoUrl,
+        compressedInvestorPitch: compressedVideoUrl,
       })
       .where(eq(scouts.scoutId, scoutId))
       .returning();

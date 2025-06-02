@@ -56,14 +56,15 @@ export default function InvestorPitchPage() {
   const [pitchProblem, setPitchProblem] = useState("");
   const [pitchSolution, setPitchSolution] = useState("");
   const [pitchValue, setPitchValue] = useState("");
-
+  const [compressedVideoUrl, setCompressedVideoUrl] = useState<string | null>(null);
   async function fetchInvestorsPitch() {
     const res = await fetch(
       `/api/endpoints/scouts/investor_pitch?scoutId=${scoutId}`
     );
     if (res.status == 200) {
-      const { url } = await res.json();
+      const { url, compressedUrl } = await res.json();
       setVideoUrl(url);
+      setCompressedVideoUrl(compressedUrl);
       console.log(url);
     } else {
       toast({
@@ -228,13 +229,22 @@ export default function InvestorPitchPage() {
                     
 
                     <ReactPlayer
-                      url={videoUrl || "/dummyVideo.mp4"}
+                      url={compressedVideoUrl || videoUrl || "/dummyVideo.mp4"}
                       controls
                       width="300px"
                       height="533px"
                       style={{
                         borderRadius: "0.35rem",
                         aspectRatio: "16/9",
+                      }}
+                      onError={(e) => {
+                        if (compressedVideoUrl && videoUrl) {
+                          setCompressedVideoUrl(null);
+                          toast({
+                            title: "Compressed video unavailable",
+                            description: "Falling back to original video",
+                          });
+                        }
                       }}
                     />
                   </div>
