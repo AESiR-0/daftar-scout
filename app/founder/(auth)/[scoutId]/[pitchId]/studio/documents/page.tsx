@@ -255,7 +255,7 @@ export default function DocumentsPage() {
       }
 
       // Get the S3 URL
-      const url = key;
+      const url = await getVideoUrl(doc.docUrl);
 
       toast({
         title: "Downloading file",
@@ -317,39 +317,20 @@ export default function DocumentsPage() {
         return;
       }
 
-      // First delete from S3
-      if (doc.docUrl) {
-        try {
-          // Extract the key from the full S3 URL
-          // URL format: https://daftaros.s3.ap-south-1.amazonaws.com/founder-docs/...
-          const urlParts = doc.docUrl.split('.amazonaws.com/');
-          if (urlParts.length === 2) {
-            const key = urlParts[1]; // This will be "founder-docs/..."
-            await deleteVideoFromS3("founder", key);
-          } else {
-            throw new Error("Invalid S3 URL format");
-          }
-        } catch (error) {
-          console.error("Error deleting from storage:", error);
-          toast({
-            title: "Error",
-            description: "Failed to delete file from storage",
-            variant: "destructive",
-          });
-          return;
+      // Delete document using the new endpoint
+      const response = await fetch(
+        `/api/endpoints/pitch/documents/delete?id=${docId}&pitchId=${pitchId}`,
+        {
+          method: "DELETE",
         }
-      }
-
-      // Then delete from database
-      const response = await fetch(`/api/endpoints/pitch/founder/documents?id=${docId}`, {
-        method: "DELETE",
-      });
+      );
 
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to delete document");
       }
 
+      // Remove from local state
       setDocumentsList((prev) => prev.filter((d) => d.id !== docId));
       toast({
         title: "Document deleted",
