@@ -329,7 +329,7 @@ export default function InvestorQuestionsPage() {
               </DialogHeader>
               <div className="grid grid-cols-12 gap-6 mt-10">
                 {/* Language Column */}
-                <div className="col-span-2 space-y-4">
+                {/* <div className="col-span-2 space-y-4">
                   <h3 className="text-lg font-semibold">Languages</h3>
                   <div className="space-y-2">
                     {languages.map((language) => (
@@ -345,7 +345,7 @@ export default function InvestorQuestionsPage() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Video Preview Column */}
                 <div className="col-span-6">
