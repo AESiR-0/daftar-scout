@@ -249,13 +249,14 @@ export default function DocumentsPage() {
 
     try {
       // Extract the key from the S3 URL
-      const key = doc.docUrl.split('/').pop();
-      if (!key) {
-        throw new Error("Invalid document URL");
+      const urlParts = doc.docUrl.split('.amazonaws.com/');
+      if (urlParts.length !== 2) {
+        throw new Error("Invalid document URL format");
       }
+      const key = urlParts[1];
 
       // Get the S3 URL
-      const url = await getVideoUrl(doc.docUrl);
+      const url = await getVideoUrl(key);
 
       toast({
         title: "Downloading file",
@@ -284,10 +285,11 @@ export default function DocumentsPage() {
 
     try {
       // Extract the key from the S3 URL
-      const key = doc.docUrl.split('/').pop();
-      if (!key) {
-        throw new Error("Invalid document URL");
+      const urlParts = doc.docUrl.split('.amazonaws.com/');
+      if (urlParts.length !== 2) {
+        throw new Error("Invalid document URL format");
       }
+      const key = urlParts[1];
 
       // Get the S3 URL
       const url = await getVideoUrl(key);

@@ -17,6 +17,7 @@ import {
 import { uploadInvestorPitchDocument } from "@/lib/actions/document";
 import { useDaftar } from "@/lib/context/daftar-context";
 import { usePathname } from "next/navigation";
+import { getVideoUrl } from "@/lib/s3";
 
 interface Document {
   id: string;
@@ -253,32 +254,88 @@ export default function DocumentsPage() {
     input.click();
   };
 
-  const handleDownload = (doc: Document) => {
-    window.open(doc.url, "_blank");
-    toast({
-      title: "Downloading file",
-      description: `Started downloading ${doc.name}`,
-    });
-    addActivityLog({
-      action: "Downloaded",
-      documentName: doc.name,
-      user: "Current User",
-      timestamp: formatDate(new Date().toISOString()),
-    });
+  const handleDownload = async (doc: Document) => {
+    if (!doc.url) {
+      toast({
+        title: "Error",
+        description: "Document URL not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Extract the key from the S3 URL
+      const urlParts = doc.url.split('.amazonaws.com/');
+      if (urlParts.length !== 2) {
+        throw new Error("Invalid document URL format");
+      }
+      const key = urlParts[1];
+
+      // Get the S3 URL
+      const url = await getVideoUrl(key);
+
+      window.open(url, "_blank");
+      toast({
+        title: "Downloading file",
+        description: `Started downloading ${doc.name}`,
+      });
+      addActivityLog({
+        action: "Downloaded",
+        documentName: doc.name,
+        user: "Current User",
+        timestamp: formatDate(new Date().toISOString()),
+      });
+    } catch (error: any) {
+      console.error("Error downloading document:", error);
+      toast({
+        title: "Error",
+        description: `Failed to download document: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleView = (doc: Document) => {
-    window.open(doc.url, "_blank");
-    toast({
-      title: "Opening document",
-      description: `Opening ${doc.name} for viewing`,
-    });
-    addActivityLog({
-      action: "Viewed",
-      documentName: doc.name,
-      user: "Current User",
-      timestamp: formatDate(new Date().toISOString()),
-    });
+  const handleView = async (doc: Document) => {
+    if (!doc.url) {
+      toast({
+        title: "Error",
+        description: "Document URL not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Extract the key from the S3 URL
+      const urlParts = doc.url.split('.amazonaws.com/');
+      if (urlParts.length !== 2) {
+        throw new Error("Invalid document URL format");
+      }
+      const key = urlParts[1];
+
+      // Get the S3 URL
+      const url = await getVideoUrl(key);
+
+      window.open(url, "_blank");
+      toast({
+        title: "Opening document",
+        description: `Opening ${doc.name} for viewing`,
+      });
+      addActivityLog({
+        action: "Viewed",
+        documentName: doc.name,
+        user: "Current User",
+        timestamp: formatDate(new Date().toISOString()),
+      });
+    } catch (error: any) {
+      console.error("Error viewing document:", error);
+      toast({
+        title: "Error",
+        description: `Failed to view document: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = async (docId: string) => {

@@ -25,6 +25,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { uploadInvestorPitchDocument, deleteFounderPitchDocument } from "@/lib/actions/document";
+import { getVideoUrl } from "@/lib/s3";
 
 // Interface for the Document, aligned with API response
 interface Document {
@@ -220,17 +221,17 @@ export default function DocumentsSection({
       }
 
       const { sent, received } = await response.json();
-      
+
       // Flatten and process all documents
       const allDocs = [...(sent || []).flat(), ...(received || [])];
-      
+
       const processedDocs = await Promise.all(allDocs.map(async (doc: APIDocument) => {
         try {
           if (!doc) return null;
           const userInfo = await fetchUserInfo(doc.uploadedBy);
-          
+
           const isInvestorDoc = Boolean(doc.daftarId || userInfo.role === "investor");
-          
+
           const processedDoc: Document = {
             id: doc.id,
             name: doc.docName,
@@ -249,7 +250,7 @@ export default function DocumentsSection({
             size: typeof doc.size === 'number' ? doc.size : 0,
             isHidden: Boolean(doc.isPrivate)
           };
-          
+
           return processedDoc;
         } catch (error) {
           console.error("Error processing document:", error);
@@ -351,7 +352,7 @@ export default function DocumentsSection({
     input.click();
   };
 
-  const handleDownload = (doc: Document) => {
+  const handleDownload = async (doc: Document) => {
     if (!doc.docUrl) {
       toast({
         title: "Error",
@@ -360,14 +361,34 @@ export default function DocumentsSection({
       });
       return;
     }
-    toast({
-      title: "Downloading file",
-      description: `Started downloading ${doc.name}`,
-    });
-    window.open(doc.docUrl, "_blank");
+
+    try {
+      // Extract the key from the S3 URL
+      const urlParts = doc.docUrl.split('.amazonaws.com/');
+      if (urlParts.length !== 2) {
+        throw new Error("Invalid document URL format");
+      }
+      const key = urlParts[1];
+
+      // Get the S3 URL
+      const url = await getVideoUrl(key);
+
+      window.open(url, "_blank");
+      toast({
+        title: "Downloading file",
+        description: `Started downloading ${doc.name}`,
+      });
+    } catch (error: any) {
+      console.error("Error downloading document:", error);
+      toast({
+        title: "Error",
+        description: `Failed to download document: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleView = (doc: Document) => {
+  const handleView = async (doc: Document) => {
     if (!doc.docUrl) {
       toast({
         title: "Error",
@@ -376,11 +397,31 @@ export default function DocumentsSection({
       });
       return;
     }
-    toast({
-      title: "Opening document",
-      description: `Opening ${doc.name} for viewing`,
-    });
-    window.open(doc.docUrl, "_blank");
+
+    try {
+      // Extract the key from the S3 URL
+      const urlParts = doc.docUrl.split('.amazonaws.com/');
+      if (urlParts.length !== 2) {
+        throw new Error("Invalid document URL format");
+      }
+      const key = urlParts[1];
+
+      // Get the S3 URL
+      const url = await getVideoUrl(key);
+
+      window.open(url, "_blank");
+      toast({
+        title: "Opening document",
+        description: `Opening ${doc.name} for viewing`,
+      });
+    } catch (error: any) {
+      console.error("Error viewing document:", error);
+      toast({
+        title: "Error",
+        description: `Failed to view document: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = async (docId: string) => {
@@ -447,7 +488,7 @@ export default function DocumentsSection({
 
         // Remove from old list
         const updatedOldList = prev[oldType].filter(d => d.id !== docId);
-        
+
         // Add to new list with updated properties
         const updatedDoc = {
           ...doc,
@@ -582,15 +623,15 @@ function formatFileSize(sizeInBytes: number): string {
 
   // Convert bytes to bits (1 byte = 8 bits) and then to Megabits
   const Mb = (sizeInBytes * 8) / (1024 * 1024);
-  
+
   // If less than 0.01 Mb, show as "< 0.01 Mb"
   if (Mb < 0.01) {
     return "< 0.01 Mb";
   }
-  
+
   // Format to 2 decimal places, but remove trailing zeros
   const formattedSize = Mb.toFixed(2).replace(/\.?0+$/, '');
-  
+
   return `${formattedSize} Mb`;
 }
 
@@ -652,7 +693,7 @@ function DocumentsList({
                 >
                   <Download className="h-4 w-4" />
                 </Button>
-      
+
                 {canDelete && (
                   <Button
                     variant="ghost"
