@@ -154,7 +154,6 @@ For detailed API documentation, please refer to [API_DOCUMENTATION.docx.md](./AP
 
 #### 2. Infrastructure Risks
 - **Database Risks**
-  - No connection pooling configuration visible
   - Missing database backup strategy
   - No visible database migration strategy
   - Potential connection leaks in error scenarios
