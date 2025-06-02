@@ -255,7 +255,7 @@ export default function DocumentsPage() {
       }
 
       // Get the S3 URL
-      const url = await getVideoUrl(key);
+      const url = key;
 
       toast({
         title: "Downloading file",
