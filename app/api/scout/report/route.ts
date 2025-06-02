@@ -359,10 +359,71 @@ export async function POST(req: Request) {
             </table>
           </div>
 
-
           <div class="page-break"></div>
 
           <!-- Page 3 Content -->
+          <div class="section">
+            <h1 style="color: #11574f;">Scout Target Audience</h1>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Community</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].scoutCommunity || 'N/A'}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Location</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].targetAudLocation || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Age</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].targetAudAgeStart || 'N/A'} - ${scout[0].targetAudAgeEnd || 'N/A'}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Gender</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].targetedGender || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Stage</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].scoutStage || 'N/A'}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Sector</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].scoutSector || 'N/A'}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <h1 style="color: #11574f;">Startup Overview</h1>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+              <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups pitched</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${pitches.length}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups selected</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${offersData.filter(o => o.offerStatus === 'accepted').length}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups not selected</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${offersData.filter(o => o.offerStatus === 'rejected' || o.offerStatus === 'declined').length}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups withdrawn in the process</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${offersData.filter(o => o.offerStatus === 'withdrawn').length}</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups who didn't accept the offer</strong></td>
+                <td style="padding: 12px; border: 1px solid #ddd;">${offersData.filter(o => o.offerStatus === 'pending').length}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="section">
+            <h1 style="color: #11574f;">Startup Insights</h1>
+            <div style="margin: 20px 0;">
+              <h3>NPS (Net Promoter Score)</h3>
+              <p>Investors typically rate startups on a scale from 1 to 10 after their experience, where 1 is the lowest score and 10 is the highest.</p>
+              <p><strong>Avg:</strong> ${(() => {
+                const ratings = investorData.map(d => d.believeRating).filter(r => r !== null);
+                return ratings.length ? (ratings.reduce((a, b) => a! + (b as number), 0) / ratings.length).toFixed(1) : 'N/A';
+              })()}</p>
+            </div>
+          </div>
+
           <div class="section">
             <h1 style="color: #11574f;">Startups Pitched</h1>
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">

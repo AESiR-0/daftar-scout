@@ -280,7 +280,7 @@ export function FoundersPitchSection({
                   </p>
                 </div>
               )}
-              <div className="mt-2 ml-20">
+              {/* <div className="mt-2 ml-20">
                 <div className="flex items-center gap-2">
                   <Label htmlFor="language" className="text-sm text-muted-foreground">Language:</Label>
                   <select
@@ -297,7 +297,7 @@ export function FoundersPitchSection({
                     ))}
                   </select>
                 </div>
-              </div>
+              </div> */}
             </div>
             <div className="w-1/2">
               <ScrollArea className="h-[calc(100vh-24rem)]">
