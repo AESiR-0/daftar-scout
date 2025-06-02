@@ -148,6 +148,16 @@ export default function DocumentsPage() {
   }, [scoutId, pitchId, toast]);
 
   const handleUpload = async () => {
+    // Disable uploads for specific pitch ID
+    if (pitchId === "HJqVubjnQ3RVGzlyDUCY4") {
+      toast({
+        title: "Upload Disabled",
+        description: "Uploads are not allowed for this pitch",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".pdf,.doc,.docx,.xlsx";
@@ -415,12 +425,18 @@ export default function DocumentsPage() {
                   Sent
                 </TabsTrigger>
               </TabsList>
-              <Button variant="outline" onClick={handleUpload} disabled={isUploading}>
+              <Button 
+                variant="outline" 
+                onClick={handleUpload} 
+                disabled={isUploading || pitchId === "HJqVubjnQ3RVGzlyDUCY4"}
+              >
                 {isUploading ? (
                   <>
                     <span className="loading loading-spinner loading-sm mr-2"></span>
                     Uploading...
                   </>
+                ) : pitchId === "HJqVubjnQ3RVGzlyDUCY4" ? (
+                  "Upload Disabled"
                 ) : (
                   <>
                     <Upload className="h-4 w-4 mr-2" />
