@@ -22,11 +22,11 @@ A platform connecting founders and investors, facilitating pitch management, dea
 
 - **Frontend**: Next.js, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes
-- **Database**: PostgreSQL with Drizzle ORM
+- **Database**: PostgreSQL with Drizzle ORM 
 - **Authentication**: NextAuth.js
 - **Calendar Integration**: Google Calendar API
 - **File Storage**: AWS S3
-- **Deployment**: AWS Elastic Beanstalk
+- **Deployment**: AWS EC2
 
 ## 📋 Prerequisites
 
@@ -154,7 +154,6 @@ For detailed API documentation, please refer to [API_DOCUMENTATION.docx.md](./AP
 
 #### 2. Infrastructure Risks
 - **Database Risks**
-  - No connection pooling configuration visible
   - Missing database backup strategy
   - No visible database migration strategy
   - Potential connection leaks in error scenarios
