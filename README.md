@@ -123,7 +123,7 @@ File uploads are handled through AWS S3 integration.
 
 ## 📚 API Documentation
 
-For detailed API documentation, please refer to [API_DOCUMENTATION.docx.md](./API_DOCUMENTATION.docx.md)
+For detailed API documentation, please refer to [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
 
 ## 🤝 Contributing
 

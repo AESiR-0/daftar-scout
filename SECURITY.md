@@ -17,7 +17,7 @@
    - Session cleanup on logout
 
 3. **Role-Based Access Control (RBAC)**
-   - User roles: founder, investor, temp
+   - User roles: founder, investor, temp(for a new user till they have not selected the roles)
    - Role-based route protection
    - Role validation in API endpoints
    - Implementation in `app/founder/(auth)/layout.tsx` and `app/investor/(auth)/layout.tsx`
@@ -41,8 +41,6 @@
 ### Data in Transit
 
 1. **TLS/SSL Implementation**
-   - TLS 1.2 or higher for all communications
-   - Secure WebSocket connections
    - HTTPS enforcement for all routes
    - AWS infrastructure security
 
@@ -55,9 +53,7 @@
 ### Data at Rest
 
 1. **Database Encryption**
-   - AWS RDS encryption for PostgreSQL
-   - AES-256 encryption for sensitive data
-   - Encrypted backups
+   - Local instance at AWS EC2 for PostgreSQL
    - Secure connection strings
 
 2. **File Storage Security**
@@ -89,7 +85,6 @@
    - Secure storage of Google OAuth credentials
    - AWS access keys management
    - SMTP credentials handling
-   - Implementation in `app/api/notifications/email/route.ts`
 
 2. **Token Generation and Validation**
    - Secure token generation for actions
@@ -142,17 +137,3 @@
    - AWS security compliance
    - SMTP service security
    - Implementation in privacy policy
-
-### Security Audits
-
-1. **Regular Security Reviews**
-   - Code security audits
-   - Dependency updates
-   - Security patch management
-   - Vulnerability scanning
-
-2. **Incident Response**
-   - Security incident handling
-   - Breach notification procedures
-   - Recovery procedures
-   - Documentation requirements 
