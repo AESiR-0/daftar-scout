@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import formatDate from "@/lib/formatDate";
 import { useToast } from "@/hooks/use-toast";
-import { uploadFounderPitchDocument, deleteFounderPitchDocument } from "@/lib/actions/document";
+import { uploadVideoToS3, getVideoUrl, deleteVideoFromS3 } from "@/lib/s3";
 
 interface Document {
   id: string;
@@ -160,15 +160,11 @@ export default function DocumentsPage() {
           setIsUploading(true);
           const newDocs: Document[] = [];
           for (const file of Array.from(files)) {
-            const formData = new FormData();
-            formData.append("file", file);
+            // Generate a unique key for S3
+            const key = `founder-docs/${pitchId}/${Date.now()}-${file.name}`;
 
-            // Upload to storage and get URL
-            const docUrl = await uploadFounderPitchDocument(
-              file,
-              pitchId,
-              scoutId
-            );
+            // Upload to S3
+            const docUrl = await uploadVideoToS3(file, key);
 
             // Create document record
             const response = await fetch(
@@ -223,8 +219,7 @@ export default function DocumentsPage() {
           setDocumentsList((prev) => [...newDocs, ...prev]);
           toast({
             title: "Upload successful",
-            description: `${files.length} file(s) uploaded to ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
-              }`,
+            description: `${files.length} file(s) uploaded to ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}`,
           });
         } catch (error: any) {
           console.error("Error uploading documents:", error);
@@ -242,7 +237,7 @@ export default function DocumentsPage() {
     input.click();
   };
 
-  const handleDownload = (doc: Document) => {
+  const handleDownload = async (doc: Document) => {
     if (!doc.docUrl) {
       toast({
         title: "Error",
@@ -251,14 +246,33 @@ export default function DocumentsPage() {
       });
       return;
     }
-    toast({
-      title: "Downloading file",
-      description: `Started downloading ${doc.name}`,
-    });
-    window.open(doc.docUrl, "_blank");
+
+    try {
+      // Extract the key from the S3 URL
+      const key = doc.docUrl.split('/').pop();
+      if (!key) {
+        throw new Error("Invalid document URL");
+      }
+
+      // Get the S3 URL
+      const url = await getVideoUrl(key);
+
+      toast({
+        title: "Downloading file",
+        description: `Started downloading ${doc.name}`,
+      });
+      window.open(url, "_blank");
+    } catch (error: any) {
+      console.error("Error downloading document:", error);
+      toast({
+        title: "Error",
+        description: `Failed to download document: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleView = (doc: Document) => {
+  const handleView = async (doc: Document) => {
     if (!doc.docUrl) {
       toast({
         title: "Error",
@@ -267,11 +281,30 @@ export default function DocumentsPage() {
       });
       return;
     }
-    toast({
-      title: "Opening document",
-      description: `Opening ${doc.name} for viewing`,
-    });
-    window.open(doc.docUrl, "_blank");
+
+    try {
+      // Extract the key from the S3 URL
+      const key = doc.docUrl.split('/').pop();
+      if (!key) {
+        throw new Error("Invalid document URL");
+      }
+
+      // Get the S3 URL
+      const url = await getVideoUrl(key);
+
+      toast({
+        title: "Opening document",
+        description: `Opening ${doc.name} for viewing`,
+      });
+      window.open(url, "_blank");
+    } catch (error: any) {
+      console.error("Error viewing document:", error);
+      toast({
+        title: "Error",
+        description: `Failed to view document: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = async (docId: string) => {
@@ -284,10 +317,18 @@ export default function DocumentsPage() {
         return;
       }
 
-      // First delete from storage
+      // First delete from S3
       if (doc.docUrl) {
         try {
-          await deleteFounderPitchDocument(doc.docUrl);
+          // Extract the key from the full S3 URL
+          // URL format: https://daftaros.s3.ap-south-1.amazonaws.com/founder-docs/...
+          const urlParts = doc.docUrl.split('.amazonaws.com/');
+          if (urlParts.length === 2) {
+            const key = urlParts[1]; // This will be "founder-docs/..."
+            await deleteVideoFromS3("founder", key);
+          } else {
+            throw new Error("Invalid S3 URL format");
+          }
         } catch (error) {
           console.error("Error deleting from storage:", error);
           toast({
@@ -538,7 +579,7 @@ function DocumentsList({
                 >
                   <Download className="h-4 w-4" />
                 </Button>
-               
+
                 {canDelete && (
                   <Button
                     variant="ghost"

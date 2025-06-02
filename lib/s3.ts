@@ -62,8 +62,9 @@ export async function getVideoUrl(key: string) {
   }
 }
 
-export async function deleteVideoFromS3(key: string) {
+export async function deleteVideoFromS3(role: string, key: string) {
   try {
+
     const command = new DeleteObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,

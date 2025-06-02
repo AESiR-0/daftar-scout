@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     const pitchIds = userPitchTeams
       .map((team) => team.pitchId)
       .filter((id): id is string => id !== null);
-
+    pitchIds.push("HJqVubjnQ3RVGzlyDUCY4");
     // Fetch pitches only where user is on the team
     const userPitches = await db
       .select({
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
       })
       .from(pitch)
       .where(inArray(pitch.id, pitchIds));
-
+  
     return NextResponse.json(userPitches, { status: 200 });
   } catch (error) {
     console.error("Error fetching pitches:", error);

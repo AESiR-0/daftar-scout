@@ -34,13 +34,13 @@ export async function uploadFounderPitchDocument(
 export async function deleteFounderPitchDocument(docUrl: string) {
   try {
     // Extract file path from URL
-    const filePathMatch = docUrl.match(/documents\/(.*)/);
-    if (!filePathMatch) {
+    const urlParts = docUrl.split('.amazonaws.com/');
+    if (urlParts.length !== 2) {
       throw new Error("Invalid document URL format");
     }
 
-    const filePath = filePathMatch[1];
-    await deleteVideoFromS3(filePath);
+    const filePath = urlParts[1];
+    await deleteVideoFromS3("founder", filePath);
     return true;
   } catch (error) {
     console.error("Error in deleteFounderPitchDocument:", error);
