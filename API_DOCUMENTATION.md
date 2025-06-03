@@ -63,6 +63,13 @@
   ```
 - **Status Codes**: 200, 401, 404
 
+### Get All Users
+- **Endpoint**: `/api/endpoints/users`
+- **Method**: GET
+- **Description**: Get list of all users
+- **Response**: Array of user objects
+- **Status Codes**: 200, 401, 500
+
 ### Update User Profile
 - **Endpoint**: `/api/endpoints/users`
 - **Method**: PATCH
@@ -106,6 +113,41 @@
 - **Status Codes**: 200, 401, 404, 500
 
 ## Founder Features
+
+### Get Pitch Details
+- **Endpoint**: `/api/endpoints/pitch`
+- **Method**: GET
+- **Description**: Get pitch information by ID
+- **Response**: Pitch details
+- **Status Codes**: 200, 404, 500
+
+### Pitch Management
+- **Endpoint**: `/api/endpoints/pitch`
+- **Method**: GET/POST/PUT
+- **Description**: Manage pitch information
+- **Response**: Pitch details
+- **Status Codes**: 200, 201, 400, 401, 404, 500
+
+### Pitch Documents
+- **Endpoint**: `/api/endpoints/pitch/documents`
+- **Method**: GET/POST
+- **Description**: Manage pitch-related documents
+- **Response**: Document information
+- **Status Codes**: 200, 201, 400, 401, 404, 500
+
+### Founder Pitch
+- **Endpoint**: `/api/endpoints/pitch/founder`
+- **Method**: GET/POST
+- **Description**: Manage founder-specific pitch information
+- **Response**: Founder pitch details
+- **Status Codes**: 200, 201, 400, 401, 404, 500
+
+### Investor Pitch
+- **Endpoint**: `/api/endpoints/pitch/investor`
+- **Method**: GET/POST
+- **Description**: Manage investor-specific pitch information
+- **Response**: Investor pitch details
+- **Status Codes**: 200, 201, 400, 401, 404, 500
 
 ### Get Pitches List
 - **Endpoint**: `/api/endpoints/pitch`
@@ -187,8 +229,15 @@
 
 ## Common Features
 
+### Focus Sectors
+- **Endpoint**: `/api/endpoints/focus-sectors`
+- **Method**: GET
+- **Description**: Get list of focus sectors
+- **Response**: Array of sector objects
+- **Status Codes**: 200, 401, 500
+
 ### Calendar Management
-- **Endpoint**: `/api/endpoints/schedule`
+- **Endpoint**: `/api/endpoints/calendar`
 - **Method**: GET
 - **Description**: Get scheduled meetings
 - **Response**:
@@ -249,6 +298,97 @@
   ```
 - **Response**: Created report information
 - **Status Codes**: 201, 400, 401, 500
+
+### Notifications
+- **Endpoint**: `/api/endpoints/notifications`
+- **Method**: GET
+- **Description**: Get user notifications
+- **Response**: Array of notification objects
+- **Status Codes**: 200, 401, 500
+
+### Status
+- **Endpoint**: `/api/endpoints/status`
+- **Method**: GET
+- **Description**: Get system status information
+- **Response**: Status information
+- **Status Codes**: 200, 401, 500
+
+### Store Location
+- **Endpoint**: `/api/endpoints/storeLocation`
+- **Method**: POST
+- **Description**: Store user location information
+- **Response**: Location storage confirmation
+- **Status Codes**: 200, 400, 401, 500
+
+### Statistics
+- **Endpoint**: `/api/endpoints/stats`
+- **Method**: GET
+- **Description**: Get system statistics
+- **Response**: Statistical data
+- **Status Codes**: 200, 401, 500
+
+### Scout Details
+- **Endpoint**: `/api/endpoints/scoutDetails`
+- **Method**: GET
+- **Description**: Get detailed scout information
+- **Response**: Scout details
+- **Status Codes**: 200, 401, 404, 500
+
+### Mapping
+- **Endpoint**: `/api/endpoints/mapping`
+- **Method**: GET
+- **Description**: Get mapping information
+- **Response**: Mapping data
+- **Status Codes**: 200, 401, 500
+
+### Languages
+- **Endpoint**: `/api/endpoints/getAllLanguages`
+- **Method**: GET
+- **Description**: Get list of supported languages
+- **Response**: Array of language objects
+- **Status Codes**: 200, 401, 500
+
+### Journal
+- **Endpoint**: `/api/endpoints/journal`
+- **Method**: GET/POST
+- **Description**: Manage journal entries
+- **Response**: Journal entries
+- **Status Codes**: 200, 201, 400, 401, 500
+
+### Listing Time
+- **Endpoint**: `/api/endpoints/listing-time`
+- **Method**: GET
+- **Description**: Get listing time information
+- **Response**: Listing time data
+- **Status Codes**: 200, 401, 500
+
+### Compress
+- **Endpoint**: `/api/endpoints/compress`
+- **Method**: POST
+- **Description**: Compress data/files
+- **Response**: Compressed data
+- **Status Codes**: 200, 400, 401, 500
+
+### Daftar
+- **Endpoint**: `/api/endpoints/daftar`
+- **Method**: POST
+- **Description**: Register new entry
+- **Response**: Registration confirmation
+- **Status Codes**: 201, 400, 401, 500
+
+### Structure
+- **Endpoint**: `/api/endpoints/structrure`
+- **Method**: GET
+- **Description**: Get system structure information
+- **Response**: Structure data
+- **Status Codes**: 200, 401, 500
+
+### Offers
+- **Endpoint**: `/api/endpoints/offers`
+- **Method**: GET
+- **Description**: Get offer information
+- **Response**: Offer details
+- **Status Codes**: 200, 401, 500
 
 ## Analytics
 
