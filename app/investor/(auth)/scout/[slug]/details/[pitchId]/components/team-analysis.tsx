@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ interface Profile {
   id: string;
   name: string;
   role: string;
-  avatar: string;
+  image: string;
   daftarName: string;
 }
 
@@ -30,7 +30,7 @@ interface TeamAnalysis {
     id: string;
     name: string;
     role: string;
-    avatar: string;
+    image: string;
     daftarName: string;
   };
   belief: "yes" | "no";
@@ -57,26 +57,55 @@ export function TeamAnalysisSection({
   const scoutId = pathname.split("/")[3];
   const pitchId = pathname.split("/")[5];
   const { toast } = useToast();
+  const hasCheckedMembership = useRef(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Find if current user has submitted an analysis
+  const userAnalysis = initialTeamAnalysis.find(
+    (analysis) => analysis.analyst.id === currentUserId
+  );
 
   const [formState, setFormState] = useState<FormState>({
-    nps: null,
-    belief: undefined,
-    note: "",
+    nps: userAnalysis?.nps ?? null,
+    belief: userAnalysis?.belief,
+    note: userAnalysis?.note ?? "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(!!userAnalysis);
   const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>(initialTeamAnalysis);
   const [loading, setLoading] = useState(false);
   const [isMember, setIsMember] = useState<boolean>(false);
 
-  // Check if user is a member of the scout
+  // Get current user ID
   useEffect(() => {
-    const checkMembership = async () => {
+    const getCurrentUser = async () => {
       try {
-        const response = await fetch(`/api/endpoints/scouts/members?scoutId=${scoutId}`);
-        if (!response.ok) throw new Error('Failed to fetch scout members');
-        const data = await response.json();
-        const isUserMember = data.some((member: any) => member.userId === currentProfile.id);
+        const response = await fetch('/api/endpoints/users/me');
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentUserId(data.id);
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+
+    getCurrentUser();
+  }, []);
+
+  // Check if user is a member of the scout and submission status
+  useEffect(() => {
+    const checkMembershipAndSubmission = async () => {
+      if (hasCheckedMembership.current || !currentUserId) return;
+      hasCheckedMembership.current = true;
+
+      try {
+        setLoading(true);
+        // Check membership
+        const membersResponse = await fetch(`/api/endpoints/scouts/members?scoutId=${scoutId}`);
+        if (!membersResponse.ok) throw new Error('Failed to fetch scout members');
+        const membersData = await membersResponse.json();
+        const isUserMember = membersData.some((member: any) => member.userId === currentUserId);
         setIsMember(isUserMember);
         
         // If not a member, set hasSubmitted to true and pre-fill with first team member's data
@@ -88,39 +117,43 @@ export function TeamAnalysisSection({
             belief: firstAnalysis.belief,
             note: firstAnalysis.note
           });
+          toast({
+            title: "Demo Mode",
+            description: "This is a demo, cannot be edited",
+            variant: "default",
+          });
+        } else {
+          // Check submission status only if user is a member
+          const analysisResponse = await fetch(
+            `/api/endpoints/pitch/investor/analysis?scoutId=${scoutId}&pitchId=${pitchId}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (analysisResponse.ok) {
+            const data = await analysisResponse.json();
+            if (data.analysis && data.analysis.length > 0) {
+              setHasSubmitted(true);
+              // Find the current user's analysis using analyst.id
+              const userAnalysis = data.analysis.find((analysis: any) => 
+                analysis.analyst.id === currentUserId
+              );
+              if (userAnalysis) {
+                setFormState({
+                  nps: userAnalysis.nps,
+                  belief: userAnalysis.belief,
+                  note: userAnalysis.note
+                });
+              }
+            }
+          }
         }
       } catch (error) {
-        console.error("Error checking membership:", error);
-        setIsMember(false);
-      }
-    };
-
-    checkMembership();
-  }, [scoutId, currentProfile.id, initialTeamAnalysis]);
-
-  // Check if the user has already submitted an analysis
-  useEffect(() => {
-    const checkSubmissionStatus = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/endpoints/pitch/investor/analysis?scoutId=${scoutId}&pitchId=${pitchId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.analysis && data.analysis.length > 0) {
-            setHasSubmitted(true);
-          }
-        }
-      } catch (error) {
-        console.error("Error checking submission status:", error);
+        console.error("Error checking membership and submission:", error);
         toast({
           title: "Error",
           description: "Failed to load analysis status",
@@ -131,8 +164,8 @@ export function TeamAnalysisSection({
       }
     };
 
-    checkSubmissionStatus();
-  }, [scoutId, pitchId, toast]);
+    checkMembershipAndSubmission();
+  }, [currentUserId]);
 
   const handleSubmit = async () => {
     if (!formState.belief || !formState.note.trim() || formState.nps === null || !isMember) return;
@@ -244,11 +277,6 @@ export function TeamAnalysisSection({
         <div className="w-1/2">
           <Card className="border-none bg-[#0e0e0e]">
             <CardContent className="space-y-6">
-              {!isMember && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10 rounded-xl">
-                  <p className="text-sm text-muted-foreground">You need to be a member of this scout to add analysis</p>
-                </div>
-              )}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>How strongly do you believe in the startup?</Label>
@@ -393,8 +421,7 @@ export function TeamAnalysisSection({
                             <div className="flex items-center justify-between gap-2 mb-1">
                               <div className="flex items-center gap-2">
                                 <img
-                                  src={entry.analyst.avatar}
-                                  alt={entry.analyst.name.charAt(0)}
+                                  src={entry.analyst.image}
                                   className="w-8 h-8 rounded-xl"
                                 />
                                 <div>
@@ -422,7 +449,7 @@ export function TeamAnalysisSection({
                             <div className="text-sm text-justify whitespace-pre-wrap">
                               {entry.note}
                             </div>
-                            
+
                           </div>
                         ))}
                       </div>

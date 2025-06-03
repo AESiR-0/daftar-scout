@@ -53,6 +53,10 @@ export default function DocumentsPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("received");
 
+  const privateCount = documentsList.filter((doc) => doc.type === "private").length;
+  const receivedCount = documentsList.filter((doc) => doc.type === "received").length;
+  const sentCount = documentsList.filter((doc) => doc.type === "sent").length;
+
   // Function to fetch user info
   const fetchUserInfo = async (userId: string) => {
     try {
@@ -416,13 +420,13 @@ export default function DocumentsPage() {
             <div className="flex items-center justify-between mb-6">
               <TabsList>
                 <TabsTrigger value="private" className="flex items-center gap-2">
-                  Private
+                  Private <span className="ml-1 text-xs text-muted-foreground">{privateCount}</span>
                 </TabsTrigger>
                 <TabsTrigger value="received" className="flex items-center gap-2">
-                  Received
+                  Received <span className="ml-1 text-xs text-muted-foreground">{receivedCount}</span>
                 </TabsTrigger>
                 <TabsTrigger value="sent" className="flex items-center gap-2">
-                  Sent
+                  Sent <span className="ml-1 text-xs text-muted-foreground">{sentCount}</span>
                 </TabsTrigger>
               </TabsList>
               <Button 

@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     // Fetch the note
     const result = await db
       .select({
+        id: investorPitch.investorId,
         note: investorPitch.note,
       })
       .from(investorPitch)
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({ note: result[0].note || "" }, { status: 200 });
+    return NextResponse.json({ note: result[0].note || "", id: result[0].id }, { status: 200 });
   } catch (error) {
     console.error("Error fetching investor note:", error);
     return NextResponse.json(

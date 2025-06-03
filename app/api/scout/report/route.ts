@@ -149,7 +149,7 @@ export async function POST(req: Request) {
       .where(eq(userLanguages.userId, pitchTeams[0]?.userId || ''));
 
     // Fetch all users for gender ratio calculation
-    const  usersAll = await db
+    const usersAll = await db
       .select({
         id: users.id,
         name: users.name,
@@ -210,12 +210,17 @@ export async function POST(req: Request) {
         trans: (trans / total) * 100,
       };
     };
+    const scoutStartDate = new Date(scout[0].programLaunchDate || "");
+    const scoutEndDate = new Date(scout[0].lastDayToPitch || "");
+    const totalDays = Math.ceil((scoutEndDate.getTime() - scoutStartDate.getTime()) / (1000 * 60 * 60 * 24));
+    const totalHours = totalDays * 8; // Assuming 8 hours per day
+    const totalMeetings = pitches.length;
 
     // Generate HTML content
     const currentDate = new Date();
     const monthYear = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
     const formattedDate = currentDate.toLocaleString('default', { month: 'long', day: 'numeric', year: 'numeric' });
-    
+
     const htmlContent = `
       <html>
         <head>
@@ -290,11 +295,11 @@ export async function POST(req: Request) {
             }
             .cover-footer {
               position: absolute;
-              bottom: 40px;
               width: 100%;
               text-align: center;
             }
             .cover-footer p {
+              bottom: 0px;
               margin: 5px 0;
             }
             .page-break {
@@ -322,11 +327,9 @@ export async function POST(req: Request) {
               <p>Daftar OS Technology</p>
               <p>www.daftaros.com</p>
               </div>
-            </div>
-           
+            </div>           
           </div>
 
-          <div class="page-break"></div>
 
           <!-- Page 2 Content -->
           <div class="section">
@@ -368,48 +371,50 @@ export async function POST(req: Request) {
               <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Community</strong></td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].scoutCommunity || 'N/A'}</td>
+                </tr>
+                <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Location</strong></td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].targetAudLocation || 'N/A'}</td>
-              </tr>
-              <tr>
+                </tr>
+                <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Age</strong></td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].targetAudAgeStart || 'N/A'} - ${scout[0].targetAudAgeEnd || 'N/A'}</td>
+                </tr>
+                <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Gender</strong></td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].targetedGender || 'N/A'}</td>
-              </tr>
-              <tr>
+                </tr>
+                <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Stage</strong></td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].scoutStage || 'N/A'}</td>
+                </tr>
+                <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Sector</strong></td>
                 <td style="padding: 12px; border: 1px solid #ddd;">${scout[0].scoutSector || 'N/A'}</td>
               </tr>
             </table>
           </div>
 
+                 <!-- Page 3 Content -->
+          <div class="section">
+            <h1 style="color: #11574f;">Scout Target Audience</h1>
+                
+                <div style="margin: 20px 0;">
+                  <p><strong>Total Meetings with Startups:</strong> ${totalMeetings}</p>
+                  <p><strong>Total Scouting Time:</strong> ${totalHours} hours</p>
+                  <p><strong>Scouting Period:</strong> ${scoutStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} to ${scoutEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                </div>
+                  
+            </div>
           <div class="section">
             <h1 style="color: #11574f;">Startup Overview</h1>
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-              <tr>
-                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups pitched</strong></td>
-                <td style="padding: 12px; border: 1px solid #ddd;">${pitches.length}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups selected</strong></td>
-                <td style="padding: 12px; border: 1px solid #ddd;">${offersData.filter(o => o.offerStatus === 'accepted').length}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups not selected</strong></td>
-                <td style="padding: 12px; border: 1px solid #ddd;">${offersData.filter(o => o.offerStatus === 'rejected' || o.offerStatus === 'declined').length}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups withdrawn in the process</strong></td>
-                <td style="padding: 12px; border: 1px solid #ddd;">${offersData.filter(o => o.offerStatus === 'withdrawn').length}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Startups who didn't accept the offer</strong></td>
-                <td style="padding: 12px; border: 1px solid #ddd;">${offersData.filter(o => o.offerStatus === 'pending').length}</td>
-              </tr>
-            </table>
+            <div style="margin: 20px 0;">
+              <p><strong>Startups pitched:</strong> ${pitches.length}</p>
+              <p><strong>Startups selected:</strong> ${offersData.filter(o => o.offerStatus === 'accepted').length}</p>
+              <p><strong>Startups not selected:</strong> ${offersData.filter(o => o.offerStatus === 'rejected' || o.offerStatus === 'declined').length}</p>
+              <p><strong>Startups withdrawn in the process:</strong> ${offersData.filter(o => o.offerStatus === 'withdrawn').length}</p>
+              <p><strong>Startups who didn't accept the offer:</strong> ${offersData.filter(o => o.offerStatus === 'pending').length}</p>
+            </div>
           </div>
 
           <div class="section">
@@ -417,10 +422,7 @@ export async function POST(req: Request) {
             <div style="margin: 20px 0;">
               <h3>NPS (Net Promoter Score)</h3>
               <p>Investors typically rate startups on a scale from 1 to 10 after their experience, where 1 is the lowest score and 10 is the highest.</p>
-              <p><strong>Avg:</strong> ${(() => {
-                const ratings = investorData.map(d => d.believeRating).filter(r => r !== null);
-                return ratings.length ? (ratings.reduce((a, b) => a! + (b as number), 0) / ratings.length).toFixed(1) : 'N/A';
-              })()}</p>
+              <p><strong>Avg:</strong> Average  </p>
             </div>
           </div>
 
@@ -623,22 +625,36 @@ export async function POST(req: Request) {
 
           <!-- Page 5 Content -->
           <div class="section">
-            <h1 style="color: #11574f;">Communication: Founder's Preferred Language to Speak with the Investors</h1>
+            <h1 style="color: #11574f;">Language Summary</h1>
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
               <thead>
                 <tr style="background-color: #f5f5f5;">
-                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Founder</th>
-                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Preferred Language(s)</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Language</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">#Founders</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Investor Knows This Language</th>
                 </tr>
               </thead>
               <tbody>
-                ${teamMembers.map(member => {
-        const langs = userLangs.filter(l => l.userId === member.id).map(l => l.languageName).join(', ') || 'N/A';
-        return `<tr>
-                    <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${member.name || 'N/A'}</td>
-                    <td style='padding: 12px; border-bottom: 1px solid #ddd;'>${langs}</td>
-                  </tr>`;
-      }).join('')}
+                ${(() => {
+        // Build language summary
+        const languageSummary: Record<string, { count: number }> = {};
+        teamMembers.forEach(member => {
+          const langs = userLangs.filter(l => l.userId === member.id).map(l => l.languageName);
+          langs.forEach(lang => {
+            if (!languageSummary[lang]) languageSummary[lang] = { count: 0 };
+            languageSummary[lang].count += 1;
+          });
+        });
+        // You should fetch or define investorLanguages here. For now, use an empty array as fallback.
+        const investorLanguages: string[] = [];
+        return Object.entries(languageSummary).map(([lang, data]) => {
+          return `<tr>
+                       <td style=\"padding: 12px; border-bottom: 1px solid #ddd;\">${lang}</td>
+                       <td style=\"padding: 12px; border-bottom: 1px solid #ddd;\">${data.count}</td>
+                       <td style=\"padding: 12px; border-bottom: 1px solid #ddd;\">${investorLanguages.includes(lang) ? "Yes" : "No"}</td>
+                     </tr>`;
+        }).join("");
+      })()}
               </tbody>
             </table>
           </div>

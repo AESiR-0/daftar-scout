@@ -76,7 +76,7 @@ interface TeamAnalysis {
     id: string;
     name: string;
     role: string;
-    avatar: string;
+    image: string;
     daftarName: string;
   };
   belief: "yes" | "no";
@@ -89,7 +89,7 @@ interface Profile {
   id: string;
   name: string;
   role: string;
-  avatar: string;
+  image: string;
   daftarName: string;
 }
 
@@ -252,7 +252,7 @@ export default function PitchDetailsPage() {
           id,
           name: userInfo.name,
           role: userInfo.role,
-          avatar: userInfo.avatar || "/avatars/default.jpg",
+          image: userInfo.image || "/avatars/default.jpg",
           daftarName: userInfo.daftarName,
         });
       } catch (error) {
@@ -354,12 +354,12 @@ export default function PitchDetailsPage() {
       setPitchDetails((prev) =>
         prev
           ? {
-              ...prev,
-              fields: {
-                ...prev.fields,
-                teamAnalysis: [newAnalysis, ...prev.fields.teamAnalysis],
-              },
-            }
+            ...prev,
+            fields: {
+              ...prev.fields,
+              teamAnalysis: [newAnalysis, ...prev.fields.teamAnalysis],
+            },
+          }
           : prev
       );
 
@@ -395,12 +395,12 @@ export default function PitchDetailsPage() {
       setPitchDetails((prev) =>
         prev
           ? {
-              ...prev,
-              fields: {
-                ...prev.fields,
-                documentation: [newDoc, ...prev.fields.documentation],
-              },
-            }
+            ...prev,
+            fields: {
+              ...prev.fields,
+              documentation: [newDoc, ...prev.fields.documentation],
+            },
+          }
           : prev
       );
 
@@ -431,14 +431,14 @@ export default function PitchDetailsPage() {
       setPitchDetails((prev) =>
         prev
           ? {
-              ...prev,
-              fields: {
-                ...prev.fields,
-                documentation: prev.fields.documentation.filter(
-                  (doc) => doc.id !== id
-                ),
-              },
-            }
+            ...prev,
+            fields: {
+              ...prev.fields,
+              documentation: prev.fields.documentation.filter(
+                (doc) => doc.id !== id
+              ),
+            },
+          }
           : prev
       );
 
@@ -737,7 +737,7 @@ export default function PitchDetailsPage() {
           />
         )}
         {activeSection === "investors-analysis" && currentProfile && (
-          <TeamAnalysisSection 
+          <TeamAnalysisSection
             currentProfile={currentProfile}
             teamAnalysis={pitchDetails?.fields.teamAnalysis.map(analysis => ({
               id: analysis.id,
@@ -745,7 +745,7 @@ export default function PitchDetailsPage() {
                 id: analysis.analyst.id,
                 name: analysis.analyst.name,
                 role: analysis.analyst.role,
-                avatar: analysis.analyst.avatar || "/avatars/default.jpg",
+                image: analysis.analyst.image || "/avatars/default.jpg",
                 daftarName: analysis.analyst.daftarName
               },
               belief: analysis.belief,

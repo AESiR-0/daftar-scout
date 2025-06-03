@@ -70,9 +70,10 @@ export async function GET(req: NextRequest) {
         shouldMeet: investorPitch.shouldMeet,
         lastActionTakenOn: investorPitch.lastActionTakenOn,
         analyst: {
-          id: users.id,
+          id: investorPitch.investorId,
           name: users.name,
           role: users.role,
+          image: users.image,
         },
         daftar: {
           id: daftar.id,
@@ -101,9 +102,10 @@ export async function GET(req: NextRequest) {
         investorPitch.believeRating,
         investorPitch.shouldMeet,
         investorPitch.lastActionTakenOn,
-        users.id,
+        investorPitch.investorId,
         users.name,
         users.role,
+        users.image,
         daftar.id,
         daftar.name
       );
@@ -112,8 +114,10 @@ export async function GET(req: NextRequest) {
     const analysis = result.map(entry => ({
       id: entry.id,
       analyst: {
+        id: entry.analyst.id,
         name: entry.analyst?.name || "N/A",
         role: entry.analyst?.role || "N/A",
+        image: entry.analyst?.image || null,
         daftarName: entry.daftar?.name || "N/A"
       },
       belief: entry.shouldMeet ? "yes" : "no",
