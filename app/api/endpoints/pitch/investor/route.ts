@@ -184,8 +184,8 @@ export async function GET(req: NextRequest) {
           member.countryCode && member.number
             ? `${member.countryCode}${member.number}`
             : "",
-        gender: member.gender || "Unknown",
-        location: member.location || "Unknown",
+        gender: member.gender,
+        location: member.location,
         imageUrl: member.image,
         designation: member.designation,
         language: member.userId ? languageMap[member.userId] || [] : [],
@@ -203,7 +203,7 @@ export async function GET(req: NextRequest) {
         })),
         foundersPitch: {
           status: pitchData[0].status || "Under Review",
-          location: pitchData[0].location || "Unknown",
+          location: pitchData[0].location,
           stage: pitchData[0].stage || "Seed",
           demoLink: pitchData[0].demoLink,
           ask: pitchData[0].ask,

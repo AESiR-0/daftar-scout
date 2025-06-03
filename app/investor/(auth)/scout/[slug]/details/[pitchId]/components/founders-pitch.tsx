@@ -339,9 +339,12 @@ export function FoundersPitchSection({
                 <p className="text-sm text-muted-foreground">Pitching From</p>
                 <span className="text-sm">{pitch.location}</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <p className="text-sm text-muted-foreground">Language : </p>
                 <span className="text-sm">Marathi</span>
+              </div>
+              <div className="flex gap-2">
+
                 <p className="text-sm text-muted-foreground">Demo Link</p>
                 {pitch.demoLink ? (
                   <Link
