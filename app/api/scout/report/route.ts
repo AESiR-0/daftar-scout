@@ -319,13 +319,11 @@ export async function POST(req: Request) {
               <div class="cover-details">
                 <p><strong>Scout name:</strong> ${scout[0].scoutName}</p>
                 <p><strong>Collaboration Daftars:</strong> ${daftarCollaborations.map(c => c.daftarName).join(', ')}</p>
-            <p><strong>Publish Date:</strong> ${formattedDate}</p>
+                <p><strong>Publish Date:</strong> ${formattedDate}</p>
                 <p><strong>Pages:</strong> <span id="total-pages">Calculating...</span></p>
-              </div>
-               <div class="cover-footer">
-              <p><strong>Published By</strong></p>
-              <p>Daftar OS Technology</p>
-              <p>www.daftaros.com</p>
+                <p><strong>Published By</strong></p>
+                <p>Daftar OS Technology</p>
+                <p>www.daftaros.com</p>
               </div>
             </div>           
           </div>
@@ -333,12 +331,12 @@ export async function POST(req: Request) {
 
           <!-- Page 2 Content -->
           <div class="section">
-            <h1 style="color: #11574f;">Scout Vision</h1>
+            <h3 style="color: #11574f;">Scout Vision</h3>
             <p>${scout[0].scoutDetails || 'N/A'}</p>
           </div>
 
           <div class="section">
-            <h1 style="color: #11574f;">Daftar's Collaboration</h1>
+            <h3 style="color: #11574f;">Daftar's Collaboration</h3>
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
               <thead>
                 <tr style="background-color: #f5f5f5;">
@@ -366,7 +364,7 @@ export async function POST(req: Request) {
 
           <!-- Page 3 Content -->
           <div class="section">
-            <h1 style="color: #11574f;">Scout Target Audience</h1>
+            <h3 style="color: #11574f;">Scout Target Audience</h3>
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
               <tr>
                 <td style="padding: 12px; border: 1px solid #ddd; background-color: #f5f5f5;"><strong>Community</strong></td>
@@ -397,7 +395,7 @@ export async function POST(req: Request) {
 
                  <!-- Page 3 Content -->
           <div class="section">
-            <h1 style="color: #11574f;">Scout Target Audience</h1>
+            <h3 style="color: #11574f;">Scout Target Audience</h3>
                 
                 <div style="margin: 20px 0;">
                   <p><strong>Total Meetings with Startups:</strong> ${totalMeetings}</p>
@@ -407,7 +405,7 @@ export async function POST(req: Request) {
                   
             </div>
           <div class="section">
-            <h1 style="color: #11574f;">Startup Overview</h1>
+            <h3 style="color: #11574f;">Startup Overview</h3>
             <div style="margin: 20px 0;">
               <p><strong>Startups pitched:</strong> ${pitches.length}</p>
               <p><strong>Startups selected:</strong> ${offersData.filter(o => o.offerStatus === 'accepted').length}</p>
@@ -418,7 +416,7 @@ export async function POST(req: Request) {
           </div>
 
           <div class="section">
-            <h1 style="color: #11574f;">Startup Insights</h1>
+            <h3 style="color: #11574f;">Startup Insights</h3>
             <div style="margin: 20px 0;">
               <h3>NPS (Net Promoter Score)</h3>
               <p>Investors typically rate startups on a scale from 1 to 10 after their experience, where 1 is the lowest score and 10 is the highest.</p>
@@ -427,7 +425,7 @@ export async function POST(req: Request) {
           </div>
 
           <div class="section">
-            <h1 style="color: #11574f;">Startups Pitched</h1>
+            <h3 style="color: #11574f;">Startups Pitched</h3>
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
               <thead>
                 <tr style="background-color: #f5f5f5;">
@@ -494,7 +492,7 @@ export async function POST(req: Request) {
 
           <!-- Page 4 Content -->
           <div class="section">
-            <h1 style="color: #11574f;">Startup Selected</h1>
+            <h3 style="color: #11574f;">Startup Selected</h3>
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
               <thead>
                 <tr style="background-color: #f5f5f5;">
@@ -558,7 +556,7 @@ export async function POST(req: Request) {
           </div>
 
           <div class="section">
-            <h1 style="color: #11574f;">Startup Not Selected</h1>
+            <h3 style="color: #11574f;">Startup Not Selected</h3>
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
               <thead>
                 <tr style="background-color: #f5f5f5;">
@@ -625,7 +623,7 @@ export async function POST(req: Request) {
 
           <!-- Page 5 Content -->
           <div class="section">
-            <h1 style="color: #11574f;">Language Summary</h1>
+            <h3 style="color: #11574f;">Language Summary</h3>
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
               <thead>
                 <tr style="background-color: #f5f5f5;">
