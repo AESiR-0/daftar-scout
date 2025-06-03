@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
       askForInvestor,
       teamSize,
     } = postBody;
-    const sectors = postBody.focusSectors || [];
+    const sectors = postBody.focusSectors ;
 
     // Validate required fields
     if (!pitchId) {
@@ -111,12 +111,12 @@ export async function POST(req: NextRequest) {
         .update(pitch)
         .set({
           pitchName,
-          location: location || null,
+          location: location,
           scoutId,
-          demoLink: demoLink || null,
-          stage: stage || null,
-          askForInvestor: askForInvestor || null,
-          teamSize: teamSize || null,
+          demoLink: demoLink,
+          stage: stage,
+          askForInvestor: askForInvestor,
+          teamSize: teamSize,
         })
         .where(eq(pitch.id, pitchId))
         .returning();

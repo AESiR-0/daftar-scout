@@ -109,7 +109,12 @@ export async function GET() {
           postedby: scouts.daftarId,
         })
         .from(scouts)
-        .where(or(eq(scouts.status, "active"), eq(scouts.status, "Active")));
+        .where(
+          or(
+            eq(scouts.scoutId, "jas730"),
+            or(eq(scouts.status, "active"), eq(scouts.status, "Active"))
+          )
+        );
     } else {
       // Get all daftars the user is associated with
       const userDaftars = await db
@@ -150,12 +155,15 @@ export async function GET() {
         .where(
           and(
             or(
-              inArray(scouts.daftarId, userDaftarIds),
-              sql`${scouts.scoutId} IN (
-                SELECT ${daftarScouts.scoutId}
-                FROM ${daftarScouts}
-                WHERE ${inArray(daftarScouts.daftarId, userDaftarIds)}
-              )`
+              eq(scouts.scoutId, "jas730"),
+              or(
+                inArray(scouts.daftarId, userDaftarIds),
+                sql`${scouts.scoutId} IN (
+                  SELECT ${daftarScouts.scoutId}
+                  FROM ${daftarScouts}
+                  WHERE ${inArray(daftarScouts.daftarId, userDaftarIds)}
+                )`
+              )
             ),
             not(eq(scouts.status, "deleted")),  // Don't show deleted scouts
             not(eq(scouts.deleteIsAgreedByAll, true))  // Only show active scouts
@@ -201,7 +209,8 @@ export async function GET() {
       const scoutCollaborators = collaborators
         .filter(c => c.scoutId === scout.id)
         .map(c => c.daftarName);
-
+    
+      
       return {
         id: scout.id,
         title: scout.title,

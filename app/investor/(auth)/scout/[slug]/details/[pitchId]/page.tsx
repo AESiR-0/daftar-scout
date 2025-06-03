@@ -61,6 +61,7 @@ interface FoundersPitch {
   sectors: string[];
   stage: string;
   ask: string;
+  demoLink: string;
   questions: Question[];
 }
 

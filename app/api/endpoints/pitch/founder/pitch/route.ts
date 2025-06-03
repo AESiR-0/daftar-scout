@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     const pitchDetails = await db
       .select({
         id: pitch.id,
+        askForInvestor: pitch.askForInvestor,
       })
       .from(pitch)
       .where(eq(pitch.id, pitchId))
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
       .from(pitchTeam)
       .innerJoin(users, eq(pitchTeam.userId, users.id))
       .where(eq(pitchTeam.pitchId, pitchId));
-
+    const askForInvestor = pitchDetails[0].askForInvestor;
     const totalTeamMembers = pitchTeamDetails.length;
     const approvedMembers = pitchTeamDetails.filter(member => member.hasApproved).length;
     const pitchApproved = totalTeamMembers === approvedMembers;
@@ -70,6 +71,7 @@ export async function GET(req: NextRequest) {
       {
         pitch: pitchDetails[0],
         team: pitchTeamDetails,
+        askForInvestor: askForInvestor,
         pitchApproved: pitchApproved,
         submitted: submitted,
         hasIncompleteAnswers: hasIncompleteAnswers,
@@ -186,7 +188,7 @@ export async function POST(req: NextRequest) {
       const result = await db
         .update(pitch)
         .set({
-          askForInvestor: askForInvestor || null,
+          askForInvestor: askForInvestor,
           status: status || "draft",
           isLocked: true
         })

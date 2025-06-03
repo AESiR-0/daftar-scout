@@ -175,9 +175,9 @@ export async function GET(req: NextRequest) {
         lastName: member.lastName || "",
         age: member.dob
           ? Math.floor(
-              (new Date().getTime() - new Date(member.dob).getTime()) /
-                (1000 * 60 * 60 * 24 * 365)
-            ).toString()
+            (new Date().getTime() - new Date(member.dob).getTime()) /
+            (1000 * 60 * 60 * 24 * 365)
+          ).toString()
           : "Unknown",
         email: member.email,
         phone:
@@ -205,7 +205,8 @@ export async function GET(req: NextRequest) {
           status: pitchData[0].status || "Under Review",
           location: pitchData[0].location || "Unknown",
           stage: pitchData[0].stage || "Seed",
-          ask: pitchData[0].ask || "Unknown",
+          demoLink: pitchData[0].demoLink,
+          ask: pitchData[0].ask,
           sectors: sectors.map((s) => s.sectorName),
           questions: answers.map((a) => ({
             id: a.id,

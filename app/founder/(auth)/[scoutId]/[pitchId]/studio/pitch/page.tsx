@@ -102,6 +102,7 @@ export default function PitchPage() {
           setTermsAccepted(true);
         }
       });
+      setSpecificAsks(data.askForInvestor);
       setPitchApproved(data.pitchApproved);
       setSubmitted(data.submitted);
       setHasIncompleteAnswers(data.hasIncompleteAnswers);
@@ -446,7 +447,7 @@ export default function PitchPage() {
           <h3 className="text-sm font-medium mb-2">{submitted ? "Pitch already submitted" : "Pitch not shared"}</h3>
           <p className="text-xs text-muted-foreground">{submitted ? "" : "Reason"}</p>
           <p className="text-xs text-muted-foreground">
-            {hasIncompleteAnswers 
+            {hasIncompleteAnswers
               ? getIncompleteAnswersMessage()
               : !pitchApproved
                 ? "Please check your team's approval and ensure all members have approved the pitch."
