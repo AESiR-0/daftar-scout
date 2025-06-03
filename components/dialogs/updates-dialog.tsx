@@ -84,6 +84,7 @@ export function UpdatesDialog({
   const scoutId = pathname.split("/")[3];
   const [updates, setUpdates] = useState<Update[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [content, setContent] = useState("");
   const { toast } = useToast();
 
   const editor = useEditor({
@@ -123,7 +124,7 @@ export function UpdatesDialog({
   };
 
   const handleSubmit = async () => {
-    if (editor?.isEmpty) {
+    if (!content.trim()) {
       toast({
         title: "Validation Error",
         description: "Update content cannot be empty",
@@ -136,16 +137,6 @@ export function UpdatesDialog({
       toast({
         title: "Validation Error",
         description: "Scout ID is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const content = editor?.getHTML() || "";
-    if (!content.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Update content cannot be empty",
         variant: "destructive",
       });
       return;
@@ -169,7 +160,7 @@ export function UpdatesDialog({
 
       const newUpdate = await response.json();
       setUpdates((prev) => [newUpdate, ...prev]);
-      editor?.commands.setContent("");
+      setContent("");
 
       toast({
         title: "Success",
@@ -223,13 +214,15 @@ export function UpdatesDialog({
             <textarea
               className="w-full border rounded-xl bg-[#1a1a1a] p-2 resize-none min-h-[150px]"
               placeholder="Write your update here..."
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
             />
             <div className="p-2 w-full flex justify-start">
               <Button
                 onClick={handleSubmit}
                 size="sm"
                 className="w-fit bg-blue-600 rounded-[0.35rem] hover:bg-blue-700 text-white"
-                disabled={editor?.isEmpty || isLoading}
+                disabled={!content.trim() || isLoading}
               >
                 Post Update
               </Button>
