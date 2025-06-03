@@ -38,6 +38,7 @@ export default function InvestorQuestionsPage() {
   const scoutId = pathname.split("/")[2];
   const pitchId = pathname.split("/")[3];
   const { isLocked, isLoading: isLockLoading } = useIsLocked();
+  const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [language, setLanguage] = useState("English");
@@ -118,12 +119,12 @@ export default function InvestorQuestionsPage() {
   useEffect(() => {
     if (isLocked) {
       toast({
-        title: "Pitch is Locked",
-        description: "This pitch is currently locked and cannot be modified.",
+        title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
+        description: isDemoPitch ? "This is a demo pitch, no data can be changed" : "This pitch is currently locked and cannot be modified.",
         variant: "destructive",
       });
     }
-  }, [isLocked, toast]);
+  }, [isLocked, toast, isDemoPitch]);
 
   useEffect(() => {
     fetchQuestions();
@@ -177,10 +178,10 @@ export default function InvestorQuestionsPage() {
     e: React.ChangeEvent<HTMLInputElement>,
     questionId: number
   ) => {
-    if (isLocked) {
+    if (isLocked || isDemoPitch) {
       toast({
-        title: "Pitch is Locked",
-        description: "Cannot modify videos while the pitch is locked.",
+        title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
+        description: isDemoPitch ? "This is a demo pitch, no data can be changed" : "Cannot modify videos while the pitch is locked.",
         variant: "destructive",
       });
       return;
@@ -211,10 +212,10 @@ export default function InvestorQuestionsPage() {
     e: React.MouseEvent<HTMLButtonElement>,
     questionId: number
   ) => {
-    if (isLocked) {
+    if (isLocked || isDemoPitch) {
       toast({
-        title: "Pitch is Locked",
-        description: "Cannot upload videos while the pitch is locked.",
+        title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
+        description: isDemoPitch ? "This is a demo pitch, no data can be changed" : "Cannot upload videos while the pitch is locked.",
         variant: "destructive",
       });
       return;
@@ -276,10 +277,10 @@ export default function InvestorQuestionsPage() {
   };
 
   const clearVideo = () => {
-    if (isLocked) {
+    if (isLocked || isDemoPitch) {
       toast({
-        title: "Pitch is Locked",
-        description: "Cannot remove videos while the pitch is locked.",
+        title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
+        description: isDemoPitch ? "This is a demo pitch, no data can be changed" : "Cannot remove videos while the pitch is locked.",
         variant: "destructive",
       });
       return;
@@ -306,10 +307,12 @@ export default function InvestorQuestionsPage() {
   return (
     <Card className="w-full border-none mt-10 px-4 bg-[#0e0e0e] container mx-auto">
       <CardContent className="border-none">
-        {isLocked && (
+        {(isLocked || isDemoPitch) && (
           <div className="flex items-center gap-2 text-destructive mb-4">
             <Lock className="h-5 w-5" />
-            <p className="text-sm font-medium">This pitch is locked and cannot be modified</p>
+            <p className="text-sm font-medium">
+              {isDemoPitch ? "This is a demo pitch, no data can be changed" : "This pitch is locked and cannot be modified"}
+            </p>
           </div>
         )}
         <div className="flex justify-end mb-4">

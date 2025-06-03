@@ -33,7 +33,8 @@ interface TeamMember {
 export default function TeamPage() {
   const { toast } = useToast();
   const pathname = usePathname();
-  const pitchId = pathname.split("/")[3]; // Get pitchId from context
+  const pitchId = pathname.split("/")[3];
+  const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -65,6 +66,16 @@ export default function TeamPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+
+  useEffect(() => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+    }
+  }, [isDemoPitch, toast]);
 
   useEffect(() => {
     if (pitchId) {
@@ -111,10 +122,10 @@ export default function TeamPage() {
   };
 
   const handleInvite = async () => {
-    if (!pitchId) {
+    if (isDemoPitch) {
       toast({
-        title: "Error",
-        description: "No pitch selected",
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
         variant: "destructive",
       });
       return;
@@ -190,14 +201,38 @@ export default function TeamPage() {
   };
 
   const handleCancelInvite = (id: string) => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     setMembers(members.filter((member) => member.id !== id));
   };
 
   const handleRemoveMember = (id: string) => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     setMembers(members.filter((member) => member.id !== id));
   };
 
   const handleWithdraw = () => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     console.log("Withdrawing from team");
   };
 
@@ -206,12 +241,28 @@ export default function TeamPage() {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
 
   const handleStartEditing = (member: TeamMember) => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     setEditingMember(member);
     setEditDesignation(member.designation);
     setIsEditing(true);
   };
 
   const handleSaveDesignation = async () => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!editingMember || !editDesignation.trim()) return;
 
     try {
@@ -351,6 +402,7 @@ export default function TeamPage() {
               size="icon"
               onClick={() => handleStartEditing(member)}
               className="h-8 w-8"
+              disabled={isDemoPitch}
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -361,6 +413,7 @@ export default function TeamPage() {
               size="icon"
               onClick={handleWithdraw}
               className="h-8 w-8"
+              disabled={isDemoPitch}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -370,6 +423,7 @@ export default function TeamPage() {
               size="icon"
               onClick={() => handleRemoveMember(member.id)}
               className="h-8 w-8"
+              disabled={isDemoPitch}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -444,30 +498,34 @@ export default function TeamPage() {
                 placeholder="First Name"
                 value={newMember.firstName}
                 onChange={(e) =>
-                  setNewMember({ ...newMember, firstName: e.target.value })
+                  !isDemoPitch && setNewMember({ ...newMember, firstName: e.target.value })
                 }
+                disabled={isDemoPitch}
               />
               <Input
                 placeholder="Last Name"
                 value={newMember.lastName}
                 onChange={(e) =>
-                  setNewMember({ ...newMember, lastName: e.target.value })
+                  !isDemoPitch && setNewMember({ ...newMember, lastName: e.target.value })
                 }
+                disabled={isDemoPitch}
               />
               <Input
                 placeholder="Designation"
                 value={newMember.designation}
                 onChange={(e) =>
-                  setNewMember({ ...newMember, designation: e.target.value })
+                  !isDemoPitch && setNewMember({ ...newMember, designation: e.target.value })
                 }
+                disabled={isDemoPitch}
               />
               <Input
                 placeholder="Email"
                 type="email"
                 value={newMember.email}
                 onChange={(e) =>
-                  setNewMember({ ...newMember, email: e.target.value })
+                  !isDemoPitch && setNewMember({ ...newMember, email: e.target.value })
                 }
+                disabled={isDemoPitch}
               />
               <Button
                 onClick={handleInvite}
@@ -477,7 +535,8 @@ export default function TeamPage() {
                   !newMember.firstName ||
                   !newMember.lastName ||
                   !newMember.email ||
-                  !newMember.designation
+                  !newMember.designation ||
+                  isDemoPitch
                 }
               >
                 {isLoading ? "Inviting..." : "Invite"}

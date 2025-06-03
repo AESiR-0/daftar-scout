@@ -50,12 +50,101 @@ export default function DeletePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentUser, setCurrentUser] = useState<TeamMember | null>(null);
+  const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch('/api/endpoints/users/me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch current user');
+      }
+
+      const userData = await response.json();
+      
+      // Transform API user data to match TeamMember interface
+      const transformedUser: TeamMember = {
+        name: userData.name || 'Demo User',
+        email: userData.email || 'demo@example.com',
+        role: userData.role || 'Founder',
+        designation: userData.designation || 'Founder',
+        isApproved: false,
+        status: 'pending',
+        isUser: true,
+        age: userData.age || '',
+        phone: userData.phone || '',
+        gender: userData.gender || '',
+        location: userData.location || '',
+        language: userData.language || ['English'],
+        founderId: userData.id || 'demo-user-id'
+      };
+
+      setCurrentUser(transformedUser);
+      return transformedUser;
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch user data',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
 
   useEffect(() => {
-    if (pitchId && scoutId) {
+    if (isDemoPitch) {
+      const setupDemoPitch = async () => {
+        setIsLoading(true);
+        try {
+          // Fetch current user data
+          const user = await fetchCurrentUser();
+          
+          if (user) {
+            // Set dummy approvals with the fetched user data
+            const dummyApprovals: TeamMember[] = [
+              user,
+              {
+                name: "Team Member 1",
+                email: "member1@example.com",
+                role: "Co-Founder",
+                designation: "Co-Founder",
+                isApproved: false,
+                status: "pending",
+                age: "28",
+                phone: "+1234567891",
+                gender: "Female",
+                location: "Demo City",
+                language: ["English"],
+                founderId: "member1-id"
+              }
+            ];
+            setApprovals(dummyApprovals);
+
+            // Show demo pitch toast
+            toast({
+              title: "Demo Pitch",
+              description: "This is a demo pitch and cannot be edited.",
+              variant: "default"
+            });
+          }
+        } catch (error) {
+          console.error('Error setting up demo pitch:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      setupDemoPitch();
+    } else if (pitchId && scoutId) {
       fetchDeleteRequests();
     }
-  }, [pitchId, scoutId]);
+  }, [pitchId, scoutId, isDemoPitch]);
 
   // Show locked toast when pitch becomes locked
 
@@ -161,6 +250,15 @@ export default function DeletePage() {
   };
 
   const handleDelete = async () => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch and cannot be edited.",
+        variant: "default"
+      });
+      return;
+    }
+
     if (!userConsent || !pitchId || !scoutId || !currentUser) {
       toast({
         title: "Error",
@@ -221,7 +319,7 @@ export default function DeletePage() {
     }
   };
 
-  if (!currentUser) {
+  if (!isLoading) {
     return null; // Or loading state
   }
 
@@ -232,7 +330,13 @@ export default function DeletePage() {
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
           <div className="flex flex-col p-4 rounded-lg space-y-6">
-
+            {isDemoPitch && (
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                <p className="text-sm text-yellow-500">
+                  This is a demo pitch. All actions are disabled.
+                </p>
+              </div>
+            )}
 
             <p className="text-sm text-muted-foreground">
               All data related to the pitch will be deleted, and the offer will be withdrawn.
@@ -245,7 +349,7 @@ export default function DeletePage() {
                 checked={userConsent}
                 onCheckedChange={(checked: boolean) => setUserConsent(checked)}
                 className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                disabled={isDeleting}
+                disabled={isDeleting || isDemoPitch}
               />
               <label htmlFor="user-consent" className="text-sm text-muted-foreground">
                 I agree to delete the pitch
@@ -256,9 +360,10 @@ export default function DeletePage() {
               variant="destructive"
               onClick={handleDelete}
               disabled={
+                isDemoPitch ||
                 !userConsent ||
                 isDeleting ||
-                (deleteClicked && approvals.find(m => m.founderId === currentUser.founderId)?.isApproved)
+                (deleteClicked && approvals.find(m => m.founderId === currentUser?.founderId)?.isApproved)
               }
               className="w-[12%] rounded-[0.35rem]"
             >

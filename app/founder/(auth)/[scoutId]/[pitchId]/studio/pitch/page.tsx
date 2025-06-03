@@ -43,6 +43,7 @@ export default function PitchPage() {
   const pathname = usePathname();
   const { toast } = useToast();
   const pitchId = pathname.split("/")[3];
+  const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
   const [specificAsks, setSpecificAsks] = useState("");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>([
@@ -71,6 +72,16 @@ export default function PitchPage() {
   const [pitchApproved, setPitchApproved] = useState(false);
   const [hasIncompleteAnswers, setHasIncompleteAnswers] = useState(false);
   const [answersCount, setAnswersCount] = useState(0);
+
+  useEffect(() => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+    }
+  }, [isDemoPitch, toast]);
 
   useEffect(() => {
     if (pitchId) {
@@ -108,6 +119,14 @@ export default function PitchPage() {
 
   // Save pitch updates
   const savePitchDetails = async () => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!pitchId) {
       toast({
         title: "Error",
@@ -152,6 +171,14 @@ export default function PitchPage() {
 
   // Handle approval toggle
   const handleApprovalToggle = async (requestId: string) => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     if (requestId !== currentUserId) return;
 
     const updatedApprovalRequests = approvalRequests.map((req) =>
@@ -180,6 +207,14 @@ export default function PitchPage() {
 
   // Handle pitch approval
   const handlePitchApproval = async () => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!termsAccepted) {
       toast({
         title: "Error",
@@ -227,6 +262,14 @@ export default function PitchPage() {
 
   // Handle pitch submission
   const handlePitchSubmission = async () => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Pitch",
+        description: "This is a demo pitch, no data can be changed",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!termsAccepted) {
       toast({
         title: "Error",
@@ -304,8 +347,8 @@ export default function PitchPage() {
             <Label>Do you have any specific ask from the Investor?</Label>
             <Textarea
               value={specificAsks}
-              disabled={pitchApproved}
-              onChange={(e) => setSpecificAsks(e.target.value)}
+              disabled={pitchApproved || isDemoPitch}
+              onChange={(e) => !isDemoPitch && setSpecificAsks(e.target.value)}
               className="min-h-[100px] bg-muted/50 resize-none rounded-xl"
             />
           </div>
@@ -315,10 +358,10 @@ export default function PitchPage() {
             <Checkbox
               id="terms"
               checked={termsAccepted}
-              disabled={pitchApproved}
+              disabled={pitchApproved || isDemoPitch}
               className="h-5 w-5 border-2 mt-1 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
               onCheckedChange={(checked: boolean) => {
-                setTermsAccepted(checked);
+                !isDemoPitch && setTermsAccepted(checked);
               }}
             />
             <label
@@ -340,7 +383,7 @@ export default function PitchPage() {
             className="w-full rounded-[0.35rem] bg-primary hover:bg-primary/90"
             size="lg"
             onClick={handlePitchApproval}
-            disabled={isLoading || !termsAccepted || pitchApproved || submitted || hasIncompleteAnswers}
+            disabled={isLoading || !termsAccepted || pitchApproved || submitted || hasIncompleteAnswers || isDemoPitch}
           >
             {pitchApproved ? "Pitch Approved" : "Approve Pitch"}
           </Button>
@@ -394,7 +437,7 @@ export default function PitchPage() {
           className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
           size="lg"
           onClick={handlePitchSubmission}
-          disabled={isLoading || !termsAccepted || !pitchApproved || submitted || hasIncompleteAnswers}
+          disabled={isLoading || !termsAccepted || !pitchApproved || submitted || hasIncompleteAnswers || isDemoPitch}
         >
           Pitch Now
         </Button>

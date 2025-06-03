@@ -167,6 +167,7 @@ export default function PitchNameForm() {
   const scoutId = pathname.split("/")[2];
   const pitchId = pathname.split("/")[3];
   const { isLocked, isLoading: isLockLoading } = useIsLocked();
+  const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
   const [pitchName, setPitchName] = useState("");
   const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
   const [selectedStage, setSelectedStage] = useState<string | null>(null);
@@ -184,14 +185,14 @@ export default function PitchNameForm() {
   });
 
   useEffect(() => {
-    if (isLocked) {
+    if (isLocked || isDemoPitch) {
       toast({
-        title: "Pitch is Locked",
-        description: "This pitch is currently locked and cannot be modified.",
+        title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
+        description: isDemoPitch ? "This is a demo pitch, no data can be changed" : "This pitch is currently locked and cannot be modified.",
         variant: "destructive",
       });
     }
-  }, [isLocked, toast]);
+  }, [isLocked, toast, isDemoPitch]);
 
   const fetchPitchDetails = async () => {
     try {
@@ -239,10 +240,10 @@ export default function PitchNameForm() {
   }, []);
 
   const handleLocationInput = (value: string) => {
-    if (isLocked) {
+    if (isLocked || isDemoPitch) {
       toast({
-        title: "Pitch is Locked",
-        description: "Cannot modify location while the pitch is locked.",
+        title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
+        description: isDemoPitch ? "This is a demo pitch, no data can be changed" : "Cannot modify location while the pitch is locked.",
         variant: "destructive",
       });
       return;
@@ -289,7 +290,7 @@ export default function PitchNameForm() {
   );
 
   const autoSave = useCallback(async () => {
-    if (isLocked) return;
+    if (isLocked || isDemoPitch) return;
 
     const pitchData = {
       pitchName,
@@ -324,6 +325,7 @@ export default function PitchNameForm() {
     selectedSectors,
     pitchId,
     isLocked,
+    isDemoPitch,
   ]);
 
   if (isLockLoading) {
@@ -333,10 +335,12 @@ export default function PitchNameForm() {
   return (
     <Card className="w-full border-none bg-[#0e0e0e] mx-auto">
       <CardContent>
-        {isLocked && (
+        {(isLocked || isDemoPitch) && (
           <div className="flex items-center gap-2 text-destructive mb-4">
             <Lock className="h-5 w-5" />
-            <p className="text-sm font-medium">This pitch is locked and cannot be modified</p>
+            <p className="text-sm font-medium">
+              {isDemoPitch ? "This is a demo pitch, no data can be changed" : "This pitch is locked and cannot be modified"}
+            </p>
           </div>
         )}
         <form className="space-y-6">
@@ -346,11 +350,11 @@ export default function PitchNameForm() {
               type="text"
               value={pitchName}
               maxLength={100}
-              onChange={(e) => !isLocked && setPitchName(e.target.value)}
+              onChange={(e) => !isLocked && !isDemoPitch && setPitchName(e.target.value)}
               onBlur={autoSave}
               placeholder="Enter your pitch name (max 100 characters)"
-              className={`rounded w-full ${isLocked ? 'opacity-100' : ''}`}
-              disabled={isLocked}
+              className={`rounded w-full ${(isLocked || isDemoPitch) ? 'opacity-100' : ''}`}
+              disabled={isLocked || isDemoPitch}
             />
           </div>
 
@@ -359,10 +363,10 @@ export default function PitchNameForm() {
             <Input
               placeholder="City/State/Country (e.g., San Francisco/California/USA)"
               value={locationInput}
-              onChange={(e) => handleLocationInput(e.target.value)}
+              onChange={(e) => !isDemoPitch && handleLocationInput(e.target.value)}
               onBlur={autoSave}
-              className={isLocked ? 'opacity-100' : ''}
-              disabled={isLocked}
+              className={(isLocked || isDemoPitch) ? 'opacity-100' : ''}
+              disabled={isLocked || isDemoPitch}
             />
             <div className="w-full h-[400px] rounded-lg overflow-hidden border">
               <MapComponent coordinates={coordinates} />
@@ -375,10 +379,10 @@ export default function PitchNameForm() {
               <Input
                 type="text"
                 value={demoLink}
-                onChange={(e) => !isLocked && setDemoLink(e.target.value)}
+                onChange={(e) => !isLocked && !isDemoPitch && setDemoLink(e.target.value)}
                 onBlur={autoSave}
                 placeholder="Enter your demo link"
-                disabled={isLocked}
+                disabled={isLocked || isDemoPitch}
               />
             </div>
             <div className="flex-1 space-y-2">
@@ -387,13 +391,13 @@ export default function PitchNameForm() {
                 options={stages}
                 value={selectedStage}
                 onSelect={(value) => {  
-                  if (!isLocked) {
+                  if (!isLocked && !isDemoPitch) {
                     setSelectedStage(value);
                     autoSave();
                   }
                 }}
                 placeholder="Select Stage"
-                disabled={isLocked}
+                disabled={isLocked || isDemoPitch}
               />
             </div>
           </div>
@@ -403,10 +407,10 @@ export default function PitchNameForm() {
             <Combobox
               options={sectors}
               onSelect={(value) => {
-                if (isLocked) {
+                if (isLocked || isDemoPitch) {
                   toast({
-                    title: "Pitch is Locked",
-                    description: "Cannot modify sectors while the pitch is locked.",
+                    title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
+                    description: isDemoPitch ? "This is a demo pitch, no data can be changed" : "Cannot modify sectors while the pitch is locked.",
                     variant: "destructive",
                   });
                   return;
@@ -417,16 +421,16 @@ export default function PitchNameForm() {
                 }
               }}
               placeholder="Add sectors"
-              disabled={isLocked}
+              disabled={isLocked || isDemoPitch}
             />
             <div className="flex flex-wrap gap-2 mt-3">
               {selectedSectors.map((sector, index) => (
                 <Badge
                   key={index}
                   variant="secondary"
-                  className={`text-xs ${!isLocked ? 'cursor-pointer hover:bg-muted' : 'opacity-100'}`}
+                  className={`text-xs ${!(isLocked || isDemoPitch) ? 'cursor-pointer hover:bg-muted' : 'opacity-100'}`}
                   onClick={() => {
-                    if (!isLocked) {
+                    if (!isLocked && !isDemoPitch) {
                       setSelectedSectors((prev) =>
                         prev.filter((s) => s !== sector)
                       );
@@ -434,7 +438,7 @@ export default function PitchNameForm() {
                     }
                   }}
                 >
-                  {sector} {!isLocked && <X className="h-3 w-3 ml-1" />}
+                  {sector} {!(isLocked || isDemoPitch) && <X className="h-3 w-3 ml-1" />}
                 </Badge>
               ))}
             </div>
