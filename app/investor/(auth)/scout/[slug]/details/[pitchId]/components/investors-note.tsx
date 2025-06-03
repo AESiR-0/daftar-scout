@@ -24,11 +24,12 @@ export function InvestorsNote({
   const [note, setNote] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  console.log("user id", userId);
+  const [isMember, setIsMember] = useState<boolean>(false);
 
   const editor = useEditor({
     extensions: [StarterKit],
     content: "",
+    editable: isMember,
     editorProps: {
       attributes: {
         class:
@@ -36,15 +37,38 @@ export function InvestorsNote({
       },
       handleDOMEvents: {
         blur: () => {
-          handleSave();
+          if (isMember) {
+            handleSave();
+          }
           return false;
         },
       },
     },
     onUpdate: ({ editor }) => {
-      setNote(editor.getHTML());
+      if (isMember) {
+        setNote(editor.getHTML());
+      }
     },
   });
+
+  // Check if user is a member of the scout
+  useEffect(() => {
+    const checkMembership = async () => {
+      try {
+        const response = await fetch(`/api/endpoints/scouts/members?scoutId=${scoutId}`);
+        if (!response.ok) throw new Error('Failed to fetch scout members');
+        const data = await response.json();
+        setIsMember(data.some((member: any) => member.userId === userId));
+      } catch (error) {
+        console.error("Error checking membership:", error);
+        setIsMember(false);
+      }
+    };
+
+    if (userId) {
+      checkMembership();
+    }
+  }, [scoutId, userId]);
 
   // Fetch the note when the component mounts
   useEffect(() => {
@@ -89,7 +113,7 @@ export function InvestorsNote({
 
   // Handle saving the note
   const handleSave = async () => {
-    if (!editor || isSaving) return;
+    if (!editor || isSaving || !isMember) return;
     setIsSaving(true);
 
     try {
@@ -143,21 +167,17 @@ export function InvestorsNote({
       </CardHeader>
       <CardContent>
         <div className="border h-[400px] rounded-xl overflow-hidden">
+          {!isMember && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+              <p className="text-sm text-muted-foreground">You need to be a member of this scout to add notes</p>
+            </div>
+          )}
           <EditorContent
             editor={editor}
             placeholder="Use this space to write down anything important about the startup—opportunities, concerns, questions, or insights. Share what stands out, what feels risky, or what we should do next. This helps the team make faster and smarter investment decisions."
             className="w-full h-full bg-[#1a1a1a] rounded-xl"
           />
         </div>
-        {/* <div className="mt-4 flex justify-end">
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || !editor}
-            className="bg-blue-600 hover:bg-blue-700 rounded-[0.35rem]"
-          >
-            {isSaving ? "Saving..." : "Save Note"}
-          </Button>
-        </div> */}
       </CardContent>
     </Card>
   );

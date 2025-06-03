@@ -200,7 +200,7 @@ const MemberCard = ({ member }: { member: TeamMember }) => (
                 <p>{member.location}</p>
               </div>
               <p className="text-sm text-muted-foreground">
-                Preferred languages to connect with investors:
+                Preferred languages to connect with investors: <br />
                 {member.language.join(", ")}
               </p>
             </div>

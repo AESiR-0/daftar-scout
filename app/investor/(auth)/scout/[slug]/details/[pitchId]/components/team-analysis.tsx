@@ -67,6 +67,36 @@ export function TeamAnalysisSection({
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [teamAnalysis, setTeamAnalysis] = useState<TeamAnalysis[]>(initialTeamAnalysis);
   const [loading, setLoading] = useState(false);
+  const [isMember, setIsMember] = useState<boolean>(false);
+
+  // Check if user is a member of the scout
+  useEffect(() => {
+    const checkMembership = async () => {
+      try {
+        const response = await fetch(`/api/endpoints/scouts/members?scoutId=${scoutId}`);
+        if (!response.ok) throw new Error('Failed to fetch scout members');
+        const data = await response.json();
+        const isUserMember = data.some((member: any) => member.userId === currentProfile.id);
+        setIsMember(isUserMember);
+        
+        // If not a member, set hasSubmitted to true and pre-fill with first team member's data
+        if (!isUserMember && initialTeamAnalysis.length > 0) {
+          setHasSubmitted(true);
+          const firstAnalysis = initialTeamAnalysis[0];
+          setFormState({
+            nps: firstAnalysis.nps,
+            belief: firstAnalysis.belief,
+            note: firstAnalysis.note
+          });
+        }
+      } catch (error) {
+        console.error("Error checking membership:", error);
+        setIsMember(false);
+      }
+    };
+
+    checkMembership();
+  }, [scoutId, currentProfile.id, initialTeamAnalysis]);
 
   // Check if the user has already submitted an analysis
   useEffect(() => {
@@ -105,7 +135,7 @@ export function TeamAnalysisSection({
   }, [scoutId, pitchId, toast]);
 
   const handleSubmit = async () => {
-    if (!formState.belief || !formState.note.trim() || formState.nps === null) return;
+    if (!formState.belief || !formState.note.trim() || formState.nps === null || !isMember) return;
     setIsSubmitting(true);
 
     try {
@@ -214,6 +244,11 @@ export function TeamAnalysisSection({
         <div className="w-1/2">
           <Card className="border-none bg-[#0e0e0e]">
             <CardContent className="space-y-6">
+              {!isMember && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10 rounded-xl">
+                  <p className="text-sm text-muted-foreground">You need to be a member of this scout to add analysis</p>
+                </div>
+              )}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>How strongly do you believe in the startup?</Label>
@@ -223,11 +258,11 @@ export function TeamAnalysisSection({
                         key={`nps-${i}`}
                         variant={formState.nps === i ? "default" : "outline"}
                         onClick={() => setFormState(prev => ({ ...prev, nps: i }))}
-                        disabled={hasSubmitted}
+                        disabled={hasSubmitted || !isMember}
                         className={cn(
                           "w-8 h-8 p-0 rounded-[0.35rem]",
                           formState.nps === i && "bg-blue-600 hover:bg-blue-700",
-                          hasSubmitted && "cursor-not-allowed opacity-50"
+                          (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
                         )}
                       >
                         {i}
@@ -241,12 +276,12 @@ export function TeamAnalysisSection({
                     <Button
                       variant={formState.belief === "yes" ? "default" : "outline"}
                       onClick={() => setFormState(prev => ({ ...prev, belief: "yes" }))}
-                      disabled={hasSubmitted}
+                      disabled={hasSubmitted || !isMember}
                       className={cn(
                         formState.belief === "yes"
                           ? "bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
                           : "rounded-[0.35rem]",
-                        hasSubmitted && "cursor-not-allowed opacity-50"
+                        (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
                       )}
                     >
                       Yes
@@ -254,12 +289,12 @@ export function TeamAnalysisSection({
                     <Button
                       variant={formState.belief === "no" ? "default" : "outline"}
                       onClick={() => setFormState(prev => ({ ...prev, belief: "no" }))}
-                      disabled={hasSubmitted}
+                      disabled={hasSubmitted || !isMember}
                       className={cn(
                         formState.belief === "no"
                           ? "bg-red-600 hover:bg-red-700 rounded-[0.35rem]"
                           : "rounded-[0.35rem]",
-                        hasSubmitted && "cursor-not-allowed opacity-50"
+                        (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
                       )}
                     >
                       No
@@ -273,10 +308,10 @@ export function TeamAnalysisSection({
                     placeholder="Why do you want to meet... or not meet... in the startup?"
                     value={formState.note}
                     onChange={(e) => setFormState(prev => ({ ...prev, note: e.target.value }))}
-                    disabled={hasSubmitted}
+                    disabled={hasSubmitted || !isMember}
                     className={cn(
                       "min-h-[100px] rounded-[0.35rem] bg-muted/50 text-white border p-4",
-                      hasSubmitted && "cursor-not-allowed opacity-50"
+                      (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
                     )}
                   />
                 </div>
@@ -294,11 +329,12 @@ export function TeamAnalysisSection({
                   !formState.note.trim() ||
                   formState.nps === null ||
                   isSubmitting ||
-                  hasSubmitted
+                  hasSubmitted ||
+                  !isMember
                 }
                 className={cn(
                   "w-full bg-blue-600 hover:bg-blue-700",
-                  hasSubmitted && "cursor-not-allowed opacity-50"
+                  (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
                 )}
               >
                 {isSubmitting ? "Submitting..." : "Submit Analysis"}
