@@ -41,7 +41,7 @@ export default function InvestorQuestionsPage() {
   const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
-  const [language, setLanguage] = useState("English");
+  const [language, setLanguage] = useState("Marathi");
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [questionsOpen, setQuestionsOpen] = useState(false);

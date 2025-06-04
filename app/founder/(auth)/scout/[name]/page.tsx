@@ -11,6 +11,7 @@ import { SelectDaftarDialog } from "@/components/dialogs/create-pitch-dialog";
 import { InvestorProfile } from "@/components/InvestorProfile";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import {
   Accordion,
   AccordionContent,
@@ -60,6 +61,18 @@ export default function ScoutDetailsPage() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showDaftarDialog, setShowDaftarDialog] = useState(false);
+  const { toast } = useToast();
+  const isDemoScout = scoutId === "jas730";
+
+  useEffect(() => {
+    if (isDemoScout) {
+      toast({
+        title: "Demo Scout",
+        description: "This is a demo scout. You cannot pitch to it. You have a sample pitch created in the pitch page.",
+        variant: "destructive",
+      });
+    }
+  }, [isDemoScout, toast]);
 
   useEffect(() => {
     async function fetchScout() {
@@ -217,8 +230,9 @@ export default function ScoutDetailsPage() {
                     description={transformedScout.description}
                   />
                   <Button
-                    className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"
+                    className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem] disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => setShowDaftarDialog(true)}
+                    disabled={isDemoScout}
                   >
                     Pitch Now
                   </Button>

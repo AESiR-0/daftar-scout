@@ -458,7 +458,7 @@ export default function DocumentsPage() {
               <>
                 <TabsContent value="private">
                   <DocumentsList
-                    documents={documentsList.filter((doc) => doc.type === "private")}
+                    documents={documentsList.filter((doc) => doc.isHidden)}
                     canDelete={true}
                     onDownload={handleDownload}
                     onView={handleView}
@@ -470,7 +470,7 @@ export default function DocumentsPage() {
 
                 <TabsContent value="received">
                   <DocumentsList
-                    documents={documentsList.filter((doc) => doc.type === "received")}
+                    documents={documentsList.filter((doc) => doc.type === "received" && !doc.isHidden)}
                     canDelete={false}
                     onDownload={handleDownload}
                     onView={handleView}
@@ -482,7 +482,7 @@ export default function DocumentsPage() {
 
                 <TabsContent value="sent">
                   <DocumentsList
-                    documents={documentsList.filter((doc) => doc.type === "sent")}
+                    documents={documentsList.filter((doc) => doc.type === "sent" && !doc.isHidden)}
                     canDelete={true}
                     onDownload={handleDownload}
                     onView={handleView}
