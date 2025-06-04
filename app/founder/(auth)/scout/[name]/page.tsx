@@ -214,7 +214,7 @@ export default function ScoutDetailsPage() {
                   <p className="text-sm text-muted-foreground">No video available</p>
                 </div>
               )}
-              <div className="video-error hidden w-full h-full absolute top-0 left-0 flex items-center justify-center bg-muted rounded-[0.35rem]">
+              <div className="video-error hidden w-full h-full absolute top-0 left-0 items-center justify-center bg-muted rounded-[0.35rem]">
                 <p className="text-sm text-muted-foreground">Error loading video</p>
               </div>
             </div>
