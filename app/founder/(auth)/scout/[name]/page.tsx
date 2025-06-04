@@ -162,7 +162,7 @@ export default function ScoutDetailsPage() {
   const { scout, faqs, updates, collaboration, lastDayToPitch } = scoutData;
 
   const transformedScout = {
-    title: `Scout Opportunity: ${scout.scoutStage}`,
+    title: `${scout.scoutStage}`,
     description: `Sector: ${scout.scoutSector} | Community: ${scout.scoutCommunity}`,
     videoUrl: scout.investorPitch && scout.investorPitch.trim() !== "" ? scout.investorPitch : null,
     slug: scoutId,
@@ -226,8 +226,11 @@ export default function ScoutDetailsPage() {
                 </h1>
                 <div className="flex text-md items-center gap-4">
                   <ShareButton
-                    title={transformedScout.title}
-                    description={transformedScout.description}
+                    daftarName={transformedScout.title}
+                    sector={transformedScout.details.Sector}
+                    stage={transformedScout.details.Stage}
+                    lastDate={transformedScout.lastPitchDate}
+                    applyUrl={`https://daftar.com/founder/scout/${transformedScout.slug}`}
                   />
                   <Button
                     className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem] disabled:opacity-50 disabled:cursor-not-allowed"
