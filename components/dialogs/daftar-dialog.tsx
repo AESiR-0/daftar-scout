@@ -315,6 +315,7 @@ export function DaftarDialog({
   const [deletionApprovals, setDeletionApprovals] = useState<DeletionApproval[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [daftarData, setDaftarData] = useState({
+    avatarUrl: "",
     name: "",
     structure: "",
     code: "",
@@ -341,12 +342,13 @@ export function DaftarDialog({
         }
         const data = await response.json()
         console.log('Daftar details response:', data)
-        
+
         // Parse location string into address components
         const locationParts = data.location ? data.location.split(',').map((part: string) => part.trim()) : []
         const [street = "", city = "", state = "", country = "", postalCode = ""] = locationParts
-        
+
         setDaftarData({
+          avatarUrl: data.profileUrl || "",
           name: data.name || "",
           structure: data.structure || "",
           code: data.id || "",
@@ -517,7 +519,7 @@ export function DaftarDialog({
 
       // Update local state
       setMembers(members.filter(member => member.id !== id));
-      
+
       toast({
         title: "Success",
         description: "Member removed successfully"
@@ -573,7 +575,7 @@ export function DaftarDialog({
       }
 
       const data = await response.json();
-      
+
       if (data.status === 'archived') {
         toast({
           title: "Success",
@@ -587,7 +589,7 @@ export function DaftarDialog({
           description: "Your approval for deletion has been recorded"
         });
         // Refresh the deletion approvals
-        const updatedApprovals = deletionApprovals.map(approval => 
+        const updatedApprovals = deletionApprovals.map(approval =>
           approval.memberId === members.find(m => m.isCurrentUser)?.id
             ? { ...approval, status: 'approved' as const, date: new Date().toISOString() }
             : approval
@@ -875,7 +877,7 @@ export function DaftarDialog({
       case "delete":
         const currentUser = members.find(m => m.isCurrentUser);
         const activeMembers = members.filter(m => m.status === 'active');
-        
+
         return (
           <Card className="border-none rounded-[0.35rem] bg-[#1a1a1a] p-4">
             <div className="space-y-4">

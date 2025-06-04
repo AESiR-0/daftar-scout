@@ -204,7 +204,7 @@ export default function PitchNameForm() {
 
       setPitchName(data.pitchName || "");
       setDemoLink(data.demoLink || "");
-      setSelectedStage(data.stage || null);
+      setSelectedStage(data.stage);
       setSelectedSectors(data.focusSectors || []);
 
       if (data.location) {
@@ -288,6 +288,12 @@ export default function PitchNameForm() {
     }, 500),
     []
   );
+
+  useEffect(() => {
+    if (locationInput) {
+      debounceLocation(locationInput);
+    }
+  }, [locationInput, debounceLocation]);
 
   const autoSave = useCallback(async () => {
     if (isLocked || isDemoPitch) return;
