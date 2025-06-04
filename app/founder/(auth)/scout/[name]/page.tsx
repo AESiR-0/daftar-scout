@@ -214,7 +214,7 @@ export default function ScoutDetailsPage() {
                   <p className="text-sm text-muted-foreground">No video available</p>
                 </div>
               )}
-              <div className="video-error hidden w-full h-full absolute top-0 left-0 flex items-center justify-center bg-muted rounded-[0.35rem]">
+              <div className="video-error hidden w-full h-full absolute top-0 left-0 items-center justify-center bg-muted rounded-[0.35rem]">
                 <p className="text-sm text-muted-foreground">Error loading video</p>
               </div>
             </div>
@@ -229,8 +229,6 @@ export default function ScoutDetailsPage() {
                     daftarName={collaboration.join(", ")}
                     sector={transformedScout.details.Sector}
                     stage={transformedScout.details.Stage}
-                    title={transformedScout.title}
-                    description={transformedScout.description}
                     lastDate={transformedScout.lastPitchDate}
                     applyUrl={`https://daftar.com/founder/scout/${transformedScout.slug}`}
                   />
