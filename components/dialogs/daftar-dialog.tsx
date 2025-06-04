@@ -183,7 +183,7 @@ function MemberCard({ member, onRemove }: MemberCardProps) {
     <div className="bg-[#1a1a1a] py-6 rounded-[0.35rem]">
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
-          <Avatar className="h-40 w-40 rounded-[0.35rem]">
+          <Avatar className="h-24 w-24 rounded-[0.35rem]">
             {member.imageUrl ? (
               <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
             ) : (
