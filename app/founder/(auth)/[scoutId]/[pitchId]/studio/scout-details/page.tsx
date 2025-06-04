@@ -65,7 +65,7 @@ function ErrorPage() {
 }
 
 export default function ScoutDetailsPage() {
-  const { scoutId, pitchId } = useParams() as { 
+  const { scoutId, pitchId } = useParams() as {
     scoutId: string;
     pitchId: string;
   };
@@ -153,8 +153,13 @@ export default function ScoutDetailsPage() {
                       </h1>
                       <div className="flex text-md items-center gap-4">
                         <ShareButton
+                          daftarName={`${collaboration.join(", ")}`}
+                          sector={scout.details.Sector}
+                          stage={scout.details.Stage}
                           title={scout.title}
                           description={scout.description}
+                          lastDate={lastDayToPitch}
+                          applyUrl={`/founder/scout/${scout.slug}`}
                         />
                         <Button
                           className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"

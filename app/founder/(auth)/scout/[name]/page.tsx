@@ -84,7 +84,7 @@ export default function ScoutDetailsPage() {
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
           throw new Error(
-            errorData.error || 
+            errorData.error ||
             `Failed to fetch scout (${res.status}): ${res.statusText}`
           );
         }
@@ -226,9 +226,11 @@ export default function ScoutDetailsPage() {
                 </h1>
                 <div className="flex text-md items-center gap-4">
                   <ShareButton
-                    daftarName={transformedScout.title}
+                    daftarName={collaboration.join(", ")}
                     sector={transformedScout.details.Sector}
                     stage={transformedScout.details.Stage}
+                    title={transformedScout.title}
+                    description={transformedScout.description}
                     lastDate={transformedScout.lastPitchDate}
                     applyUrl={`https://daftar.com/founder/scout/${transformedScout.slug}`}
                   />
