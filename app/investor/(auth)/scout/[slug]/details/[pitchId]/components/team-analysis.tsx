@@ -416,13 +416,13 @@ export function TeamAnalysisSection({
                         {teamAnalysis.map((entry) => (
                           <div
                             key={entry.id}
-                            className="rounded-lg border border-muted bg-muted/50 p-4"
+                            className="rounded-[0.35rem] border border-muted bg-muted/50 p-4"
                           >
                             <div className="flex items-center justify-between gap-2 mb-1">
                               <div className="flex items-center gap-2">
                                 <img
                                   src={entry.analyst.image}
-                                  className="w-8 h-8 rounded-xl"
+                                  className="w-8 h-8 rounded-[0.35rem]"
                                 />
                                 <div>
                                   <p className="text-sm font-medium">
