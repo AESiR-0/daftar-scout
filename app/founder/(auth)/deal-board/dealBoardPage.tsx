@@ -47,6 +47,10 @@ const emptyStateMessages: Record<string, { title: string; description: string }>
     title: "No Pitch Withdrawn Yet",
     description: "When a pitch is withdrawn by you or the investor, it'll show up here.",
   },
+  Deleted: {
+    title: "No Pitch Deleted Yet",
+    description: "When a pitch is deleted by you, it'll show up here.",
+  },
 };
 
 type PitchBoardPageProps = {

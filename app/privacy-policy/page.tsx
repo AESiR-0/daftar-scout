@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
               Daftar Privacy Policy
             </CardTitle>
             <p className="text-sm text-gray-400 text-center mt-2">
-              <strong>Effective Date:</strong> April 10, 2025
+              <strong>Effective Date:</strong> June 15, 2025
             </p>
           </CardHeader>
           <CardContent>
