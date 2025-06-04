@@ -677,7 +677,7 @@ export async function POST(req: Request) {
 
     // Launch browser
     const browser = await puppeteer.launch({
-      executablePath: process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
       headless: true
     });
 

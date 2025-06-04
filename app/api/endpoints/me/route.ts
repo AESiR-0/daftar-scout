@@ -70,6 +70,7 @@ export async function PATCH(req: NextRequest) {
     dateOfBirth,
     phone,
     languages: languageList = [], // list of language names
+    image, // Add image field
   } = body;
 
   if (!email) {
@@ -98,6 +99,8 @@ export async function PATCH(req: NextRequest) {
         dob: dateOfBirth ? new Date(dateOfBirth).toISOString() : null,
         countryCode,
         number,
+        image, // Add image field
+        lastChangeOfPitcture: image ? new Date() : undefined, // Update last change timestamp if image is provided
       })
       .where(eq(users.email, email));
 
@@ -112,7 +115,7 @@ export async function PATCH(req: NextRequest) {
     const languageIds = languageRecords.map((l) => l.id);
 
     // Delete existing userLanguages
-      await db.delete(userLanguages).where(eq(userLanguages.userId, userId));
+    await db.delete(userLanguages).where(eq(userLanguages.userId, userId));
 
     // Insert new userLanguages
     await db.insert(userLanguages).values(

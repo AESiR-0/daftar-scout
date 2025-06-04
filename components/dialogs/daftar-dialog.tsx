@@ -39,6 +39,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "../ui/checkbox"
 import { useDaftar } from "@/lib/context/daftar-context"
 import { usePathname } from "next/navigation"
+import { uploadVideoToS3 } from "@/lib/s3"
 
 interface TeamMember {
   id: string
@@ -534,15 +535,46 @@ export function DaftarDialog({
     }
   };
 
-  const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      const imageUrl = URL.createObjectURL(file)
-      setAvatarUrl(imageUrl)
-      toast({
-        title: "Photo updated",
-        description: "Your daftar photo has been updated successfully."
-      })
+      try {
+        // Generate a unique key for the image
+        const key = `daftar-images/${daftarId}/${Date.now()}-${file.name}`;
+        
+        // Upload to S3 and get URL
+        const imageUrl = await uploadVideoToS3(file, key);
+        
+        // Update local state
+        setAvatarUrl(imageUrl);
+        
+        // Update Daftar profile in database
+        const response = await fetch(`/api/endpoints/daftar/me?daftarId=${daftarId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            profileUrl: imageUrl
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update Daftar profile image');
+        }
+
+        toast({
+          title: "Photo updated",
+          description: "Your daftar photo has been updated successfully."
+        });
+      } catch (error: any) {
+        console.error('Error uploading image:', error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to upload image",
+          variant: "destructive"
+        });
+      }
     }
   }
 
