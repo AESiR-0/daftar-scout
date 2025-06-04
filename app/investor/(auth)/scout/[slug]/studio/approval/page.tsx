@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { usePathname } from "next/navigation";
 import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 interface ApprovalRequest {
   scoutId: string;
   isApproved: boolean;
@@ -123,9 +123,9 @@ export default function ApprovalPage() {
 
       // Update local state
       setUserApproved(true);
-      setApprovalRequests(prev => 
-        prev?.map(request => 
-          request.isCurrentUser 
+      setApprovalRequests(prev =>
+        prev?.map(request =>
+          request.isCurrentUser
             ? { ...request, isApproved: true, approvedAt: new Date() }
             : request
         )
@@ -133,7 +133,7 @@ export default function ApprovalPage() {
 
       toast({
         title: "Scout Approved",
-        description: data.isApprovedByAll 
+        description: data.isApprovedByAll
           ? "Your approval has been submitted and the scout is now active!"
           : "Your approval has been submitted successfully",
       });
@@ -185,9 +185,8 @@ export default function ApprovalPage() {
                       />
                       <label
                         htmlFor="terms"
-                        className={`text-sm text-muted-foreground ${
-                          issues.length > 0 || isLocked ? "opacity-50" : ""
-                        }`}
+                        className={`text-sm text-muted-foreground ${issues.length > 0 || isLocked ? "opacity-50" : ""
+                          }`}
                       >
                         All the data looks good to me. We can take the Scout
                         live.
@@ -220,39 +219,40 @@ export default function ApprovalPage() {
                   </div>
 
                   <div className="space-y-3">
-                    {approvalRequests?.map((member) => (
-                      <div
-                        key={member.investorId}
-                        className={`flex items-center justify-between p-4 border rounded-lg bg-background ${
-                          member.isCurrentUser ? "border-primary/50" : ""
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>
-                              {member.user.name[0].toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">
-                              {member.user.name} {member.user.lastName}
-                              {member.isCurrentUser && (
-                                <span className="ml-2 text-xs text-primary">(You)</span>
-                              )}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {member.designation}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {member.daftarName}
-                            </p>
+                    <ScrollArea className="h-[50vh]">
+                      {approvalRequests?.map((member) => (
+                        <div
+                          key={member.investorId}
+                          className={`flex items-center justify-between p-4 border rounded-lg bg-background ${member.isCurrentUser ? "border-primary/50" : ""
+                            }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>
+                                {member.user.name[0].toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium">
+                                {member.user.name} {member.user.lastName}
+                                {member.isCurrentUser && (
+                                  <span className="ml-2 text-xs text-primary">(You)</span>
+                                )}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {member.designation}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {member.daftarName}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            {getStatusIcon(member.isApproved)}
                           </div>
                         </div>
-                        <div className="flex items-center">
-                          {getStatusIcon(member.isApproved)}
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </ScrollArea>
                   </div>
                 </div>
               </CardContent>

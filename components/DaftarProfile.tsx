@@ -26,7 +26,7 @@ export function DaftarProfile({ collaborator }: { collaborator: any }) {
                 <div className="mt-3 space-y-2 text-xs">
                     <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">Structure:</span>
-                        <span>{collaborator.daftarDetails.structure}</span>
+                        <span>{collaborator.daftarDetails.structure.charAt(0).toUpperCase() + collaborator.daftarDetails.structure.slice(1)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-muted-foreground">Location:</span>

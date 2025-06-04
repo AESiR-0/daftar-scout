@@ -351,7 +351,7 @@ export function FoundersPitchSection({
                     href={pitch.demoLink}
                     className="text-sm hover:underline"
                   >
-                    View Demo
+                    {pitch.demoLink}
                   </Link>
                 ) : (
                   <span className="text-sm">No Demo Link</span>
