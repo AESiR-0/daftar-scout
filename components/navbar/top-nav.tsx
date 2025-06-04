@@ -33,7 +33,7 @@ export function TopNav({ role }: { role: string }) {
     role === "investor" ? topNavConfig["investor"] : topNavConfig["founder"];
   const pathname = usePathname();
   const router = useRouter();
-  const paths = pathname.split("/").filter(Boolean);
+  const scoutId = pathname.split("/")[3];
   const [profileOpen, setProfileOpen] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -93,13 +93,7 @@ export function TopNav({ role }: { role: string }) {
 
   // Update the back button handler
   const handleBack = () => {
-    if (pathname.includes("/founder/studio/pitch-name")) {
-      router.push("/founder/pitch");
-    } else if (pathname.includes("/investor/studio/details")) {
-      router.push("/investor/scout");
-    } else {
-      router.back();
-    }
+      router.push(`/investor/scout/${scoutId}`);
   };
   useEffect(() => {
     async function fetchUserId() {
