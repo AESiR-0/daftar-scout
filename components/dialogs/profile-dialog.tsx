@@ -54,6 +54,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSession } from "next-auth/react";
+import { uploadVideoToS3 } from "@/lib/s3";
+import { db } from "@/backend/database";
+import { languages } from "@/backend/drizzle/models/users";
+
 interface ProfileData {
   firstName: string;
   lastName: string;
@@ -63,6 +67,7 @@ interface ProfileData {
   dateOfBirth: string | null;
   languages: string[];
   joinedDate: string;
+  image: string;
 }
 
 interface ProfileDialogProps {
@@ -112,6 +117,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(false);
   const [isLoadingSupport, setIsLoadingSupport] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [availableLanguages, setAvailableLanguages] = useState<{ id: string; language_name: string }[]>([]);
 
   const tabs: { id: ProfileTab; label: string }[] = [
     { id: "account", label: "My Account" },
@@ -153,6 +159,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         dateOfBirth: data.dateOfBirth || null,
         languages: data.languages || [],
         joinedDate: data.joinedDate || new Date().toDateString(),
+        image: data.image || "",
       });
     } catch (error: any) {
       console.error("Error fetching profile:", error);
@@ -420,6 +427,29 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     setFeedbackText("");
   };
 
+  // Fetch available languages
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await fetch("/api/endpoints/languages");
+        if (!response.ok) throw new Error("Failed to fetch languages");
+        const data = await response.json();
+        setAvailableLanguages(data);
+      } catch (error) {
+        console.error("Error fetching languages:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load languages",
+          variant: "destructive",
+        });
+      }
+    };
+
+    if (open) {
+      fetchLanguages();
+    }
+  }, [open]);
+
   const renderContent = () => {
     switch (activeTab) {
       case "account":
@@ -443,7 +473,64 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-20 w-20">
-                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarImage 
+                      src={profileData.image} 
+                      className={cn(
+                        "cursor-pointer transition-opacity hover:opacity-80",
+                        isEditing && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+                      )}
+                      onClick={() => isEditing && document.getElementById('avatar-upload')?.click()}
+                    />
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          try {
+                            // Generate a unique key for the image
+                            const key = `profile-images/${session?.user?.email}/${Date.now()}-${file.name}`;
+                            
+                            // Upload to S3 and get URL
+                            const imageUrl = await uploadVideoToS3(file, key);
+                            
+                            // Update local state
+                            setProfileData(prev => prev ? {
+                              ...prev,
+                              image: imageUrl
+                            } : prev);
+
+                            // Update profile in database
+                            const response = await fetch("/api/endpoints/me", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                email: session?.user?.email,
+                                image: imageUrl
+                              }),
+                            });
+
+                            if (!response.ok) {
+                              throw new Error("Failed to update profile image");
+                            }
+
+                            toast({
+                              title: "Profile updated",
+                              description: "Your profile image has been updated successfully",
+                            });
+                          } catch (error: any) {
+                            console.error("Error uploading image:", error);
+                            toast({
+                              title: "Error",
+                              description: error.message || "Failed to upload image",
+                              variant: "destructive",
+                            });
+                          }
+                        }
+                      }}
+                    />
                     <AvatarFallback>
                       {profileData.firstName[0]}
                       {profileData.lastName[0]}
@@ -539,8 +626,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                             variant="outline"
                             className={cn(
                               "w-full justify-start text-left font-normal rounded-[0.35rem] bg-[#1a1a1a]",
-                              !profileData.dateOfBirth &&
-                                "text-muted-foreground"
+                              !profileData.dateOfBirth && "text-muted-foreground"
                             )}
                             disabled={isLoading}
                           >
@@ -555,20 +641,14 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={
-                              profileData.dateOfBirth
-                                ? new Date(profileData.dateOfBirth)
-                                : undefined
-                            }
+                            selected={profileData.dateOfBirth ? new Date(profileData.dateOfBirth) : undefined}
                             onSelect={(date) => {
                               if (date) {
                                 setProfileData((prev) =>
                                   prev
                                     ? {
                                         ...prev,
-                                        dateOfBirth: date
-                                          .toISOString()
-                                          .split("T")[0],
+                                        dateOfBirth: date.toISOString().split("T")[0],
                                       }
                                     : prev
                                 );
@@ -576,6 +656,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                             }}
                             initialFocus
                             disabled={isLoading}
+                            fromYear={1900}
+                            toYear={new Date().getFullYear()}
+                            captionLayout="dropdown-buttons"
+                            className="rounded-md border"
                           />
                         </PopoverContent>
                       </Popover>
@@ -603,20 +687,11 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                               <SelectValue placeholder="Add language" />
                             </SelectTrigger>
                             <SelectContent>
-                              {[
-                                "English",
-                                "Hindi",
-                                "Spanish",
-                                "French",
-                                "German",
-                              ]
-                                .filter(
-                                  (lang) =>
-                                    !profileData.languages.includes(lang)
-                                )
+                              {availableLanguages
+                                .filter((lang) => !profileData.languages.includes(lang.language_name))
                                 .map((lang) => (
-                                  <SelectItem key={lang} value={lang}>
-                                    {lang}
+                                  <SelectItem key={lang.id} value={lang.language_name}>
+                                    {lang.language_name}
                                   </SelectItem>
                                 ))}
                             </SelectContent>
@@ -1119,7 +1194,7 @@ Logs will be retained for no more than 100 days for debugging and performance an
 
 Cloud Infrastructure (AWS): We use Amazon Web Services (AWS EC2 and S3) to host our application and store session-related data. Your Google authentication data (such as your name and email address) is processed and stored securely on our AWS servers, solely for the purposes of providing access and managing sessions. AWS complies with industry-standard data protection regulations and does not access your data for any purpose outside of providing cloud services.
 
-No Unauthorized Third Parties: We do not share or transfer your Google user data to any unauthorized third parties. Only Daftar’s authorized internal personnel have access to this data, and only for the purpose of operating the service.
+No Unauthorized Third Parties: We do not share or transfer your Google user data to any unauthorized third parties. Only Daftar's authorized internal personnel have access to this data, and only for the purpose of operating the service.
 
 Legal Compliance: We may disclose your Google user data if legally required (e.g., court order, legal process, or government request), and only when necessary to comply with applicable laws, protect our rights, or ensure the safety of users.
 
