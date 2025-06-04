@@ -229,8 +229,6 @@ export default function ScoutDetailsPage() {
                     daftarName={collaboration.join(", ")}
                     sector={transformedScout.details.Sector}
                     stage={transformedScout.details.Stage}
-                    title={transformedScout.title}
-                    description={transformedScout.description}
                     lastDate={transformedScout.lastPitchDate}
                     applyUrl={`https://daftar.com/founder/scout/${transformedScout.slug}`}
                   />
