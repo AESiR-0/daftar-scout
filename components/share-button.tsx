@@ -8,8 +8,7 @@ interface ShareButtonProps {
     sector: string;
     stage: string;
     lastDate: string;
-    title: string;
-    description: string;
+
     applyUrl: string;
 }
 

@@ -153,11 +153,9 @@ export default function ScoutDetailsPage() {
                       </h1>
                       <div className="flex text-md items-center gap-4">
                         <ShareButton
-                          daftarName={`${collaboration.join(", ")}`}
+                          daftarName={`${collaboration.map((c: Collaboration) => c.daftarName).join(", ")}`}
                           sector={scout.details.Sector}
                           stage={scout.details.Stage}
-                          title={scout.title}
-                          description={scout.description}
                           lastDate={lastDayToPitch}
                           applyUrl={`/founder/scout/${scout.slug}`}
                         />

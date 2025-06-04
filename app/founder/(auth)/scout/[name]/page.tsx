@@ -226,7 +226,7 @@ export default function ScoutDetailsPage() {
                 </h1>
                 <div className="flex text-md items-center gap-4">
                   <ShareButton
-                    daftarName={collaboration.join(", ")}
+                    daftarName={collaborations.map((c: InvestorProfileProps) => c.daftarName).join(", ")}
                     sector={transformedScout.details.Sector}
                     stage={transformedScout.details.Stage}
                     lastDate={transformedScout.lastPitchDate}
