@@ -1,9 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
-import { pitch } from "@/backend/drizzle/models/pitch";
 import { scouts } from "@/backend/drizzle/models/scouts";
-import { daftar } from "@/backend/drizzle/models/daftar";
+import { pitches } from "@/backend/drizzle/models/pitches";
+import { daftars } from "@/backend/drizzle/models/daftars";
 import { eq } from "drizzle-orm";
+import { cache } from 'react';
+
+// Cache the database queries
+const getScoutDetails = cache(async (scoutId: string) => {
+  const [scout] = await db
+    .select({ name: scouts.scoutName })
+    .from(scouts)
+    .where(eq(scouts.scoutId, scoutId))
+    .limit(1);
+  return scout;
+});
+
+const getPitchDetails = cache(async (pitchId: string) => {
+  const [pitch] = await db
+    .select({ name: pitches.pitchName })
+    .from(pitches)
+    .where(eq(pitches.id, pitchId))
+    .limit(1);
+  return pitch;
+});
+
+const getDaftarDetails = cache(async (daftarId: string) => {
+  const [daftar] = await db
+    .select({ name: daftars.name })
+    .from(daftars)
+    .where(eq(daftars.id, daftarId))
+    .limit(1);
+  return daftar;
+});
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,57 +41,21 @@ export async function GET(req: NextRequest) {
     const pitchId = searchParams.get("pitchId");
     const daftarId = searchParams.get("daftarId");
 
-    const details: {
-      pitchName?: string;
-      scoutName?: string;
-      daftarName?: string;
-    } = {};
-
-    // Fetch pitch details if pitchId is provided
-    if (pitchId) {
-      const [pitchDetails] = await db
-        .select({ pitchName: pitch.pitchName })
-        .from(pitch)
-        .where(eq(pitch.id, pitchId))
-        .limit(1);
-
-      if (pitchDetails?.pitchName) {
-        details.pitchName = pitchDetails.pitchName;
-      }
+    if (!scoutId && !pitchId && !daftarId) {
+      return NextResponse.json({ error: 'No valid ID provided' }, { status: 400 });
     }
 
-    // Fetch scout details if scoutId is provided
-    if (scoutId) {
-      const [scoutDetails] = await db
-        .select({ scoutName: scouts.scoutName })
-        .from(scouts)
-        .where(eq(scouts.scoutId, scoutId))
-        .limit(1);
+    const [scoutDetails, pitchDetails, daftarDetails] = await Promise.all([
+      scoutId ? getScoutDetails(scoutId) : null,
+      pitchId ? getPitchDetails(pitchId) : null,
+      daftarId ? getDaftarDetails(daftarId) : null,
+    ]);
 
-      if (scoutDetails?.scoutName) {
-        details.scoutName = scoutDetails.scoutName;
-      }
-    }
-
-    // Fetch daftar details if daftarId is provided
-    if (daftarId) {
-      const [daftarDetails] = await db
-        .select({ daftarName: daftar.name })
-        .from(daftar)
-        .where(eq(daftar.id, daftarId))
-        .limit(1);
-
-      if (daftarDetails?.daftarName) {
-        details.daftarName = daftarDetails.daftarName;
-      }
-    }
-
-    // Only return if we have at least one piece of data
-    if (Object.keys(details).length > 0) {
-      return NextResponse.json(details, { status: 200 });
-    }
-
-    return NextResponse.json({}, { status: 200 });
+    return NextResponse.json({
+      scoutName: scoutDetails?.name,
+      pitchName: pitchDetails?.name,
+      daftarName: daftarDetails?.name,
+    });
   } catch (error) {
     console.error("Error fetching notification details:", error);
     return NextResponse.json(

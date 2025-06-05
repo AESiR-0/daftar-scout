@@ -10,6 +10,16 @@ import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { cache } from 'react';
+
+// Cache the user role check
+const getUserRole = cache(async (email: string) => {
+  return db
+    .select({ role: users?.role })
+    .from(users)
+    .where(eq(users?.email, email))
+    .then((res) => res[0]);
+});
 
 export default async function Layout({
   children,
@@ -21,11 +31,7 @@ export default async function Layout({
   if (!session?.user) {
     redirect("/login/investor");
   }
-  const user = await db
-    .select({ role: users?.role })
-    .from(users)
-    .where(eq(users?.email, session?.user?.email ?? ""))
-    .then((res) => res[0]);
+  const user = await getUserRole(session.user.email ?? "");
 
   if (user.role === "temp") {
     redirect("/sign-up/complete");

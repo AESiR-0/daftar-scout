@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +56,7 @@ type Notification = {
   created_at: string;
 };
 
-type UITab = "updates" | "alerts" | "news" | "scout-requests" | "scout-links";
+type UITab = "updates" | "alerts" | "news" | "scout-requests" | "scout-links" | "all";
 
 const emptyStateMessages: Record<UITab, string> = {
   "scout-requests":
@@ -66,6 +66,7 @@ const emptyStateMessages: Record<UITab, string> = {
   updates: "Looks empty here for now.",
   alerts: "Looks empty here for now.",
   news: "When a startup gets selected at Daftar, we'll share the news here.",
+  all: "No notifications yet.",
 };
 
 export function NotificationDialog({
@@ -79,11 +80,10 @@ export function NotificationDialog({
   role?: "founder" | "investor" | undefined;
   userId: string;
 }) {
-  const [activeTab, setActiveTab] = useState<UITab>(
-    role === "investor" ? "scout-requests" : "updates"
-  );
+  const [activeTab, setActiveTab] = useState<UITab>("all");
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [notificationDetails, setNotificationDetails] = useState<Record<string, NotificationDetails>>({});
+  const [notificationDetails, setNotificationDetails] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   const pathname = usePathname();
   const scoutId =
@@ -108,23 +108,74 @@ export function NotificationDialog({
     return typeMap[type];
   };
 
-  // Fetch all notifications from Supabase on mount
-  useEffect(() => {
-    const fetchNotifications = async () => {
+  // Custom debounce implementation
+  function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number
+  ): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout;
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  }
+
+  // Debounced function to fetch notification details
+  const fetchNotificationDetails = useCallback(
+    debounce(async (notifications: Notification[]) => {
+      const details: Record<string, any> = {};
+      
+      // Process notifications in batches of 5
+      for (let i = 0; i < notifications.length; i += 5) {
+        const batch = notifications.slice(i, i + 5);
+        await Promise.all(
+          batch.map(async (notification) => {
+            if (!notification.payload.scout_id && !notification.payload.pitchId && !notification.payload.daftar_id) {
+              return;
+            }
+
+            try {
+              const queryParams = new URLSearchParams();
+              if (notification.payload.scout_id) {
+                queryParams.append('scoutId', notification.payload.scout_id);
+              }
+              if (notification.payload.pitchId) {
+                queryParams.append('pitchId', notification.payload.pitchId);
+              }
+              if (notification.payload.daftar_id) {
+                queryParams.append('daftarId', notification.payload.daftar_id);
+              }
+
+              const res = await fetch(`/api/endpoints/notifications/details?${queryParams.toString()}`);
+              if (!res.ok) throw new Error(`Failed to fetch details: ${res.statusText}`);
+              
+              const data = await res.json();
+              if (data && (data.pitchName || data.scoutName || data.daftarName)) {
+                details[notification.id] = data;
+              }
+            } catch (error) {
+              console.error('Error fetching notification details:', error);
+            }
+          })
+        );
+      }
+
+      setNotificationDetails(prev => ({ ...prev, ...details }));
+    }, 1000),
+    []
+  );
+
+  // Fetch notifications with pagination
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from("notifications")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50); // Limit to 50 most recent notifications
 
-      if (error) {
-        console.error("Error fetching notifications:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load notifications",
-          variant: "destructive",
-        });
-        return;
-      }
+      if (error) throw error;
 
       if (data) {
         const filteredNotifications = data.filter(
@@ -133,16 +184,37 @@ export function NotificationDialog({
               notif.targeted_users.includes(userId)) &&
             (notif.role === "both" || notif.role === role)
         );
-        console.log("Filtered Notifications:", filteredNotifications);
         setNotifications(filteredNotifications);
+        
+        // Fetch details for relevant notifications
+        const relevantNotifications = filteredNotifications.filter(
+          n => n.type === 'request' || n.type === 'updates' || n.type === 'scout_link'
+        );
+        fetchNotificationDetails(relevantNotifications);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load notifications",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId, role, fetchNotificationDetails]);
 
-    fetchNotifications();
-  }, [userId, role]);
-
-  // Real-time listener for Supabase notifications
+  // Initial fetch
   useEffect(() => {
+    if (open) {
+      fetchNotifications();
+    }
+  }, [open, fetchNotifications]);
+
+  // Real-time subscription
+  useEffect(() => {
+    if (!open) return;
+
     const subscription = supabase
       .channel("realtime:notifications")
       .on(
@@ -157,11 +229,13 @@ export function NotificationDialog({
           const isTargeted =
             notif.targeted_users.length === 0 ||
             notif.targeted_users.includes(userId);
-
           const roleMatches = notif.role === "both" || notif.role === role;
 
           if (isTargeted && roleMatches) {
-            setNotifications((prev) => [...prev, notif]);
+            setNotifications(prev => [notif, ...prev]);
+            if (notif.type === 'request' || notif.type === 'updates' || notif.type === 'scout_link') {
+              fetchNotificationDetails([notif]);
+            }
             toast({
               title: `New notification: ${notif.title || notif.type}`,
               variant: "default",
@@ -174,15 +248,7 @@ export function NotificationDialog({
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, [userId, role]);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      const res = fetch(
-        `/api/endpoints/notifications?userId=${userId}&scoutId=${notifications[0]?.payload?.scout_id ? notifications[0]?.payload?.scout_id : ""}&daftarId=${notifications[0]?.payload?.daftar_id ? notifications[0]?.payload?.daftar_id : ""}&pitchId=${notifications[0]?.payload?.pitchId ? notifications[0]?.payload?.pitchId : ""}`
-      );
-    };
-  });
+  }, [open, userId, role, fetchNotificationDetails]);
 
   // Add counts for each tab
   const tabCounts = {
@@ -252,56 +318,6 @@ export function NotificationDialog({
       });
     }
   };
-
-  // Fetch details for notifications
-  useEffect(() => {
-    const fetchNotificationDetails = async (notification: Notification) => {
-      // Skip if no relevant IDs are present
-      if (!notification.payload.scout_id && !notification.payload.pitchId && !notification.payload.daftar_id) {
-        return;
-      }
-
-      try {
-        const queryParams = new URLSearchParams();
-
-        if (notification.payload.scout_id) {
-          queryParams.append('scoutId', notification.payload.scout_id ? notification.payload.scout_id : "");
-        }
-        if (notification.payload.pitchId) {
-          queryParams.append('pitchId', notification.payload.pitchId ? notification.payload.pitchId : "");
-        }
-        if (notification.payload.daftar_id) {
-          queryParams.append('daftarId', notification.payload.daftar_id ? notification.payload.daftar_id : "");
-        }
-
-        const res = await fetch(`/api/endpoints/notifications/details?${queryParams.toString()}`);
-
-        if (!res.ok) {
-          throw new Error(`Failed to fetch details: ${res.statusText}`);
-        }
-
-        const data = await res.json();
-
-        if (data && (data.pitchName || data.scoutName || data.daftarName)) {
-          setNotificationDetails(prev => ({
-            ...prev,
-            [notification.id]: data
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching notification details:', error);
-        // Don't show toast for every failed notification detail fetch
-        // as it could be noisy if many notifications fail
-      }
-    };
-
-    // Only fetch details for relevant notification types
-    notifications.forEach(notification => {
-      if (notification.type === 'request' || notification.type === 'updates' || notification.type === 'scout_link') {
-        fetchNotificationDetails(notification);
-      }
-    });
-  }, [notifications]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
