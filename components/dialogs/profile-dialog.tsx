@@ -474,7 +474,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <label htmlFor="avatar-upload" className="cursor-pointer">
-                    <Avatar className="h-20 w-20">
+                  <Avatar className="h-20 w-20">
                       <AvatarImage 
                         src={profileData.image} 
                         className={cn(
@@ -482,7 +482,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                           isEditing && "ring-2 ring-primary ring-offset-2 ring-offset-background"
                         )}
                       />
-                    </Avatar>
+                  </Avatar>
                   </label>
                   <input
                     id="avatar-upload"
@@ -547,16 +547,16 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       }
                     }}
                   />
-                </div>
+                  </div>
                 {!isEditing && (
-                  <Button
+                <Button
                     variant="outline"
-                    size="icon"
-                    className="rounded-[0.35rem]"
+                  size="icon"
+                  className="rounded-[0.35rem]"
                     onClick={() => setIsEditing(true)}
-                  >
+                >
                     <Pencil className="h-4 w-4" />
-                  </Button>
+                </Button>
                 )}
                 {isEditing && (
                   <p className="text-xs text-muted-foreground mt-2">
@@ -643,8 +643,8 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                                 : prev
                             );
                           }}
-                          disabled={isLoading}
-                        >
+                            disabled={isLoading}
+                          >
                           <SelectTrigger className="rounded-[0.35rem] bg-[#1a1a1a]">
                             <SelectValue placeholder="Month" />
                           </SelectTrigger>
@@ -715,10 +715,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                                     : prev
                                 );
                               }
-                            }
-                          }}
+                              }
+                            }}
                           placeholder="Year"
-                          disabled={isLoading}
+                            disabled={isLoading}
                           className="rounded-[0.35rem] bg-[#1a1a1a]"
                         />
                       </div>
