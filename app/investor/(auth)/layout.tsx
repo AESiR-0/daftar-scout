@@ -52,7 +52,7 @@ export default async function Layout({
     console.warn("[Investor Layout] User role is temp, redirecting to /sign-up/complete");
     redirect("/sign-up/complete");
   }
-  if (user.role !== "investor") {
+  if (user.role.toLowerCase() !== "investor") {
     console.warn(`{[Investor Layout] User role is not investor (got '${user.role}'), redirecting to /founder}`);
     redirect("/founder");
   }
