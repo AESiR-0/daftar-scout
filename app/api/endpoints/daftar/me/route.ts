@@ -20,10 +20,11 @@ interface DaftarAddress {
 }
 
 interface UpdateDaftarRequest {
-    name: string;
-    structure: string;
-    website: string;
-    vision: string;
+    name?: string;
+    structure?: string;
+    website?: string;
+    profileUrl?: string;
+    vision?: string;
 }
 
 export async function GET(req: NextRequest) {
@@ -104,6 +105,7 @@ export async function PATCH(req: NextRequest) {
             .update(daftar)
             .set({
                 name: updateData.name,
+                profileUrl: updateData.profileUrl,
                 structure: updateData.structure,
                 website: updateData.website,
                 bigPicture: updateData.vision,

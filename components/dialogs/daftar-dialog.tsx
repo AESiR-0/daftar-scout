@@ -468,6 +468,7 @@ export function DaftarDialog({
         },
         body: JSON.stringify({
           name: daftarData.name,
+          profileUrl: avatarUrl,
           structure: daftarData.structure,
           website: daftarData.website,
           vision: daftarData.vision,
@@ -764,23 +765,39 @@ export function DaftarDialog({
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20 rounded-[0.35rem]">
-                    <AvatarImage src={avatarUrl} />
-                    <AvatarFallback>D</AvatarFallback>
-                  </Avatar>
+                  <label htmlFor="daftar-avatar-upload" className={isEditing ? "cursor-pointer" : undefined}>
+                    <Avatar className="h-20 w-20 rounded-[0.35rem]">
+                      <AvatarImage src={avatarUrl} />
+                      <AvatarFallback>D</AvatarFallback>
+                    </Avatar>
+                  </label>
+                  <input
+                    id="daftar-avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={!isEditing}
+                    onChange={handlePhotoChange}
+                  />
                   <div>
                     <h3 className="text-lg font-medium">{daftarData.name}</h3>
                     <p className="text-sm text-muted-foreground">{daftarData.structure}</p>
                     <p className="text-xs text-muted-foreground mt-1">Daftar Code: {daftarData.code}</p>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
-                  {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
-                </Button>
+                <div className="flex flex-col items-end gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-[0.35rem]"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  {isEditing && (
+                    <p className="text-xs text-muted-foreground mt-2">Click the image to change your Daftar photo</p>
+                  )}
+                </div>
               </div>
 
               {isEditing ? (
