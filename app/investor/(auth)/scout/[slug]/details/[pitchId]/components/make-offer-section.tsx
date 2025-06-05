@@ -34,6 +34,10 @@ interface Offer {
   type: "sent" | "accepted" | "withdrawn" | "rejected";
   date: string;
   responses?: ActionLog[];
+  offer_desc: string;
+  userName: string;
+  userLastName: string;
+  actions: any[];
 }
 
 interface ActionLog {
@@ -91,49 +95,13 @@ export function MakeOfferSection({
       const data = await response.json();
       const mappedOffers: Offer[] = data.map((offer: any) => ({
         id: offer.id.toString(),
-        scoutName: offer.creatorName + (offer.creatorLastName ? ` ${offer.creatorLastName}` : ''),
-        collaboration: ["Collaboration Partner"],
+        scoutName: offer.userName + (offer.userLastName ? ` ${offer.userLastName}` : ''),
         status: offer.status,
-        type: offer.status,
         date: formatDate(offer.offer_sent_at),
-        responses: [
-          {
-            action: offer.status === "pending" ? "Offer Sent" : offer.status,
-            reason: offer.offer_desc,
-            timestamp: formatDate(offer.offer_sent_at),
-            user: {
-              founder: {
-                name: offer.creatorName,
-                lastName: offer.creatorLastName,
-                age: "30",
-                designation: offer.creatorRole || "Investor",
-                email: offer.creatorEmail || "investor@example.com",
-                phone: "1234567890",
-                gender: "Unknown",
-                location: "Unknown",
-                language: ["English"],
-              },
-            },
-          },
-          ...(offer.actions || []).map((action: any) => ({
-            action: action.action,
-            reason: action.notes || "",
-            timestamp: formatDate(action.actionTakenAt),
-            user: {
-              founder: {
-                name: action.actionTakerName,
-                lastName: action.actionTakerLastName,
-                age: "30",
-                designation: action.actionTakerRole || "User",
-                email: action.actionTakerEmail || "user@example.com",
-                phone: "1234567890",
-                gender: "Unknown",
-                location: "Unknown",
-                language: ["English"],
-              },
-            },
-          })),
-        ],
+        offer_desc: offer.offer_desc,
+        userName: offer.userName,
+        userLastName: offer.userLastName,
+        actions: offer.actions || [],
       }));
       setOffers(mappedOffers);
     } catch (error) {
@@ -385,15 +353,15 @@ export function MakeOfferSection({
                           <div className="bg-muted/5 rounded-[0.35rem] p-4">
                             <div className="flex flex-col gap-1 mb-5">
                               <p className="text-xs text-muted-foreground">
-                                Created by: {offer.responses?.[0].user.founder.name} {offer.responses?.[0].user.founder.lastName}
+                                Created by: {offer.userName} {offer.userLastName}
                                 <time className="text-xs text-muted-foreground">
-                                  {" "}at {offer.responses?.[0].timestamp}
+                                  {" "}at {offer.date}
                                 </time>
                               </p>
 
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              {offer.responses?.[0].reason}
+                            <p className="text-sm text-muted-foreground whitespace-pre-line">
+                              {offer.offer_desc}
                             </p>
 
                           </div>

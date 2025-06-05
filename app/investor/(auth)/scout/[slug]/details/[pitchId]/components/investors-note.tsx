@@ -162,13 +162,19 @@ export function InvestorsNote({
       </CardHeader>
       <CardContent>
         <div className="border h-[400px] rounded-xl overflow-hidden flex flex-col">
-          <textarea
-            value={note}
-            onChange={e => setNote(e.target.value)}
-            disabled={!isMember}
-            placeholder="Use this space to write down anything important about the startup—opportunities, concerns, questions, or insights. Share what stands out, what feels risky, or what we should do next. This helps the team make faster and smarter investment decisions."
-            className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white resize-none border-none outline-none flex-1"
-          />
+          {isMember ? (
+            <textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              disabled={!isMember}
+              placeholder={note}
+              className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white resize-none border-none outline-none flex-1"
+            />
+          ) : (
+            <p className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white whitespace-pre-line flex-1">
+              {note}
+            </p>
+          )}
           <div className="text-xs text-muted-foreground mt-2 self-end">
             {isSaving ? "Saving..." : ""}
           </div>
