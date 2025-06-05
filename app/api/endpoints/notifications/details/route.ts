@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
 import { scouts } from "@/backend/drizzle/models/scouts";
-import { pitches } from "@/backend/drizzle/models/pitches";
-import { daftars } from "@/backend/drizzle/models/daftars";
+import { pitch } from "@/backend/drizzle/models/pitch";
+import { daftar } from "@/backend/drizzle/models/daftar";
 import { eq } from "drizzle-orm";
 import { cache } from 'react';
 
@@ -17,21 +17,21 @@ const getScoutDetails = cache(async (scoutId: string) => {
 });
 
 const getPitchDetails = cache(async (pitchId: string) => {
-  const [pitch] = await db
-    .select({ name: pitches.pitchName })
-    .from(pitches)
-    .where(eq(pitches.id, pitchId))
+  const [pitchData] = await db
+    .select({ name: pitch.pitchName })
+    .from(pitch)
+    .where(eq(pitch.id, pitchId))
     .limit(1);
-  return pitch;
+  return pitchData;
 });
 
 const getDaftarDetails = cache(async (daftarId: string) => {
-  const [daftar] = await db
-    .select({ name: daftars.name })
-    .from(daftars)
-    .where(eq(daftars.id, daftarId))
+  const [daftarData] = await db
+      .select({ name: daftar.name })
+    .from(daftar)
+    .where(eq(daftar.id, daftarId))
     .limit(1);
-  return daftar;
+  return daftarData;
 });
 
 export async function GET(req: NextRequest) {
