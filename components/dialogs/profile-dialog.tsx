@@ -159,7 +159,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
         dateOfBirth: data.dateOfBirth || null,
         languages: data.languages || [],
         joinedDate: data.joinedDate || new Date().toDateString(),
-        image: data.image || "",
+        image: data.image,
       });
     } catch (error: any) {
       console.error("Error fetching profile:", error);
@@ -192,6 +192,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           email: session?.user?.email,
           firstName: profileData.firstName,
           lastName: profileData.lastName,
+          image: profileData.image,
           phone: profileData.phone,
           gender: profileData.gender,
           dateOfBirth: profileData.dateOfBirth,
@@ -472,90 +473,96 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
             <div className="p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20">
-                    <AvatarImage 
-                      src={profileData.image} 
-                      className={cn(
-                        "cursor-pointer transition-opacity hover:opacity-80",
-                        isEditing && "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                      )}
-                      onClick={() => isEditing && document.getElementById('avatar-upload')?.click()}
-                    />
-                    <input
-                      id="avatar-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          try {
-                            // Generate a unique key for the image
-                            const key = `profile-images/${session?.user?.email}/${Date.now()}-${file.name}`;
-                            
-                            // Upload to S3 and get URL
-                            const imageUrl = await uploadVideoToS3(file, key);
-                            
-                            // Update local state
-                            setProfileData(prev => prev ? {
-                              ...prev,
-                              image: imageUrl
-                            } : prev);
-
-                            // Update profile in database
-                            const response = await fetch("/api/endpoints/me", {
-                              method: "PATCH",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                email: session?.user?.email,
-                                image: imageUrl
-                              }),
-                            });
-
-                            if (!response.ok) {
-                              throw new Error("Failed to update profile image");
-                            }
-
-                            toast({
-                              title: "Profile updated",
-                              description: "Your profile image has been updated successfully",
-                            });
-                          } catch (error: any) {
-                            console.error("Error uploading image:", error);
-                            toast({
-                              title: "Error",
-                              description: error.message || "Failed to upload image",
-                              variant: "destructive",
-                            });
+                  <label htmlFor="avatar-upload" className="cursor-pointer">
+                    <Avatar className="h-20 w-20">
+                      <AvatarImage 
+                        src={profileData.image} 
+                        className={cn(
+                          "transition-opacity hover:opacity-80",
+                          isEditing && "ring-2 ring-primary ring-offset-2 ring-offset-background"
+                        )}
+                      />
+                    </Avatar>
+                  </label>
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        try {
+                          setIsLoading(true);
+                          // Validate file size (max 5MB)
+                          if (file.size > 2 * 1024 * 1024) {
+                            throw new Error("Image size should be less than 2MB");
                           }
+                          // Validate file type
+                          if (!file.type.startsWith('image/')) {
+                            throw new Error("Please upload an image file");
+                          }
+                          // Generate a unique key for the image
+                          const key = `profile-images/${session?.user?.email}/${Date.now()}-${file.name}`;
+                          // Upload to S3 and get URL
+                          const imageUrl = await uploadVideoToS3(file, key);
+                          // Update local state
+                          setProfileData(prev => prev ? {
+                            ...prev,
+                            image: imageUrl
+                          } : prev);
+                          // Update profile in database
+                          const response = await fetch("/api/endpoints/me", {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              email: session?.user?.email,
+                              firstName: profileData.firstName,
+                              lastName: profileData.lastName,
+                              phone: profileData.phone,
+                              gender: profileData.gender,
+                              dateOfBirth: profileData.dateOfBirth,
+                              languages: profileData.languages,
+                              image: imageUrl
+                            }),
+                          });
+                          if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || "Failed to update profile image");
+                          }
+                          toast({
+                            title: "Profile updated",
+                            description: "Your profile image has been updated successfully",
+                          });
+                        } catch (error: any) {
+                          console.error("Error uploading image:", error);
+                          toast({
+                            title: "Error",
+                            description: error.message || "Failed to upload image",
+                            variant: "destructive",
+                          });
+                        } finally {
+                          setIsLoading(false);
                         }
-                      }}
-                    />
-                    <AvatarFallback>
-                      {profileData.firstName[0]}
-                      {profileData.lastName[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="text-lg font-medium">{`${profileData.firstName} ${profileData.lastName}`}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {profileData.email}
-                    </p>
-                  </div>
+                      }
+                    }}
+                  />
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-[0.35rem]"
-                  onClick={() => setIsEditing(!isEditing)}
-                  disabled={isLoading}
-                >
-                  {isEditing ? (
-                    <X className="h-4 w-4" />
-                  ) : (
+                {!isEditing && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-[0.35rem]"
+                    onClick={() => setIsEditing(true)}
+                  >
                     <Pencil className="h-4 w-4" />
-                  )}
-                </Button>
+                  </Button>
+                )}
+                {isEditing && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Click the image to change your profile picture
+                  </p>
+                )}
               </div>
 
               {isEditing ? (
@@ -620,49 +627,110 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     </div>
                     <div className="space-y-2">
                       <Label>Date of Birth</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal rounded-[0.35rem] bg-[#1a1a1a]",
-                              !profileData.dateOfBirth && "text-muted-foreground"
-                            )}
-                            disabled={isLoading}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {profileData.dateOfBirth ? (
-                              formatDate(new Date(profileData.dateOfBirth))
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={profileData.dateOfBirth ? new Date(profileData.dateOfBirth) : undefined}
-                            onSelect={(date) => {
-                              if (date) {
+                      <div className="grid grid-cols-3 gap-2">
+                        <Select
+                          value={profileData.dateOfBirth ? new Date(profileData.dateOfBirth).toLocaleString('default', { month: 'short' }) : ""}
+                          onValueChange={(value) => {
+                            const currentDate = profileData.dateOfBirth ? new Date(profileData.dateOfBirth) : new Date();
+                            const monthIndex = new Date(`${value} 1, 2000`).getMonth();
+                            currentDate.setMonth(monthIndex);
+                            setProfileData((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    dateOfBirth: currentDate.toISOString().split("T")[0],
+                                  }
+                                : prev
+                            );
+                          }}
+                          disabled={isLoading}
+                        >
+                          <SelectTrigger className="rounded-[0.35rem] bg-[#1a1a1a]">
+                            <SelectValue placeholder="Month" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 12 }, (_, i) => {
+                              const month = new Date(2000, i, 1).toLocaleString('default', { month: 'short' });
+                              return (
+                                <SelectItem key={month} value={month}>
+                                  {month}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+
+                        <Input
+                          type="number"
+                          min="1"
+                          max="31"
+                          value={profileData.dateOfBirth ? new Date(profileData.dateOfBirth).getDate() : ""}
+                          onChange={(e) => {
+                            const day = parseInt(e.target.value);
+                            if (day >= 1 && day <= 31) {
+                              const currentDate = profileData.dateOfBirth ? new Date(profileData.dateOfBirth) : new Date();
+                              const month = currentDate.getMonth();
+                              const year = currentDate.getFullYear();
+                              const daysInMonth = new Date(year, month + 1, 0).getDate();
+                              
+                              if (day <= daysInMonth) {
+                                currentDate.setDate(day);
                                 setProfileData((prev) =>
                                   prev
                                     ? {
                                         ...prev,
-                                        dateOfBirth: date.toISOString().split("T")[0],
+                                        dateOfBirth: currentDate.toISOString().split("T")[0],
                                       }
                                     : prev
                                 );
                               }
-                            }}
-                            initialFocus
-                            disabled={isLoading}
-                            fromYear={1900}
-                            toYear={new Date().getFullYear()}
-                            captionLayout="dropdown-buttons"
-                            className="rounded-md border"
-                          />
-                        </PopoverContent>
-                      </Popover>
+                            }
+                          }}
+                          placeholder="Day"
+                          disabled={isLoading}
+                          className="rounded-[0.35rem] bg-[#1a1a1a]"
+                        />
+
+                        <Input
+                          type="number"
+                          min="1900"
+                          max={new Date().getFullYear()}
+                          value={profileData.dateOfBirth ? new Date(profileData.dateOfBirth).getFullYear() : ""}
+                          onChange={(e) => {
+                            const year = parseInt(e.target.value);
+                            if (year >= 1900 && year <= new Date().getFullYear()) {
+                              const currentDate = profileData.dateOfBirth ? new Date(profileData.dateOfBirth) : new Date();
+                              const month = currentDate.getMonth();
+                              const day = currentDate.getDate();
+                              const daysInMonth = new Date(year, month + 1, 0).getDate();
+                              
+                              if (day <= daysInMonth) {
+                                currentDate.setFullYear(year);
+                                setProfileData((prev) =>
+                                  prev
+                                    ? {
+                                        ...prev,
+                                        dateOfBirth: currentDate.toISOString().split("T")[0],
+                                      }
+                                    : prev
+                                );
+                              }
+                            }
+                          }}
+                          placeholder="Year"
+                          disabled={isLoading}
+                          className="rounded-[0.35rem] bg-[#1a1a1a]"
+                        />
+                      </div>
+                      {profileData.dateOfBirth && (
+                        <p className="text-sm text-muted-foreground">
+                          Selected date: {new Date(profileData.dateOfBirth).toLocaleDateString('en-US', { 
+                            month: 'long', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </p>
+                      )}
                     </div>
                     <div className="col-span-2 space-y-2">
                       <Label>Preferred Languages (up to 3)</Label>

@@ -3,7 +3,7 @@ import { db } from "@/backend/database";
 import { pitch, investorPitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { scouts, daftarScouts } from "@/backend/drizzle/models/scouts";
 import { users, userLanguages, languages } from "@/backend/drizzle/models/users";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { sendEmail } from "@/lib/mail/mailer";
 import puppeteer from 'puppeteer-core';
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
@@ -134,10 +134,14 @@ export async function POST(req: Request) {
         location: users.location,
         dob: users.dob,
         gender: users.gender,
+        languages: sql<string[]>`array_agg(${languages.language_name})`,
       })
       .from(users)
-      .where(eq(users.id, pitchTeams[0]?.userId || ''));
-
+      .leftJoin(userLanguages, eq(users.id, userLanguages.userId))
+      .leftJoin(languages, eq(userLanguages.languageId, languages.id))
+      .where(eq(users.id, pitchTeams[0]?.userId || ''))
+      .groupBy(users.id, users.name, users.location, users.dob, users.gender);
+    console.log(teamMembers);
     // Fetch user languages
     const userLangs = await db
       .select({
@@ -395,32 +399,37 @@ export async function POST(req: Request) {
 
                  <!-- Page 3 Content -->
           <div class="section">
-            <h3 style="color: #11574f;">Scout Target Audience</h3>
+            <h3 style="color: #11574f;">Startup Summary</h3>
                 
                 <div style="margin: 20px 0;">
-                  <p><strong>Total Meetings with Startups:</strong> ${totalMeetings}</p>
-                  <p><strong>Total Scouting Time:</strong> ${totalHours} hours</p>
-                  <p><strong>Scouting Period:</strong> ${scoutStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} to ${scoutEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                <ol>
+                  <li><strong>Total Meetings with Startups:</strong> ${totalMeetings}</li>
+                  <li><strong>Total Scouting Time:</strong> ${totalHours} hours</li>
+                  <li><strong>Scouting Period:</strong> ${scoutStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} to ${scoutEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</li>
+                </ol>
                 </div>
                   
             </div>
           <div class="section">
             <h3 style="color: #11574f;">Startup Overview</h3>
             <div style="margin: 20px 0;">
-              <p><strong>Startups pitched:</strong> ${pitches.length}</p>
-              <p><strong>Startups selected:</strong> ${offersData.filter(o => o.offerStatus === 'accepted').length}</p>
-              <p><strong>Startups not selected:</strong> ${offersData.filter(o => o.offerStatus === 'rejected' || o.offerStatus === 'declined').length}</p>
-              <p><strong>Startups withdrawn in the process:</strong> ${offersData.filter(o => o.offerStatus === 'withdrawn').length}</p>
-              <p><strong>Startups who didn't accept the offer:</strong> ${offersData.filter(o => o.offerStatus === 'pending').length}</p>
+            <ol>
+              <li>Startups pitched: ${pitches.length}</li>
+              <li>Startups selected: ${offersData.filter(o => o.offerStatus === 'accepted').length}</li>
+              <li>Startups not selected: ${offersData.filter(o => o.offerStatus === 'rejected' || o.offerStatus === 'declined').length}</li>
+              <li>Startups withdrawn in the process: ${offersData.filter(o => o.offerStatus === 'withdrawn').length}</li>
+              <li>Startups who didn't accept the offer: ${offersData.filter(o => o.offerStatus === 'pending').length}</li>
             </div>
           </div>
 
           <div class="section">
             <h3 style="color: #11574f;">Startup Insights</h3>
             <div style="margin: 20px 0;">
-              <h3>NPS (Net Promoter Score)</h3>
-              <p>Investors typically rate startups on a scale from 1 to 10 after their experience, where 1 is the lowest score and 10 is the highest.</p>
-              <p><strong>Avg:</strong> Average  </p>
+            <ul>
+              <li>NPS (Net Promoter Score) : 
+              Investors typically rate startups on a scale from 1 to 10 after their experience, where 1 is the lowest score and 10 is the highest.</li>
+              <li><strong>Avg:</strong> Average  </li>
+            </ul>
             </div>
           </div>
 
@@ -637,10 +646,11 @@ export async function POST(req: Request) {
         // Build language summary
         const languageSummary: Record<string, { count: number }> = {};
         teamMembers.forEach(member => {
-          const langs = userLangs.filter(l => l.userId === member.id).map(l => l.languageName);
-          langs.forEach(lang => {
-            if (!languageSummary[lang]) languageSummary[lang] = { count: 0 };
-            languageSummary[lang].count += 1;
+          (member.languages || []).forEach(lang => {
+            if (lang) {
+              if (!languageSummary[lang]) languageSummary[lang] = { count: 0 };
+              languageSummary[lang].count += 1;
+            }
           });
         });
         // You should fetch or define investorLanguages here. For now, use an empty array as fallback.

@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       firstName: user.name,
       lastName: user.lastName,
+      image: user.image,
       email: user.email,
       phone: `${user.countryCode || ""}${user.number || ""}`,
       gender: user.gender,
@@ -118,12 +119,14 @@ export async function PATCH(req: NextRequest) {
     await db.delete(userLanguages).where(eq(userLanguages.userId, userId));
 
     // Insert new userLanguages
-    await db.insert(userLanguages).values(
-      languageIds.map((id) => ({
-        userId,
-        languageId: id,
-      }))
-    );
+    if (languageIds.length > 0) {
+      await db.insert(userLanguages).values(
+        languageIds.map((id) => ({
+          userId,
+          languageId: id,
+        }))
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {
