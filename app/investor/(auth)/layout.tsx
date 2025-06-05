@@ -28,15 +28,32 @@ export default async function Layout({
 }) {
   // Check if the user is authenticated
   const session = await auth();
+  console.log("[Investor Layout] Session:", session);
   if (!session?.user) {
+    console.error("[Investor Layout] No session user, redirecting to /login/investor");
     redirect("/login/investor");
   }
   const user = await getUserRole(session.user.email ?? "");
+  console.log("[Investor Layout] User from DB:", user);
+
+  if (!user || !user.role) {
+    // Fallback: If user is not found or role is missing, show an error
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-red-600">User role not found</h1>
+          <p className="text-muted-foreground">Please contact support or try logging in again.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (user.role === "temp") {
+    console.warn("[Investor Layout] User role is temp, redirecting to /sign-up/complete");
     redirect("/sign-up/complete");
   }
   if (user.role !== "investor") {
+    console.warn(`{[Investor Layout] User role is not investor (got '${user.role}'), redirecting to /founder}`);
     redirect("/founder");
   }
   return (
