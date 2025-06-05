@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
   );
 
   if (isRateLimitedRoute) {
-    const ip = request.ip || 'anonymous';
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'anonymous';
     const now = Date.now();
     const windowStart = now - RATE_LIMIT.windowMs;
 
