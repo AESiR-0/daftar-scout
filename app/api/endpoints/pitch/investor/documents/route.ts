@@ -5,6 +5,7 @@ import { users } from "@/backend/drizzle/models/users";
 import { daftarInvestors, daftar } from "@/backend/drizzle/models/daftar";
 import { eq, inArray, and, not } from "drizzle-orm";
 import { auth } from "@/auth"; // your auth function
+import { pitchDocs } from "@/backend/drizzle/models/pitch";
 
 interface User {
   id: string;
@@ -54,11 +55,11 @@ export async function POST(req: NextRequest) {
 
     const uploadedBy = userDetails[0].id;
     const body = await req.json();
-    const { 
-      docName, 
-      docType, 
-      docUrl, 
-      isPrivate, 
+    const {
+      docName,
+      docType,
+      docUrl,
+      isPrivate,
       scoutId,
       pitchId,
       daftarId,
@@ -106,6 +107,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const scoutId = searchParams.get("scoutId");
+    const pitchId = searchParams.get("pitchId");
 
     if (!scoutId) {
       return NextResponse.json(
@@ -146,7 +148,11 @@ export async function GET(req: NextRequest) {
       .from(scoutDocuments)
       .where(eq(scoutDocuments.scoutId, scoutId))
       .execute();
-
+    const pitchDocuments = await db
+      .select()
+      .from(pitchDocs)
+      .where(eq(pitchDocs.pitchId, pitchId ?? ""))
+      .execute();
     // Get uploader details with daftar info
     const uploaderIds = [...new Set(documents.map(doc => doc.uploadedBy))].filter(Boolean);
     const uploaders = await db
@@ -161,6 +167,16 @@ export async function GET(req: NextRequest) {
       .leftJoin(daftarInvestors, eq(users.id, daftarInvestors.investorId))
       .leftJoin(daftar, eq(daftarInvestors.daftarId, daftar.id))
       .where(inArray(users.id, uploaderIds as string[]))
+      .execute();
+    const pitchUploaderIds = [...new Set(pitchDocuments.map(doc => doc.uploadedBy))].filter((id): id is string => id !== null);
+    const pitchUploaders = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        lastName: users.lastName
+      })
+      .from(users)
+      .where(inArray(users.id, pitchUploaderIds))
       .execute();
 
     // Map uploader details to documents
@@ -178,6 +194,24 @@ export async function GET(req: NextRequest) {
         daftarName: uploader?.daftarName || "Unknown Daftar"
       };
     });
+    const pitchDocsWithUploaders = pitchDocuments.map(doc => {
+      const uploader = pitchUploaders.find(u => u.id === doc.uploadedBy);
+      return {
+        ...doc,
+        uploadedBy: uploader ? {
+          id: uploader.id,
+          name: uploader.name,
+          lastName: uploader.lastName
+        } : null
+      };
+    });
+    const filteredPitchDocs = pitchDocsWithUploaders.filter(doc => {
+      if (doc.isPrivate) {
+        return false;
+      }
+      return true;
+    });
+
 
     // Filter documents based on visibility and daftarId
     const filteredDocs = docsWithUploaders.filter(doc => {
@@ -189,7 +223,9 @@ export async function GET(req: NextRequest) {
       return true;
     });
 
-    return NextResponse.json(filteredDocs);
+    const allDocs = [...filteredDocs, ...filteredPitchDocs];
+
+    return NextResponse.json(allDocs);
   } catch (error) {
     console.error("[GET /scout-docs]", error);
     return NextResponse.json(
