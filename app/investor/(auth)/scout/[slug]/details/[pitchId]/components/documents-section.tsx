@@ -213,47 +213,17 @@ export default function DocumentsSection({
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/api/endpoints/pitch/investor/documents?scoutId=${scoutId}`
+        `/api/endpoints/pitch/investor/documents?scoutId=${scoutId}&pitchId=${pitchId}`
       );
 
       if (!response.ok) {
         throw new Error("Failed to fetch documents");
       }
 
-      const allDocs = await response.json();
+      const receivedDocs = await response.json();
 
-      // Separate investor docs (sent) from founder docs (received)
-      const investorDocs = allDocs.filter((doc: any) => doc.uploadedBy?.daftarId || doc.daftarId);
-      const founderDocs = allDocs.filter((doc: any) => !doc.uploadedBy?.daftarId && !doc.daftarId);
-
-      const processedDocs = await Promise.all([
-        ...investorDocs.map(async (doc: any) => {
-          try {
-            if (!doc) return null;
-
-            const processedDoc: Document = {
-              id: doc.id,
-              name: doc.docName,
-              docUrl: doc.docUrl,
-              uploadedBy: doc.uploadedBy?.name || "Unknown",
-              uploaderRole: "investor",
-              daftar: {
-                id: doc.uploadedBy?.daftarId || doc.daftarId || "unknown",
-                name: doc.uploadedBy?.daftarName || "Unknown"
-              },
-              uploadedAt: formatDate(doc.uploadedAt),
-              type: "sent",
-              size: typeof doc.size === 'number' ? doc.size : 0,
-              isHidden: Boolean(doc.isPrivate)
-            };
-
-            return processedDoc;
-          } catch (error) {
-            console.error("Error processing investor document:", error);
-            return null;
-          }
-        }),
-        ...founderDocs.map(async (doc: any) => {
+      const processedDocs = await Promise.all(
+        receivedDocs.map(async (doc: any) => {
           try {
             if (!doc) return null;
 
@@ -275,11 +245,11 @@ export default function DocumentsSection({
 
             return processedDoc;
           } catch (error) {
-            console.error("Error processing founder document:", error);
+            console.error("Error processing document:", error);
             return null;
           }
         })
-      ]);
+      );
 
       // Filter and categorize documents
       const validDocs = {
@@ -291,11 +261,7 @@ export default function DocumentsSection({
       processedDocs
         .filter((doc): doc is Document => doc !== null)
         .forEach(doc => {
-          if (doc.type === "sent") {
-            validDocs.sent.push(doc);
-          } else if (doc.type === "received") {
-            validDocs.received.push(doc);
-          }
+          validDocs.received.push(doc);
         });
 
       setDocumentsByType(validDocs);

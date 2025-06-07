@@ -109,9 +109,9 @@ export async function GET(req: NextRequest) {
     const scoutId = searchParams.get("scoutId");
     const pitchId = searchParams.get("pitchId");
 
-    if (!scoutId) {
+    if (!scoutId || !pitchId) {
       return NextResponse.json(
-        { error: "scoutId is required" },
+        { error: "scoutId and pitchId are required" },
         { status: 400 }
       );
     }
@@ -139,35 +139,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userId = currentUserWithDaftar[0].id;
-    const userDaftarId = currentUserWithDaftar[0].daftarId;
-
-    // Get all documents
-    const documents = await db
-      .select()
-      .from(scoutDocuments)
-      .where(eq(scoutDocuments.scoutId, scoutId))
-      .execute();
+    // Get pitch documents (from founders)
     const pitchDocuments = await db
       .select()
       .from(pitchDocs)
-      .where(eq(pitchDocs.pitchId, pitchId ?? ""))
+      .where(eq(pitchDocs.pitchId, pitchId))
       .execute();
-    // Get uploader details with daftar info
-    const uploaderIds = [...new Set(documents.map(doc => doc.uploadedBy))].filter(Boolean);
-    const uploaders = await db
-      .select({
-        id: users.id,
-        name: users.name,
-        lastName: users.lastName,
-        daftarId: daftarInvestors.daftarId,
-        daftarName: daftar.name
-      })
-      .from(users)
-      .leftJoin(daftarInvestors, eq(users.id, daftarInvestors.investorId))
-      .leftJoin(daftar, eq(daftarInvestors.daftarId, daftar.id))
-      .where(inArray(users.id, uploaderIds as string[]))
-      .execute();
+
+    // Get uploader details for pitch documents
     const pitchUploaderIds = [...new Set(pitchDocuments.map(doc => doc.uploadedBy))].filter((id): id is string => id !== null);
     const pitchUploaders = await db
       .select({
@@ -179,21 +158,7 @@ export async function GET(req: NextRequest) {
       .where(inArray(users.id, pitchUploaderIds))
       .execute();
 
-    // Map uploader details to documents
-    const docsWithUploaders = documents.map(doc => {
-      const uploader = uploaders.find(u => u.id === doc.uploadedBy);
-      return {
-        ...doc,
-        uploadedBy: uploader ? {
-          id: uploader.id,
-          name: uploader.name,
-          lastName: uploader.lastName,
-          daftarId: uploader.daftarId,
-          daftarName: uploader.daftarName
-        } : null,
-        daftarName: uploader?.daftarName || "Unknown Daftar"
-      };
-    });
+    // Map uploader details to pitch documents
     const pitchDocsWithUploaders = pitchDocuments.map(doc => {
       const uploader = pitchUploaders.find(u => u.id === doc.uploadedBy);
       return {
@@ -205,27 +170,11 @@ export async function GET(req: NextRequest) {
         } : null
       };
     });
-    const filteredPitchDocs = pitchDocsWithUploaders.filter(doc => {
-      if (doc.isPrivate) {
-        return false;
-      }
-      return true;
-    });
 
+    // Filter out private pitch documents
+    const filteredPitchDocs = pitchDocsWithUploaders.filter(doc => !doc.isPrivate);
 
-    // Filter documents based on visibility and daftarId
-    const filteredDocs = docsWithUploaders.filter(doc => {
-      if (doc.isPrivate) {
-        // Private documents are only visible to users from the same daftar
-        return doc.uploadedBy?.daftarId === userDaftarId;
-      }
-      // Non-private documents are visible to all investors
-      return true;
-    });
-
-    const allDocs = [...filteredDocs, ...filteredPitchDocs];
-
-    return NextResponse.json(allDocs);
+    return NextResponse.json(filteredPitchDocs);
   } catch (error) {
     console.error("[GET /scout-docs]", error);
     return NextResponse.json(
