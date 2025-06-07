@@ -80,6 +80,17 @@ export async function POST(req: Request) {
       .leftJoin(users, eq(daftarInvestors.investorId, users.id))
       .where(eq(daftarInvestors.daftarId, daftarCollaborations[0]?.daftarId || ''));
 
+    // Fetch all investors with their languages
+    const allDaftarInvestors = await db
+      .select({
+        daftarId: daftarInvestors.daftarId,
+        languages: sql<string[]>`array_agg(${languages.language_name})`,
+      })
+      .from(daftarInvestors)
+      .leftJoin(userLanguages, eq(daftarInvestors.investorId, userLanguages.userId))
+      .leftJoin(languages, eq(userLanguages.languageId, languages.id))
+      .groupBy(daftarInvestors.daftarId);
+    
     // Fetch all pitches for this scout
     const pitches = await db
       .select({
@@ -347,10 +358,19 @@ export async function POST(req: Request) {
                   <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Daftar Name</th>
                   <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Location</th>
                   <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Team Size</th>
+                  <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Preferred Language to Connect with Founder</th>
                 </tr>
               </thead>
               <tbody>
-                ${daftarCollaborations.map(collab => `
+                ${daftarCollaborations.map(collab => {
+                  // Get unique languages from all investors in this Daftar
+                  const investorsInDaftar = allDaftarInvestors.find(di => di.daftarId === collab.daftarId);
+                  const languages = [...new Set(
+                    (investorsInDaftar?.languages || [])
+                      .filter(Boolean)
+                  )].join(', ');
+
+                  return `
                   <tr>
                     <td style="padding: 12px; border-bottom: 1px solid #ddd;">
                       ${collab.daftarName || 'N/A'}<br/>
@@ -358,8 +378,9 @@ export async function POST(req: Request) {
                     </td>
                     <td style="padding: 12px; border-bottom: 1px solid #ddd;">${collab.daftarLocation || 'N/A'}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #ddd;">${daftarTeam.filter(member => member.status === 'active').length}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #ddd;">${languages || 'N/A'}</td>
                   </tr>
-              `).join('')}
+                `}).join('')}
               </tbody>
             </table>
           </div>
@@ -475,10 +496,18 @@ export async function POST(req: Request) {
             const team = pitchTeams.filter(pt => pt.pitchId === p.id);
             team.forEach(pt => {
               const member = usersAll.find(m => m.id === pt.userId);
-              if (member) {
-                if (member.gender === 'male') genderCounts.male++;
-                else if (member.gender === 'female') genderCounts.female++;
-                else if (member.gender === 'trans') genderCounts.trans++;
+              if (member?.gender) {
+                switch(member.gender.toLowerCase()) {
+                  case 'male':
+                    genderCounts.male++;
+                    break;
+                  case 'female':
+                    genderCounts.female++;
+                    break;
+                  case 'trans':
+                    genderCounts.trans++;
+                    break;
+                }
               }
             });
           });
@@ -542,10 +571,18 @@ export async function POST(req: Request) {
             const team = pitchTeams.filter(pt => pt.pitchId === p.id);
             team.forEach(pt => {
               const member = usersAll.find(m => m.id === pt.userId);
-              if (member) {
-                if (member.gender === 'male') genderCounts.male++;
-                else if (member.gender === 'female') genderCounts.female++;
-                else if (member.gender === 'trans') genderCounts.trans++;
+              if (member?.gender) {
+                switch(member.gender.toLowerCase()) {
+                  case 'male':
+                    genderCounts.male++;
+                    break;
+                  case 'female':
+                    genderCounts.female++;
+                    break;
+                  case 'trans':
+                    genderCounts.trans++;
+                    break;
+                }
               }
             });
           });
@@ -606,10 +643,18 @@ export async function POST(req: Request) {
             const team = pitchTeams.filter(pt => pt.pitchId === p.id);
             team.forEach(pt => {
               const member = usersAll.find(m => m.id === pt.userId);
-              if (member) {
-                if (member.gender === 'male') genderCounts.male++;
-                else if (member.gender === 'female') genderCounts.female++;
-                else if (member.gender === 'trans') genderCounts.trans++;
+              if (member?.gender) {
+                switch(member.gender.toLowerCase()) {
+                  case 'male':
+                    genderCounts.male++;
+                    break;
+                  case 'female':
+                    genderCounts.female++;
+                    break;
+                  case 'trans':
+                    genderCounts.trans++;
+                    break;
+                }
               }
             });
           });
@@ -687,7 +732,7 @@ export async function POST(req: Request) {
 
     // Launch browser
     const browser = await puppeteer.launch({
-      executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser',
+      executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome',
       headless: true
     });
 

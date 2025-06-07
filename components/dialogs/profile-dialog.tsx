@@ -57,6 +57,8 @@ import { useSession } from "next-auth/react";
 import { uploadVideoToS3 } from "@/lib/s3";
 import { db } from "@/backend/database";
 import { languages } from "@/backend/drizzle/models/users";
+import { LanguageInput } from "@/components/language-input";
+import { cache } from 'react';
 
 interface ProfileData {
   firstName: string;
@@ -741,71 +743,16 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                     </div>
                     <div className="col-span-2 space-y-2">
                       <Label>Preferred Languages (up to 3)</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {profileData.languages.length < 3 && (
-                          <Select
-                            onValueChange={(value) => {
-                              const selectedLang = availableLanguages?.find(lang => lang.id === value);
-                              if (selectedLang && !profileData.languages.some(l => l.id === selectedLang.id)) {
-                                setProfileData((prev) =>
-                                  prev
-                                    ? {
-                                        ...prev,
-                                        languages: [...prev.languages, { id: selectedLang.id, name: selectedLang.language_name }],
-                                      }
-                                    : prev
-                                );
-                              }
-                            }}
-                            disabled={isLoading}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Add language" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {availableLanguages && availableLanguages.length > 0 ? (
-                                availableLanguages
-                                  .filter((lang) => !profileData.languages.some(l => l.id === lang.id))
-                                  .map((lang) => (
-                                    <SelectItem key={lang.id} value={lang.id}>
-                                      {lang.language_name}
-                                    </SelectItem>
-                                  ))
-                              ) : (
-                                <SelectItem value="loading" disabled>
-                                  Loading languages...
-                                </SelectItem>
-                              )}
-                            </SelectContent>
-                          </Select>
-                        )}
-                        {profileData.languages.map((lang) => (
-                          <Badge
-                            key={lang.id}
-                            className="bg-muted rounded-[0.35rem]"
-                          >
-                            {lang.name}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-4 w-4 ml-1 hover:bg-transparent"
-                              onClick={() => {
-                                if (!profileData) return;
-                                const updatedLanguages = profileData.languages.filter(
-                                  (l) => l.id !== lang.id
-                                );
-                                setProfileData({
-                                  ...profileData,
-                                  languages: updatedLanguages
-                                });
-                              }}
-                              disabled={isLoading}
-                            >
-                              <X className="h-3 w-3 rounded-[0.35rem]" />
-                            </Button>
-                          </Badge>
-                        ))}
-                      </div>
+                      <LanguageInput
+                        selectedLanguages={profileData.languages}
+                        onLanguagesChange={(languages) =>
+                          setProfileData((prev) =>
+                            prev ? { ...prev, languages } : prev
+                          )
+                        }
+                        disabled={isLoading}
+                        isLoading={isLoading}
+                      />
                     </div>
                   </div>
                   <Button
@@ -1310,3 +1257,7 @@ Contact Us: If you have any questions or concerns about this Privacy Policy or h
 Tech Team Daftar OS`,
   },
 ];
+
+export const getLanguages = cache(async (search: string) => {
+  // ... existing query logic
+});

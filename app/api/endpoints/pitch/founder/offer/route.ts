@@ -29,10 +29,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const actionTaker = alias(users, "actionTaker");
-
-    // Get offers with user details and actions
-    const result = await db
+    // First query: Get all offers with user details
+    const offersResult = await db
       .select({
         id: offers.id,
         pitch_id: offers.pitchId,
@@ -43,49 +41,65 @@ export async function GET(req: NextRequest) {
         created_at: offers.offeredAt,
         userName: users.name,
         userLastName: users.lastName,
-        action: offerActions.action,
-        actionTakenAt: offerActions.actionTakenAt,
-        actionTakerName: actionTaker.name,
-        actionTakerLastName: actionTaker.lastName,
       })
       .from(offers)
       .leftJoin(users, eq(users.id, offers.offerBy))
-      .leftJoin(offerActions, eq(offerActions.offerId, offers.id))
-      .leftJoin(actionTaker, eq(actionTaker.id, offerActions.actionTakenBy))
       .where(eq(offers.pitchId, pitchId));
 
-    // Group actions by offer
-    const offersMap = result.reduce((acc, row) => {
-      if (!acc[row.id]) {
-        acc[row.id] = {
-          id: row.id,
-          pitch_id: row.pitch_id,
-          investor_id: row.investor_id,
-          offer_desc: row.offer_desc,
-          status: row.status,
-          offer_sent_at: row.offer_sent_at,
-          created_at: row.created_at,
-          userName: row.userName,
-          userLastName: row.userLastName,
-          actions: [],
-        };
-      }
+    // Second query: Get all actions for these offers
+    const offerIds = offersResult.map(offer => offer.id);
+    const actionsResult = await db
+      .select({
+        offerId: offerActions.offerId,
+        action: offerActions.action,
+        actionTakenAt: offerActions.actionTakenAt,
+        actionTakerName: users.name,
+        actionTakerLastName: users.lastName,
+      })
+      .from(offerActions)
+      .leftJoin(users, eq(users.id, offerActions.actionTakenBy))
+      .where(inArray(offerActions.offerId, offerIds));
 
-      if (row.action && row.actionTakenAt && row.actionTakerName) {
-        acc[row.id].actions.push({
-          action: row.action,
-          timestamp: row.actionTakenAt,
+    // Group actions by offer ID
+    const actionsByOffer = actionsResult.reduce<Record<string, any[]>>((acc, action) => {
+      if (action.offerId !== null) {
+        if (!acc[action.offerId]) {
+          acc[action.offerId] = [];
+        }
+        acc[action.offerId].push({
+          action: action.action,
+          timestamp: action.actionTakenAt?.toISOString() || "",
           takenBy: {
-            name: row.actionTakerName,
-            lastName: row.actionTakerLastName,
+            name: action.actionTakerName,
+            lastName: action.actionTakerLastName,
           },
         });
       }
-
       return acc;
-    }, {} as Record<string, any>);
+    }, {});
 
-    return NextResponse.json(Object.values(offersMap));
+    // Combine offers with their actions
+    const finalOffers = offersResult.map(offer => ({
+      id: offer.id,
+      pitch_id: offer.pitch_id,
+      investor_id: offer.investor_id,
+      offer_desc: offer.offer_desc,
+      status: offer.status,
+      offer_sent_at: offer.offer_sent_at,
+      created_at: offer.created_at,
+      userName: offer.userName,
+      userLastName: offer.userLastName,
+      actions: actionsByOffer[offer.id] || [],
+    }));
+
+    // Sort actions by timestamp in descending order for each offer
+    finalOffers.forEach(offer => {
+      offer.actions.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+    });
+
+    return NextResponse.json(finalOffers);
   } catch (error) {
     console.error("Error fetching offers:", error);
     return NextResponse.json(

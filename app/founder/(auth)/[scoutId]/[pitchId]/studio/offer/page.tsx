@@ -61,6 +61,19 @@ export default function OffersPage() {
   const [currentAction, setCurrentAction] = useState<"withdraw" | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Check if pitch is in demo mode
+  const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
+
+  // Show toast for demo pitch
+  useEffect(() => {
+    if (isDemoPitch) {
+      toast({
+        title: "Demo Mode",
+        description: "This is a demo pitch. Actions are disabled.",
+        variant: "default",
+      });
+    }
+  }, [isDemoPitch, toast]);
 
   // Fetch offers on mount
   useEffect(() => {
@@ -229,6 +242,7 @@ Offers from investors will be shared here."</p>
                       handleStatusUpdate(offer.id, "rejected", reason)
                     }
                     onWithdraw={(reason) => handleWithdraw(offer.id, reason)}
+                    disabled={isDemoPitch}
                   />
                 ))}
             </div>
@@ -386,17 +400,20 @@ function OfferCard({
   onAccept,
   onDecline,
   onWithdraw,
+  disabled,
 }: {
   offer: Offer;
   onView: (offer: Offer) => void;
   onAccept: (reason: string) => void;
   onDecline: (reason: string) => void;
   onWithdraw: (reason: string) => void;
+  disabled?: boolean;
 }) {
   const [showActionDialog, setShowActionDialog] = useState(false);
   const [currentAction, setCurrentAction] = useState<"decline" | "withdraw" | null>(null);
 
   const handleAction = (action: "accept" | "decline" | "withdraw") => {
+    if (disabled) return;
     if (action === "accept") {
       onAccept(""); // Accept doesn't need a reason
       return;
@@ -406,6 +423,7 @@ function OfferCard({
   };
 
   const handleConfirmAction = (reason: string) => {
+    if (disabled) return;
     switch (currentAction) {
       case "decline":
         onDecline(reason);
@@ -455,6 +473,7 @@ function OfferCard({
               className="bg-muted hover:bg-muted/50"
               variant="ghost"
               onClick={() => handleAction("accept")}
+              disabled={disabled}
             >
               Accept
             </Button>
@@ -462,6 +481,7 @@ function OfferCard({
               className="bg-muted hover:bg-muted/50"
               variant="ghost"
               onClick={() => handleAction("decline")}
+              disabled={disabled}
             >
               Decline
             </Button>
@@ -472,6 +492,7 @@ function OfferCard({
             className="bg-muted hover:bg-muted/50"
             variant="ghost"
             onClick={() => handleAction("withdraw")}
+            disabled={disabled}
           >
             Withdraw
           </Button>
@@ -480,6 +501,7 @@ function OfferCard({
           className="bg-muted hover:bg-muted/50"
           variant="ghost"
           onClick={() => onView(offer)}
+          disabled={disabled}
         >
           View Details
         </Button>
@@ -494,6 +516,7 @@ function OfferCard({
           )} Offer`}
           action={currentAction}
           onConfirm={handleConfirmAction}
+          disabled={disabled}
         />
       )}
     </div>
@@ -506,12 +529,14 @@ function ActionDialog({
   title,
   action,
   onConfirm,
+  disabled,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   action: "decline" | "withdraw";
   onConfirm: (reason: string) => void;
+  disabled?: boolean;
 }) {
   const [reason, setReason] = useState("");
 
@@ -527,6 +552,7 @@ function ActionDialog({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             className="min-h-[100px]"
+            disabled={disabled}
           />
           <Button
             onClick={() => {
@@ -534,7 +560,7 @@ function ActionDialog({
               setReason("");
             }}
             className="w-full bg-muted hover:bg-muted/50"
-            disabled={!reason.trim()}
+            disabled={!reason.trim() || disabled}
           >
             Confirm
           </Button>
