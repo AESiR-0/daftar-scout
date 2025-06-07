@@ -16,30 +16,23 @@ export async function GET(req: NextRequest) {
   if (!session.user?.email)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const userId = db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.email, session.user.email))
-    .limit(1);
-
-  if (!userId) {
-    return NextResponse.json({ error: "User ID required" }, { status: 400 });
-  }
-
   try {
     // Get user basic info
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    const [user] = await db.select().from(users).where(eq(users.email, session.user.email));
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get language names for the user
+    // Get language info for the user
     const userLangs = await db
-      .select({ name: languages.language_name })
+      .select({ 
+        id: languages.id,
+        name: languages.language_name 
+      })
       .from(userLanguages)
       .innerJoin(languages, eq(userLanguages.languageId, languages.id))
-      .where(eq(userLanguages.userId, userId));
+      .where(eq(userLanguages.userId, user.id));
 
     return NextResponse.json({
       firstName: user.name,
@@ -49,7 +42,7 @@ export async function GET(req: NextRequest) {
       phone: `${user.countryCode || ""}${user.number || ""}`,
       gender: user.gender,
       dateOfBirth: user.dob || null,
-      languages: userLangs.map((l) => l.name),
+      languages: userLangs.map((l) => ({ id: l.id, name: l.name })),
       joinedDate: user.createdAt.toDateString(),
     });
   } catch (err) {
@@ -70,8 +63,8 @@ export async function PATCH(req: NextRequest) {
     gender,
     dateOfBirth,
     phone,
-    languages: languageList = [], // list of language names
-    image, // Add image field
+    languages: languageIds = [], // Now expecting array of language IDs
+    image,
   } = body;
 
   if (!email) {
@@ -100,20 +93,14 @@ export async function PATCH(req: NextRequest) {
         dob: dateOfBirth ? new Date(dateOfBirth).toISOString() : null,
         countryCode,
         number,
-        image, // Add image field
-        lastChangeOfPitcture: image ? new Date() : undefined, // Update last change timestamp if image is provided
+        image,
+        lastChangeOfPitcture: image ? new Date() : undefined,
       })
       .where(eq(users.email, email));
 
-    // Get language IDs
-    const user = await db.select().from(users).where(eq(users.email, email));
-    const userId = user[0].id;
-    const languageRecords = await db
-      .select({ id: languages.id })
-      .from(languages)
-      .where(inArray(languages.language_name, languageList));
-
-    const languageIds = languageRecords.map((l) => l.id);
+    // Get user ID
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const userId = user.id;
 
     // Delete existing userLanguages
     await db.delete(userLanguages).where(eq(userLanguages.userId, userId));
@@ -121,7 +108,7 @@ export async function PATCH(req: NextRequest) {
     // Insert new userLanguages
     if (languageIds.length > 0) {
       await db.insert(userLanguages).values(
-        languageIds.map((id) => ({
+        languageIds.map((id: string) => ({
           userId,
           languageId: id,
         }))

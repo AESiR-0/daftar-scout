@@ -65,7 +65,7 @@ interface ProfileData {
   phone: string;
   gender: string;
   dateOfBirth: string | null;
-  languages: string[];
+  languages: { id: string; name: string }[];
   joinedDate: string;
   image: string;
 }
@@ -196,7 +196,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           phone: profileData.phone,
           gender: profileData.gender,
           dateOfBirth: profileData.dateOfBirth,
-          languages: profileData.languages,
+          languages: profileData.languages.map(lang => lang.id),
         }),
       });
 
@@ -432,10 +432,16 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const response = await fetch("/api/endpoints/languages");
+        const response = await fetch("/api/endpoints/getAllLanguages");
         if (!response.ok) throw new Error("Failed to fetch languages");
-        const data = await response.json();
-        setAvailableLanguages(data);
+        const { data } = await response.json();
+        console.log("Fetched languages:", data); // Debug log
+        if (Array.isArray(data)) {
+          setAvailableLanguages(data);
+        } else {
+          console.error("Languages data is not an array:", data);
+          setAvailableLanguages([]);
+        }
       } catch (error) {
         console.error("Error fetching languages:", error);
         toast({
@@ -443,6 +449,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
           description: "Failed to load languages",
           variant: "destructive",
         });
+        setAvailableLanguages([]);
       }
     };
 
@@ -522,7 +529,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                               phone: profileData.phone,
                               gender: profileData.gender,
                               dateOfBirth: profileData.dateOfBirth,
-                              languages: profileData.languages,
+                              languages: profileData.languages.map(lang => lang.id),
                               image: imageUrl
                             }),
                           });
@@ -738,12 +745,13 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                         {profileData.languages.length < 3 && (
                           <Select
                             onValueChange={(value) => {
-                              if (!profileData.languages.includes(value)) {
+                              const selectedLang = availableLanguages?.find(lang => lang.id === value);
+                              if (selectedLang && !profileData.languages.some(l => l.id === selectedLang.id)) {
                                 setProfileData((prev) =>
                                   prev
                                     ? {
                                         ...prev,
-                                        languages: [...prev.languages, value],
+                                        languages: [...prev.languages, { id: selectedLang.id, name: selectedLang.language_name }],
                                       }
                                     : prev
                                 );
@@ -755,38 +763,42 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                               <SelectValue placeholder="Add language" />
                             </SelectTrigger>
                             <SelectContent>
-                              {availableLanguages
-                                .filter((lang) => !profileData.languages.includes(lang.language_name))
-                                .map((lang) => (
-                                  <SelectItem key={lang.id} value={lang.language_name}>
-                                    {lang.language_name}
-                                  </SelectItem>
-                                ))}
+                              {availableLanguages && availableLanguages.length > 0 ? (
+                                availableLanguages
+                                  .filter((lang) => !profileData.languages.some(l => l.id === lang.id))
+                                  .map((lang) => (
+                                    <SelectItem key={lang.id} value={lang.id}>
+                                      {lang.language_name}
+                                    </SelectItem>
+                                  ))
+                              ) : (
+                                <SelectItem value="loading" disabled>
+                                  Loading languages...
+                                </SelectItem>
+                              )}
                             </SelectContent>
                           </Select>
                         )}
                         {profileData.languages.map((lang) => (
                           <Badge
-                            key={lang}
+                            key={lang.id}
                             className="bg-muted rounded-[0.35rem]"
                           >
-                            {lang}
+                            {lang.name}
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-4 w-4 ml-1 hover:bg-transparent"
-                              onClick={() =>
-                                setProfileData((prev) =>
-                                  prev
-                                    ? {
-                                        ...prev,
-                                        languages: prev.languages.filter(
-                                          (l) => l !== lang
-                                        ),
-                                      }
-                                    : prev
-                                )
-                              }
+                              onClick={() => {
+                                if (!profileData) return;
+                                const updatedLanguages = profileData.languages.filter(
+                                  (l) => l.id !== lang.id
+                                );
+                                setProfileData({
+                                  ...profileData,
+                                  languages: updatedLanguages
+                                });
+                              }}
                               disabled={isLoading}
                             >
                               <X className="h-3 w-3 rounded-[0.35rem]" />
@@ -831,7 +843,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       Preferred Languages:
                     </span>{" "}
                     {profileData.languages.length > 0
-                      ? profileData.languages.join(", ")
+                      ? profileData.languages.map(lang => lang.name).join(", ")
                       : "None"}
                   </p>
                   <div className="text-xs pt-4">

@@ -61,6 +61,7 @@ export default function InvestorQuestionsPage() {
     "Pahadi",
     "Nepali",
     "Assamese",
+    "Marathi",
     "Gujarati",
     "English",
     "Sindhi",
@@ -149,7 +150,7 @@ export default function InvestorQuestionsPage() {
         videoUrl: q.answerUrl || "",
         compressedVideoUrl: q.compressedAnswerUrl || "",
         scoutId: q.scoutId,
-        language: q.answerLanguage || "English",
+        language: q.answerLanguage || "Marathi",
         isCustom: q.isCustom,
         isSample: !q.answerUrl,
       }));
@@ -492,7 +493,7 @@ export default function InvestorQuestionsPage() {
                   <div className="mt-5">
                     <Combobox
                       placeholder="Select video's language"
-                      value={language}
+                      value={'Marathi'}
                       options={languages}
                       onSelect={(value) => setLanguage(value)}
                       disabled={isLocked}

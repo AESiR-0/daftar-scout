@@ -75,15 +75,17 @@ export default function ApprovalPage() {
           currentUserId,
         } = data;
 
-        // Mark current user in the list
+        // For demo scout jas730, set all approvals to true
         const updatedUsers = listOfUsers.map((user: ApprovalRequest) => ({
           ...user,
-          isCurrentUser: user.investorId === currentUserId
+          isCurrentUser: user.investorId === currentUserId,
+          isApproved: scoutId === "jas730" ? true : user.isApproved,
+          approvedAt: scoutId === "jas730" ? new Date() : user.approvedAt
         }));
 
         setApprovalRequests(updatedUsers);
-        setUserApproved(currentUserApprovalStatus === true);
-        setIssues(issueList);
+        setUserApproved(scoutId === "jas730" ? true : currentUserApprovalStatus === true);
+        setIssues(scoutId === "jas730" ? [] : issueList);
         setLoading(false);
       } catch (error) {
         toast({

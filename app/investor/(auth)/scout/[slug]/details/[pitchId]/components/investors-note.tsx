@@ -167,13 +167,17 @@ export function InvestorsNote({
               value={note}
               onChange={e => setNote(e.target.value)}
               disabled={!isMember}
-              placeholder={note}
-              className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white resize-none border-none outline-none flex-1"
+              placeholder="Enter your notes here..."
+              className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white resize-none border-none outline-none flex-1 whitespace-pre-wrap"
             />
           ) : (
-            <p className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white whitespace-pre-line flex-1">
-              {note}
-            </p>
+            <div className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white overflow-y-auto flex-1">
+              {note.split('\\n').map((line, i) => (
+                <p key={i} className="whitespace-pre-line">
+                  {line}
+                </p>
+              ))}
+            </div>
           )}
           <div className="text-xs text-muted-foreground mt-2 self-end">
             {isSaving ? "Saving..." : ""}

@@ -15,7 +15,16 @@ interface ShareButtonProps {
 export function ShareButton({ daftarName, sector, stage, lastDate, applyUrl }: ShareButtonProps) {
     const { toast } = useToast()
     const handleShare = async () => {
-        const postText = `${daftarName} is looking to invest in startups in ${sector} at ${stage} that are creating high impact.\n\nPitch your startup in a 2.5-minute video in your language, and let's explore how we can take this ahead.\n\nLast day to pitch: ${lastDate}\n\napply: ${applyUrl}`;
+        const postText = `${daftarName} Scouting Startups at https://daftaros.com \n \n
+        If you have a startup idea, pitch to us in a 2.5 minute video, in the language you’re most comfortable speaking. Your first meeting with us is just a few minutes away, and we can’t wait to hear from you. \n
+ 
+Accepting pitches from: ${location} \n Stage: ${stage} \n Sector: ${sector} \n
+       Last Day to Pitch : ${lastDate} \n
+       Pitch Now: ${applyUrl}
+       \n \n \n
+       Daftar OS \n
+       Simplifying Startup Pitching and Scouting
+       `;
         const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(postText)}`;
         window.open(linkedInUrl, '_blank');
     }

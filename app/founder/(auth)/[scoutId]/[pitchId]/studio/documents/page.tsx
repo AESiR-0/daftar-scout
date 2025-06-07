@@ -156,7 +156,7 @@ export default function DocumentsPage() {
     if (pitchId === "HJqVubjnQ3RVGzlyDUCY4") {
       toast({
         title: "Upload Disabled",
-        description: "This is a demo pitch, so uploads are disabled.",
+        description: "The document is execlusively to your daftar investors",
         variant: "destructive",
       });
       return;

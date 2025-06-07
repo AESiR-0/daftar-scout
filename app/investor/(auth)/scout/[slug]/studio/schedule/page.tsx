@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, AlertCircle, Check } from "lucide-react";
+import { CalendarIcon, AlertCircle, Check, Lock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import {
@@ -14,10 +14,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { toast } from "@/hooks/use-toast";
 
 export default function SchedulePage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3]; // Assuming URL is /scouts/[scoutId]/schedule
+  const isDemoScout = scoutId === "jas730";
 
   const [lastPitchDate, setLastPitchDate] = useState<Date>();
   const [launchDate, setLaunchDate] = useState<Date>();
@@ -27,6 +29,16 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(false);
 
   const isDateValid = !dateError && lastPitchDate && launchDate;
+
+  useEffect(() => {
+    if (isDemoScout) {
+      toast({
+        title: "Demo Scout",
+        description: "This is a demo scout, data change is restricted",
+        variant: "destructive",
+      });
+    }
+  }, [isDemoScout]);
 
   useEffect(() => {
     async function fetchSchedule() {
@@ -115,6 +127,12 @@ export default function SchedulePage() {
         <div className="col-span-2">
           <Card className="border-none bg-[#0e0e0e]">
             <CardContent className="p-6 space-y-6">
+              {isDemoScout && (
+                <div className="flex items-center gap-2 text-destructive mb-4">
+                  <Lock className="h-5 w-5" />
+                  <p className="text-sm font-medium">This is a demo pitch, data change is restricted</p>
+                </div>
+              )}
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label>Last Day to Pitch</Label>
@@ -126,6 +144,7 @@ export default function SchedulePage() {
                           "w-full justify-start text-left font-normal",
                           !lastPitchDate && "text-muted-foreground"
                         )}
+                        disabled={isScheduled || isDemoScout}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {lastPitchDate
@@ -139,7 +158,7 @@ export default function SchedulePage() {
                         selected={lastPitchDate}
                         onSelect={handleLastPitchDateSelect}
                         initialFocus
-                        disabled={isScheduled}
+                        disabled={isScheduled || isDemoScout}
                       />
                     </PopoverContent>
                   </Popover>
@@ -155,7 +174,7 @@ export default function SchedulePage() {
                           "w-full justify-start text-left font-normal",
                           !launchDate && "text-muted-foreground"
                         )}
-                        disabled={isScheduled}
+                        disabled={isScheduled || isDemoScout}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {launchDate ? format(launchDate, "PPP") : "Pick a date"}
@@ -167,7 +186,7 @@ export default function SchedulePage() {
                         selected={launchDate}
                         onSelect={handleLaunchDateSelect}
                         initialFocus
-                        disabled={isScheduled}
+                        disabled={isScheduled || isDemoScout}
                       />
                     </PopoverContent>
                   </Popover>
@@ -187,7 +206,7 @@ export default function SchedulePage() {
                 variant="outline"
                 onClick={handleGoLive}
                 className="rounded-[0.35rem]"
-                disabled={!isDateValid || isScheduled || loading || !isApproved}
+                disabled={!isDateValid || isScheduled || loading || !isApproved || isDemoScout}
               >
                 {loading
                   ? "Scheduling..."
