@@ -37,15 +37,16 @@ export function ScheduleMeetingDialog({
   onScheduled,
 }: ScheduleMeetingDialogProps) {
   const { data: session } = useSession();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     attendeeEmail: "",
     attendees: [] as string[],
-    date: undefined as Date | undefined,
+    date: new Date(),
     hours: "",
     minutes: "",
     period: "",
-    location: "",
+    location: "virtual",
     locationAddress: "",
     agenda: "",
   });
@@ -72,6 +73,7 @@ export function ScheduleMeetingDialog({
 
   const handleSubmit = async () => {
     try {
+      setIsSubmitting(true);
       const formattedTime = `${formData.hours}:${formData.minutes} ${formData.period}`;
       const [hours, minutes] = formattedTime.split(":");
       const isPM = formData.period === "PM";
@@ -111,6 +113,8 @@ export function ScheduleMeetingDialog({
     } catch (error) {
       console.error("Error scheduling meeting:", error);
       // You might want to show an error toast here
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -209,7 +213,7 @@ export function ScheduleMeetingDialog({
                         mode="single"
                         selected={formData.date}
                         onSelect={(date) =>
-                          setFormData({ ...formData, date: date || undefined })
+                          setFormData({ ...formData, date: date || new Date() })
                         }
                         initialFocus
                       />
@@ -335,14 +339,16 @@ export function ScheduleMeetingDialog({
                 variant="outline"
                 className="rounded-[0.35rem]"
                 onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSubmit}
                 className="bg-blue-600 rounded-[0.35rem] hover:bg-blue-700 text-white"
+                disabled={isSubmitting}
               >
-                Schedule Meeting
+                {isSubmitting ? "Scheduling..." : "Schedule Meeting"}
               </Button>
             </div>
           </div>

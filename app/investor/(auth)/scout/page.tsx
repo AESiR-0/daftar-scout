@@ -237,7 +237,9 @@ export default function ScoutPage() {
       </div>
 
       {showMeetings ? (
-        <MeetingsPage />
+        <div className="min-h-screen">
+          <MeetingsPage />
+        </div>
       ) : (
         <div className="grid grid-cols-4 gap-6">
           {Object.entries(filteredScouts).map(([status, scouts], index) => (

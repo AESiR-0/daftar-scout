@@ -36,6 +36,7 @@ export default function MeetingsPage() {
   const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
+  const [buttonLoading, setButtonLoading] = useState<{ [key: string]: boolean }>({});
   const { toast } = useToast();
   const { data: session } = useSession();
 
@@ -93,6 +94,7 @@ export default function MeetingsPage() {
 
   const handleAcceptMeeting = async (meetingId: string) => {
     try {
+      setButtonLoading(prev => ({ ...prev, [meetingId]: true }));
       const response = await fetch(`/api/endpoints/calendar/meetings/${meetingId}/accept`, {
         method: 'POST',
       });
@@ -114,11 +116,14 @@ export default function MeetingsPage() {
         description: 'Failed to accept meeting',
         variant: 'destructive',
       });
+    } finally {
+      setButtonLoading(prev => ({ ...prev, [meetingId]: false }));
     }
   };
 
   const handleRejectMeeting = async (meetingId: string) => {
     try {
+      setButtonLoading(prev => ({ ...prev, [meetingId]: true }));
       const response = await fetch(`/api/endpoints/calendar/meetings/${meetingId}/reject`, {
         method: 'POST',
       });
@@ -140,6 +145,8 @@ export default function MeetingsPage() {
         description: 'Failed to reject meeting',
         variant: 'destructive',
       });
+    } finally {
+      setButtonLoading(prev => ({ ...prev, [meetingId]: false }));
     }
   };
 
@@ -148,7 +155,7 @@ export default function MeetingsPage() {
   };
 
   return (
-    <div className="space-y-6 container mx-auto px-4">
+    <div className="space-y-6 min-h-screen container mx-auto px-4">
       {/* Three Column Layout */}
       <div className="flex gap-6">
         {/* Calendar and Schedule Button Column */}
@@ -311,18 +318,18 @@ export default function MeetingsPage() {
                         variant="outline"
                         className="rounded-[0.35rem]"
                         onClick={() => handleAcceptMeeting(selectedMeeting.id)}
-                        disabled={!canRespondToMeeting(selectedMeeting)}
+                        disabled={!canRespondToMeeting(selectedMeeting) || buttonLoading[selectedMeeting.id]}
                       >
-                        Accept
+                        {buttonLoading[selectedMeeting.id] ? "Accepting..." : "Accept"}
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         className="rounded-[0.35rem]"
                         onClick={() => handleRejectMeeting(selectedMeeting.id)}
-                        disabled={!canRespondToMeeting(selectedMeeting)}
+                        disabled={!canRespondToMeeting(selectedMeeting) || buttonLoading[selectedMeeting.id]}
                       >
-                        Reject
+                        {buttonLoading[selectedMeeting.id] ? "Rejecting..." : "Reject"}
                       </Button>
                     </>
                   )}
