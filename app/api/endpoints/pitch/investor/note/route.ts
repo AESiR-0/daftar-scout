@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
         and(
           eq(investorPitch.scoutId, scoutId),
           eq(investorPitch.pitchId, pitchId),
-          eq(investorPitch.investorId, userId)
         )
       )
       .limit(1);
@@ -94,7 +93,6 @@ export async function POST(req: NextRequest) {
           and(
             eq(investorPitch.scoutId, scoutId),
             eq(investorPitch.pitchId, pitchId),
-            eq(investorPitch.investorId, userId)
           )
         );
     } else {

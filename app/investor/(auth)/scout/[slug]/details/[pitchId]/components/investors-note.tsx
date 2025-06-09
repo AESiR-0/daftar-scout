@@ -25,34 +25,20 @@ export function InvestorsNote({
   const [note, setNote] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [isMember, setIsMember] = useState<boolean>(false);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const prevNoteRef = useRef<string>("");
 
-  // Check if user is a member of the scout
+  const isDemo = scoutId === 'jas730' && pitchId === 'HJqVubjnQ3RVGzlyDUCY4';
+
   useEffect(() => {
-    const checkMembership = async () => {
-      if (!userId) return;
-      try {
-        const response = await fetch(`/api/endpoints/scouts/members?scoutId=${scoutId}`);
-        if (!response.ok) throw new Error('Failed to fetch scout members');
-        const data = await response.json();
-        const isUserMember = data.some((member: any) => member.userId === userId);
-        setIsMember(isUserMember);
-        if (!isUserMember) {
-          toast({
-            title: "Demo Mode",
-            description: "This is a demo, cannot be edited",
-            variant: "default",
-          });
-        }
-      } catch (error) {
-        console.error("Error checking membership:", error);
-        setIsMember(false);
-      }
-    };
-    checkMembership();
-  }, [userId, scoutId, toast]);
+    if (isDemo) {
+      toast({
+        title: "Demo Mode",
+        description: "This is a demo, cannot be edited",
+        variant: "default",
+      });
+    }
+  }, [isDemo]);
 
   // Fetch the note when the component mounts
   useEffect(() => {
@@ -93,7 +79,7 @@ export function InvestorsNote({
 
   // Debounced autosave effect
   useEffect(() => {
-    if (!isMember || !userId) return;
+    if (isDemo || !userId) return;
     if (note === prevNoteRef.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
@@ -145,7 +131,7 @@ export function InvestorsNote({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [note, isMember, userId, scoutId, pitchId, toast]);
+  }, [note, isDemo, userId, scoutId, pitchId, toast]);
 
   if (loading) {
     return (
@@ -162,22 +148,20 @@ export function InvestorsNote({
       </CardHeader>
       <CardContent>
         <div className="border h-[400px] rounded-xl overflow-hidden flex flex-col">
-          {isMember ? (
+          {!isDemo ? (
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}
-              disabled={!isMember}
               placeholder="Enter your notes here..."
               className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white resize-none border-none outline-none flex-1 whitespace-pre-wrap"
             />
           ) : (
-            <div className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white overflow-y-auto flex-1">
-              {note.split('\\n').map((line, i) => (
-                <p key={i} className="whitespace-pre-line">
-                  {line}
-                </p>
-              ))}
-            </div>
+            <div 
+              className="w-full h-full bg-[#1a1a1a] rounded-xl p-3 text-white overflow-y-auto flex-1"
+              dangerouslySetInnerHTML={{ 
+                __html: note.replace(/\\n/g, '<br />') 
+              }}
+            />
           )}
           <div className="text-xs text-muted-foreground mt-2 self-end">
             {isSaving ? "Saving..." : ""}
