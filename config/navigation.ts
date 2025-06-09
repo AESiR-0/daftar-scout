@@ -218,11 +218,11 @@ export const scoutStudioNavItems = [
 ];
 
 export const founderStudioNavItems = [
-  // {
-  //   title: "Scout Details",
-  //   url: "scout-details",
-  //   icon: FileSpreadsheet,
-  // },
+  {
+    title: "Scout Details",
+    url: "scout-details",
+    icon: FileSpreadsheet,
+  },
   {
     title: "Pitch Name",
     url: "pitch-name",

@@ -22,7 +22,12 @@ export default async function UserProfileForm({
   if (!user.length) {
     return <p className="text-red-600">User not found.</p>;
   }
-  const languagesList = await db.select().from(languages);
+
+  // Fetch initial languages with limit
+  const languagesList = await db
+    .select()
+    .from(languages)
+    .limit(20);
 
   // Fetch all preferred languages for the user
   const userLanguagesList = await db

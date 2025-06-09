@@ -630,6 +630,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                         <SelectContent>
                           <SelectItem value="Male">Male</SelectItem>
                           <SelectItem value="Female">Female</SelectItem>
+                          <SelectItem value="Trans">Trans</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>
@@ -643,15 +644,15 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                             const currentDate = profileData.dateOfBirth ? new Date(profileData.dateOfBirth) : new Date();
                             const monthIndex = new Date(`${value} 1, 2000`).getMonth();
                             currentDate.setMonth(monthIndex);
-                            setProfileData((prev) =>
-                              prev
-                                ? {
-                                    ...prev,
+                                setProfileData((prev) =>
+                                  prev
+                                    ? {
+                                        ...prev,
                                     dateOfBirth: currentDate.toISOString().split("T")[0],
-                                  }
-                                : prev
-                            );
-                          }}
+                                      }
+                                    : prev
+                                );
+                            }}
                             disabled={isLoading}
                           >
                           <SelectTrigger className="rounded-[0.35rem] bg-[#1a1a1a]">
@@ -693,10 +694,10 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                                     : prev
                                 );
                               }
-                            }
-                          }}
+                              }
+                            }}
                           placeholder="Day"
-                          disabled={isLoading}
+                            disabled={isLoading}
                           className="rounded-[0.35rem] bg-[#1a1a1a]"
                         />
 
@@ -727,7 +728,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                               }
                             }}
                           placeholder="Year"
-                            disabled={isLoading}
+                              disabled={isLoading}
                           className="rounded-[0.35rem] bg-[#1a1a1a]"
                         />
                       </div>

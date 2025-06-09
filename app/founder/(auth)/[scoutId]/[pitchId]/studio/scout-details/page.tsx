@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -24,22 +24,25 @@ interface Update {
 }
 
 interface Collaboration {
-  daftarName: string;
+  name: string;
   structure: string;
   website: string;
   location: string;
   onDaftarSince: string;
-  bigPicture: string;
-  image?: string;
+  bigPicture: string | null;
+  image: string | null;
 }
 
 interface ScoutDetails {
-  title: string;
-  description: string;
-  videoUrl: string;
+  targetAudAgeStart: number;
+  targetAudAgeEnd: number;
+  scoutCommunity: string;
+  scoutGender: string;
+  targetAudLocation: string;
+  scoutStage: string;
+  scoutSector: string[];
   lastDayToPitch: string;
-  details: Record<string, string>;
-  slug: string;
+  investorPitch: string;
 }
 
 interface ScoutData {
@@ -65,10 +68,9 @@ function ErrorPage() {
 }
 
 export default function ScoutDetailsPage() {
-  const { scoutId, pitchId } = useParams() as {
-    scoutId: string;
-    pitchId: string;
-  };
+  const pathname = usePathname();
+  const scoutId = pathname.split("/")[2];
+  const pitchId = pathname.split("/")[3];
   const [scoutData, setScoutData] = useState<ScoutData | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -140,39 +142,33 @@ export default function ScoutDetailsPage() {
                 <Card className="bg-[#0e0e0e] border-none p-4">
                   <div className="relative aspect-[9/16] w-full max-w-[400px] mx-auto">
                     <video
-                      src={scout.videoUrl}
+                      src={scout.investorPitch}
                       controls
                       className="w-full h-full object-cover rounded-[0.35rem]"
                     />
                   </div>
 
-                  <div className="mt-8">
-                    <div className="flex items-center justify-between">
+                  <div className="mt-8 flex flex-col justify-center items-center text-center">
+                    <div className="flex items-center justify-center">
                       <h1 className="text-2xl font-bold text-white">
-                        {scout.title}
+                        {scout.scoutStage}
                       </h1>
-                      <div className="flex text-md items-center gap-4">
-                        <ShareButton
-                          daftarName={`${collaboration.map((c: Collaboration) => c.daftarName).join(", ")}`}
-                          sector={scout.details.Sector}
-                          stage={scout.details.Stage}
-                          lastDate={lastDayToPitch}
-                          applyUrl={`/founder/scout/${scout.slug}`}
-                        />
-                        <Button
-                          className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem]"
-                          onClick={() => setShowDaftarDialog(true)}
-                        >
-                          Pitch Now
-                        </Button>
-                      </div>
+                     
                     </div>
 
                     <div className="mt-2 space-y-2">
                       <div className="text-sm text-muted-foreground">
                         Collaboration:{" "}
                         {collaboration.length > 0 ? (
-                          <InvestorProfile investor={collaboration[0]} />
+                          <InvestorProfile investor={{
+                            daftarName: collaboration[0].name,
+                            structure: collaboration[0].structure,
+                            onDaftarSince: collaboration[0].onDaftarSince,
+                            website: collaboration[0].website,
+                            location: collaboration[0].location,
+                            bigPicture: collaboration[0].bigPicture || "",
+                            image: collaboration[0].image || ""
+                          }} />
                         ) : (
                           <span>No collaboration available.</span>
                         )}
@@ -219,20 +215,30 @@ export default function ScoutDetailsPage() {
                   <TabsContent value="details">
                     <Card className="bg-[#1a1a1a] border-none rounded-[0.35rem] p-6">
                       <div className="grid grid-cols-1 gap-4">
-                        {scout.details &&
-                          Object.entries(scout.details).map(([key, value]: [string, string]) => (
-                            <div
-                              key={key}
-                              className="flex justify-between items-center py-2 border-b border-muted/20 last:border-b-0"
-                            >
-                              <span className="text-sm font-medium text-white">
-                                {key}
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                {value}
-                              </span>
-                            </div>
-                          ))}
+                        <div className="flex justify-between items-center py-2 border-b border-muted/20">
+                          <span className="text-sm font-medium text-white">Community</span>
+                          <span className="text-sm text-muted-foreground">{scout.scoutCommunity}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-muted/20">
+                          <span className="text-sm font-medium text-white">Gender</span>
+                          <span className="text-sm text-muted-foreground">{scout.scoutGender}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-muted/20">
+                          <span className="text-sm font-medium text-white">Age Range</span>
+                          <span className="text-sm text-muted-foreground">{scout.targetAudAgeStart} - {scout.targetAudAgeEnd}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-muted/20">
+                          <span className="text-sm font-medium text-white">Location</span>
+                          <span className="text-sm text-muted-foreground">{scout.targetAudLocation}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-muted/20">
+                          <span className="text-sm font-medium text-white">Stage</span>
+                          <span className="text-sm text-muted-foreground">{scout.scoutStage}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-muted/20 last:border-b-0">
+                          <span className="text-sm font-medium text-white">Sector</span>
+                          <span className="text-sm text-muted-foreground">{scout.scoutSector.join(", ")}</span>
+                        </div>
                       </div>
                     </Card>
                   </TabsContent>
@@ -309,7 +315,7 @@ export default function ScoutDetailsPage() {
         <SelectDaftarDialog
           open={showDaftarDialog}
           onOpenChange={setShowDaftarDialog}
-          scoutSlug={scout.slug}
+          scoutSlug={scoutId}
         />
       </div>
     </StudioCard>

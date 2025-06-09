@@ -542,7 +542,7 @@ function DocumentsList({
   const renderMetadata = (doc: Document) => {
     const visibilityText = {
       "investors_only": "Visible to all investors",
-      "private": "Visible to daftar investors only"
+      "private": "The document is exclusively visible to your Daftar investors"
     };
 
     return (

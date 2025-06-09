@@ -127,6 +127,11 @@ export default function UserProfileClient({
   const { toast } = useToast();
   const countryDropdownRef = useRef<HTMLDivElement>(null);
   const languageDropdownRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [availableLanguages, setAvailableLanguages] = useState(languageData);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const languageCache = useRef<Map<string, any[]>>(new Map());
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -197,6 +202,62 @@ export default function UserProfileClient({
     }
   }, [languageData]);
 
+  useEffect(() => {
+    const fetchLanguages = async (query: string) => {
+      try {
+        setIsSearching(true);
+        // Check cache first
+        const cacheKey = query.toLowerCase();
+        if (languageCache.current.has(cacheKey)) {
+          setAvailableLanguages(languageCache.current.get(cacheKey)!);
+          return;
+        }
+
+        const response = await fetch(`/api/endpoints/getAllLanguages?search=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error("Failed to fetch languages");
+        const { data } = await response.json();
+        
+        // Filter out already selected languages
+        const filteredLanguages = data.filter(
+          (lang: any) => !formState.languages.includes(lang.language_name)
+        );
+        
+        // Update cache
+        languageCache.current.set(cacheKey, filteredLanguages);
+        setAvailableLanguages(filteredLanguages);
+      } catch (error) {
+        console.error("Error fetching languages:", error);
+        setAvailableLanguages([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set new timeout for search
+    searchTimeoutRef.current = setTimeout(() => {
+      if (searchQuery) {
+        fetchLanguages(searchQuery);
+      } else {
+        // When search is empty, show initial languages excluding selected ones
+        const filteredInitial = languageData.filter(
+          lang => !formState.languages.includes(lang.language_name)
+        );
+        setAvailableLanguages(filteredInitial);
+      }
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery, languageData, formState.languages]);
+
   const handleChange = (field: string, value: string) => {
     if (field === "number") {
       // Only allow digits and limit length based on country code
@@ -230,6 +291,7 @@ export default function UserProfileClient({
       if (isLanguageSelected) {
         selectedLanguages = prev.languages.filter((lang) => lang !== language);
       } else {
+        // Only check limit for founders
         if (prev.role === "founder" && prev.languages.length >= 3) {
           toast({
             title: "Language Limit",
@@ -518,14 +580,14 @@ export default function UserProfileClient({
                 >
                   {formState.languages.length
                     ? formState.languages.join(", ")
-                    : isLanguageLoading
+                    : isLanguageLoading || isSearching
                     ? "Loading"
                     : formState.role === "founder"
-                    ? "Select Preferred Languages to Connect with Investors"
+                    ? "Select up to 3 Preferred Languages to Connect with Investors"
                     : formState.role === "investor"
                     ? "Select Preferred Languages to Connect with Founders"
                     : "Select Preferred Languages"}
-                  {isLanguageLoading ? (
+                  {isLanguageLoading || isSearching ? (
                     <Loader2 className="ml-2 h-4 w-4 shrink-0 opacity-50 animate-spin" />
                   ) : (
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -540,43 +602,51 @@ export default function UserProfileClient({
                   <CommandInput
                     placeholder="Search languages..."
                     className="h-9"
+                    onValueChange={(value) => setSearchQuery(value)}
                   />
-                  <CommandEmpty>No language found.</CommandEmpty>
-                  <CommandGroup className="max-h-[300px] overflow-auto">
-                    {isLanguageLoading ? (
+                  <CommandEmpty>
+                    {isSearching ? (
                       <div className="flex items-center justify-center p-4">
                         <Loader2 className="h-6 w-6 animate-spin" />
                       </div>
                     ) : (
-                      languageData?.map((language) => (
-                        <CommandItem
-                          key={language.id}
-                          value={language.language_name}
-                          onSelect={() =>
-                            handleLanguageToggle(language.language_name)
-                          }
-                          className="cursor-pointer"
-                          disabled={
-                            formState.role === "founder" &&
-                            formState.languages.length >= 3 &&
-                            !formState.languages.includes(
+                      "No language found."
+                    )}
+                  </CommandEmpty>
+                  <CommandGroup className="max-h-[300px] overflow-auto">
+                    {availableLanguages?.map((language) => (
+                      <CommandItem
+                        key={language.id}
+                        value={language.language_name}
+                        onSelect={() =>
+                          handleLanguageToggle(language.language_name)
+                        }
+                        className="cursor-pointer"
+                        disabled={
+                          formState.role === "founder" &&
+                          formState.languages.length >= 3 &&
+                          !formState.languages.includes(
+                            language.language_name
+                          )
+                        }
+                      >
+                        <Check
+                          className={`mr-2 h-4 w-4 ${
+                            formState.languages.includes(
                               language.language_name
                             )
-                          }
-                        >
-                          <Check
-                            className={`mr-2 h-4 w-4 ${
-                              formState.languages.includes(
-                                language.language_name
-                              )
-                                ? "opacity-100"
-                                : "opacity-0"
-                            }`}
-                          />
-                          {language.language_name}
-                        </CommandItem>
-                      ))
-                    )}
+                              ? "opacity-100"
+                              : "opacity-0"
+                          }`}
+                        />
+                        {language.language_name}
+                        {formState.role === "founder" && formState.languages.length >= 3 && !formState.languages.includes(language.language_name) && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            (3 language limit)
+                          </span>
+                        )}
+                      </CommandItem>
+                    ))}
                   </CommandGroup>
                 </Command>
               </PopoverContent>

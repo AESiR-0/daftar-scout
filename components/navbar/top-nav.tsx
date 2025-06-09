@@ -43,6 +43,7 @@ export function TopNav({ role }: { role: string }) {
   const [hasNewNotifications, setHasNewNotifications] = useState(true);
   const [hasNewProfileUpdates, setHasNewProfileUpdates] = useState(true);
   const [studioEntryPoint, setStudioEntryPoint] = useState<string>("");
+  const [avatarImage, setAvatarImage] = useState<string>("");
 
   // Only show search on specific pages
   const showSearch =
@@ -112,6 +113,22 @@ export function TopNav({ role }: { role: string }) {
     }
     fetchUserId();
   });
+
+  useEffect(() => {
+    async function fetchUserProfile() {
+      try {
+        const response = await fetch("/api/endpoints/me");
+        const data = await response.json();
+        if (data?.image) {
+          setAvatarImage(data.image);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+    fetchUserProfile();
+  }, []);
+
   return (
     <div className="">
       <div className="flex h-12 items-center px-4">
@@ -197,7 +214,7 @@ export function TopNav({ role }: { role: string }) {
               onClick={() => setProfileOpen(true)}
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                <AvatarImage src={avatarImage || "https://github.com/shadcn.png"} alt="User" />
                 <AvatarFallback>UN</AvatarFallback>
               </Avatar>
             </Button>

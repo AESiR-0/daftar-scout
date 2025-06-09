@@ -353,7 +353,7 @@ export function MakeOfferSection({
                           <div className="bg-muted/5 rounded-[0.35rem] p-4">
                             <div className="flex flex-col gap-1 mb-5">
                               <p className="text-xs text-muted-foreground">
-                                Created by: {offer.userName} {offer.userLastName}
+                                Sent by: {pitchId === "HJqVubjnQ3RVGzlyDUCY4" ? "System" : `${offer.userName} ${offer.userLastName}`}
                                 <time className="text-xs text-muted-foreground">
                                   {" "}at {offer.date}
                                 </time>
