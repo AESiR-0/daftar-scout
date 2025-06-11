@@ -128,7 +128,7 @@ export default function ScoutDetailsPage() {
     scout,
     faqs = [],
     updates = [],
-    collaboration ,
+    collaboration,
     lastDayToPitch,
   } = scoutData;
 
@@ -154,22 +154,25 @@ export default function ScoutDetailsPage() {
                       <h1 className="text-2xl font-bold text-white">
                         {scout.scoutName}
                       </h1>
-                     
                     </div>
 
                     <div className="mt-2 space-y-2">
                       <div className="text-sm text-muted-foreground">
                         Collaboration:{" "}
-                        {collaboration.length > 0 ? (
-                          <InvestorProfile investor={{
-                            daftarName: collaboration[0].name,
-                            structure: collaboration[0].structure,
-                            onDaftarSince: collaboration[0].onDaftarSince,
-                            website: collaboration[0].website,
-                            location: collaboration[0].location,
-                            bigPicture: collaboration[0].bigPicture || "",
-                            image: collaboration[0].image || ""
-                          }} />
+                        {collaboration && collaboration.length > 0 ? (
+                          collaboration.map((collab, index) => (
+                            <div key={index} className="pl-2 border-l-2 border-blue-500/50 mt-2">
+                              <InvestorProfile investor={{
+                                daftarName: collab.name || "",
+                                structure: collab.structure ? (typeof collab.structure === 'string' ? collab.structure : '') : '',
+                                onDaftarSince: collab.onDaftarSince || "",
+                                website: collab.website || "",
+                                location: collab.location || "",
+                                bigPicture: collab.bigPicture || "",
+                                image: collab.image || ""
+                              }} />
+                            </div>
+                          ))
                         ) : (
                           <span>No collaboration available.</span>
                         )}
