@@ -42,6 +42,7 @@ interface Offer {
   userName: string;
   userLastName: string | null;
   collaboration: string;
+  scoutName: string;
   status: "pending" | "accepted" | "rejected" | "withdrawn";
   date: string;
   actions: ActionHistory[];
@@ -98,6 +99,7 @@ export default function OffersPage() {
         userName: offer.userName,
         userLastName: offer.userLastName,
         collaboration: offer.offer_desc,
+        scoutName: offer.scoutName,
         status: offer.status || "pending",
         date: formatDate(offer.offer_sent_at),
         actions: offer.actions || [],
@@ -226,8 +228,7 @@ export default function OffersPage() {
                 <p className="text-muted-foreground">Loading offers...</p>
               )}
               {!isLoading && pendingOffers.length === 0 && (
-                <p className="text-muted-foreground px-4 py-4">"Looks empty for now.
-Offers from investors will be shared here."</p>
+                <p className="text-muted-foreground px-4 py-4">{offers.length >= 1 ? "No pending offers. Logs of the offers will be shown below." : "Looks empty for now. Offers from investors will be shared here."}</p>
               )}
               {!isLoading &&
                 pendingOffers.map((offer) => (
@@ -284,14 +285,15 @@ Offers from investors will be shared here."</p>
                     <div className="flex flex-col gap-2">
                       <div className="bg-muted/5 rounded-[0.35rem] p-4">
                         <p className="text-sm text-muted-foreground">
-                          Offer from {offer.userName} {offer.userLastName || ''}
+                          Offer from {offer.scoutName}
                         </p>
+                        <time className="text-xs text-muted-foreground block mt-1">
+                          {offer.date}
+                        </time>
                         <p className="text-sm text-muted-foreground mt-2">
                           {offer.collaboration}
                         </p>
-                        <time className="text-xs text-muted-foreground block mt-2">
-                          {offer.date}
-                        </time>
+                        
                       </div>
                     </div>
 

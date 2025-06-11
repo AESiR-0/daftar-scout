@@ -41,9 +41,12 @@ export async function GET(req: NextRequest) {
         created_at: offers.offeredAt,
         userName: users.name,
         userLastName: users.lastName,
+        scoutName: scouts.scoutName,
       })
       .from(offers)
       .leftJoin(users, eq(users.id, offers.offerBy))
+      .leftJoin(pitch, eq(pitch.id, offers.pitchId))
+      .leftJoin(scouts, eq(scouts.scoutId, pitch.scoutId))
       .where(eq(offers.pitchId, pitchId));
 
     // Second query: Get all actions for these offers
@@ -89,6 +92,7 @@ export async function GET(req: NextRequest) {
       created_at: offer.created_at,
       userName: offer.userName,
       userLastName: offer.userLastName,
+      scoutName: offer.scoutName,
       actions: actionsByOffer[offer.id] || [],
     }));
 

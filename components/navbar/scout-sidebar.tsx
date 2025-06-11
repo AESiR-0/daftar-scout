@@ -1,4 +1,5 @@
 "use client";
+import { ShareButton } from "@/components/share-button";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,6 +28,30 @@ interface Section {
   pitches: Pitch[];
 }
 
+interface ScoutDetails {
+  scoutId: string;
+  scoutName: string;
+  targetAudAgeStart: number;
+  targetAudAgeEnd: number;
+  scoutCommunity: string;
+  scoutGender: string;
+  targetAudLocation: string;
+  scoutStage: string;
+  scoutSector: string[];
+  lastDayToPitch: string;
+  investorPitch: string;
+}
+
+interface Collaboration {
+  name: string;
+  structure: string;
+  website: string;
+  location: string;
+  onDaftarSince: string;
+  bigPicture: string | null;
+  image: string | null;
+}
+
 export function ScoutSidebar({
   scoutSlug,
   isPlanning = true,
@@ -44,6 +69,8 @@ export function ScoutSidebar({
   const [isShowScroll, setIsShowScroll] = useState(true);
   const [sections, setSections] = useState<Section[]>([]);
   const [sendingReport, setSendingReport] = useState(false);
+  const [scoutDetails, setScoutDetails] = useState<ScoutDetails | null>(null);
+  const [collaborations, setCollaborations] = useState<Collaboration[]>([]);
   const pathname = usePathname();
   const isStudio = pathname.includes("studio");
   const scoutId = pathname.split("/")[3];
@@ -97,12 +124,34 @@ export function ScoutSidebar({
     fetchData();
   }, [scoutId]);
 
+  useEffect(() => {
+    const fetchScoutDetails = async () => {
+      try {
+        const res = await fetch(`/api/endpoints/scoutDetails?scoutId=${scoutId}`);
+        if (!res.ok) throw new Error("Failed to fetch scout details");
+        const data = await res.json();
+        setScoutDetails(data.scout);
+        setCollaborations(data.collaboration || []);
+      } catch (error) {
+        console.error("Error fetching scout details:", error);
+      }
+    };
+
+    if (scoutId) {
+      fetchScoutDetails();
+    }
+  }, [scoutId]);
+
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) =>
       prev.includes(sectionId)
         ? prev.filter((id) => id !== sectionId)
         : [...prev, sectionId]
     );
+  };
+
+  const handleShare = () => {
+    
   };
 
   const handleSendReport = async () => {
@@ -173,6 +222,15 @@ export function ScoutSidebar({
               >
                 Send Report
               </Button>
+              {scoutDetails && (
+                <ShareButton 
+                  daftarName={collaborations.map(c => c.name).join(", ")}
+                  sector={scoutDetails.scoutSector.join(", ")}
+                  stage={scoutDetails.scoutStage}
+                  lastDate={scoutDetails.lastDayToPitch}
+                  applyUrl={`/founder/scout/${scoutId}`}
+                />
+              )}
             </div>
           </div>
           <div className="flex-1" />
@@ -196,9 +254,18 @@ export function ScoutSidebar({
                 className="w-full text-white px-0 justify-start opacity-50 cursor-not-allowed"
                 onClick={handleSendReport}
                 disabled={true}
-              > 
+              >
                 Send Report
               </Button>
+              {scoutDetails && (
+                <ShareButton 
+                  daftarName={collaborations.map(c => c.name).join(", ")}
+                  sector={scoutDetails.scoutSector.join(", ")}
+                  stage={scoutDetails.scoutStage}
+                  lastDate={scoutDetails.lastDayToPitch}
+                  applyUrl={`/founder/scout/${scoutId}`}
+                />
+              )}
             </div>
           </div>
           <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm" />
@@ -241,6 +308,15 @@ export function ScoutSidebar({
             >
               {sendingReport ? "Sending..." : "Send Report"}
             </Button>
+            {scoutDetails && (
+              <ShareButton 
+                daftarName={collaborations.map(c => c.name).join(", ")}
+                sector={scoutDetails.scoutSector.join(", ")}
+                stage={scoutDetails.scoutStage}
+                lastDate={scoutDetails.lastDayToPitch}
+                applyUrl={`/founder/scout/${scoutId}`}
+              />
+            )}
           </div>
         </div>
 
