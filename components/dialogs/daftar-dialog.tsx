@@ -542,13 +542,13 @@ export function DaftarDialog({
       try {
         // Generate a unique key for the image
         const key = `daftar-images/${daftarId}/${Date.now()}-${file.name}`;
-        
+
         // Upload to S3 and get URL
         const imageUrl = await uploadVideoToS3(file, key);
-        
+
         // Update local state
         setAvatarUrl(imageUrl);
-        
+
         // Update Daftar profile in database
         const response = await fetch(`/api/endpoints/daftar/me?daftarId=${daftarId}`, {
           method: 'PATCH',
@@ -813,7 +813,7 @@ export function DaftarDialog({
                     <div className="space-y-2">
                       <Label>Structure</Label>
                       <Select
-                        value={daftarData.structure}
+                        value={daftarData.structure.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ').split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                         onValueChange={(value) => setDaftarData(prev => ({ ...prev, structure: value }))}
                       >
                         <SelectTrigger>
@@ -828,14 +828,14 @@ export function DaftarDialog({
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Website</Label>
+                      <Label>Website</Label> <br />
                       <Input
                         value={daftarData.website}
                         onChange={(e) => setDaftarData(prev => ({ ...prev, website: e.target.value }))}
                       />
                     </div>
                     <div className="col-span-2 space-y-2">
-                      <Label>Address</Label>
+                      <Label>Address</Label> <br />
                       <div className="space-y-2">
                         <Input
                           placeholder="Street Address"
@@ -882,7 +882,7 @@ export function DaftarDialog({
                       </div>
                     </div>
                     <div className="col-span-2 space-y-2">
-                      <Label>What's the big picture you're working on?</Label>
+                      <Label>What's the big picture you're working on?</Label> <br />
                       <Input
                         value={daftarData.vision}
                         onChange={(e) => setDaftarData(prev => ({ ...prev, vision: e.target.value }))}

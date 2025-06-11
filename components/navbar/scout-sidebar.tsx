@@ -407,6 +407,7 @@ Simplifying Startup Pitching and Scouting
           <Button
             size="sm"
             variant="link"
+            disabled={scoutId === 'jas730'}
             className="px-0 py-0 text-white"
             onClick={() => setEndScoutingOpen(true)}
           >
