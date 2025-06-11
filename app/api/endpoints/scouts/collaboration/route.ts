@@ -49,12 +49,9 @@ export async function GET(req: NextRequest) {
       .where(eq(daftarScouts.scoutId, scoutId));
 
     // Filter out the current user's daftar
-    const filteredEntries = scoutEntries.filter(
-      entry => entry.daftarId !== currentDaftarId
-    );
 
     // Ensure all fields have default values if null
-    const sanitizedEntries = filteredEntries.map(entry => ({
+    const sanitizedEntries = scoutEntries.map(entry => ({
       id: entry.id || '',
       daftarId: entry.daftarId || '',
       isPending: entry.isPending ?? true,

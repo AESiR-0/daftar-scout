@@ -86,6 +86,17 @@ export function UpdatesDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [content, setContent] = useState("");
   const { toast } = useToast();
+  const isDemo = scoutId === 'jas730';
+
+  useEffect(() => {
+    if (isDemo) {
+      toast({
+        title: "Demo Mode",
+        description: "Updates posting is restricted in demo scout",
+        variant: "default",
+      });
+    }
+  }, [isDemo]);
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -213,16 +224,17 @@ export function UpdatesDialog({
           <div className="space-y-2 flex flex-col items-center gap-2 rounded-md">
             <textarea
               className="w-full border rounded-xl bg-[#1a1a1a] p-2 resize-none min-h-[150px]"
-              placeholder="Write your update here..."
+              placeholder={isDemo ? "Updates posting is restricted in demo scout" : "Write your update here..."}
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              disabled={isDemo}
             />
             <div className="p-2 w-full flex justify-start">
               <Button
                 onClick={handleSubmit}
                 size="sm"
                 className="w-fit bg-blue-600 rounded-[0.35rem] hover:bg-blue-700 text-white"
-                disabled={!content.trim() || isLoading}
+                disabled={!content.trim() || isLoading || isDemo}
               >
                 Post Update
               </Button>
@@ -258,6 +270,7 @@ export function UpdatesDialog({
                       </div>
                       <Button
                         variant="ghost"
+                        disabled={isDemo}
                         size="icon"
                         onClick={() => handleDelete(update.id)}
                         className="h-8 w-8 p-1 opacity-0 group-hover:opacity-100 transition-opacity"

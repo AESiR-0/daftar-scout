@@ -15,6 +15,7 @@ type Pitch = {
   demoLink: string;
   stage: string;
   askForInvestor: boolean;
+  investorStatus: string;
   createdAt: string;
   status: string | null;
   isCompleted: boolean;
@@ -70,7 +71,7 @@ export default function PitchBoardPage({ pitches }: PitchBoardPageProps) {
     const timer = setTimeout(() => {
       const grouped: Record<string, Pitch[]> = {};
       for (const pitch of pitches) {
-        const status = pitch.status ?? "Inbox";
+        const status = pitch.investorStatus == 'Inbox' || 'inbox' ? 'Inbox' : pitch.status ?? "Inbox";
         if (!grouped[status]) grouped[status] = [];
         grouped[status].push(pitch);
       }

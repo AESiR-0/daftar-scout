@@ -26,18 +26,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+
+interface Action {
+  action: "accepted" | "withdrawn" | "Offer Sent" | "rejected";
+  timestamp: string;
+  takenBy: {
+    name: string;
+    lastName: string;
+  }
+}
+
 interface Offer {
   id: string;
-  scoutName: string;
-  collaboration: string[];
-  status: "pending" | "accepted" | "rejected" | "withdrawn";
-  type: "sent" | "accepted" | "withdrawn" | "rejected";
-  date: string;
-  responses?: ActionLog[];
+  pitch_id: string;
+  investor_id: string;
   offer_desc: string;
+  status: "pending" | "accepted" | "rejected" | "withdrawn";
+  offer_sent_at: string;
+  created_at: string;
   userName: string;
   userLastName: string;
-  actions: any[];
+  actions: Action[];
 }
 
 interface ActionLog {
@@ -95,9 +104,11 @@ export function MakeOfferSection({
       const data = await response.json();
       const mappedOffers: Offer[] = data.map((offer: any) => ({
         id: offer.id.toString(),
-        scoutName: offer.userName + (offer.userLastName ? ` ${offer.userLastName}` : ''),
+        pitch_id: offer.pitch_id,
+        investor_id: offer.investor_id,
         status: offer.status,
-        date: formatDate(offer.offer_sent_at),
+        offer_sent_at: offer.offer_sent_at,
+        created_at: offer.created_at,
         offer_desc: offer.offer_desc,
         userName: offer.userName,
         userLastName: offer.userLastName,
@@ -272,7 +283,7 @@ export function MakeOfferSection({
   const logOffers = offers.filter((o) => {
     if (historyFilter === "all") return true;
     if (historyFilter === "pending") return o.status === "pending";
-    if (historyFilter === "withdrawn") return o.type === "withdrawn";
+    if (historyFilter === "withdrawn") return o.status === "withdrawn";
     return o.status === historyFilter;
   });
 
@@ -353,9 +364,9 @@ export function MakeOfferSection({
                           <div className="bg-muted/5 rounded-[0.35rem] p-4">
                             <div className="flex flex-col gap-1 mb-5">
                               <p className="text-xs text-muted-foreground">
-                                Sent by: {pitchId === "HJqVubjnQ3RVGzlyDUCY4" ? "System" : `${offer.userName} ${offer.userLastName}`}
+                                Offer sent by: {pitchId === "HJqVubjnQ3RVGzlyDUCY4" ? "System" : `${offer.userName} ${offer.userLastName}`}
                                 <time className="text-xs text-muted-foreground">
-                                  {" "}at {offer.date}
+                                  {" "}at {formatDate(offer.offer_sent_at)}
                                 </time>
                               </p>
 
@@ -367,25 +378,18 @@ export function MakeOfferSection({
                           </div>
                         </div>
 
-                        {offer.responses && offer.responses.length > 1 && (
+                        {offer.actions && offer.actions.length > 0 && (
                           <div className="-mt-5 space-y-4">
-                            {[...offer.responses]
-                              .filter((response) => response.action !== "Offer Sent")
+                            {[...offer.actions]
+                              .filter((action) => action.action !== "Offer Sent")
                               .reverse()
-                              .map((response, index) => (
+                              .map((action, index) => (
                                 <div key={index} className="flex flex-col gap-2">
                                   <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
-                                    <p className="text-sm text-muted-foreground">
-                                      {response.reason}
-                                    </p>
                                     <div className="flex flex-col gap-1">
                                       <p className="text-xs text-muted-foreground">
-                                        {response.action[0].toUpperCase() + response.action.slice(1)} by: {response.user.founder.name} {response.user.founder.lastName}
-
+                                        {action.action[0].toUpperCase() + action.action.slice(1)} by: {action.takenBy.name} {action.takenBy.lastName} at: {formatDate(action.timestamp)}
                                       </p>
-                                      <time className="text-xs text-muted-foreground">
-                                        {response.action} at: {response.timestamp}
-                                      </time>
                                     </div>
                                   </div>
                                 </div>
@@ -414,7 +418,7 @@ export function MakeOfferSection({
         </CardContent>
       </Card>
 
-      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+      {/* <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Offer Details</DialogTitle>
@@ -426,7 +430,7 @@ export function MakeOfferSection({
                 <h3 className="font-semibold">Scout Information</h3>
                 <p className="text-lg">{selectedOffer.scoutName}</p>
                 <p className="text-sm text-muted-foreground">
-                  Submitted on {selectedOffer.date}
+                  Submitted on {formatDate(selectedOffer.offer_sent_at)}
                 </p>
               </div>
 
@@ -443,7 +447,7 @@ export function MakeOfferSection({
 
               <div className="space-y-2">
                 <div className="space-y-2">
-                  {selectedOffer.responses?.map((log, index) => (
+                  {selectedOffer.actions?.map((log, index) => (
                     <div key={index} className="text-sm">
                       <span className="text-muted-foreground">
                         {log.timestamp}
@@ -459,7 +463,7 @@ export function MakeOfferSection({
             </div>
           )}
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent className="max-w-2xl">
@@ -524,70 +528,69 @@ export function MakeOfferSection({
     </div>
   );
 }
+// function OfferCard({
+//   offer,
+//   onView,
+// }: {
+//   offer: Offer;
+//   onView: (offer: Offer) => void;
+// }) {
+//   const getStatusInfo = () => {
+//     const lastLog = offer.actions?.[0];
+//     if (!lastLog?.user?.founder) return null;
 
-function OfferCard({
-  offer,
-  onView,
-}: {
-  offer: Offer;
-  onView: (offer: Offer) => void;
-}) {
-  const getStatusInfo = () => {
-    const lastLog = offer.responses?.[0];
-    if (!lastLog?.user?.founder) return null;
+//     switch (offer.status) {
+//       case "accepted":
+//         return {
+//           text: "Accepted by: ",
+//           user: lastLog.user.founder,
+//         };
+//       case "rejected":
+//         return {
+//           text: "Rejected by: ",
+//           user: lastLog.user.founder,
+//         };
+//       case "withdrawn":
+//         return {
+//           text: "Withdrawn by: ",
+//           user: lastLog.user.founder,
+//         };
+//       default:
+//         return null;
+//     }
+//   };
 
-    switch (offer.status) {
-      case "accepted":
-        return {
-          text: "Accepted by: ",
-          user: lastLog.user.founder,
-        };
-      case "rejected":
-        return {
-          text: "Rejected by: ",
-          user: lastLog.user.founder,
-        };
-      case "withdrawn":
-        return {
-          text: "Withdrawn by: ",
-          user: lastLog.user.founder,
-        };
-      default:
-        return null;
-    }
-  };
+//   const statusInfo = getStatusInfo();
 
-  const statusInfo = getStatusInfo();
+//   return (
+//     <div className="flex flex-col p-4 border rounded-lg transition-colors">
+//       <div className="flex justify-between items-start">
+//         <div className="flex-1">
+//           <time className="text-xs text-muted-foreground">{formatDate(offer.offer_sent_at)}</time>
+//           <p className="text-lg font-medium">{offer.scoutName}</p>
+//           <p className="text-sm text-muted-foreground">
+//             Collaboration: {offer.collaboration.join(", ")}
+//           </p>
 
-  return (
-    <div className="flex flex-col p-4 border rounded-lg transition-colors">
-      <div className="flex justify-between items-start">
-        <div className="flex-1">
-          <time className="text-xs text-muted-foreground">{offer.date}</time>
-          <p className="text-lg font-medium">{offer.scoutName}</p>
-          <p className="text-sm text-muted-foreground">
-            Collaboration: {offer.collaboration.join(", ")}
-          </p>
-
-          {offer.status !== "pending" && statusInfo && (
-            <p className="text-sm text-muted-foreground mt-1">
-              {statusInfo.text}
-              <FounderProfile founder={statusInfo.user} />
-            </p>
-          )}
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="mt-1"
-          onClick={(e) => {
-            e.stopPropagation();
-            onView(offer);
-          }}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
-}
+//           {offer.status !== "pending" && statusInfo && (
+//             <p className="text-sm text-muted-foreground mt-1">
+//               {statusInfo.text}
+//               <FounderProfile founder={statusInfo.user} />
+//             </p>
+//           )}
+//         </div>
+//         <Button
+//           variant="ghost"
+//           size="icon"
+//           className="mt-1"
+//           onClick={(e) => {
+//             e.stopPropagation();
+//             onView(offer);
+//           }}
+//         >
+//           <ChevronRight className="h-4 w-4" />
+//         </Button>
+//       </div>
+//     </div>
+//   );
+// }

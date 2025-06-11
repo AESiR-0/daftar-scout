@@ -390,7 +390,7 @@ export function TeamAnalysisSection({
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground grid grid-cols-3 gap-2 text-center">
+                    <div className="text-sm text-muted-foreground grid grid-cols-4 gap-2 text-center">
                       <div>
                         <p className="text-white text-xl font-semibold">
                           {teamSize}
@@ -408,6 +408,12 @@ export function TeamAnalysisSection({
                           {averageNPS}
                         </p>
                         <p>Avg. Belief</p>
+                      </div>
+                      <div>
+                        <p className="text-white text-xl font-semibold">
+                          {teamAnalysis.length}
+                        </p>
+                        <p>Voted</p>
                       </div>
                     </div>
 
@@ -429,12 +435,12 @@ export function TeamAnalysisSection({
                                     {entry.analyst.name}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {entry.analyst.role} –{" "}
+                                   {entry.analyst.role.slice(0, 1).toUpperCase() + entry.analyst.role.slice(1)} –{" "}
                                     {entry.analyst.daftarName}
                                   </p>
                                   <div className="flex gap-2">
                                     <p className="text-xs text-muted-foreground">
-                                      Belief: {entry.nps}/10
+                                      NPS: {entry.nps}/10
                                     </p>
                                     <p className="text-xs text-muted-foreground">
                                       Should Meet: {entry.belief === "yes" ? "Yes" : "No"}

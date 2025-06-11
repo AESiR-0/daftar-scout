@@ -16,6 +16,7 @@ type Pitch = {
   location: string;
   scoutId: string | null;
   demoLink: string;
+  investorStatus: string;
   stage: string;
   askForInvestor: boolean;
   createdAt: string;

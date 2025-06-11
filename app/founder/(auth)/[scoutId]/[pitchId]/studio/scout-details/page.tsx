@@ -35,6 +35,7 @@ interface Collaboration {
 
 interface ScoutDetails {
   targetAudAgeStart: number;
+  scoutName: string;
   targetAudAgeEnd: number;
   scoutCommunity: string;
   scoutGender: string;
@@ -127,7 +128,7 @@ export default function ScoutDetailsPage() {
     scout,
     faqs = [],
     updates = [],
-    collaboration = [],
+    collaboration ,
     lastDayToPitch,
   } = scoutData;
 
@@ -148,10 +149,10 @@ export default function ScoutDetailsPage() {
                     />
                   </div>
 
-                  <div className="mt-8 flex flex-col justify-center items-center text-center">
-                    <div className="flex items-center justify-center">
+                  <div className="mt-8 flex flex-col justify-start items-start ">
+                    <div className="flex items-center">
                       <h1 className="text-2xl font-bold text-white">
-                        {scout.scoutStage}
+                        {scout.scoutName}
                       </h1>
                      
                     </div>

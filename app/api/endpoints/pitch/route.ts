@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
         demoLink: pitch.demoLink,
         stage: pitch.stage,
         askForInvestor: pitch.askForInvestor,
+        investorStatus: pitch.investorStatus,
         createdAt: pitch.createdAt,
         status: pitch.status,
         isCompleted: pitch.isCompleted,

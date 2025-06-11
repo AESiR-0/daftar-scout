@@ -162,7 +162,7 @@ export default function ScoutDetailsPage() {
   const { scout, faqs, updates, collaboration, lastDayToPitch } = scoutData;
 
   const transformedScout = {
-    title: `${scout.scoutStage}`,
+    title: `${scout.scoutName}`,
     description: `Sector: ${scout.scoutSector} | Community: ${scout.scoutCommunity}`,
     videoUrl: scout.investorPitch && scout.investorPitch.trim() !== "" ? scout.investorPitch : null,
     slug: scoutId,

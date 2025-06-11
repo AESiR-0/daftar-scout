@@ -25,6 +25,9 @@ export async function GET(req: NextRequest) {
     // Fetch scout data
     const scoutData = await db
       .select({
+        scoutId: scouts.scoutId,
+        scoutName: scouts.scoutName,
+      
         targetAudAgeStart: scouts.targetAudAgeStart,
         targetAudAgeEnd: scouts.targetAudAgeEnd,
         scoutCommunity: scouts.scoutCommunity,
