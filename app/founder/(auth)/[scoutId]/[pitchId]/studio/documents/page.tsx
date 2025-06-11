@@ -429,9 +429,9 @@ export default function DocumentsPage() {
                   Sent <span className="ml-1 text-xs text-muted-foreground">{sentCount}</span>
                 </TabsTrigger>
               </TabsList>
-              <Button 
-                variant="outline" 
-                onClick={handleUpload} 
+              <Button
+                variant="outline"
+                onClick={handleUpload}
                 disabled={isUploading || pitchId === "HJqVubjnQ3RVGzlyDUCY4"}
               >
                 {isUploading ? (
@@ -551,6 +551,8 @@ function DocumentsList({
       </div>
     );
   }
+  const pathname = usePathname();
+  const pitchId = pathname.split("/")[3];
 
   return (
     <div className="space-y-4">
@@ -587,6 +589,7 @@ function DocumentsList({
                   <Button
                     variant="ghost"
                     size="icon"
+                    disabled={pitchId === 'HJqVubjnQ3RVGzlyDUCY4'}
                     className="hover:bg-muted/50"
                     onClick={() => onDelete(doc.id)}
                   >
