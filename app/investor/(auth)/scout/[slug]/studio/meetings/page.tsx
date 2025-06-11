@@ -117,8 +117,7 @@ export default function MeetingsPage() {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium text-sm">{meeting.name}</h4>
-                    <Badge variant="secondary">{meeting.status}</Badge>
-                  </div>
+s                  </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
                     <span>{`${meeting.date}T${meeting.time}`}</span>

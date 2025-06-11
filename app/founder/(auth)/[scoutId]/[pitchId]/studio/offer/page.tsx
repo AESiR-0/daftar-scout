@@ -289,7 +289,7 @@ export default function OffersPage() {
                         <time className="text-xs text-muted-foreground block mt-1">
                           {offer.date}
                         </time>
-                        <p className="text-sm text-muted-foreground mt-2">
+                        <p className="text-sm text-muted-foreground  mt-2">
                           {offer.collaboration}
                         </p>
 
@@ -443,10 +443,11 @@ function OfferCard({
         <p className="text-sm text-muted-foreground">
           Offer from {offer.scoutName}
         </p>
+        <time className="text-xs text-muted-foreground block mt-1">{offer.date}</time>
+
         <p className="text-sm text-muted-foreground mt-2">
           {offer.collaboration}
         </p>
-        <time className="text-xs text-muted-foreground block mt-2">{offer.date}</time>
       </div>
 
       {offer.actions && offer.actions.length > 0 && (

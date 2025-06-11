@@ -15,11 +15,12 @@ interface ShareButtonProps {
 export function ShareButton({ daftarName, sector, stage, lastDate, applyUrl }: ShareButtonProps) {
     const { toast } = useToast()
     const handleShare = async () => {
-        const postText = `${daftarName} Scouting Startups with https://daftaros.com
+        const postText = `${daftarName} Scouting Startups #DaftarOS
 
 If you have a startup idea, pitch to us in a 2.5 minute video, in the 
 language you're most comfortable speaking. Your first meeting with us 
 is just a few minutes away, and we can't wait to hear from you.
+
 Accepting pitches from: ${location}
 Stage: ${stage}
 Sector: ${sector}

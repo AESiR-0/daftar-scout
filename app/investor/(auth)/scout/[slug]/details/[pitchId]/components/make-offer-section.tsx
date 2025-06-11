@@ -372,7 +372,7 @@ export function MakeOfferSection({
                               </time>
 
                             </div>
-                            <p className="text-sm text-muted-foreground whitespace-pre-line">
+                            <p className="text-sm text-muted-foreground ">
                               {offer.offer_desc}
                             </p>
 

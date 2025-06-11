@@ -426,10 +426,10 @@ export function TeamAnalysisSection({
                           >
                             <div className="flex items-center justify-between gap-2 mb-1">
                               <div className="flex items-center gap-2">
-                                <img
+                                {/* <img
                                   src={entry.analyst.image}
                                   className="w-8 h-8 rounded-[0.35rem]"
-                                />
+                                /> */}
                                 <div>
                                   <p className="text-sm font-medium">
                                     {entry.analyst.name}

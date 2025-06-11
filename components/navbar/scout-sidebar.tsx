@@ -12,6 +12,7 @@ import { LaunchProgramDialog } from "../dialogs/launch-program-dialog";
 import { InsightsDialog } from "../dialogs/insights-dialog";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { formatDate } from "@/lib/format-date";
 
 interface Pitch {
   pitchId: string;
@@ -151,12 +152,12 @@ export function ScoutSidebar({
 
   const handleShare = () => {
     if (!scoutDetails) return;
-    
+
     let collaborationNames = collaborations.map(c => c.name);
     if (scoutId === 'jas730') {
       collaborationNames.push("Jason's family office fund");
     }
-    
+
     const postText = `${collaborationNames.join(", ")} Scouting Startups #DaftarOS
 
 If you have a startup idea, pitch to us in a 2.5 minute video, in the 
@@ -166,7 +167,7 @@ is just a few minutes away, and we can't wait to hear from you.
 Accepting pitches from: ${scoutDetails.targetAudLocation}
 Stage: ${scoutDetails.scoutStage}
 Sector: ${scoutDetails.scoutSector.join(", ")}
-Last Day to Pitch: ${scoutDetails.lastDayToPitch}
+Last Day to Pitch: ${formatDate(scoutDetails.lastDayToPitch)}
 Pitch Now: ${window.location.origin}/founder/scout/${scoutId}
 
 Daftar OS

@@ -242,9 +242,6 @@ export default function MeetingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
                     <h2 className="text-lg font-semibold">{selectedMeeting.title}</h2>
-                    <Badge variant="secondary">
-                      {selectedMeeting.status}
-                    </Badge>
                   </div>
                 </div>
               </div>
