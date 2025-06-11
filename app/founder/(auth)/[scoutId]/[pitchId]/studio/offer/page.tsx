@@ -255,7 +255,7 @@ export default function OffersPage() {
               <Select
                 value={historyFilter}
                 onValueChange={(
-                  value: "all" | "accepted" | "rejected" | "withdrawn"
+                  value: "all" | "accepted" | "rejected" 
                 ) => setHistoryFilter(value)}
               >
                 <SelectTrigger className="w-[180px] bg-muted/50">
@@ -265,7 +265,6 @@ export default function OffersPage() {
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="accepted">Accepted</SelectItem>
                   <SelectItem value="rejected">Declined</SelectItem>
-                  <SelectItem value="withdrawn">Withdrawn</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -293,7 +292,7 @@ export default function OffersPage() {
                         <p className="text-sm text-muted-foreground mt-2">
                           {offer.collaboration}
                         </p>
-                        
+
                       </div>
                     </div>
 
@@ -457,11 +456,12 @@ function OfferCard({
               <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="capitalize">{action.action} by</span>
-                  <span>{action.takenBy.name} {action.takenBy.lastName || ''}</span>
+                  <time className="text-xs text-muted-foreground">
+                    {formatDate(action.timestamp)}
+                  </time>
+                  <span>{offer.scoutName}</span>
                 </div>
-                <time className="text-xs text-muted-foreground">
-                  {formatDate(action.timestamp)}
-                </time>
+
               </div>
             </div>
           ))}
@@ -499,14 +499,7 @@ function OfferCard({
             Withdraw
           </Button>
         )}
-        <Button
-          className="bg-muted hover:bg-muted/50"
-          variant="ghost"
-          onClick={() => onView(offer)}
-          disabled={disabled}
-        >
-          View Details
-        </Button>
+
       </div>
 
       {currentAction && (

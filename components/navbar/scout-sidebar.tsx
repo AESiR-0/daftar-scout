@@ -1,5 +1,4 @@
 "use client";
-import { ShareButton } from "@/components/share-button";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,7 +88,7 @@ export function ScoutSidebar({
           `/api/endpoints/scouts/pitchesList?scoutId=${scoutId}`
         );
         const data = await res.json();
-        
+
         // Transform the data to match our interface
         const transformedData: Pitch[] = data.data.map((pitch: any) => ({
           pitchId: pitch.pitchId,
@@ -151,7 +150,30 @@ export function ScoutSidebar({
   };
 
   const handleShare = () => {
+    if (!scoutDetails) return;
     
+    let collaborationNames = collaborations.map(c => c.name);
+    if (scoutId === 'jas730') {
+      collaborationNames.push("Jason's family office fund");
+    }
+    
+    const postText = `${collaborationNames.join(", ")} Scouting Startups #DaftarOS
+
+If you have a startup idea, pitch to us in a 2.5 minute video, in the 
+language you're most comfortable speaking. Your first meeting with us 
+is just a few minutes away, and we can't wait to hear from you.
+
+Accepting pitches from: ${scoutDetails.targetAudLocation}
+Stage: ${scoutDetails.scoutStage}
+Sector: ${scoutDetails.scoutSector.join(", ")}
+Last Day to Pitch: ${scoutDetails.lastDayToPitch}
+Pitch Now: ${window.location.origin}/founder/scout/${scoutId}
+
+Daftar OS
+Simplifying Startup Pitching and Scouting
+    `;
+    const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(postText)}`;
+    window.open(linkedInUrl, '_blank');
   };
 
   const handleSendReport = async () => {
@@ -248,15 +270,15 @@ export function ScoutSidebar({
               >
                 Send Report
               </Button>
-              {scoutDetails && (
-                <ShareButton 
-                  daftarName={collaborations.map(c => c.name).join(", ")}
-                  sector={scoutDetails.scoutSector.join(", ")}
-                  stage={scoutDetails.scoutStage}
-                  lastDate={scoutDetails.lastDayToPitch}
-                  applyUrl={`/founder/scout/${scoutId}`}
-                />
-              )}
+              <Button
+                variant="link"
+                size="sm"
+                className="w-full text-white px-0 justify-start"
+                onClick={handleShare}
+                disabled={!scoutDetails}
+              >
+                Share
+              </Button>
             </div>
           </div>
           <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm" />
@@ -299,15 +321,15 @@ export function ScoutSidebar({
             >
               {sendingReport ? "Sending..." : "Send Report"}
             </Button>
-            {scoutDetails && (
-              <ShareButton 
-                daftarName={collaborations.map(c => c.name).join(", ")}
-                sector={scoutDetails.scoutSector.join(", ")}
-                stage={scoutDetails.scoutStage}
-                lastDate={scoutDetails.lastDayToPitch}
-                applyUrl={`/founder/scout/${scoutId}`}
-              />
-            )}
+            <Button
+              variant="link"
+              size="sm"
+              className="w-full text-white px-0 justify-start"
+              onClick={handleShare}
+              disabled={!scoutDetails}
+            >
+              Share
+            </Button>
           </div>
         </div>
 

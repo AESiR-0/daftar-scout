@@ -272,20 +272,17 @@ export function FoundersPitchSection({
                     playing={false}
                     style={{ aspectRatio: '9/16' }}
                   />
-                   <div className="flex p-4 items-center gap-2">
-                <p className="text-sm text-muted-foreground">Language : </p>
-                <span className="text-sm">Marathi</span>
-              </div>
+
                 </div>
               ) : (
                 <div className="w-[300px] h-[533px] aspect-[9/16] bg-muted rounded-[0.35rem] ml-20 flex items-center justify-center">
                   <p className="text-sm text-muted-foreground">
                     No video available
                   </p>
-                  
+
                 </div>
               )}
-               <div className="flex pl-20 my-5 text-center  items-center gap-2">
+              <div className="flex pl-20 my-5 text-center  items-center gap-2">
                 <p className="text-sm text-muted-foreground">Language : </p>
                 <span className="text-sm">Marathi</span>
               </div>
@@ -324,22 +321,22 @@ export function FoundersPitchSection({
                     </div>
                   ))}
                 </div>
-                
+
               </ScrollArea>
-                  
+
             </div>
           </div>
 
-<div className="px-4">
-  <hr />
-  </div>            
+          <div className="px-4">
+            <hr />
+          </div>
 
           <div className="mt-8">
             {/* Founder's Ask */}
-            
-           
+
+
             <div className="flex flex-col">
-              
+
               <h3 className="text-md pl-4 text-foreground">Founder's Ask</h3>
               <div className="rounded-[0.35rem] p-4">
                 <p className="text-sm text-muted-foreground">{pitch.ask}</p>
@@ -357,13 +354,13 @@ export function FoundersPitchSection({
                 <p className="text-sm text-muted-foreground">Pitching From</p>
                 <span className="text-sm">{pitch.location}</span>
               </div>
-              
+
               <div className="flex gap-2">
 
                 <p className="text-sm text-muted-foreground">Demo Link</p>
                 {pitch.demoLink ? (
                   <Link
-                    href={pitch.demoLink}
+                    href={`https://${pitch.demoLink}`}
                     className="text-sm hover:underline"
                     target="_blank"
                   >

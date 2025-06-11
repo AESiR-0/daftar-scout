@@ -407,7 +407,7 @@ export function TeamAnalysisSection({
                         <p className="text-white text-xl font-semibold">
                           {averageNPS}
                         </p>
-                        <p>Avg. Belief</p>
+                        <p>Avg. NPS</p>
                       </div>
                       <div>
                         <p className="text-white text-xl font-semibold">

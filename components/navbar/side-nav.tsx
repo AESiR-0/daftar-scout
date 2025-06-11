@@ -89,11 +89,12 @@ export function AppSidebar({ role }: { role: string }) {
           <Button
             size="icon"
             style={
-              { background: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="14" fill="white">D</text></svg>')`, }
+              { background: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="21" viewBox="0 0 21 21" width="21"><g fill="none" fill-rule="evenodd" stroke="white" stroke-linecap="round" stroke-linejoin="round" transform="matrix(0 1 -1 0 17 3)"><g transform="translate(6)"><path d="m7.621 6.378.001 4.243-4.244-.001" transform="matrix(-.70710678 .70710678 .70710678 .70710678 3.379263 -1.399737)"/><path d="m.5.5h2c1.65685425 0 3 1.34314575 3 3v8"/></g><g transform="matrix(-1 0 0 -1 9 13)"><path d="m7.621 6.378.001 4.243-4.244-.001" transform="matrix(-.70710678 .70710678 .70710678 .70710678 3.379263 -1.399737)"/><path d="m.5.5h2c1.65685425 0 3 1.34314575 3 3v8"/></g></g></svg>')`, 
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }
             }
-            // style={{
-            //   background: `url('${profileUrl}')`,
-            // }}
             className="rounded-full bg-[#1a1a1a] border-2 border-[#2a2a2a] h-8 w-8"
             onClick={() => setSelectDaftarOpen(true)}
           ></Button>

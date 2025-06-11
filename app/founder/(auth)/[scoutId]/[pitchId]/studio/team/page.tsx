@@ -284,8 +284,8 @@ export default function TeamPage() {
       }
 
       // Update the members list with the new designation
-      setMembers(members.map(member => 
-        member.id === editingMember.id 
+      setMembers(members.map(member =>
+        member.id === editingMember.id
           ? { ...member, designation: editDesignation.trim() }
           : member
       ));
@@ -372,7 +372,7 @@ export default function TeamPage() {
                 {member.phone && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4" />
-                    <p>{formatPhoneNumber(member.phone)}</p>
+                    <p>{member.countryCode} {' '} {formatPhoneNumber(member.phone)}</p>
                   </div>
                 )}
                 {member.location && (
