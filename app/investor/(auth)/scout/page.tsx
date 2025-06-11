@@ -152,7 +152,7 @@ export default function ScoutPage() {
     router.refresh();
     toast({
       title: "Scout Created",
-      description: "New scout has been added to planning",
+      description: "New scout has been added to planning. Please refresh to see the changes.",
     });
   };
 
