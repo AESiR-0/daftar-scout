@@ -349,9 +349,20 @@ export default function PitchPage() {
             <Textarea
               value={specificAsks}
               disabled={pitchApproved || isDemoPitch}
-              onChange={(e) => !isDemoPitch && setSpecificAsks(e.target.value)}
-              className="min-h-[100px] bg-muted/50 resize-none rounded-xl"
+              onChange={(e) => {
+                if (!isDemoPitch) {
+                  const words = e.target.value.trim().split(/\s+/).length;
+                  if (words <= 500 || e.target.value === '') {
+                    setSpecificAsks(e.target.value);
+                  }
+                }
+              }}
+              className="min-h-[100px] bg-muted/50 resize-y rounded-xl"
+              placeholder="What specific asks do you have for investors?"
             />
+            <span className="text-sm text-muted-foreground mt-1">
+              {specificAsks ? `${specificAsks.trim().split(/\s+/).length}/500 words` : '0/500 words'}
+            </span>
           </div>
 
           {/* Team Approvals Section */}

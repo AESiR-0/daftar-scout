@@ -222,15 +222,6 @@ export function ScoutSidebar({
               >
                 Send Report
               </Button>
-              {scoutDetails && (
-                <ShareButton 
-                  daftarName={collaborations.map(c => c.name).join(", ")}
-                  sector={scoutDetails.scoutSector.join(", ")}
-                  stage={scoutDetails.scoutStage}
-                  lastDate={scoutDetails.lastDayToPitch}
-                  applyUrl={`/founder/scout/${scoutId}`}
-                />
-              )}
             </div>
           </div>
           <div className="flex-1" />
