@@ -24,7 +24,8 @@ import { CalendarIcon, X, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSession } from "next-auth/react";
-
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 export interface ScheduleMeetingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -36,6 +37,8 @@ export function ScheduleMeetingDialog({
   onOpenChange,
   onScheduled,
 }: ScheduleMeetingDialogProps) {
+  const { toast } = useToast();
+  const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -109,6 +112,10 @@ export function ScheduleMeetingDialog({
       }
 
       onOpenChange(false);
+      toast({
+        title: "Meeting scheduled successfully, please refresh to see the meeting in your calendar",
+      });
+      router.refresh();
       onScheduled?.(); // Call the onScheduled callback if provided
     } catch (error) {
       console.error("Error scheduling meeting:", error);

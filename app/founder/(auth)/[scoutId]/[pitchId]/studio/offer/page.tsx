@@ -255,7 +255,7 @@ export default function OffersPage() {
               <Select
                 value={historyFilter}
                 onValueChange={(
-                  value: "all" | "accepted" | "rejected" 
+                  value: "all" | "accepted" | "rejected"
                 ) => setHistoryFilter(value)}
               >
                 <SelectTrigger className="w-[180px] bg-muted/50">
@@ -455,11 +455,10 @@ function OfferCard({
             <div key={index} className="flex flex-col gap-2">
               <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="capitalize">{action.action} by</span>
+                  <span className="capitalize">{action.action} by {offer.scoutName}</span>
                   <time className="text-xs text-muted-foreground">
                     {formatDate(action.timestamp)}
                   </time>
-                  <span>{offer.scoutName}</span>
                 </div>
 
               </div>

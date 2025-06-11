@@ -92,7 +92,7 @@ export function MakeOfferSection({
     description: "",
   });
   const [offerMessage, setOfferMessage] = useState("");
-
+  const isDemo = scoutId === "jas730";
   const fetchOffers = async () => {
     try {
       const response = await fetch(
@@ -364,11 +364,12 @@ export function MakeOfferSection({
                           <div className="bg-muted/5 rounded-[0.35rem] p-4">
                             <div className="flex flex-col gap-1 mb-5">
                               <p className="text-xs text-muted-foreground">
-                                Offer sent by: {pitchId === "HJqVubjnQ3RVGzlyDUCY4" ? "System" : `${offer.userName} ${offer.userLastName}`}
-                                <time className="text-xs text-muted-foreground">
-                                  {" "}at {formatDate(offer.offer_sent_at)}
-                                </time>
+                                Offer sent by {pitchId === "HJqVubjnQ3RVGzlyDUCY4" ? "System" : `${offer.userName} ${offer.userLastName}`}
+
                               </p>
+                              <time className="text-xs text-muted-foreground">
+                                {formatDate(offer.offer_sent_at)}
+                              </time>
 
                             </div>
                             <p className="text-sm text-muted-foreground whitespace-pre-line">
@@ -388,8 +389,11 @@ export function MakeOfferSection({
                                   <div className="bg-muted/5 rounded-[0.35rem] p-4 space-y-2">
                                     <div className="flex flex-col gap-1">
                                       <p className="text-xs text-muted-foreground">
-                                        {action.action[0].toUpperCase() + action.action.slice(1)} by: {action.takenBy.name} {action.takenBy.lastName} at: {formatDate(action.timestamp)}
+                                        {action.action[0].toUpperCase() + action.action.slice(1)} by {pitchId === "HJqVubjnQ3RVGzlyDUCY4" ? "System" : `${action.takenBy.name} ${action.takenBy.lastName}`}
                                       </p>
+                                      <time className="text-xs text-muted-foreground">
+                                        {formatDate(action.timestamp)}
+                                      </time>
                                     </div>
                                   </div>
                                 </div>
@@ -402,6 +406,7 @@ export function MakeOfferSection({
                             <Button
                               variant="outline"
                               className="rounded-[0.35rem]"
+                              disabled={isDemo}
                               onClick={() => handleAction(offer.id, "withdrawn")}
                             >
                               Withdraw
