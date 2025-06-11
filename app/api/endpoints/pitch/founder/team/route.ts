@@ -152,6 +152,20 @@ export async function POST(req: NextRequest) {
       .limit(1);
 
     if (userExist.length === 0) {
+      // Check if user exists but is an investor
+      const isInvestor = await db
+        .select()
+        .from(users)
+        .where(and(eq(users.email, email), eq(users.role, "investor")))
+        .limit(1);
+
+      if (isInvestor.length > 0) {
+        return NextResponse.json(
+          { error: "Cannot invite an investor to a pitch team. Only founders can be invited to a pitch." },
+          { status: 400 }
+        );
+      }
+
       return NextResponse.json(
         { error: "User does not exist" },
         { status: 404 }

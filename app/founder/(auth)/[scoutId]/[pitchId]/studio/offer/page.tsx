@@ -441,7 +441,7 @@ function OfferCard({
     <div className="flex flex-col gap-4">
       <div className="bg-muted/50 rounded-[0.35rem] p-4">
         <p className="text-sm text-muted-foreground">
-          Offer from {offer.userName} {offer.userLastName || ''}
+          Offer from {offer.scoutName}
         </p>
         <p className="text-sm text-muted-foreground mt-2">
           {offer.collaboration}
