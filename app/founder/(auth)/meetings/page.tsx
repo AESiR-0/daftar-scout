@@ -59,9 +59,9 @@ export default function MeetingsPage() {
   // Get meetings for selected date
   const selectedDateMeetings = selectedDate
     ? meetings.filter(m => {
-        const meetingDate = new Date(m.startTime)
-        return meetingDate.toDateString() === selectedDate.toDateString()
-      })
+      const meetingDate = new Date(m.startTime)
+      return meetingDate.toDateString() === selectedDate.toDateString()
+    })
     : []
 
   // Get all dates that have meetings
@@ -80,10 +80,10 @@ export default function MeetingsPage() {
       if (!response.ok) {
         throw new Error('Failed to accept meeting')
       }
-      
+
       // Refresh meetings list
       await fetchMeetings()
-      
+
       toast({
         title: 'Success',
         description: 'Meeting accepted successfully',
@@ -109,10 +109,10 @@ export default function MeetingsPage() {
       if (!response.ok) {
         throw new Error('Failed to reject meeting')
       }
-      
+
       // Refresh meetings list
       await fetchMeetings()
-      
+
       toast({
         title: 'Success',
         description: 'Meeting rejected successfully',
@@ -258,9 +258,9 @@ export default function MeetingsPage() {
                   {selectedMeeting.meetLink ? (
                     <>
                       <Video className="h-4 w-4 text-muted-foreground" />
-                      <a 
-                        href={selectedMeeting.meetLink} 
-                        target="_blank" 
+                      <a
+                        href={selectedMeeting.meetLink}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline"
                       >
@@ -300,6 +300,9 @@ export default function MeetingsPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <p className="text-sm text-muted-foreground">
+                    You can delete this meeting from your Google Calendar.
+                  </p>
                   {selectedMeeting.organizer === session?.user?.email ? (
                     <p className="text-sm text-muted-foreground">You are the organizer of this meeting</p>
                   ) : selectedMeeting.status === 'accepted' ? (

@@ -236,7 +236,7 @@ Simplifying Startup Pitching and Scouting
                   Studio
                 </Button>
               </Link>
-              <Button
+              {/* <Button
                 variant="link"
                 size="sm"
                 className="w-full text-white px-0 justify-start opacity-50 cursor-not-allowed"
@@ -244,7 +244,7 @@ Simplifying Startup Pitching and Scouting
                 disabled={true}
               >
                 Send Report
-              </Button>
+              </Button> */}
             </div>
           </div>
           <div className="flex-1" />
@@ -262,7 +262,7 @@ Simplifying Startup Pitching and Scouting
               <h2 className="text-[14px] font-semibold">{scoutName}</h2>
             </div>
             <div className="px-4 py-2">
-              <Button
+              {/* <Button
                 variant="link"
                 size="sm"
                 className="w-full text-white px-0 justify-start opacity-50 cursor-not-allowed"
@@ -270,7 +270,7 @@ Simplifying Startup Pitching and Scouting
                 disabled={true}
               >
                 Send Report
-              </Button>
+              </Button> */}
               <Button
                 variant="link"
                 size="sm"
