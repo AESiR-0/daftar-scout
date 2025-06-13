@@ -51,7 +51,7 @@ export default function DocumentsPage() {
   const [documentsList, setDocumentsList] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("received");
+  const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("private");
 
   const privateCount = documentsList.filter((doc) => doc.type === "private").length;
   const receivedCount = documentsList.filter((doc) => doc.type === "received").length;
@@ -412,7 +412,7 @@ export default function DocumentsPage() {
       <Card className="border-none bg-[#0e0e0e] flex-1">
         <CardContent className="space-y-6">
           <Tabs
-            defaultValue="received"
+            defaultValue="private"
             onValueChange={(value: string) =>
               setActiveTab(value as typeof activeTab)
             }

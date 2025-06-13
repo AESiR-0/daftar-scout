@@ -6,9 +6,9 @@ import { Footer } from "@/components/footer";
 import { ErrorBoundary } from "@/components/error-boundary";
 
 export const metadata: Metadata = {
-  title: "Simplifying Startup Pitching",
+  title: "Daftar OS",
   description:
-    "Share your story in 2.5min and connect with investors who want to back you at the idea or MVP stage.",
+    "Simplifying Startup Scouting and Pitching",
 };
 
 export default function RootLayout({

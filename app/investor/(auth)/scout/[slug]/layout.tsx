@@ -30,6 +30,7 @@ export default async function ScoutLayout({
     <div className="flex h-[calc(100vh-4rem)]">
       <ScoutSidebar
         scoutSlug={[name, slug]}
+        isClosed={status === "Closed" || status === "closed"}
         isPlanning={status === "Planning"}
         isScheduling={status === "Scheduled"}
       />

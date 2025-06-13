@@ -64,7 +64,8 @@ export function CreateScoutDialog({
       router.push("/investor/scout");
       toast({
         title: "Scout created",
-        description: `Scout "${newScout.scoutName}" (ID: ${newScout.scoutId}) created successfully. Please refresh to see the scout in your list`,
+        description: `Scout "${newScout.scoutName}" (ID: ${newScout.scoutId}) created successfully. 
+        \n Please refresh to see the scout in your list`,
       });
       router.refresh();
 

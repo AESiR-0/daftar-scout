@@ -56,10 +56,12 @@ export function ScoutSidebar({
   scoutSlug,
   isPlanning = true,
   isScheduling = false,
+  isClosed = false,
 }: {
   scoutSlug: string[];
   isPlanning?: boolean;
   isScheduling?: boolean;
+  isClosed?: boolean;
 }) {
   const [expandedSections, setExpandedSections] = useState<string[]>(["inbox"]);
   const [endScoutingOpen, setEndScoutingOpen] = useState(false);
@@ -154,25 +156,20 @@ export function ScoutSidebar({
     if (!scoutDetails) return;
 
     let collaborationNames = collaborations.map(c => c.name);
-    if (scoutId === 'jas730') {
-      collaborationNames.push("Jason's family office fund");
-    }
 
-    const postText = `${collaborationNames.join(", ")} Scouting Startups #DaftarOS
-
-If you have a startup idea, pitch to us in a 2.5 minute video, in the 
-language you're most comfortable speaking. Your first meeting with us 
-is just a few minutes away, and we can't wait to hear from you.
+    const postText = `${collaborationNames.join(", ")} - Scouting Startups at Daftar OS
+ 
+If you have a startup idea, pitch to us in a 2.5-minute video, in the language you’re most comfortable speaking. Your first meeting with us is just a few minutes away, and we can’t wait to hear from you.
 
 Accepting pitches from: ${scoutDetails.targetAudLocation}
-Stage: ${scoutDetails.scoutStage}
+Stage: ${scoutDetails.scoutStage.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
 Sector: ${scoutDetails.scoutSector.join(", ")}
 Last Day to Pitch: ${formatDate(scoutDetails.lastDayToPitch)}
 Pitch Now: ${window.location.origin}/founder/scout/${scoutId}
 
 Daftar OS
-Simplifying Startup Pitching and Scouting
-    `;
+www.daftaros.com
+Simplifying Startup Scouting and Pitching`;
     const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(postText)}`;
     window.open(linkedInUrl, '_blank');
   };
@@ -318,7 +315,7 @@ Simplifying Startup Pitching and Scouting
               size="sm"
               className="w-full text-white px-0 justify-start"
               onClick={handleSendReport}
-              disabled={sendingReport}
+              disabled={sendingReport || !isClosed}
             >
               {sendingReport ? "Sending..." : "Send Report"}
             </Button>

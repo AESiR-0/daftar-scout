@@ -298,11 +298,11 @@ export default function MeetingsPage() {
                     {selectedMeeting.description}
                   </p>
                 </div>
-
+                <p className="text-sm text-muted-foreground">
+                  You can delete this meeting from your Google Calendar.
+                </p>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm text-muted-foreground">
-                    You can delete this meeting from your Google Calendar.
-                  </p>
+
                   {selectedMeeting.organizer === session?.user?.email ? (
                     <p className="text-sm text-muted-foreground">You are the organizer of this meeting</p>
                   ) : selectedMeeting.status === 'accepted' ? (

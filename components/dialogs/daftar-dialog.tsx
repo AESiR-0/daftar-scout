@@ -469,7 +469,7 @@ export function DaftarDialog({
         body: JSON.stringify({
           name: daftarData.name,
           profileUrl: avatarUrl,
-          structure: daftarData.structure,
+          structure: daftarData.structure.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
           website: daftarData.website,
           vision: daftarData.vision,
         }),
@@ -781,7 +781,7 @@ export function DaftarDialog({
                   />
                   <div>
                     <h3 className="text-lg font-medium">{daftarData.name}</h3>
-                    <p className="text-sm text-muted-foreground">{daftarData.structure}</p>
+                    <p className="text-sm text-muted-foreground">{daftarData.structure.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ').split('/').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</p>
                     <p className="text-xs text-muted-foreground mt-1">Daftar Code: {daftarData.code}</p>
                   </div>
                 </div>
