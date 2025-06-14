@@ -305,7 +305,7 @@ export function CreateDaftarDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
-          structure: formData.structure,
+          structure: formData.structure.split(" ").map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" ").split("/").map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join("/"),
           website: formData.website || null, // Only optional field
           bigPicture: formData.vision || null,
           location,

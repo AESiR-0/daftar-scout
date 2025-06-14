@@ -51,7 +51,7 @@ interface TeamMember {
   gender: string
   location: string
   language: string[]
-  profileUrl?: string
+  profileUrl: string
   status: 'active' | 'pending'
   isCurrentUser?: boolean
   joinDate: string
@@ -107,54 +107,7 @@ const formatPhoneNumber = (phone?: string) => {
   }
   return phone
 }
-const dummyTeamMembers: TeamMember[] = [
-  {
-    id: '1',
-    firstName: 'Current',
-    lastName: 'User',
-    email: 'current@user.com',
-    designation: 'Founder',
-    age: '28',
-    gender: 'Male',
-    location: 'Dubai, UAE',
-    language: ['English', 'Arabic'],
-    status: 'active',
-    isCurrentUser: true,
-    joinDate: '2024-01-15',
-    phone: '+971526374859',
-    approvesDelete: true
-  },
-  {
-    id: '2',
-    firstName: 'Sarah',
-    lastName: 'Ahmed',
-    email: 'sarah.ahmed@example.com',
-    designation: 'CTO',
-    age: '32',
-    gender: 'Female',
-    location: 'Abu Dhabi, UAE',
-    language: ['English', 'Arabic', 'French'],
-    status: 'active',
-    joinDate: '2024-02-01',
-    phone: '+971526374859',
-    approvesDelete: true
-  },
-  {
-    id: '3',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    designation: 'Product Manager',
-    age: '30',
-    gender: 'Male',
-    location: 'Dubai, UAE',
-    language: ['English', 'Spanish'],
-    status: 'pending',
-    joinDate: '2024-03-10',
-    phone: '+971526374859',
-    approvesDelete: false
-  }
-]
+
 
 const tabs: { id: DaftarTab; label: string; icon: any }[] = [
   { id: "details", label: "Details", icon: UserCircle },
@@ -310,13 +263,13 @@ export function DaftarDialog({
   const [isLoadingTeam, setIsLoadingTeam] = useState(false)
   const [newMember, setNewMember] = useState<Partial<TeamMember>>({})
   const [showAddMember, setShowAddMember] = useState(false)
-  const [avatarUrl, setAvatarUrl] = useState<string>("/assets/daftar.png")
+  const [avatarUrl, setAvatarUrl] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showDeletionApprovals, setShowDeletionApprovals] = useState(false)
   const [deletionApprovals, setDeletionApprovals] = useState<DeletionApproval[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [daftarData, setDaftarData] = useState({
-    avatarUrl: "",
+    profileUrl: "",
     name: "",
     structure: "",
     code: "",
@@ -347,9 +300,9 @@ export function DaftarDialog({
         // Parse location string into address components
         const locationParts = data.location ? data.location.split(',').map((part: string) => part.trim()) : []
         const [street = "", city = "", state = "", country = "", postalCode = ""] = locationParts
-
+        setAvatarUrl(data.profileUrl)
         setDaftarData({
-          avatarUrl: data.profileUrl || "",
+          profileUrl: data.profileUrl,
           name: data.name || "",
           structure: data.structure || "",
           code: data.id || "",

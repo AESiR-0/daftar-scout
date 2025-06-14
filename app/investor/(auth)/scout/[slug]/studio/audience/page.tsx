@@ -99,16 +99,16 @@ const communities = [
 ];
 
 const stages = [
-  { value: "idea", label: "Idea Stage" },
-  { value: "mvp", label: "Prototype to MVP" },
-  { value: "product", label: "Product Market Fit" },
-  { value: "early", label: "Early Traction" },
-  { value: "growth", label: "Growth" },
+  { value: "Idea", label: "Idea Stage" },
+  { value: "Prototype to MVP", label: "Prototype to MVP" },
+  { value: "Product Market Fit", label: "Product Market Fit" },
+  { value: "Early Traction", label: "Early Traction" },
+  { value: "Growth", label: "Growth" },
 ];
 
 const genders = [
-  { value: "male", label: "Male Only Team" },
-  { value: "female", label: "Female Only Team" },
+  { value: "Male Only Team", label: "Male Only Team" },
+  { value: "Female Only Team", label: "Female Only Team" },
   { value: "Transgender", label: "Transgender" },
   { value: "Atleast one Male", label: "Atleast one Male" },
   { value: "Atleast one Female", label: "Atleast one Female" },
@@ -514,8 +514,8 @@ export default function AudiencePage() {
         <div className="z-10">
           <Dialog open={openFilters} onOpenChange={setOpenFilters}>
             <DialogTrigger asChild>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="rounded-[0.35rem]"
               >
                 Edit Audience Filters
@@ -526,7 +526,7 @@ export default function AudiencePage() {
                 <DialogTitle>Audience Filters</DialogTitle>
                 <DialogDescription>
                   <p className="text-sm text-muted-foreground">
-                  If you a community, sector, or stage that you are specifically scouting for is not available in our list, just message us through support in your profile. We’ll update it within 12 hours.( notification will be sent to you )
+                    If you a community, sector, or stage that you are specifically scouting for is not available in our list, just message us through support in your profile. We’ll update it within 12 hours.( notification will be sent to you )
                   </p>
                 </DialogDescription>
               </DialogHeader>

@@ -17,16 +17,16 @@ export const sectors = [
 ]
 
 export const stages = [
-  { value: "idea", label: "Idea Stage" },
-  { value: "mvp", label: "Prototype to MVP" },
-  { value: "product", label: "Product Market Fit" },
-  { value: "growth", label: "Growth Stage" },
+  { value: "Idea", label: "Idea Stage" },
+  { value: "Prototype to MVP", label: "Prototype to MVP" },
+  { value: "Product Market Fit", label: "Product Market Fit" },
+  { value: "Growth", label: "Growth Stage" },
 ]
 
 export const genderOptions = [
-  { value: "male", label: "Male Only Team" },
-  { value: "female", label: "Female Only Team" },
-  { value: "trans", label: "Trans Only" },
-  { value: "non-binary", label: "Non-Binary Only" },
-  { value: "open-for-all", label: "Open For All" },
+  { value: "Male Only Team", label: "Male Only Team" },
+  { value: "Female Only Team", label: "Female Only Team" },
+  { value: "Trans Only", label: "Trans Only" },
+  { value: "Non-Binary Only", label: "Non-Binary Only" },
+  { value: "Open For All", label: "Open For All" },
 ] 
