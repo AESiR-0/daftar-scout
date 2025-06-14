@@ -24,56 +24,74 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "ScoutId not given" }, { status: 400 });
     }
 
-    // Get current user's ID
+    // Get daftarId for the scout
+    const scoutCheck = await db
+      .select({ daftarId: daftarScouts.daftarId })
+      .from(daftarScouts)
+      .where(eq(daftarScouts.scoutId, scoutId))
+      .limit(1);
+
+    if (scoutCheck.length === 0) {
+      return NextResponse.json({ error: "Scout not found" }, { status: 404 });
+    }
+
+    const daftarId = scoutCheck[0].daftarId;
+    if (!daftarId) {
+      return NextResponse.json({ error: "Daftar not found" }, { status: 404 });
+    }
     const user = await db
       .select({ id: users.id })
       .from(users)
       .where(eq(users.email, session.user.email))
       .limit(1);
-
-    if (user.length === 0) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
     const currentUserId = user[0].id;
-
-    // Get all users involved in the scout deletion process
-    const listOfUsers = await db
+    const currentUserApprovalStatus = await db
+      .select({ isAgreed: scoutDelete.isAgreed })
+      .from(scoutDelete)
+      .where(and(eq(scoutDelete.scoutId, scoutId), eq(scoutDelete.investorId, currentUserId)))
+      .limit(1);
+    // Get all investors in the daftar with their details
+    const daftarInvestorsList = await db
       .select({
-        scoutId: scoutDelete.scoutId,
-        isAgreed: scoutDelete.isAgreed,
-        investorId: scoutDelete.investorId,
-        agreedAt: scoutDelete.agreedAt,
-        daftarName: daftar.name,
+        investorId: daftarInvestors.investorId,
         designation: daftarInvestors.designation,
+        daftarName: daftar.name,
         user: {
           name: users.name,
           lastName: users.lastName,
           email: users.email,
-          role: users.role,
         },
       })
+      .from(daftarInvestors)
+      .leftJoin(users, eq(daftarInvestors.investorId, users.id))
+      .leftJoin(daftar, eq(daftarInvestors.daftarId, daftar.id))
+      .where(eq(daftarInvestors.daftarId, daftarId));
+
+    // Get all approvals for this scout
+    const approvals = await db
+      .select({
+        investorId: scoutDelete.investorId,
+        isAgreed: scoutDelete.isAgreed,
+        agreedAt: scoutDelete.agreedAt,
+      })
       .from(scoutDelete)
-      .leftJoin(users, eq(scoutDelete.investorId, users.id))
-      .leftJoin(daftarScouts, eq(scoutDelete.scoutId, daftarScouts.scoutId))
-      .leftJoin(daftar, eq(daftarScouts.daftarId, daftar.id))
-      .leftJoin(
-        daftarInvestors,
-        and(
-          eq(daftar.id, daftarInvestors.daftarId),
-          eq(scoutDelete.investorId, daftarInvestors.investorId)
-        )
-      )
       .where(eq(scoutDelete.scoutId, scoutId));
 
-    // Get current user's approval status
-    const currentUserApprovalStatus = listOfUsers.find(
-      (entry) => entry.investorId === currentUserId
-    ) || null;
+    // Combine the data
+    const members = daftarInvestorsList.map((investor) => {
+      const approval = approvals.find((a) => a.investorId === investor.investorId);
+      const userName = investor.user ? `${investor.user.name} ${investor.user.lastName}` : 'Unknown User';
 
-    return NextResponse.json({
-      listOfUsers,
-      currentUserApprovalStatus,
+      return {
+        name: userName,
+        isApproved: approval?.isAgreed || false,
+        status: approval ? (approval.isAgreed ? 'approved' : 'rejected') : 'not_requested',
+        daftarName: investor.daftarName || 'Unknown Daftar',
+        designation: investor.designation || 'Unknown Designation',
+      };
     });
+
+    return NextResponse.json({ currentUserApprovalStatus: currentUserApprovalStatus, members });
   } catch (error) {
     console.error("GET /scout-delete error:", error);
     return NextResponse.json(
@@ -91,11 +109,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { scoutId, isAgreed } = body;
+    const { scoutId } = body;
 
-    if (!scoutId || isAgreed === undefined) {
+    if (!scoutId) {
       return NextResponse.json(
-        { error: "scoutId and isAgreed are required" },
+        { error: "scoutId is required" },
         { status: 400 }
       );
     }
@@ -144,7 +162,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Record approval in scoutDelete table
-    const agreedAt = isAgreed ? new Date() : null;
+    const agreedAt = new Date();
     const existingApproval = await db
       .select()
       .from(scoutDelete)
@@ -160,7 +178,7 @@ export async function POST(req: NextRequest) {
       await db
         .update(scoutDelete)
         .set({
-          isAgreed,
+          isAgreed: true,
           agreedAt,
         })
         .where(
@@ -174,7 +192,7 @@ export async function POST(req: NextRequest) {
       await db.insert(scoutDelete).values({
         scoutId,
         investorId,
-        isAgreed,
+        isAgreed: true,
         agreedAt,
       });
     }

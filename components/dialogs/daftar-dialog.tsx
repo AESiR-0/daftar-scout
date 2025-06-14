@@ -51,7 +51,7 @@ interface TeamMember {
   gender: string
   location: string
   language: string[]
-  imageUrl?: string
+  profileUrl?: string
   status: 'active' | 'pending'
   isCurrentUser?: boolean
   joinDate: string
@@ -185,8 +185,8 @@ function MemberCard({ member, onRemove }: MemberCardProps) {
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
           <Avatar className="h-24 w-24 rounded-[0.35rem]">
-            {member.imageUrl ? (
-              <AvatarImage src={member.imageUrl} alt={member.firstName} className="rounded-[0.35rem]" />
+            {member.profileUrl ? (
+              <AvatarImage src={member.profileUrl} alt={member.firstName} className="rounded-[0.35rem]" />
             ) : (
               <AvatarFallback className="rounded-[0.35rem] text-xl">{getInitials(`${member.firstName} ${member.lastName}`)}</AvatarFallback>
             )}

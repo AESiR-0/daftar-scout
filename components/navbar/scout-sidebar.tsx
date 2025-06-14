@@ -286,7 +286,7 @@ Simplifying Startup Scouting and Pitching`;
   }
 
   return (
-    <div className="w-[16rem] py-4 pl-4 h-full">
+    <div className="w-[18rem] py-4 px-4 h-full">
       <div className="bg-[#1a1a1a] flex h-full rounded-[0.35rem] flex-col">
         <div className="border-b shrink-0">
           <div className="border-b px-4 py-4">
@@ -317,7 +317,7 @@ Simplifying Startup Scouting and Pitching`;
               onClick={handleSendReport}
               disabled={sendingReport || !isClosed}
             >
-              {sendingReport ? "Sending..." : "Send Report"}
+              {sendingReport ? "Sending..." : !isClosed ? "Send Report (opens after scouting ends)" : "Send Report"}
             </Button>
             <Button
               variant="link"

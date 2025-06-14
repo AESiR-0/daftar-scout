@@ -8,11 +8,11 @@ interface ShareButtonProps {
     sector: string;
     stage: string;
     lastDate: string;
-
+    location: string;
     applyUrl: string;
 }
 
-export function ShareButton({ daftarName, sector, stage, lastDate, applyUrl }: ShareButtonProps) {
+export function ShareButton({ daftarName, sector, stage, lastDate, applyUrl, location }: ShareButtonProps) {
     const { toast } = useToast()
     const handleShare = async () => {
         const postText = `${daftarName} - Scouting Startups at Daftar OS
@@ -24,10 +24,7 @@ Stage: ${stage.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slic
 Sector: ${sector}
 Last Day to Pitch: ${lastDate}
 Pitch Now: ${applyUrl}
-
-Daftar OS
-www.daftaros.com
-Simplifying Startup Scouting and Pitching    `;
+`;
         const linkedInUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(postText)}`;
         window.open(linkedInUrl, '_blank');
     }

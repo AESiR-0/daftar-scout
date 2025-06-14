@@ -26,11 +26,43 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 export interface ScheduleMeetingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onScheduled?: () => void;
 }
+
+const meetingSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  attendeeEmail: z.string().email("Invalid email").optional().or(z.literal("")),
+  attendees: z.array(z.string().email("Invalid email")).min(1, "At least one attendee is required"),
+  date: z.date({
+    required_error: "Date is required",
+    invalid_type_error: "Invalid date",
+  }),
+  hours: z.string().min(1, "Hour is required"),
+  minutes: z.string().min(1, "Minute is required"),
+  period: z.enum(["AM", "PM"], {
+    required_error: "AM/PM is required",
+  }),
+  location: z.enum(["virtual", "in-person"], {
+    required_error: "Location type is required",
+  }),
+  locationAddress: z.string().optional(),
+  agenda: z.string().min(1, "Agenda is required"),
+}).refine((data) => {
+  // This will be validated in the onSubmit function
+  return true;
+}, {
+  message: "At least one attendee is required",
+  path: ["attendees"],
+});
+
+type MeetingFormData = z.infer<typeof meetingSchema>;
 
 export function ScheduleMeetingDialog({
   open,
@@ -41,18 +73,31 @@ export function ScheduleMeetingDialog({
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    attendeeEmail: "",
-    attendees: [] as string[],
-    date: new Date(),
-    hours: "",
-    minutes: "",
-    period: "",
-    location: "virtual",
-    locationAddress: "",
-    agenda: "",
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<MeetingFormData>({
+    resolver: zodResolver(meetingSchema),
+    defaultValues: {
+      title: "",
+      attendeeEmail: "",
+      attendees: [],
+      date: new Date(),
+      hours: "",
+      minutes: "",
+      period: "AM",
+      location: "virtual",
+      locationAddress: "",
+      agenda: "",
+    },
   });
+
+  const formData = watch();
 
   const hours = Array.from({ length: 12 }, (_, i) => ({
     value: String(i + 1).padStart(2, "0"),
@@ -66,32 +111,28 @@ export function ScheduleMeetingDialog({
 
   const handleAddAttendee = () => {
     if (formData.attendeeEmail && !formData.attendees.includes(formData.attendeeEmail)) {
-      setFormData({
-        ...formData,
-        attendees: [...formData.attendees, formData.attendeeEmail],
-        attendeeEmail: "",
-      });
+      setValue("attendees", [...formData.attendees, formData.attendeeEmail]);
+      setValue("attendeeEmail", "");
     }
   };
 
-  const handleSubmit = async () => {
+  const onSubmit = async (data: MeetingFormData) => {
     try {
       setIsSubmitting(true);
-      const formattedTime = `${formData.hours}:${formData.minutes} ${formData.period}`;
+      const formattedTime = `${data.hours}:${data.minutes} ${data.period}`;
       const [hours, minutes] = formattedTime.split(":");
-      const isPM = formData.period === "PM";
+      const isPM = data.period === "PM";
       const hour = parseInt(hours) + (isPM ? 12 : 0);
 
-      const startTime = new Date(formData.date!);
+      const startTime = new Date(data.date);
       startTime.setHours(hour, parseInt(minutes), 0, 0);
 
       const endTime = new Date(startTime);
-      endTime.setHours(endTime.getHours() + 1); // Default 1-hour meeting
+      endTime.setHours(endTime.getHours() + 1);
 
-      // Include current user's email in attendees list
       const allAttendees = session?.user?.email
-        ? [...formData.attendees, session.user.email]
-        : formData.attendees;
+        ? [...data.attendees, session.user.email]
+        : data.attendees;
 
       const response = await fetch("/api/endpoints/calendar/create-meeting", {
         method: "POST",
@@ -99,27 +140,35 @@ export function ScheduleMeetingDialog({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: formData.title,
-          description: formData.agenda,
+          title: data.title,
+          description: data.agenda,
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString(),
           attendees: allAttendees,
+          location: data.location === "virtual" ? "Virtual Meeting" : data.locationAddress,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create meeting");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create meeting");
       }
 
       onOpenChange(false);
+      reset();
       toast({
-        title: "Meeting scheduled successfully, please refresh to see the meeting in your calendar",
+        title: "Success",
+        description: "Meeting scheduled successfully",
       });
       router.refresh();
-      onScheduled?.(); // Call the onScheduled callback if provided
+      onScheduled?.();
     } catch (error) {
       console.error("Error scheduling meeting:", error);
-      // You might want to show an error toast here
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to schedule meeting",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -130,17 +179,18 @@ export function ScheduleMeetingDialog({
       <DialogTitle> </DialogTitle>
       <DialogContent className="max-w-3xl h-[600px] p-0">
         <ScrollArea className="h-full">
-          <div className="p-6 space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
             <div className="grid gap-4">
               <div className="space-y-2">
                 <Label>Meeting Title</Label>
                 <Input
                   placeholder="Enter meeting title"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
+                  {...register("title")}
+                  className={errors.title ? "border-red-500" : ""}
                 />
+                {errors.title && (
+                  <p className="text-sm text-red-500">{errors.title.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -149,10 +199,8 @@ export function ScheduleMeetingDialog({
                   <Input
                     type="email"
                     placeholder="Enter attendee email"
-                    value={formData.attendeeEmail}
-                    onChange={(e) =>
-                      setFormData({ ...formData, attendeeEmail: e.target.value })
-                    }
+                    {...register("attendeeEmail")}
+                    className={errors.attendeeEmail ? "border-red-500" : ""}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -168,6 +216,12 @@ export function ScheduleMeetingDialog({
                     Add
                   </Button>
                 </div>
+                {errors.attendeeEmail && (
+                  <p className="text-sm text-red-500">{errors.attendeeEmail.message}</p>
+                )}
+                {errors.attendees && (
+                  <p className="text-sm text-red-500">{errors.attendees.message}</p>
+                )}
                 <div className="flex flex-wrap gap-2 mt-2">
                   {formData.attendees.map((email) => (
                     <Badge
@@ -179,12 +233,10 @@ export function ScheduleMeetingDialog({
                       <X
                         className="h-3 w-3 cursor-pointer"
                         onClick={() =>
-                          setFormData({
-                            ...formData,
-                            attendees: formData.attendees.filter(
-                              (e) => e !== email
-                            ),
-                          })
+                          setValue(
+                            "attendees",
+                            formData.attendees.filter((e) => e !== email)
+                          )
                         }
                       />
                     </Badge>
@@ -206,7 +258,8 @@ export function ScheduleMeetingDialog({
                         variant="outline"
                         className={cn(
                           "w-full justify-start text-left font-normal",
-                          !formData.date && "text-muted-foreground"
+                          !formData.date && "text-muted-foreground",
+                          errors.date && "border-red-500"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
@@ -219,13 +272,14 @@ export function ScheduleMeetingDialog({
                       <Calendar
                         mode="single"
                         selected={formData.date}
-                        onSelect={(date) =>
-                          setFormData({ ...formData, date: date || new Date() })
-                        }
+                        onSelect={(date) => setValue("date", date || new Date())}
                         initialFocus
                       />
                     </PopoverContent>
                   </Popover>
+                  {errors.date && (
+                    <p className="text-sm text-red-500">{errors.date.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -235,11 +289,9 @@ export function ScheduleMeetingDialog({
                       <Clock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Select
                         value={formData.hours}
-                        onValueChange={(value: any) =>
-                          setFormData({ ...formData, hours: value })
-                        }
+                        onValueChange={(value) => setValue("hours", value)}
                       >
-                        <SelectTrigger className="pl-8">
+                        <SelectTrigger className={cn("pl-8", errors.hours && "border-red-500")}>
                           <SelectValue placeholder="HH" />
                         </SelectTrigger>
                         <SelectContent>
@@ -256,11 +308,9 @@ export function ScheduleMeetingDialog({
 
                     <Select
                       value={formData.minutes}
-                      onValueChange={(value: any) =>
-                        setFormData({ ...formData, minutes: value })
-                      }
+                      onValueChange={(value) => setValue("minutes", value)}
                     >
-                      <SelectTrigger className="w-[70px]">
+                      <SelectTrigger className={cn("w-[70px]", errors.minutes && "border-red-500")}>
                         <SelectValue placeholder="MM" />
                       </SelectTrigger>
                       <SelectContent>
@@ -274,11 +324,9 @@ export function ScheduleMeetingDialog({
 
                     <Select
                       value={formData.period}
-                      onValueChange={(value: any) =>
-                        setFormData({ ...formData, period: value })
-                      }
+                      onValueChange={(value) => setValue("period", value as "AM" | "PM")}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className={errors.period && "border-red-500"}>
                         <SelectValue placeholder="AM/PM" />
                       </SelectTrigger>
                       <SelectContent>
@@ -287,6 +335,9 @@ export function ScheduleMeetingDialog({
                       </SelectContent>
                     </Select>
                   </div>
+                  {(errors.hours || errors.minutes || errors.period) && (
+                    <p className="text-sm text-red-500">Time is required</p>
+                  )}
                 </div>
               </div>
 
@@ -294,16 +345,14 @@ export function ScheduleMeetingDialog({
                 <Label>Location</Label>
                 <Select
                   value={formData.location}
-                  onValueChange={(value: string) =>
-                    setFormData({
-                      ...formData,
-                      location: value,
-                      locationAddress:
-                        value === "virtual" ? "" : formData.locationAddress,
-                    })
-                  }
+                  onValueChange={(value) => {
+                    setValue("location", value as "virtual" | "in-person");
+                    if (value === "virtual") {
+                      setValue("locationAddress", "");
+                    }
+                  }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errors.location && "border-red-500"}>
                     <SelectValue placeholder="Select location type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -311,19 +360,20 @@ export function ScheduleMeetingDialog({
                     <SelectItem value="in-person">In-Person</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.location && (
+                  <p className="text-sm text-red-500">{errors.location.message}</p>
+                )}
 
                 {formData.location === "in-person" && (
                   <div className="mt-2">
                     <Input
                       placeholder="Enter meeting location"
-                      value={formData.locationAddress}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          locationAddress: e.target.value,
-                        })
-                      }
+                      {...register("locationAddress")}
+                      className={errors.locationAddress ? "border-red-500" : ""}
                     />
+                    {errors.locationAddress && (
+                      <p className="text-sm text-red-500">{errors.locationAddress.message}</p>
+                    )}
                   </div>
                 )}
               </div>
@@ -332,33 +382,37 @@ export function ScheduleMeetingDialog({
                 <Label>Agenda</Label>
                 <Textarea
                   placeholder="Enter meeting agenda"
-                  value={formData.agenda}
-                  onChange={(e) =>
-                    setFormData({ ...formData, agenda: e.target.value })
-                  }
-                  className="min-h-[100px]"
+                  {...register("agenda")}
+                  className={cn("min-h-[100px]", errors.agenda && "border-red-500")}
                 />
+                {errors.agenda && (
+                  <p className="text-sm text-red-500">{errors.agenda.message}</p>
+                )}
               </div>
             </div>
 
             <div className="flex justify-center gap-2">
               <Button
+                type="button"
                 variant="outline"
                 className="rounded-[0.35rem]"
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  reset();
+                  onOpenChange(false);
+                }}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button
-                onClick={handleSubmit}
+                type="submit"
                 className="bg-blue-600 rounded-[0.35rem] hover:bg-blue-700 text-white"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Scheduling..." : "Schedule Meeting"}
               </Button>
             </div>
-          </div>
+          </form>
         </ScrollArea>
       </DialogContent>
     </Dialog>

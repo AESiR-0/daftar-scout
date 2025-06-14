@@ -228,6 +228,7 @@ export default function ScoutDetailsPage() {
                   <ShareButton
                     daftarName={collaborations.map((c: InvestorProfileProps) => c.daftarName).join(", ")}
                     sector={transformedScout.details.Sector}
+                    location={transformedScout.details.Location}
                     stage={transformedScout.details.Stage}
                     lastDate={transformedScout.lastPitchDate}
                     applyUrl={`https://daftar.com/founder/scout/${transformedScout.slug}`}
