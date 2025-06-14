@@ -8,7 +8,7 @@ import { CheckCircle, Clock, XCircle } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useParams, usePathname } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
-
+import { ScrollArea } from "@/components/ui/scroll-area"
 interface TeamMember {
   name: string
   isApproved: boolean
@@ -196,31 +196,33 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
                 }
 
                 return (
-                  <div
-                    key={member.name}
-                    className="flex items-center justify-between p-4 border rounded-lg bg-background"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>{member.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium">
-                          {member.name}
-                        </p>
+                  <ScrollArea key={member.name}>
+                    <div
+                      key={member.name}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-background"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{member.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {member.name}
+                          </p>
 
-                        <p className="text-xs text-muted-foreground">
-                          {member.designation}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {member.daftarName}
-                        </p>
+                          <p className="text-xs text-muted-foreground">
+                            {member.designation}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {member.daftarName}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        {getStatusIcon(approval.status)}
                       </div>
                     </div>
-                    <div className="flex items-center">
-                      {getStatusIcon(approval.status)}
-                    </div>
-                  </div>
+                  </ScrollArea>
                 )
               })}
             </div>
