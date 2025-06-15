@@ -17,7 +17,7 @@ export function ShareButton({ daftarName, sector, stage, lastDate, applyUrl, loc
     const handleShare = async () => {
         const postText = `${daftarName} - Scouting Startups at Daftar OS
  
-If you have a startup idea, pitch to us in a 2.5-minute video, in the language you’re most comfortable speaking. Your first meeting with us is just a few minutes away, and we can’t wait to hear from you.
+If you have a startup idea, pitch to us in a 2.5-minute video, in the language you're most comfortable speaking. Your first meeting with us is just a few minutes away, and we can't wait to hear from you.
 
 Accepting pitches from: ${location}
 Stage: ${stage.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}

@@ -12,6 +12,7 @@ import { CreateScoutDialog } from "@/components/dialogs/create-scout-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDaftar } from "@/lib/context/daftar-context";
 
 interface Scout {
   id: string;
@@ -70,10 +71,12 @@ export default function ScoutPage() {
     fetchMeetingsCount();
   }, []);
 
+  const { selectedDaftar } = useDaftar();
+
   useEffect(() => {
     const fetchScoutStatus = async () => {
       try {
-        const res = await fetch("/api/endpoints/scouts", {
+        const res = await fetch(`/api/endpoints/scouts?daftarId=${selectedDaftar}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

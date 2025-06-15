@@ -72,7 +72,7 @@ async function generateScoutId(scoutName: string): Promise<string> {
   return scoutId;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.email) {
@@ -81,6 +81,9 @@ export async function GET() {
         { status: 401 }
       );
     }
+
+    const { searchParams } = new URL(req.url);
+    const daftarId = searchParams.get("daftarId");
 
     // Get current user and check role
     const userResult = await db
@@ -116,33 +119,40 @@ export async function GET() {
           )
         );
     } else {
-      // Get all daftars the user is associated with
-      const userDaftars = await db
-        .select({
-          daftarId: daftarInvestors.daftarId,
-        })
-        .from(users)
-        .innerJoin(
-          daftarInvestors,
-          eq(users.id, daftarInvestors.investorId)
-        )
-        .where(
-          and(
-            eq(users.email, session.user.email),
-            eq(daftarInvestors.status, "active")  // Only get daftars where user is active
+      // For non-founder roles, filter by daftarId if provided
+      let userDaftarIds: string[] = [];
+      
+      if (daftarId) {
+        // If daftarId is provided, use only that daftar
+        userDaftarIds = [daftarId];
+      } else {
+        // Otherwise get all daftars the user is associated with
+        const userDaftars = await db
+          .select({
+            daftarId: daftarInvestors.daftarId,
+          })
+          .from(users)
+          .innerJoin(
+            daftarInvestors,
+            eq(users.id, daftarInvestors.investorId)
           )
-        );
+          .where(
+            and(
+              eq(users.email, session.user.email),
+              eq(daftarInvestors.status, "active")
+            )
+          );
 
-      if (!userDaftars.length) {
-        return NextResponse.json([], { status: 200 });  // Return empty array instead of 404
+        userDaftarIds = userDaftars
+          .map(d => d.daftarId)
+          .filter((id): id is string => id !== null);
       }
 
-      // Filter out null values and create the daftar IDs array
-      const userDaftarIds = userDaftars
-        .map(d => d.daftarId)
-        .filter((id): id is string => id !== null);
+      if (!userDaftarIds.length) {
+        return NextResponse.json([], { status: 200 });
+      }
 
-      // Get all scouts where any of user's daftars is either the owner or a collaborator
+      // Get scouts for the specified daftar(s)
       scoutsList = await db
         .select({
           id: scouts.scoutId,
@@ -165,8 +175,8 @@ export async function GET() {
                 )`
               )
             ),
-            not(eq(scouts.status, "deleted")),  // Don't show deleted scouts
-            not(eq(scouts.deleteIsAgreedByAll, true))  // Only show active scouts
+            not(eq(scouts.status, "deleted")),
+            not(eq(scouts.deleteIsAgreedByAll, true))
           )
         );
     }
@@ -210,7 +220,6 @@ export async function GET() {
         .filter(c => c.scoutId === scout.id)
         .map(c => c.daftarName);
     
-      
       return {
         id: scout.id,
         title: scout.title,

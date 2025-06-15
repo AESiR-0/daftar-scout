@@ -231,7 +231,7 @@ export default function ScoutDetailsPage() {
                     location={transformedScout.details.Location}
                     stage={transformedScout.details.Stage}
                     lastDate={transformedScout.lastPitchDate}
-                    applyUrl={`https://daftar.com/founder/scout/${transformedScout.slug}`}
+                    applyUrl={`https://www.daftaros.com/founder/scout/${transformedScout.slug}`}
                   />
                   <Button
                     className="bg-blue-500 px-4 py-4 hover:bg-blue-600 text-white rounded-[0.35rem] disabled:opacity-50 disabled:cursor-not-allowed"

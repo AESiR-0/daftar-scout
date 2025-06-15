@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { ShareButton } from "@/components/share-button";
 import { SelectDaftarDialog } from "@/components/dialogs/create-pitch-dialog";
 import { InvestorProfile } from "@/components/InvestorProfile";
 import { StudioCard } from "../components/layout/studio-card";
@@ -137,11 +135,11 @@ export default function ScoutDetailsPage() {
       <div className="h-full flex flex-col">
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
-            <div className="flex gap-6 p-6">
+            <div className="flex gap-6 ">
               {/* Main Content */}
               <div className="flex-1">
-                <Card className="bg-[#0e0e0e] border-none p-4">
-                  <div className="relative aspect-[9/16] w-full max-w-[400px] mx-auto">
+                <Card className="bg-[#0e0e0e] border-none  px-4">
+                  <div className="relative aspect-[9/16] w-full h-[750px] max-w-[400px] mx-auto">
                     <video
                       src={scout.investorPitch}
                       controls
@@ -149,7 +147,7 @@ export default function ScoutDetailsPage() {
                     />
                   </div>
 
-                  <div className="mt-8 flex flex-col justify-start items-start ">
+                  <div className="mt-16 flex flex-col justify-start items-start ">
                     <div className="flex items-center">
                       <h1 className="text-2xl font-bold text-white">
                         {scout.scoutName}
