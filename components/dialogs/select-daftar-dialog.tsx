@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 interface Daftar {
   id: string;
   name: string;
@@ -30,16 +32,20 @@ export function SelectDaftarDialog({
   selected,
   onSelect,
 }: SelectDaftarDialogProps) {
+  const router = useRouter();
   const handleDaftarSelect = (daftarId: string) => {
-    document.cookie = `selectedDaftarId=${daftarId}; path=/; max-age=${
-      60 * 60 * 24
-    }`;
-    document.cookie = `profileUrl=${
-      daftars.find((daftar) => daftar.id === daftarId)?.profileUrl || ""
-    }; path=/; max-age=${60 * 60 * 24}`;
+    document.cookie = `selectedDaftarId=${daftarId}; path=/; max-age=${60 * 60 * 24
+      }`;
+    document.cookie = `profileUrl=${daftars.find((daftar) => daftar.id === daftarId)?.profileUrl || ""
+      }; path=/; max-age=${60 * 60 * 24}`;
 
     onSelect(daftarId);
     onOpenChange(false);
+    router.refresh();
+    toast({
+      title: "Daftar Selected",
+      description: `You have selected ${daftars.find((daftar) => daftar.id === daftarId)?.name}, refresh to see the Daftar's Scouts`,
+    });
   };
 
   if (!daftars || daftars.length === 0) {
@@ -80,9 +86,8 @@ export function SelectDaftarDialog({
             {daftars.map((daftar) => (
               <div
                 key={daftar.id}
-                className={`p-4 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50 ${
-                  selected === daftar.id ? "bg-muted/50 hover:bg-muted" : ""
-                }`}
+                className={`p-4 rounded-lg border cursor-pointer transition-colors hover:bg-muted/50 ${selected === daftar.id ? "bg-muted/50 hover:bg-muted" : ""
+                  }`}
                 onClick={() => handleDaftarSelect(daftar.id)}
               >
                 <h3 className="font-medium">{daftar.name}</h3>
