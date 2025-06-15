@@ -187,16 +187,16 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
               <p className="text-sm text-muted-foreground">{approvedCount} of {totalMembers} approved</p>
             </div>
 
-            <div className="space-y-3">
-              {approvals.map((member) => {
-                const approval = approvals.find(a => a.isApproved === member.isApproved) || {
-                  status: 'not_requested',
-                  isApproved: false,
-                  date: undefined
-                }
+            <div className="space-y-3 p-4 px-0">
+              <ScrollArea className="h-[175px] rounded-md ">
+                {approvals.map((member) => {
+                  const approval = approvals.find(a => a.isApproved === member.isApproved) || {
+                    status: 'not_requested',
+                    isApproved: false,
+                    date: undefined
+                  }
 
-                return (
-                  <ScrollArea key={member.name}>
+                  return (
                     <div
                       key={member.name}
                       className="flex items-center justify-between p-4 border rounded-lg bg-background"
@@ -209,7 +209,6 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
                           <p className="text-sm font-medium">
                             {member.name}
                           </p>
-
                           <p className="text-xs text-muted-foreground">
                             {member.designation}
                           </p>
@@ -221,10 +220,11 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
                       <div className="flex items-center">
                         {getStatusIcon(approval.status)}
                       </div>
+
                     </div>
-                  </ScrollArea>
-                )
-              })}
+                  )
+                })}
+              </ScrollArea>
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
@@ -233,6 +233,6 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
           </div>
         </div>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   )
 } 
