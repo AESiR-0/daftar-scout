@@ -6,7 +6,7 @@ import {
 } from "@/backend/drizzle/models/daftar";
 import { users } from "@/backend/drizzle/models/users";
 import { auth } from "@/auth";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { createNotification } from "@/lib/notifications/insert";
 
 interface TeamMemberResponse {
@@ -134,7 +134,6 @@ export async function POST(req: NextRequest) {
         if (newMember.length === 0) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
-
         // Check if user is already a team member
         const existingMember = await db
             .select()
@@ -148,7 +147,17 @@ export async function POST(req: NextRequest) {
         if (existingMember.length > 0) {
             return NextResponse.json({ error: "User is already a team member" }, { status: 400 });
         }
-
+        const checkInvestor = await db
+            .select()
+            .from(users)
+            .where(and(
+                eq(users.id, newMember[0].id),
+                or(eq(users.role, 'investor'), eq(users.role, 'Investor'))
+            ))
+            .limit(1);
+        if (checkInvestor.length === 0) {
+            return NextResponse.json({ error: "User is not an investor. You can only invite an investor to join your Daftar." }, { status: 400 });
+        }
         // Get Daftar details
         const daftarDetails = await db
             .select({
