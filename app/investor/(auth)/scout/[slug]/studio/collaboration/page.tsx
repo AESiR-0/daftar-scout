@@ -33,6 +33,7 @@ export default function CollaborationPage() {
   const { toast } = useToast();
   const [daftarId, setDaftarId] = useState("");
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [isInviting, setIsInviting] = useState(false);
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
   const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
@@ -94,6 +95,7 @@ export default function CollaborationPage() {
     }
 
     try {
+      setIsInviting(true);
       const res = await fetch("/api/endpoints/scouts/collaboration", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -136,6 +138,8 @@ export default function CollaborationPage() {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsInviting(false);
     }
   };
 
@@ -170,10 +174,14 @@ export default function CollaborationPage() {
                   value={daftarId}
                   onChange={(e) => setDaftarId(e.target.value.toUpperCase())}
                   maxLength={6}
-                  disabled={isLocked}
+                  disabled={isLocked || isInviting}
                 />
-                <Button onClick={handleInvite} variant="outline" disabled={isLocked}>
-                  Invite
+                <Button 
+                  onClick={handleInvite} 
+                  variant="outline" 
+                  disabled={isLocked || isInviting}
+                >
+                  {isInviting ? "Inviting..." : "Invite"}
                 </Button>
               </div>
 

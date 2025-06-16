@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
     const userExist = await db
       .select()
       .from(users)
-      .where(and(eq(users.email, email), eq(users.role, "founder")))
+      .where(and(eq(users.email, email), or(eq(users.role, "founder"), eq(users.role, "Founder"))))
       .limit(1);
 
     if (userExist.length === 0) {
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
       const isInvestor = await db
         .select()
         .from(users)
-        .where(and(eq(users.email, email), eq(users.role, "investor")))
+        .where(and(eq(users.email, email), or(eq(users.role, "investor"), eq(users.role, "Investor"))))
         .limit(1);
 
       if (isInvestor.length > 0) {
