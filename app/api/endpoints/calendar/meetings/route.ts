@@ -57,19 +57,31 @@ export async function GET() {
       singleEvents: true,
       orderBy: "startTime",
       maxResults: 100,
-      fields: "items(id,summary,description,start,end,attendees,hangoutLink,location,conferenceData)",
+      fields: "items(id,summary,description,start,end,attendees,hangoutLink,location,conferenceData,organizer)",
     });
 
-    // Get meetings from database
+    // Get meetings from database (where user is organizer)
     const dbMeetings = await db
       .select()
       .from(meetings)
       .where(eq(meetings.userId, user.id))
       .orderBy(meetings.startTime);
 
-    // Combine calendar events with database meetings
-    const combinedMeetings = dbMeetings.map(dbMeeting => {
-      const calendarEvent = calendarResponse.data.items?.find(
+    // Get all calendar events
+    const allCalendarEvents = calendarResponse.data.items || [];
+
+    // Find events where current user is an attendee but not the organizer
+    const attendedEvents = allCalendarEvents.filter(event => {
+      const isAttendee = event.attendees?.some(attendee => 
+        attendee.email === user.email && attendee.responseStatus !== 'declined'
+      );
+      const isOrganizer = event.organizer?.email === user.email;
+      return isAttendee && !isOrganizer;
+    });
+
+    // Process organized meetings (from database)
+    const organizedMeetings = dbMeetings.map(dbMeeting => {
+      const calendarEvent = allCalendarEvents.find(
         event => event.id === dbMeeting.calendarEventId
       );
 
@@ -88,10 +100,52 @@ export async function GET() {
         meetLink: calendarEvent.hangoutLink || calendarEvent.conferenceData?.entryPoints?.[0]?.uri || dbMeeting.meetLink,
         location: calendarEvent.location || dbMeeting.location || "Virtual Meeting",
         organizer: calendarEvent.organizer?.email || user.email,
+        role: "organizer"
       };
-    }).filter(Boolean); // Remove null meetings
+    }).filter(Boolean);
 
-    return NextResponse.json(combinedMeetings);
+    // Process attended meetings (from Google Calendar only)
+    const attendedMeetings = attendedEvents.map(calendarEvent => {
+      // Find the current user's response status from the event
+      const userAttendee = calendarEvent.attendees?.find(attendee => 
+        attendee.email === user.email
+      );
+      const responseStatus = userAttendee?.responseStatus || 'needsAction';
+      
+      // Map Google Calendar response status to our status
+      let status = 'pending';
+      if (responseStatus === 'accepted') {
+        status = 'accepted';
+      } else if (responseStatus === 'declined') {
+        status = 'rejected';
+      } else if (responseStatus === 'tentative') {
+        status = 'pending';
+      }
+
+      return {
+        id: calendarEvent.id,
+        title: calendarEvent.summary || "Untitled Meeting",
+        description: calendarEvent.description || "",
+        startTime: calendarEvent.start?.dateTime || calendarEvent.start?.date || "",
+        endTime: calendarEvent.end?.dateTime || calendarEvent.end?.date || "",
+        status: status,
+        attendees: calendarEvent.attendees?.map(a => a.email) || [],
+        meetLink: calendarEvent.hangoutLink || calendarEvent.conferenceData?.entryPoints?.[0]?.uri || "",
+        location: calendarEvent.location || "Virtual Meeting",
+        organizer: calendarEvent.organizer?.email || "",
+        role: "attendee",
+        calendarEventId: calendarEvent.id
+      };
+    });
+
+    // Combine and sort all meetings
+    const allMeetings = [...organizedMeetings, ...attendedMeetings];
+    allMeetings.sort((a, b) => {
+      if (!a || !b) return 0;
+      return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+    });
+
+    return NextResponse.json(allMeetings);
   } catch (error) {
     console.error("Error fetching meetings:", error);
     return NextResponse.json(

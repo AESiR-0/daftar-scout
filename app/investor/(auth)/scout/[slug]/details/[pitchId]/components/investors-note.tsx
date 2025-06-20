@@ -75,7 +75,7 @@ export function InvestorsNote({
       }
     };
     fetchNote();
-  }, [userId, scoutId, pitchId, toast]);
+  }, [userId, scoutId, pitchId]);
 
   // Debounced autosave effect
   useEffect(() => {

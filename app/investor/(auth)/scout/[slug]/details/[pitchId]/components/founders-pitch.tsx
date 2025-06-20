@@ -339,7 +339,9 @@ export function FoundersPitchSection({
 
               <h3 className="text-md pl-4 text-foreground">Founder's Ask</h3>
               <div className="rounded-[0.35rem] p-4">
-                <p className="text-sm text-muted-foreground">{pitch.ask}</p>
+                <p className="text-sm text-muted-foreground">{pitch.ask == ""
+                  ? "No Ask"
+                  : pitch.ask}</p>
               </div>
             </div>
 

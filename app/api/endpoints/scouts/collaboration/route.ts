@@ -3,7 +3,7 @@ import { db } from "@/backend/database";
 import { scouts } from "@/backend/drizzle/models/scouts";
 import { daftarScouts } from "@/backend/drizzle/models/scouts";
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { users } from "@/backend/drizzle/models/users";
 import { NextRequest, NextResponse } from "next/server";
 import { createNotification } from "@/lib/notifications/insert";
@@ -154,4 +154,86 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({ success: true, inserted });
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await auth();
+    const userEmail = session?.user?.email;
+    if (!userEmail) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const scoutId = searchParams.get("scoutId");
+    const collaboratorId = searchParams.get("collaboratorId");
+
+    if (!scoutId || !collaboratorId) {
+      return NextResponse.json(
+        { error: "scoutId and collaboratorId are required" },
+        { status: 400 }
+      );
+    }
+
+    // Get the user's daftarId to check if they're the scout owner
+    const userDaftar = await db
+      .select({ daftarId: daftarInvestors.daftarId })
+      .from(users)
+      .leftJoin(daftarInvestors, eq(users.id, daftarInvestors.investorId))
+      .where(eq(users.email, userEmail))
+      .limit(1);
+
+    const currentDaftarId = userDaftar[0]?.daftarId;
+
+    // Check if the user is the scout owner
+    const scoutOwner = await db
+      .select({ daftarId: scouts.daftarId })
+      .from(scouts)
+      .where(eq(scouts.scoutId, scoutId))
+      .limit(1);
+
+    if (scoutOwner.length === 0) {
+      return NextResponse.json({ error: "Scout not found" }, { status: 404 });
+    }
+
+    // Only the scout owner can remove collaborators
+    if (scoutOwner[0].daftarId !== currentDaftarId) {
+      return NextResponse.json(
+        { error: "Only the scout owner can remove collaborators" },
+        { status: 403 }
+      );
+    }
+
+    // Get total number of collaborators for this scout
+    const totalCollaborators = await db
+      .select({ count: daftarScouts.id })
+      .from(daftarScouts)
+      .where(eq(daftarScouts.scoutId, scoutId));
+
+    // Don't allow removal if there's only one collaborator
+    if (totalCollaborators.length <= 1) {
+      return NextResponse.json(
+        { error: "Cannot remove the last collaborator" },
+        { status: 400 }
+      );
+    }
+
+    // Delete the collaborator
+    const deleted = await db
+      .delete(daftarScouts)
+      .where(
+        and(
+          eq(daftarScouts.id, parseInt(collaboratorId)),
+          eq(daftarScouts.scoutId, scoutId)
+        )
+      );
+
+    return NextResponse.json({ success: true, deleted });
+  } catch (error) {
+    console.error('Error in DELETE /api/endpoints/scouts/collaboration:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

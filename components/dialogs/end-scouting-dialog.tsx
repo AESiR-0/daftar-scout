@@ -64,7 +64,15 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
         }
         const data = await response.json()
         setApprovals(data.members || [])
-        setCurrentUserApprovalStatus(data.currentUserApprovalStatus || false)
+        
+        // Check if current user has already approved
+        const hasApproved = data.currentUserApprovalStatus && 
+          data.currentUserApprovalStatus.length > 0 && 
+          data.currentUserApprovalStatus[0]?.isAgreed === true
+        
+        setCurrentUserApprovalStatus(hasApproved)
+        setIsRequested(hasApproved)
+        setConfirmEndScouting(hasApproved)
       } catch (error) {
         console.error('Error fetching team members:', error)
         toast({
@@ -93,20 +101,33 @@ export function EndScoutingDialog({ open, onOpenChange, onConfirm }: EndScouting
         }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error('Failed to request team approval')
+        throw new Error(data.error || 'Failed to request team approval')
       }
 
+      // Update local state
       setIsRequested(true)
+      setCurrentUserApprovalStatus(true)
+      setConfirmEndScouting(true)
+
+      // Refresh the team members list
+      const updatedResponse = await fetch(`/api/endpoints/scouts/delete?scoutId=${scoutId}`)
+      if (updatedResponse.ok) {
+        const updatedData = await updatedResponse.json()
+        setApprovals(updatedData.members || [])
+      }
+
       toast({
         title: 'Success',
-        description: 'Request sent to team members',
+        description: data.message || 'Request sent to team members',
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error requesting team approval:', error)
       toast({
         title: 'Error',
-        description: 'Failed to request team approval',
+        description: error.message || 'Failed to request team approval',
         variant: 'destructive',
       })
     } finally {

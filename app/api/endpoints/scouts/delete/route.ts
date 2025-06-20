@@ -39,17 +39,32 @@ export async function GET(req: NextRequest) {
     if (!daftarId) {
       return NextResponse.json({ error: "Daftar not found" }, { status: 404 });
     }
+
+    // Get current user's ID
     const user = await db
       .select({ id: users.id })
       .from(users)
       .where(eq(users.email, session.user.email))
       .limit(1);
+
+    if (user.length === 0) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     const currentUserId = user[0].id;
-    const currentUserApprovalStatus = await db
+
+    // Get current user's approval status
+    const currentUserApproval = await db
       .select({ isAgreed: scoutDelete.isAgreed })
       .from(scoutDelete)
-      .where(and(eq(scoutDelete.scoutId, scoutId), eq(scoutDelete.investorId, currentUserId)))
+      .where(
+        and(
+          eq(scoutDelete.scoutId, scoutId),
+          eq(scoutDelete.investorId, currentUserId)
+        )
+      )
       .limit(1);
+
     // Get all investors in the daftar with their details
     const daftarInvestorsList = await db
       .select({
@@ -81,17 +96,20 @@ export async function GET(req: NextRequest) {
     const members = daftarInvestorsList.map((investor) => {
       const approval = approvals.find((a) => a.investorId === investor.investorId);
       const userName = investor.user ? `${investor.user.name} ${investor.user.lastName}` : 'Unknown User';
-
+      
       return {
         name: userName,
         isApproved: approval?.isAgreed || false,
-        status: approval ? (approval.isAgreed ? 'approved' : 'rejected') : 'not_requested',
+        status: approval ? (approval.isAgreed ? 'approved' : 'rejected') : 'pending',
         daftarName: investor.daftarName || 'Unknown Daftar',
         designation: investor.designation || 'Unknown Designation',
       };
     });
 
-    return NextResponse.json({ currentUserApprovalStatus: currentUserApprovalStatus, members });
+    return NextResponse.json({ 
+      members,
+      currentUserApprovalStatus: currentUserApproval 
+    });
   } catch (error) {
     console.error("GET /scout-delete error:", error);
     return NextResponse.json(
@@ -223,6 +241,7 @@ export async function POST(req: NextRequest) {
         .update(scouts)
         .set({
           isArchived: true,
+          status: 'closed',
           deletedOn: new Date(),
           deleteIsAgreedByAll: true,
         })

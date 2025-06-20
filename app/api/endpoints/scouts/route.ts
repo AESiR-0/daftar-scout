@@ -176,8 +176,7 @@ export async function GET(req: NextRequest) {
               )
             ),
             not(eq(scouts.status, "deleted")),
-            not(eq(scouts.deleteIsAgreedByAll, true))
-          )
+            )
         );
     }
 

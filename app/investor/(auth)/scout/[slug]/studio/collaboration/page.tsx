@@ -34,6 +34,7 @@ export default function CollaborationPage() {
   const [daftarId, setDaftarId] = useState("");
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [isInviting, setIsInviting] = useState(false);
+  const [removingCollaborator, setRemovingCollaborator] = useState<string | null>(null);
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
   const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
@@ -143,11 +144,38 @@ export default function CollaborationPage() {
     }
   };
 
-  const removeCollaborator = (id: string) => {
-    setCollaborators(collaborators.filter((c) => c.id !== id));
-    toast({
-      title: "Collaborator removed",
-    });
+  const removeCollaborator = async (id: string) => {
+    try {
+      setRemovingCollaborator(id);
+      const res = await fetch(
+        `/api/endpoints/scouts/collaboration?scoutId=${scoutId}&collaboratorId=${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to remove collaborator");
+      }
+
+      // Remove from local state
+      setCollaborators(collaborators.filter((c) => c.id !== id));
+      
+      toast({
+        title: "Collaborator removed",
+        description: "Collaborator has been successfully removed from the scout.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to remove collaborator",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setRemovingCollaborator(null);
+    }
   };
 
   if (isLockLoading) {
@@ -211,14 +239,21 @@ export default function CollaborationPage() {
                           {formatDate(collaborator.addedAt)}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeCollaborator(collaborator.id)}
-                        disabled={isLocked}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                      {/* Only show cross button if there are multiple collaborators */}
+                      {collaborators.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeCollaborator(collaborator.id)}
+                          disabled={isLocked || removingCollaborator === collaborator.id}
+                        >
+                          {removingCollaborator === collaborator.id ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                          ) : (
+                            <X className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
                     </div>
                   ))
                 ) : (

@@ -25,9 +25,11 @@ interface Meeting {
   daftarName: string;
   attendees: string[];
   status: string;
-  calendarEventId: string;
+
   meetLink?: string;
   organizer?: string;
+  role?: "organizer" | "attendee";
+  calendarEventId?: string;
 }
 
 export default function MeetingsPage() {
@@ -94,21 +96,50 @@ export default function MeetingsPage() {
 
   const handleAcceptMeeting = async (meetingId: string) => {
     try {
-      setButtonLoading(prev => ({ ...prev, [meetingId]: true }));
-      const response = await fetch(`/api/endpoints/calendar/meetings/${meetingId}/accept`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to accept meeting');
+      setButtonLoading(prev => ({ ...prev, [`accept-${meetingId}`]: true }));
+      
+      // Find the meeting to get calendar event ID
+      const meeting = meetings.find(m => m.id === meetingId);
+      if (!meeting) {
+        throw new Error('Meeting not found');
       }
 
-      // Refresh meetings list
-      await fetchMeetings();
+      // For attendees, we need to update Google Calendar directly
+      if (meeting.role === 'attendee') {
+        const response = await fetch(`/api/endpoints/calendar/meetings/attendee/respond`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            calendarEventId: meeting.calendarEventId,
+            response: 'accepted'
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to accept meeting');
+        }
+      } else {
+        // For organizers, use the existing route
+        const response = await fetch(`/api/endpoints/calendar/meetings/${meetingId}/accept`, {
+          method: 'POST',
+        });
+        if (!response.ok) {
+          throw new Error('Failed to accept meeting');
+        }
+      }
 
       toast({
         title: 'Success',
-        description: 'Meeting accepted successfully',
+        description: 'Meeting accepted successfully. Refreshing page...',
       });
+
+      // Refresh the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
     } catch (error) {
       console.error('Error accepting meeting:', error);
       toast({
@@ -117,27 +148,56 @@ export default function MeetingsPage() {
         variant: 'destructive',
       });
     } finally {
-      setButtonLoading(prev => ({ ...prev, [meetingId]: false }));
+      setButtonLoading(prev => ({ ...prev, [`accept-${meetingId}`]: false }));
     }
   };
 
   const handleRejectMeeting = async (meetingId: string) => {
     try {
-      setButtonLoading(prev => ({ ...prev, [meetingId]: true }));
-      const response = await fetch(`/api/endpoints/calendar/meetings/${meetingId}/reject`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to reject meeting');
+      setButtonLoading(prev => ({ ...prev, [`reject-${meetingId}`]: true }));
+      
+      // Find the meeting to get calendar event ID
+      const meeting = meetings.find(m => m.id === meetingId);
+      if (!meeting) {
+        throw new Error('Meeting not found');
       }
 
-      // Refresh meetings list
-      await fetchMeetings();
+      // For attendees, we need to update Google Calendar directly
+      if (meeting.role === 'attendee') {
+        const response = await fetch(`/api/endpoints/calendar/meetings/attendee/respond`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            calendarEventId: meeting.calendarEventId,
+            response: 'declined'
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to reject meeting');
+        }
+      } else {
+        // For organizers, use the existing route
+        const response = await fetch(`/api/endpoints/calendar/meetings/${meetingId}/reject`, {
+          method: 'POST',
+        });
+        if (!response.ok) {
+          throw new Error('Failed to reject meeting');
+        }
+      }
 
       toast({
         title: 'Success',
-        description: 'Meeting rejected successfully',
+        description: 'Meeting rejected successfully. Refreshing page...',
       });
+
+      // Refresh the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
     } catch (error) {
       console.error('Error rejecting meeting:', error);
       toast({
@@ -146,7 +206,7 @@ export default function MeetingsPage() {
         variant: 'destructive',
       });
     } finally {
-      setButtonLoading(prev => ({ ...prev, [meetingId]: false }));
+      setButtonLoading(prev => ({ ...prev, [`reject-${meetingId}`]: false }));
     }
   };
 
@@ -322,18 +382,18 @@ export default function MeetingsPage() {
                         variant="outline"
                         className="rounded-[0.35rem]"
                         onClick={() => handleAcceptMeeting(selectedMeeting.id)}
-                        disabled={!canRespondToMeeting(selectedMeeting) || buttonLoading[selectedMeeting.id]}
+                        disabled={!canRespondToMeeting(selectedMeeting) || buttonLoading[`accept-${selectedMeeting.id}`]}
                       >
-                        {buttonLoading[selectedMeeting.id] ? "Accepting..." : "Accept"}
+                        {buttonLoading[`accept-${selectedMeeting.id}`] ? "Accepting..." : "Accept"}
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         className="rounded-[0.35rem]"
                         onClick={() => handleRejectMeeting(selectedMeeting.id)}
-                        disabled={!canRespondToMeeting(selectedMeeting) || buttonLoading[selectedMeeting.id]}
+                        disabled={!canRespondToMeeting(selectedMeeting) || buttonLoading[`reject-${selectedMeeting.id}`]}
                       >
-                        {buttonLoading[selectedMeeting.id] ? "Rejecting..." : "Reject"}
+                        {buttonLoading[`reject-${selectedMeeting.id}`] ? "Rejecting..." : "Reject"}
                       </Button>
                     </>
                   )}

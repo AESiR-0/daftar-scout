@@ -226,7 +226,7 @@ export default function ScoutPage() {
             variant="secondary"
             className="text-xs bg-muted text-muted-foreground"
           >
-            {scoutStatus.active.length}
+            {Object.values(scoutStatus).reduce((total, scouts) => total + scouts.length, 0)}
           </Badge>
         </Button>
 

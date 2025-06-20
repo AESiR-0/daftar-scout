@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const pitchId = searchParams.get("pitchId");
-    const scoutId = searchParams.get("scoutId");
 
     // Validate path parameter
     if (!pitchId) {
@@ -46,13 +45,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Get team members
+    // Get team members with their user details
     const teamMembers = await db
       .select({
         id: pitchTeam.id,
         userId: pitchTeam.userId,
         designation: pitchTeam.designation,
-        hasApproved: pitchTeam.hasApproved,
         name: users.name,
         lastName: users.lastName,
         email: users.email,
@@ -64,21 +62,22 @@ export async function GET(req: NextRequest) {
     // Fetch deletion requests for the pitch
     const deleteRequests = await db
       .select({
-        id: pitchDelete.id,
-        pitch_id: pitchDelete.pitchId,
-        founder_id: pitchDelete.founderId,
-        is_agreed: pitchDelete.isAgreed,
+        founderId: pitchDelete.founderId,
+        isAgreed: pitchDelete.isAgreed,
       })
       .from(pitchDelete)
       .where(eq(pitchDelete.pitchId, pitchId));
 
     // Map team members with their approval status from delete requests
     const teamMembersWithApproval = teamMembers.map(member => {
-      const deleteRequest = deleteRequests.find(req => req.founder_id === member.userId);
+      const deleteRequest = deleteRequests.find(req => req.founderId === member.userId);
       return {
-        ...member,
-        isApproved: deleteRequest?.is_agreed || false,
-        status: deleteRequest?.is_agreed ? "approved" : "pending"
+        name: `${member.name} ${member.lastName || ''}`.trim(),
+        email: member.email,
+        userId: member.userId,
+        designation: member.designation,
+        isApproved: deleteRequest?.isAgreed || false,
+        status: deleteRequest?.isAgreed ? "approved" : "pending"
       };
     });
 

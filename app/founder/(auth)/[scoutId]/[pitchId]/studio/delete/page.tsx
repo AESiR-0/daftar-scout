@@ -28,6 +28,21 @@ interface TeamMember {
   founderId: string;
 }
 
+interface ApiTeamMember {
+  name: string;
+  email: string;
+  userId: string;
+  designation: string;
+  hasApproved: boolean;
+  isApproved: boolean;
+  status: "pending" | "approved";
+  age?: string;
+  phone?: string;
+  gender?: string;
+  location?: string;
+  language?: string[];
+}
+
 const getStatusIcon = (status: string) => {
   switch (status) {
     case "approved":
@@ -51,6 +66,8 @@ export default function DeletePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentUser, setCurrentUser] = useState<TeamMember | null>(null);
   const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
+
+  const isCurrentUserApproved = Boolean(currentUser && approvals.find(m => m.founderId === currentUser.founderId)?.isApproved);
 
   const fetchCurrentUser = async () => {
     try {
@@ -153,8 +170,6 @@ export default function DeletePage() {
 
     setIsLoading(true);
     try {
-      console.log('Fetching delete requests for:', { pitchId, scoutId });
-
       const response = await fetch(`/api/endpoints/pitch/founder/delete?pitchId=${pitchId}&scoutId=${scoutId}`, {
         method: "GET",
         headers: {
@@ -162,68 +177,44 @@ export default function DeletePage() {
         },
       });
 
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Response data:', data);
-
       if (!response.ok) {
-        throw new Error(`Failed to fetch delete requests: ${response.status} - ${data.message || 'Unknown error'}`);
+        const errorData = await response.json();
+        throw new Error(`HTTP error! status: ${response.status} - ${errorData.message || 'Unknown error'}`);
       }
 
-      if (!data || typeof data !== 'object') {
-        throw new Error(`Invalid response data: ${JSON.stringify(data)}`);
+      const data = await response.json();
+      
+      if (!data || !data.teamMembers || !Array.isArray(data.teamMembers)) {
+        throw new Error('Invalid response format: missing or invalid teamMembers array');
       }
-
-      // Get team members and current user from response
-      const { teamMembers, currentUser: apiCurrentUser } = data;
-
-      if (!Array.isArray(teamMembers)) {
-        throw new Error('Expected teamMembers array in response');
-      }
-
-      console.log('Processing team members:', teamMembers);
 
       // Transform API data to match our interface
-      const processedMembers = teamMembers.map((member: {
-        name: string;
-        email: string;
-        userId: string;
-        designation: string;
-        hasApproved: boolean;
-        isApproved: boolean;
-        status: "pending" | "approved";
-      }): TeamMember => {
-        const memberData: TeamMember = {
-          name: member.name,
-          email: member.email,
-          role: member.designation,
-          designation: member.designation,
-          isApproved: member.isApproved,
-          status: member.status,
-          founderId: member.userId,
-          // Default values for required fields
-          age: "",
-          phone: "",
-          gender: "",
-          location: "",
-          language: [],
-          // Mark as current user if IDs match
-          isUser: apiCurrentUser?.id === member.userId
-        };
+      const processedMembers = data.teamMembers.map((member: ApiTeamMember): TeamMember => ({
+        name: member.name || '',
+        email: member.email || '',
+        role: member.designation || '',
+        designation: member.designation || '',
+        isApproved: member.isApproved || false,
+        status: member.status || 'pending',
+        founderId: member.userId || '',
+        age: member.age || '',
+        phone: member.phone || '',
+        gender: member.gender || '',
+        location: member.location || '',
+        language: member.language || [],
+        isUser: data.currentUser?.id === member.userId
+      }));
 
-        // Set current user if this is the current user
-        if (memberData.isUser) {
-          console.log('Found current user:', memberData);
-          setCurrentUser(memberData);
-        }
-
-        return memberData;
-      });
-
-      console.log('Final team members:', processedMembers);
+      console.log('Processed team members:', processedMembers);
       setApprovals(processedMembers);
 
-      // If all approvals are received, show success message
+      // Set current user if found in the team members
+      const currentUserMember = processedMembers.find((member: TeamMember) => member.isUser);
+      if (currentUserMember) {
+        setCurrentUser(currentUserMember);
+      }
+
+      // Check if all approvals are received
       const allApproved = processedMembers.every((member: TeamMember) => member.isApproved);
       if (allApproved && deleteClicked) {
         toast({
@@ -319,8 +310,12 @@ export default function DeletePage() {
     }
   };
 
-  if (!isLoading) {
-    return null; // Or loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
   }
 
   const pendingApprovals = approvals.filter((member) => !member.isApproved).length;
@@ -347,9 +342,9 @@ export default function DeletePage() {
               <Checkbox
                 id="user-consent"
                 checked={userConsent}
-                onCheckedChange={(checked: boolean) => setUserConsent(checked)}
+                onCheckedChange={(checked) => setUserConsent(checked === true)}
                 className="h-5 w-5 mt-0.5 border-2 border-gray-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
-                disabled={isDeleting || isDemoPitch}
+                disabled={isDeleting || isDemoPitch || isCurrentUserApproved}
               />
               <label htmlFor="user-consent" className="text-sm text-muted-foreground">
                 I agree to delete the pitch
@@ -363,14 +358,14 @@ export default function DeletePage() {
                 isDemoPitch ||
                 !userConsent ||
                 isDeleting ||
-                (deleteClicked && approvals.find(m => m.founderId === currentUser?.founderId)?.isApproved)
+                isCurrentUserApproved
               }
               className="w-[12%] rounded-[0.35rem]"
             >
-              {isDeleting ? "Processing..." : deleteClicked ? "Approved" : "Delete"}
+              {isDeleting ? "Processing..." : isCurrentUserApproved ? "Approved" : "Delete"}
             </Button>
 
-            {deleteClicked && (
+            {(deleteClicked || isCurrentUserApproved) && (
               <div className="space-y-4 mt-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium">Team's Approval Required</h3>
@@ -418,4 +413,4 @@ export default function DeletePage() {
       </Card>
     </div>
   );
-}
+} 
