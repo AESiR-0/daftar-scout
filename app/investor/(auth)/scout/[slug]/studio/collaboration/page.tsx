@@ -9,7 +9,7 @@ import formatDate from "@/lib/formatDate";
 import { X, Lock } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { InvestorProfile } from "@/components/InvestorProfile";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import ReactPlayer from "react-player";
 import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 
@@ -35,9 +35,15 @@ export default function CollaborationPage() {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [isInviting, setIsInviting] = useState(false);
   const [removingCollaborator, setRemovingCollaborator] = useState<string | null>(null);
+  const [processingAction, setProcessingAction] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const scoutId = pathname.split("/")[3];
   const { isLocked, isLoading: isLockLoading } = useIsScoutLocked();
+
+  // Check for action parameters from email links
+  const action = searchParams.get("action");
+  const actionDaftarId = searchParams.get("daftarId");
 
   useEffect(() => {
     if (isLocked) {
@@ -49,39 +55,96 @@ export default function CollaborationPage() {
     }
   }, [isLocked, toast]);
 
+  // Handle action from email link
   useEffect(() => {
-    const fetchCollaborators = async () => {
-      try {
-        const res = await fetch(
-          `/api/endpoints/scouts/collaboration?scoutId=${scoutId}`
-        );
-        const data = await res.json();
+    if (action && actionDaftarId && !processingAction) {
+      handleEmailAction(action, actionDaftarId);
+    }
+  }, [action, actionDaftarId, processingAction]);
 
-        // Map DB structure to UI structure
-        const formatted: Collaborator[] = data.map((item: any) => ({
-          id: item.id,
-          daftarId: item.daftarId,
-          daftarName: item.daftarName || "Unknown Daftar",
-          status: item.isPending ? "Pending" : "Accepted",
-          addedAt: item.createdAt || new Date().toISOString(),
-          daftarDetails: {
-            structure: item.daftarStructure || "Unknown",
-            website: item.daftarWebsite || "N/A",
-            location: item.daftarLocation || "N/A",
-            bigPicture: item.daftarBigPicture || "No description",
-          },
-        }));
+  const fetchCollaborators = async () => {
+    try {
+      const res = await fetch(
+        `/api/endpoints/scouts/collaboration?scoutId=${scoutId}`
+      );
+      const data = await res.json();
 
-        setCollaborators(formatted);
-      } catch (error) {
-        toast({
-          title: "Error fetching collaborators",
-          description: "Something went wrong",
-          variant: "destructive",
-        });
+      // Map DB structure to UI structure
+      const formatted: Collaborator[] = data.map((item: any) => ({
+        id: item.id,
+        daftarId: item.daftarId,
+        daftarName: item.daftarName || "Unknown Daftar",
+        status: item.isPending ? "Pending" : "Accepted",
+        addedAt: item.createdAt || new Date().toISOString(),
+        daftarDetails: {
+          structure: item.daftarStructure || "Unknown",
+          website: item.daftarWebsite || "N/A",
+          location: item.daftarLocation || "N/A",
+          bigPicture: item.daftarBigPicture || "No description",
+        },
+      }));
+
+      setCollaborators(formatted);
+    } catch (error) {
+      toast({
+        title: "Error fetching collaborators",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEmailAction = async (actionType: string, daftarId: string) => {
+    if (!["accept", "reject"].includes(actionType)) return;
+    
+    setProcessingAction(true);
+    try {
+      const response = await fetch("/api/endpoints/scouts/collaboration/action", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          scoutId,
+          daftarId,
+          action: actionType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to process action");
       }
-    };
 
+      toast({
+        title: `Collaboration ${actionType === 'accept' ? 'Accepted' : 'Rejected'}`,
+        description: `You have successfully ${actionType}ed the collaboration request.`,
+      });
+
+      // Refresh collaborators list
+      await fetchCollaborators();
+      
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Redirect to scout page after successful action
+      setTimeout(() => {
+        window.location.href = `/investor/scout`;
+      }, 1500);
+      
+    } catch (error: any) {
+      toast({
+        title: "Action Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCollaborators();
   }, []);
 
@@ -180,6 +243,20 @@ export default function CollaborationPage() {
 
   if (isLockLoading) {
     return <p className="text-muted-foreground">Loading...</p>;
+  }
+
+  if (processingAction) {
+    return (
+      <div className="container px-4 mt-4 mx-auto py-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-lg font-medium">Processing your request...</p>
+            <p className="text-sm text-muted-foreground mt-2">Please wait while we handle your collaboration action.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

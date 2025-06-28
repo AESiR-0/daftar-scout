@@ -6,7 +6,6 @@ import { users } from "@/backend/drizzle/models/users";
 import { eq, and, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { createNotification } from "@/lib/notifications/insert";
 
 export async function POST(req: NextRequest) {
   // Get session and user
@@ -47,6 +46,66 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }
 
+  return await processCollaborationAction(scoutId, daftarId, action, userDetails[0]);
+}
+
+export async function GET(req: NextRequest) {
+  // Get session and user
+  const session = await auth();
+  const userEmail = session?.user?.email;
+  if (!userEmail)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Fetch current user details
+  const userDetails = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      firstName: users.name,
+      lastName: users.lastName,
+      profileUrl: users.image,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.email, userEmail))
+    .limit(1);
+
+  if (!userDetails[0])
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+  // Parse query parameters
+  const { searchParams } = new URL(req.url);
+  const scoutId = searchParams.get("scoutId");
+  const daftarId = searchParams.get("daftarId");
+  const action = searchParams.get("action");
+
+  if (!scoutId || !daftarId || !action) {
+    return NextResponse.json(
+      { error: "scoutId, daftarId, and action are required" },
+      { status: 400 }
+    );
+  }
+
+  if (!["accept", "reject"].includes(action)) {
+    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  }
+
+  const result = await processCollaborationAction(scoutId, daftarId, action, userDetails[0]);
+  
+  // If successful, redirect to scout page
+  if (result.status === 200) {
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/investor/scout`);
+  }
+  
+  return result;
+}
+
+async function processCollaborationAction(
+  scoutId: string,
+  daftarId: string,
+  action: string,
+  userDetails: any
+) {
   // Check if the collaboration request exists and is pending
   const collaboration = await db
     .select({
@@ -132,22 +191,49 @@ export async function POST(req: NextRequest) {
     new Set(relatedInvestors.map((i) => i.investorId))
   ).filter((id): id is string => id !== null);
 
-  await createNotification({
-    type: "updates",
-    role: "investor",
-    title: `Collaboration ${action === "accept" ? "Accepted" : "Rejected"}`,
-    description: `Your invitation to collaborate on scout "${scoutDetails[0].scoutName}" with daftar "${daftarDetails[0].name}" has been ${action}ed.`,
-    targeted_users: targetedInvestorIds,
-    payload: {
-      action_by: userDetails[0].id,
-      action_at: new Date().toISOString(),
-      action,
-    },
-  });
+  // Send email to all related investors instead of creating notifications
+  for (const investorId of targetedInvestorIds) {
+    try {
+      // Get investor's email and name
+      const [investor] = await db
+        .select({ email: users.email, name: users.name })
+        .from(users)
+        .where(eq(users.id, investorId))
+        .limit(1);
+
+      if (!investor?.email) {
+        console.error(`No email found for investor ${investorId}`);
+        continue;
+      }
+
+      // Send collaboration response email
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/notifications/email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'collaboration_response',
+          userEmail: investor.email,
+          userName: investor.name || 'User',
+          scoutName: scoutDetails[0].scoutName,
+          daftarName: daftarDetails[0].name,
+          action: action,
+          responderName: userDetails.firstName || 'User',
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        console.error(`Failed to send email to investor ${investorId}`);
+      }
+    } catch (error) {
+      console.error(`Error sending email to investor ${investorId}:`, error);
+    }
+  }
 
   return NextResponse.json({
     success: true,
-    user: userDetails[0],
+    user: userDetails,
     action,
   });
 }

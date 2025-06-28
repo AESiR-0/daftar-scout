@@ -6,7 +6,6 @@ import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar";
 import { eq, and } from "drizzle-orm";
 import { users } from "@/backend/drizzle/models/users";
 import { NextRequest, NextResponse } from "next/server";
-import { createNotification } from "@/lib/notifications/insert";
 import { auth } from "@/auth";
 
 export async function GET(req: NextRequest) {
@@ -136,22 +135,45 @@ export async function POST(req: NextRequest) {
     isPending: true,
   });
 
-  // Create notification for each user in the daftar
-  await createNotification({
-    type: "request",
-    subtype: "collaboration",
-    role: "investor",
-    title: `New Scout Collaboration Request`,
-    description: `You've been invited to collaborate on scout "${scoutExists[0].scoutName}" by daftar "${daftarExists[0].name}".`,
-    targeted_users: targetedUsers,
-    payload: {
-      action_by: userId,
-      action_at: new Date().toISOString(),
-      action: "pending",
-      scoutName: scoutExists[0].scoutName,
-      daftarName: daftarExists[0].name,
-    },
-  });
+  // Send email to each user in the daftar instead of creating notifications
+  for (const userId of targetedUsers) {
+    try {
+      // Get user's email and name
+      const [user] = await db
+        .select({ email: users.email, name: users.name })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (!user?.email) {
+        console.error(`No email found for user ${userId}`);
+        continue;
+      }
+
+      // Send collaboration invitation email
+      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/notifications/email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'collaboration_invite',
+          userEmail: user.email,
+          userName: user.name || 'User',
+          scoutName: scoutExists[0].scoutName,
+          daftarName: daftarExists[0].name,
+          scoutId: scoutId,
+          daftarId: daftarId,
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        console.error(`Failed to send email to user ${userId}`);
+      }
+    } catch (error) {
+      console.error(`Error sending email to user ${userId}:`, error);
+    }
+  }
 
   return NextResponse.json({ success: true, inserted });
 }

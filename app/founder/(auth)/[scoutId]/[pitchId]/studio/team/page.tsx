@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { usePitch } from "@/contexts/PitchContext"; // Import context hook
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface TeamMember {
@@ -33,8 +33,13 @@ interface TeamMember {
 export default function TeamPage() {
   const { toast } = useToast();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const pitchId = pathname.split("/")[3];
   const isDemoPitch = pitchId === "HJqVubjnQ3RVGzlyDUCY4";
+
+  // Check for action parameters from email links
+  const action = searchParams.get("action");
+  const token = searchParams.get("token");
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -66,6 +71,7 @@ export default function TeamPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [processingAction, setProcessingAction] = useState(false);
 
   useEffect(() => {
     if (isDemoPitch) {
@@ -77,11 +83,12 @@ export default function TeamPage() {
     }
   }, [isDemoPitch, toast]);
 
+  // Handle action from email link
   useEffect(() => {
-    if (pitchId) {
-      fetchTeamMembers();
+    if (action && token && !processingAction) {
+      handleEmailAction(action, token);
     }
-  }, [pitchId]);
+  }, [action, token, processingAction]);
 
   const fetchTeamMembers = async () => {
     setIsFetching(true);
@@ -120,6 +127,61 @@ export default function TeamPage() {
       setIsFetching(false);
     }
   };
+
+  const handleEmailAction = async (actionType: string, token: string) => {
+    if (!["accept", "reject"].includes(actionType)) return;
+    
+    setProcessingAction(true);
+    try {
+      const response = await fetch("/api/endpoints/pitch/founder/team/action", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pitchId,
+          action: actionType === 'accept' ? 'accepted' : 'declined',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to process action");
+      }
+
+      toast({
+        title: `Pitch Team Invitation ${actionType === 'accept' ? 'Accepted' : 'Rejected'}`,
+        description: `You have successfully ${actionType}ed the pitch team invitation.`,
+      });
+
+      // Refresh team members list
+      await fetchTeamMembers();
+      
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Redirect to pitch page after successful action
+      setTimeout(() => {
+        window.location.href = `/founder/${pathname.split("/")[2]}/${pitchId}/studio/pitch`;
+      }, 1500);
+      
+    } catch (error: any) {
+      toast({
+        title: "Action Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingAction(false);
+    }
+  };
+
+  useEffect(() => {
+    if (pitchId) {
+      fetchTeamMembers();
+    }
+  }, [pitchId]);
 
   const handleInvite = async () => {
     if (isDemoPitch) {
@@ -310,6 +372,20 @@ export default function TeamPage() {
 
   const activeMembers = members.filter((m) => m.status === "active");
   const pendingMembers = members.filter((m) => m.status === "pending");
+
+  if (processingAction) {
+    return (
+      <div className="space-y-4 px-10">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-lg font-medium">Processing your request...</p>
+            <p className="text-sm text-muted-foreground mt-2">Please wait while we handle your pitch team action.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const MemberCard = ({ member }: { member: TeamMember }) => (
     <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
