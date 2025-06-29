@@ -194,11 +194,7 @@ export function TopNav({ role }: { role: string }) {
               {"icon" in action && action.icon === Play && hasNewPlay && (
                 <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
               )}
-              {"icon" in action &&
-                action.icon === Bell &&
-                hasNewNotifications && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
-                )}
+            
             </div>
           ))}
 
