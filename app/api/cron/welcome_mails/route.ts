@@ -123,4 +123,6 @@ async function sendReminders() {
     }
 }
 
-sendReminders().catch(console.error);
+export async function GET() {
+    await sendReminders().catch(console.error);
+}
