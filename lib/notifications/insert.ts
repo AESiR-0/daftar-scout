@@ -248,14 +248,15 @@ export const emailTemplates = {
   welcome: {
     default: (notification: any, userEmail: string) => ({
       to: userEmail,
-      subject: 'Welcome to DaftarOS',
+      subject: 'Welcome to Daftar OS - Demo Video',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f0f0f0; padding: 20px; border-radius: 10px;border: 1px solid #ccc;">
-          <p>${notification.userName},</p>
-          <p>We're happy to have you with us.</p>
-          <p>At Daftar OS, we've created software to help you grow your startup by connecting you with investors and governments. Video pitching in your own language makes it easier to explain what you're building. It's simple, clear, and helps you share the main idea of your startup. We believe that for the first meeting, it's easier for investors to find you, no matter where you are.</p>
-          <p>If you're building a startup that can get funding, we want to help you connect with the right people and resources from both government and private investors.</p>
-          <p>Welcome to Daftar OS Technology. We're creating a new startup economy.</p>
+          <p>Hi ${notification.userName}</p>
+          <p>Welcome Aboard</p>
+          <br/>
+          <p>Here's your demo video to help you experience how Daftar works:
+🎥 https://daftar.com/demo
+</p>
           <p>Raunak<br>Founder, Daftar OS</p>
         </div>
       `,

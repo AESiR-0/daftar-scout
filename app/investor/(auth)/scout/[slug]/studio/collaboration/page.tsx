@@ -96,7 +96,7 @@ export default function CollaborationPage() {
 
   const handleEmailAction = async (actionType: string, daftarId: string) => {
     if (!["accept", "reject"].includes(actionType)) return;
-    
+
     setProcessingAction(true);
     try {
       const response = await fetch("/api/endpoints/scouts/collaboration/action", {
@@ -124,15 +124,15 @@ export default function CollaborationPage() {
 
       // Refresh collaborators list
       await fetchCollaborators();
-      
+
       // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
-      
+
       // Redirect to scout page after successful action
       setTimeout(() => {
         window.location.href = `/investor/scout`;
       }, 1500);
-      
+
     } catch (error: any) {
       toast({
         title: "Action Failed",
@@ -225,7 +225,7 @@ export default function CollaborationPage() {
 
       // Remove from local state
       setCollaborators(collaborators.filter((c) => c.id !== id));
-      
+
       toast({
         title: "Collaborator removed",
         description: "Collaborator has been successfully removed from the scout.",
@@ -281,9 +281,9 @@ export default function CollaborationPage() {
                   maxLength={6}
                   disabled={isLocked || isInviting}
                 />
-                <Button 
-                  onClick={handleInvite} 
-                  variant="outline" 
+                <Button
+                  onClick={handleInvite}
+                  variant="outline"
                   disabled={isLocked || isInviting}
                 >
                   {isInviting ? "Inviting..." : "Invite"}
@@ -310,7 +310,11 @@ export default function CollaborationPage() {
                           }}
                         />
                         <p className="text-xs text-muted-foreground">
-                          Status: {collaborator.status}
+
+                          {collaborator.status == 'Pending' ?
+                            `  Status: ${collaborator.status}`
+                            : `On Scout Since`
+                          }
                         </p>
                         <p className="text-xs mt-1 text-muted-foreground">
                           {formatDate(collaborator.addedAt)}
@@ -387,29 +391,29 @@ export default function CollaborationPage() {
               </p>
 
               <div className="space-y-4">
-                <Textarea 
-                  placeholder="How can we help you?" 
+                <Textarea
+                  placeholder="How can we help you?"
                   className="h-24"
                   disabled={isLocked}
                 />
-                <Input 
+                <Input
                   placeholder="When should we call you? e.g. 2:00 PM IST"
                   disabled={isLocked}
                 />
                 <div className="flex gap-2">
-                  <Input 
-                    className="w-20" 
+                  <Input
+                    className="w-20"
                     placeholder="+91"
                     disabled={isLocked}
                   />
-                  <Input 
-                    className="flex-1" 
+                  <Input
+                    className="flex-1"
                     placeholder="Enter phone number"
                     disabled={isLocked}
                   />
                 </div>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full"
                   disabled={isLocked}
                 >

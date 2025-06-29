@@ -6,7 +6,7 @@ import {
   Play,
   ScrollText,
   Folder,
-  Bell,
+  // Bell,
   Calendar,
   Crown,
   FileText,
@@ -77,14 +77,14 @@ export const topNavConfig = {
     { text: "Journal", action: "journal" },
     { text: "Subscription", action: "subscription" },
     { icon: Play, action: "play" },
-    { icon: Bell, action: "notifications" },
+    // { icon: Bell, action: "notifications" },
     { icon: Folder, action: "daftar" },
   ],
   founder: [
     { text: "Journal", action: "journal" },
     { text: "Subscription", action: "subscription" },
     { icon: Play, action: "play" },
-    { icon: Bell, action: "notifications" },
+    // { icon: Bell, action: "notifications" },
   ],
 };
 

@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   isArchived: boolean("is_archived").default(false).notNull(),
   archivedOn: timestamp("deleted_on"), // Nullable
   journal: text("journal"),
+  hour24Mail: boolean("hour_24_mail").default(false),
+  day7Mail: boolean("hour_24_mail").default(false),
 });
 
 export const accounts = pgTable(

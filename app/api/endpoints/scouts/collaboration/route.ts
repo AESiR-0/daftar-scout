@@ -207,7 +207,6 @@ export async function DELETE(req: NextRequest) {
 
     const currentDaftarId = userDaftar[0]?.daftarId;
 
-    // Check if the user is the scout owner
     const scoutOwner = await db
       .select({ daftarId: scouts.daftarId })
       .from(scouts)
@@ -215,7 +214,6 @@ export async function DELETE(req: NextRequest) {
       .limit(1);
 
 
-    // Get total number of collaborators for this scout
     const totalCollaborators = await db
       .select({ count: daftarScouts.id })
       .from(daftarScouts)
