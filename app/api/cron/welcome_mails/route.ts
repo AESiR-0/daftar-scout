@@ -2,6 +2,8 @@ import { db } from "@/backend/database";
 import { users } from "@/backend/drizzle/models/users";
 import { eq, and, gte, lte } from "drizzle-orm";
 import nodemailer from "nodemailer";
+import { NextResponse } from "next/server";
+
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -46,12 +48,12 @@ async function sendReminders() {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2>Welcome to Daftar OS</h2>
                 <p><strong>${user.name}</strong></p>
-                <p>I’m happy to have you with us.</p>
+                <p>I'm happy to have you with us.</p>
                 <p>
-                    At Daftar OS, our core vision is to help you scout startups in the simplest format and open a bigger market for investing, one you couldn’t reach before with traditional pitching formats.
+                    At Daftar OS, our core vision is to help you scout startups in the simplest format and open a bigger market for investing, one you couldn't reach before with traditional pitching formats.
                 </p>
                 <p>
-                    So here’s to your next big opportunity, whether it’s the next Jacob’s Peanut Butter, Bose, or Manyavar – we’re working with you to help you reach them first.
+                    So here's to your next big opportunity, whether it's the next Jacob's Peanut Butter, Bose, or Manyavar – we're working with you to help you reach them first.
                 </p>
                 <p>
                     You can learn more about the Daftar Operating System by experiencing it in its beta. Welcome to Daftar OS Technology.
@@ -69,7 +71,7 @@ async function sendReminders() {
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <h2>Welcome to Daftar OS</h2>
                     <p><strong>${user.name}</strong></p>
-                    <p> We’re happy to have you with us.</p>
+                    <p> We're happy to have you with us.</p>
                     <p>
                                         At Daftar OS, you can pitch your startup idea in the language you are most comfortable with and get your first meeting started.
 
@@ -124,5 +126,11 @@ async function sendReminders() {
 }
 
 export async function GET() {
-    await sendReminders().catch(console.error);
+    try {
+        await sendReminders();
+        return NextResponse.json({ success: true }), { status: 200 };
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ success: false, error: error instanceof Error ? error.message : String(error) }), { status: 500 };
+    }
 }
