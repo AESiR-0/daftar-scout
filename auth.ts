@@ -56,9 +56,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   pages: {
-    signIn: `/login/*`,
+    signIn: `/login`,
   },
-  session: { strategy: "jwt" },
 
   callbacks: {
     async signIn({ user, account }) {
@@ -103,7 +102,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             type: "oauth",
           });
         }
-        
+
         // Create demo content for existing user if they don't have it
         return true;
       }
@@ -134,7 +133,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Send welcome email to new user
       await sendWelcomeEmail(user.email, user.name || "");
-      
+
       return true;
     },
 
