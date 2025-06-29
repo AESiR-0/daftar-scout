@@ -35,34 +35,61 @@ async function sendReminders() {
     }
 
     // 24 hour reminders
+    // 24 hour reminders
     const users24h = await getUsersByCreatedAt(hoursAgo24, '1');
     for (const user of users24h) {
-        // Check if already sent (implement your own logic, e.g. a reminders table)
-        // if (!alreadySent(user.id, "24h")) {
         await transporter.sendMail({
             to: user.email,
-            subject: "Welcome! It's been 24 hours",
-            html: "<p>Thanks for joining us! Here's what you can do next...</p>",
-        }); await db.update(users)
+            subject: "Welcome to Daftar OS",
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2>Welcome to Daftar OS</h2>
+                <p><strong>${user.name}</strong></p>
+                <p>I’m happy to have you with us.</p>
+                <p>
+                    At Daftar OS, our core vision is to help you scout startups in the simplest format and open a bigger market for investing, one you couldn’t reach before with traditional pitching formats.
+                </p>
+                <p>
+                    So here’s to your next big opportunity, whether it’s the next Jacob’s Peanut Butter, Bose, or Manyavar – we’re working with you to help you reach them first.
+                </p>
+                <p>
+                    You can learn more about the Daftar Operating System by experiencing it in its beta. Welcome to Daftar OS Technology.
+                </p>
+                <p>Raunak</p>
+            </div>
+        `,
+        });
+        await db.update(users)
             .set({ hour24Mail: true })
             .where(eq(users.id, user.id));
-        // markAsSent(user.id, "24h");
-        // }
     }
 
     // 7 day reminders
     const users7d = await getUsersByCreatedAt(daysAgo7, '7');
     for (const user of users7d) {
-        // if (!alreadySent(user.id, "7d")) {
         await transporter.sendMail({
             to: user.email,
-            subject: "It's been a week!",
-            html: "<p>Here's how to get the most out of our platform...</p>",
-        }); await db.update(users)
+            subject: "Daftar Operating System: Data Privacy",
+            html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2>Daftar Operating System: Data Privacy</h2>
+                <p><strong>${user.name}</strong></p>
+                <p>
+                    At Daftar OS, your privacy is our top priority. We work around the clock to protect your personal and business information using secure technology. All your data is encrypted both during transmission and at rest, ensuring it remains safe from unauthorized access.
+                </p>
+                <p>
+                    We believe in transparency and give you full control over your data. You can access, update, or delete your information at any time. We never sell your data to third parties and uphold strict privacy standards.
+                </p>
+                <p>
+                    Your trust is important to us, and we are committed to keeping your data safe.
+                </p>
+                <p>Tech Team<br/>Daftar OS</p>
+            </div>
+        `,
+        });
+        await db.update(users)
             .set({ day7Mail: true })
             .where(eq(users.id, user.id));
-        // markAsSent(user.id, "7d");
-        // }
     }
 }
 
