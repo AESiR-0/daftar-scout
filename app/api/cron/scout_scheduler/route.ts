@@ -8,9 +8,7 @@ import { createNotification } from "@/lib/notifications/insert";
 export async function GET() {
   try {
     const todayDate = new Date();
-    const today = todayDate.toISOString().split("T")[0]; // YYYY-MM-DD
-
-    // --- 1. Activate Scouts ---
+    const today = todayDate.toISOString().split("T")[0];
     const activatedScouts = await db
       .update(scouts)
       .set({ status: "active", isLocked: true })
@@ -21,25 +19,20 @@ export async function GET() {
         )
       )
       .returning();
-
     for (const scout of activatedScouts) {
       const scoutId = scout.scoutId;
-
       const linkedDaftars = await db
         .select({ daftarId: daftarScouts.daftarId })
         .from(daftarScouts)
         .where(eq(daftarScouts.scoutId, scoutId));
-
       const daftarIds = linkedDaftars
         .map((d) => d.daftarId)
         .filter((id): id is string => id !== null);
       if (!daftarIds.length) continue;
-
       const investors = await db
         .select({ userId: daftarInvestors.investorId })
         .from(daftarInvestors)
         .where(inArray(daftarInvestors.daftarId, daftarIds));
-
       const userIds = investors
         .map((i) => i.userId)
         .filter((id): id is string => id !== null);
@@ -58,8 +51,6 @@ export async function GET() {
         },
       });
     }
-
-    // --- 2. Close Scouts if lastDayToPitch has passed ---
     const closedScouts = await db
       .update(scouts)
       .set({ status: "closed" })
