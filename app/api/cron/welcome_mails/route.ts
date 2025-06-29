@@ -38,10 +38,11 @@ async function sendReminders() {
     // 24 hour reminders
     const users24h = await getUsersByCreatedAt(hoursAgo24, '1');
     for (const user of users24h) {
-        await transporter.sendMail({
-            to: user.email,
-            subject: "Welcome to Daftar OS",
-            html: `
+        if (user.role == 'investor' || user.role == 'Investor')
+            await transporter.sendMail({
+                to: user.email,
+                subject: "Welcome to Daftar OS",
+                html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2>Welcome to Daftar OS</h2>
                 <p><strong>${user.name}</strong></p>
@@ -58,7 +59,36 @@ async function sendReminders() {
                 <p>Raunak</p>
             </div>
         `,
-        });
+            });
+
+        else {
+            await transporter.sendMail({
+                to: user.email,
+                subject: "Welcome to Daftar OS",
+                html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2>Welcome to Daftar OS</h2>
+                    <p><strong>${user.name}</strong></p>
+                    <p> We’re happy to have you with us.</p>
+                    <p>
+                                        At Daftar OS, you can pitch your startup idea in the language you are most comfortable with and get your first meeting started.
+
+                    </p>
+                    <p>
+                     Welcome to Daftar OS — built by founders for founders.
+                    </p>
+                    
+                    <p>Raunak</p>
+                </div>
+            `,
+            });
+
+
+
+
+
+        }
+
         await db.update(users)
             .set({ hour24Mail: true })
             .where(eq(users.id, user.id));

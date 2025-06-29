@@ -13,6 +13,8 @@ import { sendWelcomeEmail } from "@/lib/notifications/listen";
 
 const ALLOWED_EMAILS = [
   "workbyprat@gmail.com",
+  "ladraunak2@gmail.com",
+  "pancham@adengage.in",
   "pratiechellani@gmail.com",
   "cyborgkiller1008@gmail.com",
   "ladraunak@gmail.com",
@@ -24,6 +26,14 @@ const ALLOWED_EMAILS = [
   "mhdumar115@gmail.com",
   "ayushya2002@gmail.com",
   "programmified7@gmail.com",
+  "parv.shroff@gmail.com",
+  "tandonshaurya92@gmail.com",
+  "zishan.ux@gmail.com",
+  "sanketshetty26@gmail.com",
+  "dip4esh@gmail.com",
+  "laad.vishal@gmail.com",
+  "rohil9@gmail.com",
+  "vermavandita20@gmail.com"
 ];
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
