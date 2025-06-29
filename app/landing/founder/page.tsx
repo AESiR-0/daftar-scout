@@ -13,10 +13,10 @@ const getCachedVideoSource = cache((language: string, questionId: string): strin
     return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Hindi-VanditaVerma.mov"
   }
   if (language === "Hindi" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Hindi-VanditaVerma.mov"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Hindi-VanditaVerma.mp4"
   }
   if (language === "Hindi" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Hindi-VanditaVerma.mov"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Hindi-VanditaVerma.mp4"
   }
   if (language === "Hindi" && questionId === "business") {
     return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Hindi-VanditaVerma.mov"
@@ -62,19 +62,19 @@ const getCachedVideoSource = cache((language: string, questionId: string): strin
     return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Sindhi.mp4"
   }
   if (language === "Sindhi" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Sindhi.mp4"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Sindhi.mov"
   }
   if (language === "Sindhi" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Sindhi.mp4"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Sindhi.mov"
   }
   if (language === "Sindhi" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Sindhi.mp4"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Sindhi.mov"
   }
   if (language === "Sindhi" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Sindhi.mp4"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Sindhi.mov"
   }
   if (language === "Sindhi" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Sindhi.mp4"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Sindhi.mov"
   }
 
   // Assamese videos
@@ -105,7 +105,7 @@ const getCachedVideoSource = cache((language: string, questionId: string): strin
     return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_punjabi+-+Manav+Maini.mov"
   }
   if (language === "Punjabi" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_punjabi+-+Manav+Maini.mov"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_punjabi+-+Manav+Maini.mp4"
   }
   if (language === "Punjabi" && questionId === "market") {
     return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_punjabi+-+Manav+Maini.mov"
@@ -114,7 +114,7 @@ const getCachedVideoSource = cache((language: string, questionId: string): strin
     return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_punjabi+-+Manav+Maini.mov"
   }
   if (language === "Punjabi" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_punjabi+-+Manav+Maini.mov"
+    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_punjabi+-+Manav+Maini.mp4"
   }
   if (language === "Punjabi" && questionId === "help") {
     return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_punjabi+-+Manav+Maini.mov"
@@ -707,7 +707,7 @@ export default function FounderPage() {
                       style={{ zIndex: 10 }}
                     >
                       {/* Play icon */}
-                      <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                      <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
                     </button>
                   )}
                   {(isPlaying && isHovered) && (
@@ -717,7 +717,7 @@ export default function FounderPage() {
                       style={{ zIndex: 10 }}
                     >
                       {/* Pause icon */}
-                      <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                      <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>
                     </button>
                   )}
                 </div>
