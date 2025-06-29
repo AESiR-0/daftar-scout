@@ -263,7 +263,7 @@ function generateCollaborationInviteEmail(
             </p>
 
             <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
-              This collaboration will help expand the reach of the scout and connect with more promising startups in your network.
+              This collaboration will help expand the reach of the scout and connect with more startups in your network.
             </p>
   
             <!-- CTA Buttons -->

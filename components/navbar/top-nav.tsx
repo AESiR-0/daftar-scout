@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { ProfileDialog } from "@/components/dialogs/profile-dialog";
 // import { ThemeToggle } from "@/components/theme/theme-toggle"
 import { JournalDialog } from "@/components/dialogs/journal-dialog";
-import { NotificationDialog } from "@/components/dialogs/notification-dialog";
+// import { NotificationDialog } from "@/components/dialogs/notification-dialog";
 // import { useRole } from "@/contexts/role-context"
 import { topNavConfig } from "@/config/navigation";
 import { DaftarDialog } from "@/components/dialogs/daftar-dialog";
@@ -36,11 +36,11 @@ export function TopNav({ role }: { role: string }) {
   const scoutId = pathname.split("/")[3];
   const [profileOpen, setProfileOpen] = useState(false);
   const [journalOpen, setJournalOpen] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
+  // const [notificationOpen, setNotificationOpen] = useState(false);
   const [daftarOpen, setDaftarOpen] = useState(false);
   const [hasNewPlay, setHasNewPlay] = useState(true);
   const [userId, setUserId] = useState<string>("");
-  const [hasNewNotifications, setHasNewNotifications] = useState(true);
+  // const [hasNewNotifications, setHasNewNotifications] = useState(true);
   const [hasNewProfileUpdates, setHasNewProfileUpdates] = useState(true);
   const [studioEntryPoint, setStudioEntryPoint] = useState<string>("");
   const [avatarImage, setAvatarImage] = useState<string>("");
@@ -81,9 +81,9 @@ export function TopNav({ role }: { role: string }) {
       case "play":
         setDemoOpen(true);
         break;
-      case "notifications":
-        setNotificationOpen(true);
-        break;
+      // case "notifications":
+      //   setNotificationOpen(true);
+      //   break;
       case "daftar":
         setDaftarOpen(true);
         break;
@@ -94,7 +94,7 @@ export function TopNav({ role }: { role: string }) {
 
   // Update the back button handler
   const handleBack = () => {
-      router.push(`/investor/scout/${scoutId}`);
+    router.push(`/investor/scout/${scoutId}`);
   };
   useEffect(() => {
     async function fetchUserId() {
@@ -155,15 +155,15 @@ export function TopNav({ role }: { role: string }) {
             pathname.includes("/investor/studio") ||
             pathname.includes("/founder/pitch/") ||
             pathname.includes("/investor/scout/")) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleBack}
-              className="mr-2 rounded-[0.35rem]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBack}
+                className="mr-2 rounded-[0.35rem]"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
           {/* <Link 
             href={role === "founder" ? "/founder" : "/investor"}
             className="text-sm font-medium"
@@ -194,7 +194,11 @@ export function TopNav({ role }: { role: string }) {
               {"icon" in action && action.icon === Play && hasNewPlay && (
                 <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
               )}
-            
+              {/* {"icon" in action &&
+                action.icon === Bell &&
+                hasNewNotifications && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full" />
+                )} */}
             </div>
           ))}
 
@@ -223,12 +227,12 @@ export function TopNav({ role }: { role: string }) {
         <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />
         <JournalDialog open={journalOpen} onOpenChange={setJournalOpen} />
         <VideoDialog open={demoOpen} onOpenChange={setDemoOpen} />
-        <NotificationDialog
+        {/* <NotificationDialog
           open={notificationOpen}
           onOpenChange={setNotificationOpen}
           userId={userId}
           role={role as "founder" | "investor" | undefined}
-        />
+        /> */}
         <DaftarDialog
           open={daftarOpen}
           onOpenChange={setDaftarOpen}

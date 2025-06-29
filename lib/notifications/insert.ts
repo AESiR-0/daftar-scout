@@ -237,7 +237,7 @@ export const emailTemplates = {
           <h2>The Scout is Now Live - Start Inviting Startups</h2>
           <p>${notification.userName},</p>
           <p>We're excited to inform you that the scout ${notification.scoutName} is successfully live. You can now invite startups from your social network by sharing this link: ${notification.payload.url}.</p>
-          <p>This is your opportunity to connect with promising startups and help them grow.</p>
+          <p>This is your opportunity to connect with startups and help them grow.</p>
           <p>Best regards,<br>Daftar OS</p>
         </div>
       `,

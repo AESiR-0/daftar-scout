@@ -214,17 +214,6 @@ export async function DELETE(req: NextRequest) {
       .where(eq(scouts.scoutId, scoutId))
       .limit(1);
 
-    if (scoutOwner.length === 0) {
-      return NextResponse.json({ error: "Scout not found" }, { status: 404 });
-    }
-
-    // Only the scout owner can remove collaborators
-    if (scoutOwner[0].daftarId !== currentDaftarId) {
-      return NextResponse.json(
-        { error: "Only the scout owner can remove collaborators" },
-        { status: 403 }
-      );
-    }
 
     // Get total number of collaborators for this scout
     const totalCollaborators = await db
