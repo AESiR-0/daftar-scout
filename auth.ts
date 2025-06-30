@@ -30,6 +30,9 @@ const ALLOWED_EMAILS = [
   "laadparul@gmail.com",
   "dip4esh@gmail.com",
   "laad.vishal@gmail.com",
+  "avijit@adengage.in",
+  "nitukthakur20@gmail.com",
+  "prathamesh@adengage.in",
   "rohil9@gmail.com",
   "vermavandita20@gmail.com"
 ];
