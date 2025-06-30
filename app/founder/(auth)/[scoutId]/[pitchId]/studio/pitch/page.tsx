@@ -344,7 +344,7 @@ export default function PitchPage() {
       <div className="w-2/3 space-y-6">
         <ScrollArea className="space-y-6">
           {/* Specific Asks Section */}
-          <div className="space-y-2 h-[200px] min-h-[150px] px-1">
+          <div className="space-y-2  min-h-[150px] px-1">
             <Label>Do you have any specific ask from the Investor?</Label>
             <Textarea
               value={specificAsks}
@@ -366,7 +366,7 @@ export default function PitchPage() {
           </div>
 
           {/* Team Approvals Section */}
-          <div className="flex items-start mt-4 px-1 space-x-2 mb-4">
+          <div className="flex items-start mt-10 px-1 space-x-2 mb-4">
             <Checkbox
               id="terms"
               checked={termsAccepted}
