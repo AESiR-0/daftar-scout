@@ -1,9 +1,22 @@
+'use client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
+
 
 export default function PrivacyPolicy() {
+  const router = useRouter();
+
   return (
     <div className="min-h-[80%] bg-[#0e0e0e] text-white py-12 px-4 sm:px-6 lg:px-8">
+      {/* Cross Button */}
+      <button
+        onClick={() => router.back()}
+        className="fixed top-12 right-12 z-50  hover:bg-black/90 text-white rounded-full p-2 shadow-lg focus:outline-none"
+        aria-label="Close"
+      >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+      </button>
       <div className="max-w-3xl mx-auto">
         <Card className="bg-[#1a1a1a] border-[#2a2a2a] shadow-lg">
           <CardHeader>
@@ -42,8 +55,8 @@ export default function PrivacyPolicy() {
                   scalable and secure environment for our users. As part of our
                   ongoing development, user interactions with the software may be
                   logged for analysis and optimization purposes. However, we
-                  ensure that this data is handled by Google’s Privacy Policy and
-                  AWS’s Privacy Practices, adhering to industry standards for
+                  ensure that this data is handled by Google's Privacy Policy and
+                  AWS's Privacy Practices, adhering to industry standards for
                   data protection.
                 </p>
               </section>
@@ -59,7 +72,7 @@ export default function PrivacyPolicy() {
                   When you sign in to Daftar using Google Sign-In, we only collect
                   essential information necessary for authentication, including
                   your email address and name. We do not store any sensitive data
-                  such as passwords. This data is processed in line with Google’s
+                  such as passwords. This data is processed in line with Google's
                   Privacy Policy, and your interactions with Google are governed
                   by their terms.
                 </p>
@@ -149,8 +162,8 @@ export default function PrivacyPolicy() {
                 <h3 className="text-xl font-medium mb-2">Google:</h3>
                 <p className="text-base leading-relaxed">
                   Your authentication data is processed by Google through OAuth
-                  2.0. Google’s privacy policies govern how your data is handled
-                  during authentication. We don’t store or process any further
+                  2.0. Google's privacy policies govern how your data is handled
+                  during authentication. We don't store or process any further
                   sensitive data through Google beyond what is required for the
                   authentication process.
                 </p>
@@ -168,7 +181,7 @@ export default function PrivacyPolicy() {
                 <ul className="list-disc pl-6 text-base leading-relaxed mt-2">
                   <li className="mb-2">
                     <strong>OAuth 2.0 Authentication:</strong> We rely on
-                    Google’s OAuth 2.0 protocol to authenticate users. This allows
+                    Google's OAuth 2.0 protocol to authenticate users. This allows
                     Daftar to securely access only the email address and basic
                     profile information (such as name) associated with your Google
                     account.
@@ -190,7 +203,7 @@ export default function PrivacyPolicy() {
                     for authentication.
                   </li>
                   <li className="mb-2">
-                    <strong>Google’s Privacy Practices:</strong> Google has
+                    <strong>Google's Privacy Practices:</strong> Google has
                     stringent privacy and security practices in place, governed by
                     its Privacy Policy. When you use Google Sign-In, your
                     interactions with Google are subject to their privacy and data
@@ -203,7 +216,7 @@ export default function PrivacyPolicy() {
                     Google.
                   </li>
                   <li className="mb-2">
-                    <strong>Google’s Security Measures:</strong> Google employs
+                    <strong>Google's Security Measures:</strong> Google employs
                     industry-standard encryption methods and other security
                     measures to ensure that your authentication data is protected.
                   </li>
@@ -216,22 +229,22 @@ export default function PrivacyPolicy() {
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:underline"
                   >
-                    Google’s Privacy Policy
+                    Google's Privacy Policy
                   </a>
                   .
                 </p>
                 <h3 className="text-xl font-medium mb-2 mt-4">AWS:</h3>
                 <p className="text-base leading-relaxed">
                   Daftar is hosted on AWS, a trusted platform that provides
-                  cloud hosting services. AWS’s policies govern how your data
+                  cloud hosting services. AWS's policies govern how your data
                   is stored and processed. We ensure that AWS follows industry
                   standards for data protection and privacy.
                 </p>
                 <p className="text-base leading-relaxed mt-2">
                   We use AWS as our backend infrastructure for storing user
                   data and session information. AWS provides a scalable and
-                  secure database. AWS processes your data in accordance with 
-                  its own privacy policies, and we ensure that AWS complies with 
+                  secure database. AWS processes your data in accordance with
+                  its own privacy policies, and we ensure that AWS complies with
                   industry-standard data protection measures.
                 </p>
               </section>
@@ -272,24 +285,24 @@ export default function PrivacyPolicy() {
                   Daftar does not sell, share, or disclose your Google user data to third parties, except as required to operate and improve our services, and only under the conditions described below:
                 </p>
                 <ul className="list-disc pl-6 text-base leading-relaxed mt-2">
-                <li className="mb-2">
-                  <strong>Cloud Infrastructure (AWS):</strong> We use Amazon Web Services (AWS EC2 and S3) to host our application and store session-related data. Your Google authentication data (such as your name and email address) is processed and stored securely on our AWS servers, solely for the purposes of providing access and managing sessions. AWS complies with industry-standard data protection regulations and does not access your data for any purpose outside of providing cloud services.
-                </li>
-                <li className="mb-2">
-                  <strong>No Unauthorized Third Parties:</strong> We do not share or transfer your Google user data to any unauthorized third parties. Only Daftar’s authorized internal personnel have access to this data, and only for the purpose of operating the service.
-                </li>
-                <li className="mb-2">
-                  <strong>Legal Compliance:</strong> We may disclose your Google user data if legally required (e.g., court order, legal process, or government request), and only when necessary to comply with applicable laws, protect our rights, or ensure the safety of users.
-                </li>
-                <li className="mb-2">
-                  <strong>No Third-Party Advertising:</strong> Daftar does not use, disclose, or share your Google user data for advertising or marketing purposes, nor do we allow any third-party advertisers access to this data.
-                </li>
-                <li className="mb-2">
-                  <strong>No Cross-Border Transfers Without Safeguards:</strong> If data needs to be processed or accessed outside your country, it is done only through trusted infrastructure providers like AWS with appropriate legal safeguards and compliance measures in place.
-                </li>
-                <li className="mb-2">
-                  <strong>Internal Data Access Controls:</strong> We strictly enforce internal data access controls and ensure that all data handlers within Daftar follow confidentiality agreements and security protocols.
-                </li>
+                  <li className="mb-2">
+                    <strong>Cloud Infrastructure (AWS):</strong> We use Amazon Web Services (AWS EC2 and S3) to host our application and store session-related data. Your Google authentication data (such as your name and email address) is processed and stored securely on our AWS servers, solely for the purposes of providing access and managing sessions. AWS complies with industry-standard data protection regulations and does not access your data for any purpose outside of providing cloud services.
+                  </li>
+                  <li className="mb-2">
+                    <strong>No Unauthorized Third Parties:</strong> We do not share or transfer your Google user data to any unauthorized third parties. Only Daftar's authorized internal personnel have access to this data, and only for the purpose of operating the service.
+                  </li>
+                  <li className="mb-2">
+                    <strong>Legal Compliance:</strong> We may disclose your Google user data if legally required (e.g., court order, legal process, or government request), and only when necessary to comply with applicable laws, protect our rights, or ensure the safety of users.
+                  </li>
+                  <li className="mb-2">
+                    <strong>No Third-Party Advertising:</strong> Daftar does not use, disclose, or share your Google user data for advertising or marketing purposes, nor do we allow any third-party advertisers access to this data.
+                  </li>
+                  <li className="mb-2">
+                    <strong>No Cross-Border Transfers Without Safeguards:</strong> If data needs to be processed or accessed outside your country, it is done only through trusted infrastructure providers like AWS with appropriate legal safeguards and compliance measures in place.
+                  </li>
+                  <li className="mb-2">
+                    <strong>Internal Data Access Controls:</strong> We strictly enforce internal data access controls and ensure that all data handlers within Daftar follow confidentiality agreements and security protocols.
+                  </li>
                 </ul>
               </section>
 
@@ -363,9 +376,3 @@ export default function PrivacyPolicy() {
     </div>
   );
 }
-
-export const metadata = {
-  title: "Daftar's Privacy Policy",
-  description:
-    "Learn how Daftar collects, processes, and protects your data in our Privacy Policy.",
-};

@@ -9,6 +9,7 @@ import {
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { toast } from "@/hooks/use-toast";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface JournalDialogProps {
   open: boolean;
@@ -91,7 +92,7 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0">
+      <DialogContent className="max-w-[45rem] p-0 gap-0">
         <DialogHeader>
           <DialogTitle></DialogTitle>
         </DialogHeader>
@@ -100,12 +101,15 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
             <h2 className="text-sm font-medium">Journal</h2>
           </div>
           <div className="flex-1 p-4">
-            <EditorContent
-              placeholder="Your journal, your pace.
+            <ScrollArea>
+              <EditorContent
+                placeholder="Your journal, your pace.
 A quiet spot to hyper-focus and structure your thoughts."
-              editor={editor}
-              className="h-full prose max-w-none"
-            />
+                editor={editor}
+                className="h-full max-h-[22rem]  prose max-w-2xl "
+                style={{ minHeight: 0 }}
+              />
+            </ScrollArea>
           </div>
         </div>
       </DialogContent>

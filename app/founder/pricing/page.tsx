@@ -2,10 +2,21 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
 
 export default function PricingPage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-[80%] bg-[#0e0e0e] text-white py-12 px-4 sm:px-6 lg:px-8">
+      {/* Cross Button */}
+      <button
+        onClick={() => router.back()}
+        className="fixed top-6 right-6 z-50 bg-black/70 hover:bg-black/90 text-white rounded-full p-2 shadow-lg focus:outline-none"
+        aria-label="Close"
+      >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+      </button>
       <div className="max-w-3xl mx-auto">
         <Card className="bg-[#1a1a1a] border-[#2a2a2a] shadow-lg">
           <CardHeader>
