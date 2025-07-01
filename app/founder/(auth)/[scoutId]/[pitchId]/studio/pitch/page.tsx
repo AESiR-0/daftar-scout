@@ -357,7 +357,7 @@ export default function PitchPage() {
                   }
                 }
               }}
-              className="min-h-[100px] max-h-[300px] h-auto bg-muted/50 resize-y rounded-xl"
+              className="h-[250px] max-h-[250px] bg-muted/50 resize-y rounded-xl"
               placeholder="What specific asks do you have for investors?"
             />
             <span className="text-sm text-muted-foreground mt-1">

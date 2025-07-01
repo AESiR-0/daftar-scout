@@ -616,7 +616,7 @@ export default function FounderPage() {
   return (
     <div className="flex flex-col items-center h-full px-4 py-12">
       {/* Main Content */}
-      <div className="max-w-6xl w-full mt-10 space-y-28">
+      <div className="max-w-6xl w-full mt-10 space-y-28"> 
         {/* Hero Section */}
         <div className="space-y-6 text-center">
           <h1 className="text-7xl font-light tracking-tight">
@@ -643,7 +643,7 @@ export default function FounderPage() {
         </div>
         <div className="text-left">
           <h1 className="text-3xl font-semibold">Sample Startup Pitches</h1>
-
+        
           {/* 3 Column Layout */}
           <div className="grid grid-cols-12 gap-6 mt-10">
             {/* Language Column */}
@@ -654,7 +654,7 @@ export default function FounderPage() {
                   <div
                     key={language}
                     className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedLanguage === language ? 'text-blue-600' : 'hover:bg-muted'
-                      }`}
+                    }`}
                     onClick={() => setSelectedLanguage(language)}
                   >
                     <span className="text-sm">{language}</span>
@@ -732,7 +732,7 @@ export default function FounderPage() {
                   <div
                     key={q.id}
                     className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedQuestion === q.id ? 'text-blue-600' : 'hover:bg-muted'
-                      }`}
+                    }`}
                     onClick={() => setSelectedQuestion(q.id)}
                   >
                     <span className="text-sm">{q.title}</span>
