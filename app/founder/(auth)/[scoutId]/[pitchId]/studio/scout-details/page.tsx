@@ -139,7 +139,7 @@ export default function ScoutDetailsPage() {
               {/* Main Content */}
               <div className="flex-1">
                 <Card className="bg-[#0e0e0e] border-none  px-4">
-                  <div className="relative aspect-video w-full h-[500px] max-w-[500px] mx-auto">
+                  <div className="relative  w-full h-[500px] max-w-[300px] mx-auto">
                     <video
                       src={scout.investorPitch}
                       controls

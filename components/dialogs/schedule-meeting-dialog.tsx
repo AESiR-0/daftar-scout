@@ -119,6 +119,49 @@ export function ScheduleMeetingDialog({
   const onSubmit = async (data: MeetingFormData) => {
     try {
       setIsSubmitting(true);
+      const now = new Date();
+      const selectedDate = new Date(data.date);
+      selectedDate.setHours(0,0,0,0);
+      now.setHours(0,0,0,0);
+
+      if (selectedDate < now) {
+        toast({
+          title: "Invalid Date",
+          description: "You cannot schedule a meeting before today.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // --- IST time check ---
+      const nowIST = new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+      );
+      const selectedDateTimeIST = new Date(
+        data.date.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+      );
+      // Set selected time
+      let selectedHour = parseInt(data.hours);
+      if (data.period === "PM" && selectedHour !== 12) selectedHour += 12;
+      if (data.period === "AM" && selectedHour === 12) selectedHour = 0;
+      selectedDateTimeIST.setHours(selectedHour, parseInt(data.minutes), 0, 0);
+      // If today, check time
+      const todayIST = new Date(nowIST);
+      todayIST.setHours(0, 0, 0, 0);
+      const selectedDayIST = new Date(selectedDateTimeIST);
+      selectedDayIST.setHours(0, 0, 0, 0);
+      if (selectedDayIST.getTime() === todayIST.getTime() && selectedDateTimeIST < nowIST) {
+        toast({
+          title: "Invalid Time",
+          description: "You cannot schedule a meeting before the current time (IST).",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      // --- end IST time check ---
+
       const formattedTime = `${data.hours}:${data.minutes} ${data.period}`;
       const [hours, minutes] = formattedTime.split(":");
       const isPM = data.period === "PM";
@@ -151,7 +194,13 @@ export function ScheduleMeetingDialog({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create meeting");
+        toast({
+          title: "Error",
+          description: errorData.error || "Failed to create meeting",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
       }
 
       onOpenChange(false);
@@ -274,6 +323,7 @@ export function ScheduleMeetingDialog({
                         selected={formData.date}
                         onSelect={(date) => setValue("date", date || new Date())}
                         initialFocus
+                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                       />
                     </PopoverContent>
                   </Popover>

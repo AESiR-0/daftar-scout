@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+/backend/drizzle/migrations/meta/*
+/backend/drizzle/migrations/**
+
 # production
 /build
 
