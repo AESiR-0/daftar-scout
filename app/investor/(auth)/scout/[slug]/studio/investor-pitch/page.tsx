@@ -198,7 +198,7 @@ export default function InvestorPitchPage() {
       });
 
       if (!res.ok) throw new Error("Failed to save pitch details");
-      
+
       toast({
         title: "Success",
         description: "Pitch details saved successfully",
@@ -217,22 +217,22 @@ export default function InvestorPitchPage() {
   }
 
   return (
-    <Card className="border-none mt-4 container mx-auto px-4 bg-[#0e0e0e]">
-      <CardContent className="pt-6">
+    <Card className="border-none min-h-screen  container mx-auto px-4 bg-[#0e0e0e]">
+      <CardContent className="py-6">
         <div className="grid grid-cols-3 gap-8">
           {/* Left Section: Video Upload */}
           <div className="col-span-2 ">
             <div className="space-y-4">
               {showSample ? (
-                <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-6">
+                <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-3">
                   <div className="space-y-4 animate-in fade-in-50 duration-300">
-                    
+
 
                     <ReactPlayer
                       url={compressedVideoUrl || videoUrl || "/dummyVideo.mp4"}
                       controls
                       width="300px"
-                      height="533px"
+                      height="500px"
                       style={{
                         borderRadius: "0.35rem",
                         aspectRatio: "16/9",
@@ -267,12 +267,14 @@ export default function InvestorPitchPage() {
                         <Button
                           variant="outline"
                           onClick={clearVideo}
+                          type="button"
                           className="w-full"
                           disabled={isUploading || isLocked}
                         >
                           Remove Video
                         </Button>
                         <Button
+                          type="button"
                           variant="outline"
                           onClick={handleUploadVideo}
                           className="w-full"
@@ -365,7 +367,7 @@ export default function InvestorPitchPage() {
                 </p>
               </div>
             </div>
-          
+
           </div>
         </div>
       </CardContent>

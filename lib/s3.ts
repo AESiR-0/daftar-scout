@@ -34,8 +34,8 @@ export async function uploadVideoToS3(file: File, key: string) {
 
     await s3Client.send(command);
 
-    // Return direct S3 URL
-    return `https://${BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${key}`;
+    // Return CloudFront URL for consistency
+    return await getCloudFrontUrl(key);
   } catch (error: any) {
     console.error("Error uploading to S3:", {
       message: error.message,
@@ -47,10 +47,15 @@ export async function uploadVideoToS3(file: File, key: string) {
   }
 }
 
+export async function getCloudFrontUrl(key: string) {
+  const domain = process.env.CLOUDFRONT_DOMAIN?.replace(/\/$/, '');
+  return `${domain}/${key}`;
+}
+
 export async function getVideoUrl(key: string) {
   try {
-    // Return direct S3 URL
-    return `https://${BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${key}`;
+    // Return CloudFront URL
+    return await getCloudFrontUrl(key);
   } catch (error: any) {
     console.error("Error getting video URL:", {
       message: error.message,
