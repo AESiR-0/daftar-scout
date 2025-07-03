@@ -18,6 +18,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/daftar-scout
-            git pull origin main
+            git pull 
             npm install
             pm2 restart daftaros || pm2 start ecosystem.config.js
