@@ -1,0 +1,23 @@
+name: Deploy to EC2 via SSH
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/daftar-scout
+            git pull origin main
+            npm install
+            pm2 restart daftaros || pm2 start ecosystem.config.js
