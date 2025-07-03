@@ -19,5 +19,6 @@ jobs:
           script: |
             cd /home/ubuntu/daftar-scout
             git pull 
-            npm install
+            npm ci
+            npm run build
             pm2 restart daftaros || pm2 start ecosystem.config.js
