@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
+import VideoStreamer from "@/components/VideoStreamer";
 
 const LANGUAGES = {
   indian: [
@@ -39,6 +40,23 @@ const LANGUAGES = {
   ],
 };
 
+function useCompressionLogs(jobId: string | null) {
+  const [logs, setLogs] = useState<string[]>([]);
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!jobId) return;
+    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_SERVER || "ws://localhost:4000");
+    ws.onopen = () => ws.send(JSON.stringify({ subscribe: true, jobId }));
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setLogs((prev) => [...prev, data.log]);
+      if (data.done) setDone(true);
+    };
+    return () => ws.close();
+  }, [jobId]);
+  return { logs, done };
+}
+
 export default function InvestorPitchPage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
@@ -57,6 +75,9 @@ export default function InvestorPitchPage() {
   const [pitchSolution, setPitchSolution] = useState("");
   const [pitchValue, setPitchValue] = useState("");
   const [compressedVideoUrl, setCompressedVideoUrl] = useState<string | null>(null);
+  const [compressionJobId, setCompressionJobId] = useState<string | null>(null);
+  const { logs: compressionLogs, done: compressionDone } = useCompressionLogs(compressionJobId);
+
   async function fetchInvestorsPitch() {
     const res = await fetch(
       `/api/endpoints/scouts/investor_pitch?scoutId=${scoutId}`
@@ -145,30 +166,27 @@ export default function InvestorPitchPage() {
     setUploadStatus("Starting upload...");
 
     try {
-      const url = await uploadInvestorsPitchVideo(file, scoutId);
-      setUploadProgress(1);
-      setUploadStatus("Upload complete");
-
-      const res2 = await fetch("/api/endpoints/scouts/investor_pitch", {
+      const res = await fetch("/api/upload/complete", {
         method: "POST",
-        body: JSON.stringify({ scoutId, videoUrl: url }),
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "investor",
+          scoutId,
+          pitchId: scoutId,
+          uploadId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          filename: file.name,
+          totalChunks: 1, // or actual chunk count if chunked
+          mimeType: file.type,
+        }),
       });
-
-      if (res2.status === 200) {
-        toast({
-          title: "Video uploaded",
-          description: "Your pitch video has been uploaded successfully",
-        });
-      } else {
-        toast({
-          title: "Upload failed",
-          description: "Could not update pitch in database.",
-          variant: "destructive",
-        });
-      }
+      const { jobId } = await res.json();
+      setCompressionJobId(jobId);
+      setUploadProgress(1);
+      setUploadStatus("Upload complete, compressing...");
+      // Wait for compression to finish (optional: poll DB or listen for done)
+      // ...
+      // After compression, update DB as before
+      // ...
     } catch (err: any) {
       toast({
         title: "Upload failed",
@@ -226,43 +244,14 @@ export default function InvestorPitchPage() {
               {showSample ? (
                 <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-3">
                   <div className="space-y-4 animate-in fade-in-50 duration-300">
-
-
-                    <ReactPlayer
-                      url={compressedVideoUrl || videoUrl || "/dummyVideo.mp4"}
-                      controls
-                      width="300px"
-                      height="500px"
-                      style={{
-                        borderRadius: "0.35rem",
-                        aspectRatio: "16/9",
-                      }}
-                      onError={(e) => {
-                        if (compressedVideoUrl && videoUrl) {
-                          setCompressedVideoUrl(null);
-                          toast({
-                            title: "Compressed video unavailable",
-                            description: "Falling back to original video",
-                          });
-                        }
-                      }}
-                    />
+                    <VideoStreamer src={compressedVideoUrl || videoUrl || "/dummyVideo.mp4"} />
                   </div>
                 </div>
               ) : (
                 <div className="border-2 flex flex-col min-h-[533px] items-center justify-center border-dashed border-gray-700 rounded-lg p-6 text-center">
                   {videoUrl ? (
                     <div className="space-y-4">
-                      <ReactPlayer
-                        url={videoUrl}
-                        controls
-                        width="300px"
-                        height="533px"
-                        style={{
-                          borderRadius: "0.35rem",
-                          aspectRatio: "16/9",
-                        }}
-                      />
+                      <VideoStreamer src={videoUrl} />
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
@@ -370,6 +359,13 @@ export default function InvestorPitchPage() {
 
           </div>
         </div>
+        {compressionJobId && (
+          <div className="mt-4 p-2 bg-gray-900 rounded text-xs max-h-48 overflow-auto">
+            <div className="font-bold mb-1">Compression Logs</div>
+            <pre>{compressionLogs.join("\n")}</pre>
+            {compressionDone ? <div className="text-green-500">Compression complete!</div> : <div className="text-yellow-500">Compressing...</div>}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

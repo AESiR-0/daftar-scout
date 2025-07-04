@@ -1,1 +1,0 @@
-ALTER TABLE "pitch_team" ALTER COLUMN "invitation_accepted" DROP DEFAULT;

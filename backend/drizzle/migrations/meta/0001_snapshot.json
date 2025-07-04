@@ -1,6 +1,6 @@
 {
-  "id": "f8c595a6-cf20-4115-9759-6f1e5658559c",
-  "prevId": "ace82fec-7478-48b9-a553-c8a5972388c8",
+  "id": "dce58eb6-453a-4930-9adc-8819edfc439e",
+  "prevId": "4ac174f6-c07a-407b-91f8-b86dd9eecb5f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -305,7 +305,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -456,6 +456,18 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'invite'"
+        },
+        "analysis_date": {
+          "name": "analysis_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approves_delete": {
+          "name": "approves_delete",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -609,6 +621,179 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.meetings": {
+      "name": "meetings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calendar_event_id": {
+          "name": "calendar_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meet_link": {
+          "name": "meet_link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "meetings_user_id_users_id_fk": {
+          "name": "meetings_user_id_users_id_fk",
+          "tableFrom": "meetings",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.notifications": {
+      "name": "notifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subtype": {
+          "name": "subtype",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "targeted_users": {
+          "name": "targeted_users",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "ARRAY[]::text[]"
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.focus_sectors": {
       "name": "focus_sectors",
       "schema": "",
@@ -652,7 +837,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -684,6 +869,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "compressed_pitch_answer_url": {
+          "name": "compressed_pitch_answer_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "question_id": {
           "name": "question_id",
           "type": "integer",
@@ -709,7 +900,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "founder_answers_question_id_scout_questions_id_fk": {
@@ -722,7 +913,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -850,7 +1041,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "investor_pitch_scout_id_scouts_scout_id_fk": {
@@ -876,7 +1067,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -934,7 +1125,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "offer_actions_action_taken_by_users_id_fk": {
@@ -947,7 +1138,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1011,7 +1202,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "offers_offer_by_users_id_fk": {
@@ -1024,7 +1215,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1112,6 +1303,20 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
+        },
+        "is_locked": {
+          "name": "is_locked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "investor_status": {
+          "name": "investor_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Inbox'"
         }
       },
       "indexes": {},
@@ -1178,7 +1383,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "pitch_delete_founder_id_users_id_fk": {
@@ -1191,7 +1396,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1236,6 +1441,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "size": {
+          "name": "size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "is_private": {
           "name": "is_private",
           "type": "boolean",
@@ -1276,7 +1487,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "pitch_docs_uploaded_by_users_id_fk": {
@@ -1289,7 +1500,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1334,7 +1545,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "pitch_focus_sectors_pitch_id_pitch_id_fk": {
@@ -1347,7 +1558,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1370,6 +1581,12 @@
         "user_id": {
           "name": "user_id",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "invitation_accepted": {
+          "name": "invitation_accepted",
+          "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
@@ -1405,7 +1622,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "pitch_team_pitchId_pitch_id_fk": {
@@ -1418,7 +1635,72 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.support_requests": {
+      "name": "support_requests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "support_name": {
+          "name": "support_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "support_requests_user_id_users_id_fk": {
+          "name": "support_requests_user_id_users_id_fk",
+          "tableFrom": "support_requests",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1472,7 +1754,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "feature_requests_user_id_users_id_fk": {
+          "name": "feature_requests_user_id_users_id_fk",
+          "tableFrom": "feature_requests",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1547,7 +1843,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1618,7 +1914,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1682,7 +1978,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "report_pitch_id_pitch_id_fk": {
@@ -1695,7 +1991,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "report_scout_id_scouts_scout_id_fk": {
@@ -1708,7 +2004,7 @@
           "columnsTo": [
             "scout_id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1753,7 +2049,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1806,7 +2102,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1842,7 +2138,8 @@
           "name": "is_pending",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": true
         },
         "added_at": {
           "name": "added_at",
@@ -1877,7 +2174,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1949,6 +2246,12 @@
       "name": "scout_approved",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
         "investor_id": {
           "name": "investor_id",
           "type": "varchar(255)",
@@ -1987,7 +2290,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "scout_approved_scout_id_scouts_scout_id_fk": {
@@ -2052,7 +2355,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "scout_delete_scout_id_scouts_scout_id_fk": {
@@ -2086,6 +2389,13 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "doc_name": {
+          "name": "doc_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
         "doc_url": {
           "name": "doc_url",
           "type": "text",
@@ -2098,8 +2408,26 @@
           "primaryKey": false,
           "notNull": false
         },
+        "size": {
+          "name": "size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
         "scout_id": {
           "name": "scout_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "daftar_id": {
+          "name": "daftar_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "uploaded_by": {
+          "name": "uploaded_by",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -2110,12 +2438,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
-        },
-        "uploaded_by": {
-          "name": "uploaded_by",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
         },
         "uploaded_at": {
           "name": "uploaded_at",
@@ -2137,7 +2459,33 @@
           "columnsTo": [
             "scout_id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "scout_documents_daftar_id_daftar_id_fk": {
+          "name": "scout_documents_daftar_id_daftar_id_fk",
+          "tableFrom": "scout_documents",
+          "tableTo": "daftar",
+          "columnsFrom": [
+            "daftar_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "scout_documents_uploaded_by_users_id_fk": {
+          "name": "scout_documents_uploaded_by_users_id_fk",
+          "tableFrom": "scout_documents",
+          "tableTo": "users",
+          "columnsFrom": [
+            "uploaded_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -2186,14 +2534,7 @@
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
-          "default": false
-        },
-        "is_sample": {
-          "name": "is_sample",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
+          "default": true
         }
       },
       "indexes": {},
@@ -2316,6 +2657,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "targeted_gender": {
+          "name": "targeted_gender",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "scout_community": {
           "name": "scout_community",
           "type": "text",
@@ -2328,22 +2675,21 @@
           "primaryKey": false,
           "notNull": false
         },
-        "scout_sector": {
-          "name": "scout_sector",
+        "investor_pitch": {
+          "name": "investor_pitch",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "scout_created_at": {
-          "name": "scout_created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "investor_pitch": {
-          "name": "investor_pitch",
+        "compressed_investor_pitch": {
+          "name": "compressed_investor_pitch",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scout_sector": {
+          "name": "scout_sector",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         },
@@ -2371,7 +2717,8 @@
           "name": "status",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'Planning'"
         },
         "last_day_to_pitch": {
           "name": "last_day_to_pitch",
@@ -2397,6 +2744,20 @@
           "type": "date",
           "primaryKey": false,
           "notNull": false
+        },
+        "scout_created_at": {
+          "name": "scout_created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "is_locked": {
+          "name": "is_locked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {},
@@ -2411,7 +2772,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -2908,6 +3269,13 @@
           "notNull": true,
           "default": true
         },
+        "is_archived": {
+          "name": "is_archived",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "deleted_on": {
           "name": "deleted_on",
           "type": "timestamp",
@@ -2919,6 +3287,20 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "hour_24_mail": {
+          "name": "hour_24_mail",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "day_7_mail": {
+          "name": "day_7_mail",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {},
@@ -2930,6 +3312,89 @@
           "nullsNotDistinct": false,
           "columns": [
             "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.video_jobs": {
+      "name": "video_jobs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "s3_key": {
+          "name": "s3_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "logs": {
+          "name": "logs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scout_id": {
+          "name": "scout_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pitch_id": {
+          "name": "pitch_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "video_jobs_job_id_unique": {
+          "name": "video_jobs_job_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "job_id"
           ]
         }
       },

@@ -1,1 +1,0 @@
-ALTER TABLE "pitch_team" ADD COLUMN "invitation_accepted" boolean DEFAULT false;

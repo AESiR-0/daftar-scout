@@ -25,7 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Combobox } from "@/components/ui/combobox";
 import Link from "next/link";
-import ReactPlayer from "react-player";
+import VideoStreamer from "@/components/VideoStreamer";
 
 const reportReasons = [
   { id: "false-claims", label: "False Claims" },
@@ -264,15 +264,7 @@ export function FoundersPitchSection({
             <div className="w-1/2">
               {selectedQuestion ? (
                 <div className="space-y-4 rounded-[0.35rem] ml-20 w-[300px] h-[533px]">
-                  <ReactPlayer
-                    url={selectedQuestion.videoUrl}
-                    width="100%"
-                    height="100%"
-                    controls
-                    playing={false}
-                    style={{ aspectRatio: '9/16' }}
-                  />
-
+                  <VideoStreamer src={selectedQuestion.compressedVideoUrl || selectedQuestion.videoUrl || "/dummyVideo.mp4"} />
                 </div>
               ) : (
                 <div className="w-[300px] h-[533px] aspect-[9/16] bg-muted rounded-[0.35rem] ml-20 flex items-center justify-center">

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -84,6 +84,7 @@ export function NotificationDialog({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationDetails, setNotificationDetails] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const pathname = usePathname();
   const scoutId =
@@ -211,44 +212,27 @@ export function NotificationDialog({
     }
   }, [open, fetchNotifications]);
 
-  // Real-time subscription
+  // WebSocket for real-time notifications
   useEffect(() => {
     if (!open) return;
-
-    const subscription = supabase
-      .channel("realtime:notifications")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-        },
-        async (payload) => {
-          const notif = payload.new as Notification;
-          const isTargeted =
-            notif.targeted_users.length === 0 ||
-            notif.targeted_users.includes(userId);
-          const roleMatches = notif.role === "both" || notif.role === role;
-
-          if (isTargeted && roleMatches) {
-            setNotifications(prev => [notif, ...prev]);
-            if (notif.type === 'request' || notif.type === 'updates' || notif.type === 'scout_link') {
-              fetchNotificationDetails([notif]);
-            }
-            toast({
-              title: `New notification: ${notif.title || notif.type}`,
-              variant: "default",
-            });
-          }
+    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_SERVER || "ws://localhost:4000");
+    wsRef.current = ws;
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "notification" && data.notification) {
+          setNotifications((prev) => [data.notification, ...prev]);
+          toast({
+            title: `New notification: ${data.notification.title || data.notification.type}`,
+            variant: "default",
+          });
         }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
+      } catch (e) {
+        // Ignore parse errors
+      }
     };
-  }, [open, userId, role, fetchNotificationDetails]);
+    return () => ws.close();
+  }, [open]);
 
   // Add counts for each tab
   const tabCounts = {

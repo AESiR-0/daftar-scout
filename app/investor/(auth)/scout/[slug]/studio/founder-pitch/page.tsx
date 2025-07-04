@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import ReactPlayer from "react-player";
 import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 import { Lock } from "lucide-react";
+import VideoStreamer from "@/components/VideoStreamer";
 
 interface Question {
   id?: number;
@@ -447,14 +448,7 @@ export default function InvestorStudioPage() {
                     <div className="col-span-4">
                       <Card className="overflow-hidden border-0 w-[300px] h-[533px] bg-muted/50">
                         <div className="aspect-[9/16]  flex items-center justify-center">
-                          <ReactPlayer
-                            url={getVideoSource(selectedLanguage, selectedQuestion.id)}
-                            width="100%"
-                            height="100%"
-                            controls
-                            playing={false}
-                            style={{ aspectRatio: '9/16' }}
-                          />
+                          <VideoStreamer src={getVideoSource(selectedLanguage, selectedQuestion.id)} />
                         </div>
                       </Card>
                     </div>

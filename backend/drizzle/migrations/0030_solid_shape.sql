@@ -1,1 +1,0 @@
-ALTER TABLE "daftar_investors" ADD COLUMN "approves_delete" boolean DEFAULT false;

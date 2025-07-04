@@ -1,1 +1,0 @@
-ALTER TABLE "pitch_docs" ADD COLUMN "size" integer;

@@ -21,6 +21,7 @@ import { Combobox } from "@/components/ui/combobox";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { useIsLocked } from "@/contexts/isLockedContext";
+import VideoStreamer from "@/components/VideoStreamer";
 
 interface Question {
   id: number;
@@ -355,15 +356,7 @@ export default function InvestorQuestionsPage() {
                 <div className="col-span-6">
                   <Card className="overflow-hidden border-0 bg-[#1a1a1a] shadow-none">
                     <div className="aspect-[9/16] h-[533px] w-[300px] flex items-center justify-center">
-                      <video
-                        src={
-                          selectedQuestion?.videoUrl ||
-                          "/videos/sample-pitch.mp4"
-                        }
-                        poster="/assets/video-poster.jpg"
-                        controls
-                        className="w-full h-full object-cover rounded-[0.35rem]"
-                      />
+                      <VideoStreamer src={compressedVideoUrl || previewUrl || "/dummyVideo.mp4"} />
                     </div>
                   </Card>
                 </div>
@@ -400,20 +393,7 @@ export default function InvestorQuestionsPage() {
                 <div className="border-2 flex flex-col border-dashed border-gray-700 rounded-lg p-6 text-center">
                   {previewUrl ? (
                     <div className="space-y-4 flex flex-col items-center justify-center">
-                      <video
-                        src={compressedVideoUrl || previewUrl}
-                        controls
-                        className="w-[300px] h-[533px] rounded-[0.35rem] aspect-[9/16]"
-                        onError={(e) => {
-                          if (compressedVideoUrl && previewUrl) {
-                            setCompressedVideoUrl(null);
-                            toast({
-                              title: "Compressed video unavailable",
-                              description: "Falling back to original video",
-                            });
-                          }
-                        }}
-                      />
+                      <VideoStreamer src={compressedVideoUrl || previewUrl || "/dummyVideo.mp4"} />
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
