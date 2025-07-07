@@ -53,6 +53,7 @@ interface FoundersPitch {
   questions: {
     id: number;
     question: string;
+    compressedVideoUrl?: string;
     videoUrl: string;
   }[];
 }
