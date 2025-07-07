@@ -19,7 +19,7 @@ jobs:
           script: |
             set -e  # Exit immediately on any error
             set -o pipefail
-
+            git stash push -m "Auto-stash before deploy" || echo "No changes to stash"
             echo "=== Pulling latest changes ==="
             git pull || { echo "❌ Git pull failed"; exit 1; }
 
