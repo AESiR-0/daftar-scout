@@ -2,7 +2,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-const isProd = process.env.NODE_ENV === "production";
+const pgSSl = process.env.PG_SSL
 const pool = new Pool({
   host: process.env.PG_HOST!,
   port: 5432,
@@ -10,7 +10,8 @@ const pool = new Pool({
   password: process.env.PG_PASSWORD!,
   database: process.env.PG_DATABASE!,
   ssl: {
-    rejectUnauthorized: isProd,
+    rejectUnauthorized: true,
+    ca:pgSSl
   },
 });
 
