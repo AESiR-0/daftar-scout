@@ -1,8 +1,9 @@
 // lib/db.ts
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import fs from "fs";
 
-const pgSSl = process.env.PG_SSL
+
 const pool = new Pool({
   host: process.env.PG_HOST!,
   port: 5432,
@@ -11,7 +12,7 @@ const pool = new Pool({
   database: process.env.PG_DATABASE!,
   ssl: {
     rejectUnauthorized: true,
-    ca:pgSSl
+    ca: fs.readFileSync('./global-bundle.pem').toString(), // Use the cert bundle here
   },
 });
 
