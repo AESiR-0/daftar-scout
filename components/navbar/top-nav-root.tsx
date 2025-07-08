@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { VideoDialog } from "@/components/dialogs/demo-dialog";
 // Placeholder: Replace with your auth hook (e.g., useSession from NextAuth.js or useUser from Supabase)
-import { useAuth } from "@/hooks/use-auth"; // Adjust to your auth library
 
 export function TopNavRoot() {
   const pathname = usePathname();
@@ -15,10 +14,9 @@ export function TopNavRoot() {
   const isFounder = pathname === "/landing/founder";
   const isInvestor = pathname === "/landing/investor";
   const [demoOpen, setDemoOpen] = useState(false);
-
+  const role = isFounder ? 'founder' : 'investor'
   // Check authentication status and user role
-  const { user, isAuthenticated } = useAuth(); // Placeholder: Adapt to your auth system
-  const userRole = user?.role; // Assume role is "founder" or "investor"
+
 
   // Don't show nav items on cloud page
   if (isCloud || isPrivacy) {
@@ -31,32 +29,22 @@ export function TopNavRoot() {
             </Link>
           </div>
           <div className="flex items-center space-x-4 mr-8">
-          <nav className="flex items-center space-x-4">
-            <Link
-              href="/privacy-policy"
-              className="text-sm font-medium text-muted-foreground hover:text-white ml-4"
-            >
-              Privacy Policy
-            </Link>
-          </nav>
-        </div>
+            <nav className="flex items-center space-x-4">
+              <Link
+                href="/privacy-policy"
+                className="text-sm font-medium text-muted-foreground hover:text-white ml-4"
+              >
+                Privacy Policy
+              </Link>
+            </nav>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Determine home route based on auth role or pathname
-  const homeRoute =
-    isAuthenticated && userRole === "founder"
-      ? "/founder"
-      : isAuthenticated && userRole === "investor"
-      ? "/investor"
-      : isFounder
-      ? "/login/founder"
-      : "/login/investor";
 
   // Determine button text based on auth status
-  const buttonText = isAuthenticated ? "Home" : "Try it for Free";
 
   return (
     <div>
@@ -89,12 +77,12 @@ export function TopNavRoot() {
               Privacy Policy
             </Link>
           </nav>
-          <Link href={homeRoute}>
+          <Link href={`/login/${role}`}>
             <Button
               size="sm"
               className="rounded-[0.35rem] bg-blue-500 text-white hover:bg-blue-600"
             >
-              {buttonText}
+              Try it for free
             </Button>
           </Link>
         </div>
