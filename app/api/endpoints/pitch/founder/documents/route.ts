@@ -5,7 +5,6 @@ import { scoutDocuments } from "@/backend/drizzle/models/scouts";
 import { users } from "@/backend/drizzle/models/users";
 import { eq, inArray, desc } from "drizzle-orm";
 import { auth } from "@/auth";
-import { supabase } from "@/lib/supabase/createClient";
 
 // POST: Upload a document
 export async function POST(req: NextRequest) {
@@ -147,22 +146,6 @@ export async function DELETE(request: Request) {
         { error: "Not authorized to delete this document" },
         { status: 403 }
       );
-    }
-
-    // Delete from Supabase Storage
-    if (doc.docUrl) {
-      const filePathMatch = doc.docUrl.match(/documents\/(.*)/);
-      if (filePathMatch) {
-        const filePath = filePathMatch[1];
-        const { error: storageError } = await supabase.storage
-          .from("documents")
-          .remove([filePath]);
-
-        if (storageError) {
-          console.error("Error deleting from storage:", storageError);
-          // Continue with database deletion even if storage deletion fails
-        }
-      }
     }
 
     // Delete from database

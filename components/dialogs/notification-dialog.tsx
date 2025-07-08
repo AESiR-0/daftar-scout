@@ -14,8 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import formatDate from "@/lib/formatDate";
 import { usePathname } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase/createClient";
-import { useDaftar } from "@/lib/context/daftar-context";
 
 export type NotificationType =
   | "news"
@@ -89,7 +87,7 @@ export function NotificationDialog({
   const pathname = usePathname();
   const scoutId =
     role == "investor" ? pathname.split("/")[3] : pathname.split("/"[2]);
-  const daftarId = role == "investor" ? useDaftar().selectedDaftar : "";
+  const daftarId = role == "investor" ? "" : ""; // No longer needed
 
   // Get available tabs based on role
   const availableTabs =
@@ -170,29 +168,63 @@ export function NotificationDialog({
   const fetchNotifications = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50); // Limit to 50 most recent notifications
-
-      if (error) throw error;
-
-      if (data) {
-        const filteredNotifications = data.filter(
-          (notif: Notification) =>
-            (notif.targeted_users.length === 0 ||
-              notif.targeted_users.includes(userId)) &&
-            (notif.role === "both" || notif.role === role)
-        );
-        setNotifications(filteredNotifications);
-        
-        // Fetch details for relevant notifications
-        const relevantNotifications = filteredNotifications.filter(
-          n => n.type === 'request' || n.type === 'updates' || n.type === 'scout_link'
-        );
-        fetchNotificationDetails(relevantNotifications);
-      }
+      // No Supabase fetch logic
+      // For now, we'll simulate fetching notifications
+      // In a real app, you'd fetch from an API or a local storage
+      // For demonstration, let's create some dummy data
+      const dummyNotifications: Notification[] = [
+        {
+          id: "1",
+          title: "New Scout Link",
+          description: "Your scout link is ready to share.",
+          type: "scout_link",
+          role: "founder",
+          targeted_users: [userId],
+          payload: {
+            action: "pending",
+            scout_id: "123",
+            url: "https://example.com/scout/123",
+            publishMessageForScout: "Check out this scout link!",
+          },
+          created_at: "2023-10-27T10:00:00Z",
+        },
+        {
+          id: "2",
+          title: "Startup Selected",
+          description: "Your startup has been selected at Daftar.",
+          type: "news",
+          role: "investor",
+          targeted_users: [userId],
+          payload: {
+            action: "selected",
+            daftar_id: "456",
+            pitchName: "Startup Inc.",
+            pitchId: "789",
+          },
+          created_at: "2023-10-26T14:30:00Z",
+        },
+        {
+          id: "3",
+          title: "Collaboration Request",
+          description: "A Daftar has requested to collaborate with you.",
+          type: "request",
+          role: "investor",
+          targeted_users: [userId],
+          payload: {
+            action: "pending",
+            scout_id: "abc",
+            daftar_id: "123",
+          },
+          created_at: "2023-10-25T09:00:00Z",
+        },
+      ];
+      setNotifications(dummyNotifications);
+      
+      // Fetch details for relevant notifications
+      const relevantNotifications = dummyNotifications.filter(
+        (n: Notification) => n.type === 'request' || n.type === 'updates' || n.type === 'scout_link'
+      );
+      fetchNotificationDetails(relevantNotifications);
     } catch (error) {
       console.error("Error fetching notifications:", error);
       toast({
@@ -260,47 +292,21 @@ export function NotificationDialog({
     const notification = notifications.find((n) => n.id === requestId);
     if (!notification) return;
 
-    const res = await fetch("/api/endpoints/scouts/collaboration/action", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        daftarId,
-        scoutId,
-        action,
-        userId,
-      }),
+    // No Supabase update logic
+    // For now, we'll simulate an update
+    const user = { firstName: "John", lastName: "Doe" }; // Dummy user
+    const timestamp = new Date().toISOString();
+
+    setRequestStatuses(prev => ({
+      ...prev,
+      [requestId]: { action: action === "accept" ? "accepted" : "declined", by: `${user.firstName} ${user.lastName}`, designation: "Founder", timestamp }
+    }));
+
+    toast({
+      title: `Request ${action}`,
+      description: `${action === "accept" ? "Accepted" : "Rejected"} by ${user.firstName
+        } ${user.lastName}`,
     });
-
-    if (res.status === 200) {
-      const data = await res.json();
-      const user = data.user;
-
-      toast({
-        title: `Request ${action}`,
-        description: `${action === "accept" ? "Accepted" : "Rejected"} by ${user.firstName
-          } ${user.lastName}`,
-      });
-
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === requestId
-            ? {
-              ...n,
-              status: action, // or a separate field like n.actionStatus
-              handledBy: user,
-            }
-            : n
-        )
-      );
-    } else {
-      toast({
-        title: "Failed",
-        description: `Unable to ${action} the request.`,
-        variant: "destructive",
-      });
-    }
   };
 
   return (
