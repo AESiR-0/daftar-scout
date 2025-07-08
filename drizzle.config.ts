@@ -1,4 +1,5 @@
 import * as dotenv from "dotenv";
+import fs from 'fs'
 import { defineConfig } from "drizzle-kit";
 
 dotenv.config();
@@ -15,6 +16,7 @@ export default defineConfig({
     database: process.env.PG_DATABASE!,
     ssl: {
       rejectUnauthorized: (process.env.PG_REJECT_UNAUTHORIZED! ?? "false") !== "true",
+      ca: fs.readFileSync('./global-bundle.pem').toString(), // Use the cert bundle here
     },
   },
   verbose: true,

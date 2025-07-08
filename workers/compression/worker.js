@@ -1,4 +1,5 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+
 const { Client } = require('pg');
 const AWS = require('aws-sdk');
 const { spawn } = require('child_process');
@@ -12,23 +13,21 @@ const REQUIRED_ENV = [
   'PG_HOST', 'PG_PORT', 'PG_USER', 'PG_PASSWORD', 'PG_DATABASE',
   'AWS_REGION', 'AWS_S3_BUCKET_NAME', 'WS_SERVER'
 ];
-const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
-if (missing.length) {
-  console.error(`[${new Date().toISOString()}] Missing required env vars:`, missing.join(', '));
-  process.exit(1);
-}
 
-// --- CONFIG ---
 const PG_CONFIG = {
   host: process.env.PG_HOST,
   port: process.env.PG_PORT,
   user: process.env.PG_USER,
   password: process.env.PG_PASSWORD,
   database: process.env.PG_DATABASE,
-  ssl: process.env.PG_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  ssl: {
+    rejectUnauthorized: false,
+    ca: fs.readFileSync('../../global-bundle.pem').toString(), // Use the cert bundle here
+
+  },
 };
 const S3 = new AWS.S3({ region: process.env.AWS_REGION });
-const WS_SERVER = process.env.WS_SERVER || "ws://localhost:4000";
+var WS_SERVER = "ws://localhost:4000";
 const TMP_DIR = os.tmpdir();
 const BUCKET = process.env.AWS_S3_BUCKET_NAME || process.env.AWS_S3_BUCKET;
 

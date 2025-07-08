@@ -1,16 +1,14 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+
 const { Client } = require('pg');
 const WebSocket = require('ws');
+const fs = require('fs');
 
 // --- ENV VALIDATION ---
 const REQUIRED_ENV = [
   'PG_HOST', 'PG_PORT', 'PG_USER', 'PG_PASSWORD', 'PG_DATABASE', 'WS_SERVER'
 ];
-const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
-if (missing.length) {
-  console.error(`[${new Date().toISOString()}] Missing required env vars:`, missing.join(', '));
-  process.exit(1);
-}
+
 
 // --- CONFIG ---
 const PG_CONFIG = {
@@ -19,7 +17,11 @@ const PG_CONFIG = {
   user: process.env.PG_USER,
   password: process.env.PG_PASSWORD,
   database: process.env.PG_DATABASE,
-  ssl: process.env.PG_SSL === 'true' ? { rejectUnauthorized: false } : false,
+  ssl: {
+    rejectUnauthorized: true,
+    ca: fs.readFileSync('../../global-bundle.pem').toString(), // Use the cert bundle here
+
+  },
 };
 const WS_SERVER = process.env.WS_SERVER || "ws://localhost:4000";
 
