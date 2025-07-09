@@ -36,6 +36,7 @@ export const users = pgTable("users", {
   journal: text("journal"),
   hour24Mail: boolean("hour_24_mail").default(false),
   day7Mail: boolean("day_7_mail").default(false),
+  fcm_token: text("fcm_token"), // Firebase Cloud Messaging token for push notifications
 });
 
 export const accounts = pgTable(

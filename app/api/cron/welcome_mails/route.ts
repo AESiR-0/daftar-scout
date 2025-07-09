@@ -8,8 +8,8 @@ const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 const transporter = nodemailer.createTransport({
-    host: "mail.smtp2go.com",
-    port: 2525,
+    host: 'email-smtp.ap-south-1.amazonaws.com',
+    port: 587, // STARTTLS (recommended)
     secure: false,
     auth: {
         user: SMTP_USER,

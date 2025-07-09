@@ -15,8 +15,8 @@ if (!SMTP_USER || !SMTP_PASS) {
 }
 
 const transporter = nodemailer.createTransport({
-  host: "mail.smtp2go.com",
-  port: 2525,
+  host: 'email-smtp.ap-south-1.amazonaws.com',
+  port: 587, // STARTTLS (recommended)
   secure: false,
   auth: {
     user: SMTP_USER,

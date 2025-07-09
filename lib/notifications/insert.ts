@@ -2,6 +2,7 @@ import { db } from "@/backend/database"; // your drizzle client
 import { notifications } from "@/backend/drizzle/models/notifications"; // adjust if different
 import { users } from "@/backend/drizzle/models/users";
 import { eq } from "drizzle-orm";
+import { sendBrowserNotifications } from "@/utils/sendBrowserNotifications";
 import {
   NotificationPayload,
   NotificationType,
@@ -284,6 +285,17 @@ export async function createNotification({
       targeted_users,
       payload,
     }).returning();
+
+    // Send push notifications to targeted users
+    if (targeted_users.length > 0) {
+      try {
+        await sendBrowserNotifications(targeted_users, title, description);
+        console.log(`Push notifications sent to ${targeted_users.length} users`);
+      } catch (error) {
+        console.error('Error sending push notifications:', error);
+        // Don't throw error here, continue with email notifications
+      }
+    }
 
     // Skip email generation for scout_link notifications
     if (type === "scout_link" || subtype === "offer_withdrawn") {

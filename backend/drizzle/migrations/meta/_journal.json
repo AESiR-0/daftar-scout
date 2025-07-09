@@ -15,6 +15,13 @@
       "when": 1751628276028,
       "tag": "0001_brave_meltdown",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752103639635,
+      "tag": "0002_cute_silver_surfer",
+      "breakpoints": true
     }
   ]
 }
