@@ -7,12 +7,8 @@ import { Play, Upload, Trash2, Video, Info, X, Lock } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { uploadInvestorsPitchVideo } from "@/lib/actions/video";
 import { Progress } from "@/components/ui/progress";
 import ReactPlayer from "react-player";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 import VideoStreamer from "@/components/VideoStreamer";
 
@@ -57,6 +53,18 @@ function useCompressionLogs(jobId: string | null) {
   return { logs, done };
 }
 
+// Helper to split file into chunks
+function splitFileIntoChunks(file: File, chunkCount: number) {
+  const chunkSize = Math.ceil(file.size / chunkCount);
+  const chunks = [];
+  for (let i = 0; i < chunkCount; i++) {
+    const start = i * chunkSize;
+    const end = Math.min(start + chunkSize, file.size);
+    chunks.push(file.slice(start, end));
+  }
+  return chunks;
+}
+
 export default function InvestorPitchPage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
@@ -85,8 +93,7 @@ export default function InvestorPitchPage() {
     if (res.status == 200) {
       const { url, compressedUrl } = await res.json();
       setVideoUrl(url);
-      setCompressedVideoUrl(compressedUrl);
-      console.log(url);
+      setCompressedVideoUrl(`https://d2nq6gsuamvat4.cloudfront.net/${compressedUrl.split('.com/')[1]}`);
     } else {
       toast({
         title: "Fetch Failed",
@@ -113,7 +120,7 @@ export default function InvestorPitchPage() {
   useEffect(() => {
     const fetchPitchDetails = async () => {
       try {
-        const res = await fetch(`/api/endpoints/scouts/investor-pitch?scoutId=${scoutId}`);
+        const res = await fetch(`/api/endpoints/scouts/investor_pitch?scoutId=${scoutId}`);
         if (!res.ok) throw new Error("Failed to fetch pitch details");
         const data = await res.json();
         setPitchName(data.pitchName || "");
@@ -165,28 +172,54 @@ export default function InvestorPitchPage() {
     setUploadProgress(0);
     setUploadStatus("Starting upload...");
 
+    const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const totalChunks = 4;
+    const chunks = splitFileIntoChunks(file, totalChunks);
+
     try {
-      const res = await fetch("/api/upload/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "investor",
-          scoutId,
-          pitchId: scoutId,
-          uploadId: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          filename: file.name,
-          totalChunks: 1, // or actual chunk count if chunked
-          mimeType: file.type,
-        }),
-      });
-      const { jobId } = await res.json();
-      setCompressionJobId(jobId);
-      setUploadProgress(1);
-      setUploadStatus("Upload complete, compressing...");
-      // Wait for compression to finish (optional: poll DB or listen for done)
-      // ...
-      // After compression, update DB as before
-      // ...
+      for (let i = 0; i < chunks.length; i++) {
+        const formData = new FormData();
+        formData.append('chunk', chunks[i]);
+        formData.append('uploadId', uploadId);
+        formData.append('chunkIndex', i.toString());
+        formData.append('totalChunks', totalChunks.toString());
+        formData.append('filename', file.name);
+        formData.append('scoutId', scoutId);
+        formData.append('pitchType', 'investor');
+        formData.append('pitchId', scoutId); // If you have a separate pitchId, use it
+
+        const res = await fetch('http://localhost:9898/upload-chunk', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) throw new Error(`Chunk ${i + 1} upload failed`);
+        setUploadProgress(((i + 1) / totalChunks) * 100);
+        setUploadStatus(`Uploaded chunk ${i + 1} of ${totalChunks}`);
+      }
+
+      setUploadStatus("All chunks uploaded. Video is being processed...");
+
+      // Poll for compression completion and refetch pitch info for CloudFront HLS URL
+      let pollCount = 0;
+      let compressedUrl = null;
+      while (pollCount < 30) { // up to 1 minute
+        await new Promise((r) => setTimeout(r, 2000));
+        const res = await fetch(`/api/endpoints/scouts/investor_pitch?scoutId=${scoutId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.compressedUrl) {
+            compressedUrl = data.compressedUrl;
+            break;
+          }
+        }
+        pollCount++;
+      }
+      if (compressedUrl) {
+        setCompressedVideoUrl(compressedUrl);
+        setUploadStatus("Compression complete!");
+      } else {
+        setUploadStatus("Compression in progress. Please refresh later.");
+      }
     } catch (err: any) {
       toast({
         title: "Upload failed",
@@ -196,13 +229,13 @@ export default function InvestorPitchPage() {
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      setUploadStatus("");
+      // setUploadStatus("");
     }
   };
 
   const handleSave = async () => {
     try {
-      const res = await fetch("/api/endpoints/scouts/investor-pitch", {
+      const res = await fetch("/api/endpoints/scouts/investor_pitch", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -244,14 +277,24 @@ export default function InvestorPitchPage() {
               {showSample ? (
                 <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-3">
                   <div className="space-y-4 animate-in fade-in-50 duration-300">
-                    <VideoStreamer src={compressedVideoUrl || videoUrl || "/dummyVideo.mp4"} />
+                    {compressedVideoUrl && compressedVideoUrl.endsWith('.m3u8') ? (
+                      <ReactPlayer url={compressedVideoUrl} controls width="100%" height="auto" config={{ file: { forceHLS: true } }} />
+                    ) : videoUrl && videoUrl.endsWith('.m3u8') ? (
+                      <ReactPlayer url={videoUrl} controls width="100%" height="auto" config={{ file: { forceHLS: true } }} />
+                    ) : (
+                      <VideoStreamer src={compressedVideoUrl || videoUrl || "/dummyVideo.mp4"} />
+                    )}
                   </div>
                 </div>
               ) : (
                 <div className="border-2 flex flex-col min-h-[533px] items-center justify-center border-dashed border-gray-700 rounded-lg p-6 text-center">
                   {videoUrl ? (
                     <div className="space-y-4">
-                      <VideoStreamer src={videoUrl} />
+                      {videoUrl.endsWith('.m3u8') ? (
+                        <ReactPlayer url={videoUrl} controls width="100%" height="auto" config={{ file: { forceHLS: true } }} />
+                      ) : (
+                        <VideoStreamer src={videoUrl} />
+                      )}
                       <div className="flex gap-2">
                         <Button
                           variant="outline"

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { z } from "zod";
-import debounce from "lodash.debounce";
 import { Lock } from "lucide-react";
 import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +17,14 @@ const scoutSchema = z.object({
 });
 
 type ScoutDetails = z.infer<typeof scoutSchema>;
+
+function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
+  let timer: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
 
 export default function DetailsPage() {
   const pathname = usePathname();
@@ -82,14 +89,20 @@ export default function DetailsPage() {
     [ScoutId, isLocked]
   );
 
-  // Trigger save on change
-  useEffect(() => {
-    if (!initialLoad) {
-      debouncedSave(details);
-    } else {
-      setInitialLoad(false);
-    }
-  }, [details, debouncedSave]);
+  // Remove the effect that triggers save on every change
+  // useEffect(() => {
+  //   if (!initialLoad) {
+  //     debouncedSave(details);
+  //   } else {
+  //     setInitialLoad(false);
+  //   }
+  // }, [details, debouncedSave]);
+
+  // Remove the unused debouncedValidateName ref
+  // const debouncedValidateName = useRef(debounce((name: string) => {
+  //   // Replace with your validation or save logic
+  //   // Example: validateOrSaveName(name);
+  // }, 400)).current;
 
   if (isLockLoading) {
     return <p className="text-muted-foreground">Loading...</p>;
@@ -109,9 +122,8 @@ export default function DetailsPage() {
             <Label>Scout Name</Label>
             <Input
               value={details.name}
-              onChange={(e) =>
-                setDetails((prev) => ({ ...prev, name: e.target.value }))
-              }
+              onChange={e => setDetails(prev => ({ ...prev, name: e.target.value }))}
+              onBlur={() => debouncedSave(details)}
               placeholder="Enter Scout name"
               disabled={isLocked}
             />
@@ -123,12 +135,11 @@ export default function DetailsPage() {
               <textarea
                 className="w-full h-[250px] bg-muted/50 text-white border p-4 rounded-[0.35rem]"
                 value={details.description}
-                onChange={(e) =>
-                  setDetails((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
+                onChange={e => setDetails((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))}
+                onBlur={() => debouncedSave(details)}
                 placeholder="Use this space to explain why you're scouting this startup and what specific value you're hoping it adds to your portfolio. This helps your team understand your thinking and stay focused while scouting."
                 disabled={isLocked}
               ></textarea>

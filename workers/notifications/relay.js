@@ -55,12 +55,14 @@ pg.on('notification', async (msg) => {
     try {
       // The payload is the notification id
       const notificationId = msg.payload;
+      console.log(`[notifications] Received notification for id: ${notificationId}`);
       // Optionally, fetch the full notification from DB
       const { rows } = await pg.query('SELECT * FROM notifications WHERE id = $1', [notificationId]);
       const notification = rows[0] || { id: notificationId };
       sendNotification(notification);
     } catch (err) {
       log('Error fetching notification:', err.message);
+      console.error(`[notifications] Error fetching notification:`, err);
     }
   }
 });
@@ -69,6 +71,9 @@ function sendNotification(notification) {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: 'notification', notification }));
     log('Notification relayed:', notification.id);
+    console.log(`[notifications] Notification relayed to WebSocket: ${notification.id}`);
+  } else {
+    console.error('[notifications] WebSocket not open, could not relay notification:', notification.id);
   }
 }
 

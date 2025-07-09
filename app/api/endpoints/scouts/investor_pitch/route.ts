@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Scout not found" }, { status: 404 });
     }
     const compressedVideoUrl = videoUrl.replace(process.env.AWS_S3_BUCKET_NAME!, process.env.AWS_S3_COMPRESSION_BUCKET_NAME!) ?? videoUrl;
-    
+
     const updatedScout = await db
       .update(scouts)
       .set({
@@ -57,9 +57,10 @@ export async function GET(req: NextRequest) {
   }
 
   const pitch = await db
-    .select({ url: scouts.investorPitch })
+    .select({ compressedUrl: scouts.compressedInvestorPitch, url: scouts.investorPitch })
     .from(scouts)
     .where(eq(scouts.scoutId, scoutId));
   const url = pitch[0].url;
-  return NextResponse.json({ url });
+  const compressedUrl = pitch[0].compressedUrl
+  return NextResponse.json({ url, compressedUrl });
 }

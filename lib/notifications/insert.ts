@@ -255,7 +255,7 @@ export const emailTemplates = {
           <p>Welcome Aboard</p>
           <br/>
           <p>Here's your demo video to help you experience how Daftar works:
-🎥 https://daftar.com/demo
+🎥 https://daftaros.com/demo
 </p>
           <p>Raunak<br>Founder, Daftar OS</p>
         </div>

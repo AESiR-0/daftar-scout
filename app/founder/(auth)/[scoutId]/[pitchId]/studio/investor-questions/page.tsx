@@ -22,6 +22,7 @@ import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { useIsLocked } from "@/contexts/isLockedContext";
 import VideoStreamer from "@/components/VideoStreamer";
+import ReactPlayer from "react-player";
 
 interface Question {
   id: number;
@@ -237,44 +238,62 @@ export default function InvestorQuestionsPage() {
     setUploadProgress(0);
     setUploadStatus("Starting upload...");
 
+    const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const totalChunks = 4;
+    const chunkSize = Math.ceil(file.size / totalChunks);
     try {
-      const url = await uploadAnswersPitchVideo(file, pitchId, scoutId);
-      setUploadProgress(1);
-      setUploadStatus("Upload complete");
-      setPreviewUrl(url);
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
+        const formData = new FormData();
+        formData.append('chunk', chunk);
+        formData.append('uploadId', uploadId);
+        formData.append('chunkIndex', i.toString());
+        formData.append('totalChunks', totalChunks.toString());
+        formData.append('filename', file.name);
+        formData.append('scoutId', scoutId);
+        formData.append('pitchId', pitchId);
+        formData.append('pitchType', 'founder');
 
-      const postRes = await fetch("/api/endpoints/pitch/founder/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          pitchId,
-          questionId: selectedQuestion.id,
-          pitchAnswerUrl: url,
-          answerLanguage: language,
-        }),
-      });
+        const res = await fetch('http://localhost:9898/upload-chunk', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) throw new Error(`Chunk ${i + 1} upload failed`);
+        setUploadProgress(((i + 1) / totalChunks) * 100);
+        setUploadStatus(`Uploaded chunk ${i + 1} of ${totalChunks}`);
+      }
+      setUploadStatus("All chunks uploaded. Video is being processed...");
 
-      if (!postRes.ok) throw new Error("Failed to save answer");
-
+      // Poll for compression completion and refetch preview/compressed URL
+      let pollCount = 0;
+      let newCompressedUrl = null;
+      while (pollCount < 30) { // up to 1 minute
+        await new Promise((r) => setTimeout(r, 2000));
+        await fetchQuestions(); // refresh questions
+        const updated = questions.find(q => q.id === questionId);
+        if (updated && updated.compressedVideoUrl) {
+          newCompressedUrl = updated.compressedVideoUrl;
+          break;
+        }
+        pollCount++;
+      }
+      if (newCompressedUrl) {
+        setCompressedVideoUrl(newCompressedUrl);
+        setUploadStatus("Compression complete!");
+      } else {
+        setUploadStatus("Compression in progress. Please refresh later.");
+      }
+    } catch (error: any) {
       toast({
-        title: "Video uploaded successfully",
-        description: "Your video answer has been saved.",
-        variant: "success",
-      });
-
-      // Refresh questions to get updated data
-      await fetchQuestions();
-    } catch (error) {
-      console.error("Error uploading video:", error);
-      toast({
-        title: "Error uploading video",
-        description: "There was an error uploading or saving your video.",
+        title: "Upload failed",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      setUploadStatus("");
     }
   };
 
@@ -356,7 +375,13 @@ export default function InvestorQuestionsPage() {
                 <div className="col-span-6">
                   <Card className="overflow-hidden border-0 bg-[#1a1a1a] shadow-none">
                     <div className="aspect-[9/16] h-[533px] w-[300px] flex items-center justify-center">
-                      <VideoStreamer src={compressedVideoUrl || previewUrl || "/dummyVideo.mp4"} />
+                      {compressedVideoUrl && compressedVideoUrl.endsWith('.m3u8') ? (
+                        <ReactPlayer url={compressedVideoUrl} controls width="100%" height="100%" config={{ file: { forceHLS: true } }} />
+                      ) : previewUrl && previewUrl.endsWith('.m3u8') ? (
+                        <ReactPlayer url={previewUrl} controls width="100%" height="100%" config={{ file: { forceHLS: true } }} />
+                      ) : (
+                        <VideoStreamer src={compressedVideoUrl || previewUrl || "/dummyVideo.mp4"} />
+                      )}
                     </div>
                   </Card>
                 </div>
@@ -393,7 +418,13 @@ export default function InvestorQuestionsPage() {
                 <div className="border-2 flex flex-col border-dashed border-gray-700 rounded-lg p-6 text-center">
                   {previewUrl ? (
                     <div className="space-y-4 flex flex-col items-center justify-center">
-                      <VideoStreamer src={compressedVideoUrl || previewUrl || "/dummyVideo.mp4"} />
+                      {compressedVideoUrl && compressedVideoUrl.endsWith('.m3u8') ? (
+                        <ReactPlayer url={compressedVideoUrl} controls width="100%" height="auto" config={{ file: { forceHLS: true } }} />
+                      ) : previewUrl && previewUrl.endsWith('.m3u8') ? (
+                        <ReactPlayer url={previewUrl} controls width="100%" height="auto" config={{ file: { forceHLS: true } }} />
+                      ) : (
+                        <VideoStreamer src={compressedVideoUrl || previewUrl || "/dummyVideo.mp4"} />
+                      )}
                       <div className="flex gap-2">
                         <Button
                           variant="outline"

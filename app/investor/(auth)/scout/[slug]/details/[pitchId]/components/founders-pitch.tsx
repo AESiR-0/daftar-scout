@@ -352,7 +352,7 @@ export function FoundersPitchSection({
 
               <div className="flex gap-2">
 
-                <p className="text-sm text-muted-foreground">Demo Link</p>
+                <p className="text-sm text-muted-foreground">Website Link</p>
                 {pitch.demoLink ? (
                   <Link
                     href={`https://${pitch.demoLink}`}
@@ -362,7 +362,7 @@ export function FoundersPitchSection({
                     {pitch.demoLink}
                   </Link>
                 ) : (
-                  <span className="text-sm">No Demo Link</span>
+                  <span className="text-sm">No Website Demo Link</span>
                 )}
               </div>
               <div className="flex gap-2">

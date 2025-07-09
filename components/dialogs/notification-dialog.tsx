@@ -168,60 +168,16 @@ export function NotificationDialog({
   const fetchNotifications = useCallback(async () => {
     try {
       setIsLoading(true);
-      // No Supabase fetch logic
-      // For now, we'll simulate fetching notifications
-      // In a real app, you'd fetch from an API or a local storage
-      // For demonstration, let's create some dummy data
-      const dummyNotifications: Notification[] = [
-        {
-          id: "1",
-          title: "New Scout Link",
-          description: "Your scout link is ready to share.",
-          type: "scout_link",
-          role: "founder",
-          targeted_users: [userId],
-          payload: {
-            action: "pending",
-            scout_id: "123",
-            url: "https://example.com/scout/123",
-            publishMessageForScout: "Check out this scout link!",
-          },
-          created_at: "2023-10-27T10:00:00Z",
-        },
-        {
-          id: "2",
-          title: "Startup Selected",
-          description: "Your startup has been selected at Daftar.",
-          type: "news",
-          role: "investor",
-          targeted_users: [userId],
-          payload: {
-            action: "selected",
-            daftar_id: "456",
-            pitchName: "Startup Inc.",
-            pitchId: "789",
-          },
-          created_at: "2023-10-26T14:30:00Z",
-        },
-        {
-          id: "3",
-          title: "Collaboration Request",
-          description: "A Daftar has requested to collaborate with you.",
-          type: "request",
-          role: "investor",
-          targeted_users: [userId],
-          payload: {
-            action: "pending",
-            scout_id: "abc",
-            daftar_id: "123",
-          },
-          created_at: "2023-10-25T09:00:00Z",
-        },
-      ];
-      setNotifications(dummyNotifications);
-      
-      // Fetch details for relevant notifications
-      const relevantNotifications = dummyNotifications.filter(
+      const res = await fetch("/api/endpoints/notifications/all");
+      if (!res.ok) throw new Error("Failed to fetch notifications");
+      const data = await res.json();
+      const filteredNotifications = (data || []).filter(
+        (notif: Notification) =>
+          (notif.targeted_users.length === 0 || notif.targeted_users.includes(userId)) &&
+          (notif.role === "both" || notif.role === role)
+      );
+      setNotifications(filteredNotifications);
+      const relevantNotifications = filteredNotifications.filter(
         (n: Notification) => n.type === 'request' || n.type === 'updates' || n.type === 'scout_link'
       );
       fetchNotificationDetails(relevantNotifications);
@@ -253,18 +209,28 @@ export function NotificationDialog({
       try {
         const data = JSON.parse(event.data);
         if (data.type === "notification" && data.notification) {
-          setNotifications((prev) => [data.notification, ...prev]);
-          toast({
-            title: `New notification: ${data.notification.title || data.notification.type}`,
-            variant: "default",
-          });
+          const notif = data.notification;
+          const isTargeted =
+            notif.targeted_users.length === 0 ||
+            notif.targeted_users.includes(userId);
+          const roleMatches = notif.role === "both" || notif.role === role;
+          if (isTargeted && roleMatches) {
+            setNotifications((prev) => [notif, ...prev]);
+            if (notif.type === 'request' || notif.type === 'updates' || notif.type === 'scout_link') {
+              fetchNotificationDetails([notif]);
+            }
+            toast({
+              title: `New notification: ${notif.title || notif.type}`,
+              variant: "default",
+            });
+          }
         }
       } catch (e) {
         // Ignore parse errors
       }
     };
     return () => ws.close();
-  }, [open]);
+  }, [open, userId, role, fetchNotificationDetails]);
 
   // Add counts for each tab
   const tabCounts = {
@@ -461,7 +427,7 @@ export function NotificationDialog({
                                 const link =
                                   notification.payload.publishMessageForScout ||
                                   notification.payload.url ||
-                                  `https://daftar.com/scout/${notification.id}`;
+                                  `https://daftaros.com/founder/scout/${notification.id}`;
                                 navigator.clipboard.writeText(link);
                                 toast({
                                   title: "Link copied",

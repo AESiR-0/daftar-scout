@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
@@ -153,11 +153,11 @@ interface Location {
   city: string;
 }
 
-function debounce(fn: Function, delay: number) {
-  let timeout: ReturnType<typeof setTimeout>;
-  return (...args: any[]) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn(...args), delay);
+function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
+  let timer: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
   };
 }
 
@@ -334,6 +334,10 @@ export default function PitchNameForm() {
     isDemoPitch,
   ]);
 
+  const debouncedAutoSave = useRef(debounce(() => {
+    autoSave();
+  }, 400)).current;
+
   if (isLockLoading) {
     return <p className="text-muted-foreground">Loading...</p>;
   }
@@ -357,7 +361,7 @@ export default function PitchNameForm() {
               value={pitchName}
               maxLength={100}
               onChange={(e) => !isLocked && !isDemoPitch && setPitchName(e.target.value)}
-              onBlur={autoSave}
+              onBlur={debouncedAutoSave}
               placeholder="Enter your pitch name (max 100 characters)"
               className={`rounded w-full ${(isLocked || isDemoPitch) ? 'opacity-100' : ''}`}
               disabled={isLocked || isDemoPitch}
@@ -370,7 +374,7 @@ export default function PitchNameForm() {
               placeholder="City/State/Country (e.g., San Francisco/California/USA)"
               value={locationInput}
               onChange={(e) => !isDemoPitch && handleLocationInput(e.target.value)}
-              onBlur={autoSave}
+              onBlur={debouncedAutoSave}
               className={(isLocked || isDemoPitch) ? 'opacity-100' : ''}
               disabled={isLocked || isDemoPitch}
             />
@@ -381,13 +385,13 @@ export default function PitchNameForm() {
 
           <div className="flex gap-4">
             <div className="flex-1 space-y-2">
-              <Label>Demo Link</Label>
+              <Label>Website Link</Label>
               <Input
                 type="text"
                 value={demoLink}
                 onChange={(e) => !isLocked && !isDemoPitch && setDemoLink(e.target.value)}
-                onBlur={autoSave}
-                placeholder="Enter your demo link"
+                onBlur={debouncedAutoSave}
+                placeholder="Enter your website demo link"
                 disabled={isLocked || isDemoPitch}
               />
             </div>

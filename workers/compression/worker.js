@@ -21,9 +21,8 @@ const PG_CONFIG = {
   password: process.env.PG_PASSWORD,
   database: process.env.PG_DATABASE,
   ssl: {
-    rejectUnauthorized: false,
+    rejectUnauthorized: true,
     ca: fs.readFileSync('../../global-bundle.pem').toString(), // Use the cert bundle here
-
   },
 };
 const S3 = new AWS.S3({ region: process.env.AWS_REGION });
@@ -54,22 +53,56 @@ function log(...args) {
   console.log(`[${new Date().toISOString()}]`, ...args);
 }
 
+// --- Startup checks ---
+async function startupChecks() {
+  // Check ffmpeg
+  log('Checking ffmpeg presence...');
+  try {
+    await new Promise((res, rej) => {
+      const ffmpeg = spawn('ffmpeg', ['-version']);
+      ffmpeg.on('error', rej);
+      ffmpeg.on('close', (code) => code === 0 ? res() : rej(new Error('ffmpeg not found or not working')));
+    });
+    log('ffmpeg is present.');
+  } catch (e) {
+    log('ffmpeg is not installed or not in PATH:', e.message);
+    process.exit(1);
+  }
+  // Check S3 connectivity
+  log('Checking S3 connectivity...');
+  try {
+    await S3.listBuckets().promise();
+    log('S3 connectivity OK.');
+  } catch (e) {
+    log('S3 connectivity failed:', e.message);
+    process.exit(1);
+  }
+}
+
+startupChecks().then(() => {
+  pollJobs();
+});
+
 // --- Poll for jobs ---
 async function pollJobs() {
   try {
+    log('Polling for jobs...');
     const { rows } = await pg.query(
       "SELECT * FROM video_jobs WHERE status = 'pending' LIMIT 1"
     );
+    log('Poll result:', rows.length, rows[0]?.job_id);
     if (rows.length) {
       const job = rows[0];
+      log(`[compression] Found pending job: ${job.job_id}`);
       await processJob(job);
+    } else {
+      log('[compression] No pending jobs found.');
     }
   } catch (e) {
     log('Polling error:', e);
   }
   setTimeout(pollJobs, 5000);
 }
-pollJobs();
 
 // --- S3 upload with retry ---
 async function uploadToS3WithRetry(params, maxRetries = 3) {
@@ -92,27 +125,49 @@ async function uploadToS3WithRetry(params, maxRetries = 3) {
 async function processJob(job) {
   let inputPath, outputDir;
   try {
+    log(`[compression] Processing job: ${job.job_id}`);
+    log(`[compression] Setting status to processing for job: ${job.job_id}`);
     await pg.query("UPDATE video_jobs SET status = 'processing' WHERE job_id = $1", [job.job_id]);
+    log(`[compression] Status set to processing for job: ${job.job_id}`);
     inputPath = path.join(TMP_DIR, `${job.job_id}-input`);
     outputDir = path.join(TMP_DIR, `${job.job_id}-hls`);
     fs.mkdirSync(outputDir, { recursive: true });
+    log(`[compression] Created output directory: ${outputDir}`);
 
     // Download from S3
+    log(`[compression] Downloading from S3: ${job.s3_key}`);
     await new Promise((res, rej) => {
+      log(`[compression] Attempting to get S3 object: Bucket=${BUCKET}, Key=${job.s3_key}`);
       const s3Stream = S3.getObject({ Bucket: BUCKET, Key: job.s3_key }).createReadStream();
       const fileStream = fs.createWriteStream(inputPath);
-      s3Stream.pipe(fileStream).on('finish', res).on('error', rej);
+
+      s3Stream.on('error', (err) => {
+        log(`[compression] S3 stream error: ${err.message}`);
+        rej(err);
+      });
+      fileStream.on('error', (err) => {
+        log(`[compression] File stream error: ${err.message}`);
+        rej(err);
+      });
+      fileStream.on('finish', () => {
+        log(`[compression] File stream finished writing: ${inputPath}`);
+        res();
+      });
+      s3Stream.pipe(fileStream);
     });
+    log(`[compression] Downloaded to: ${inputPath}`);
 
     // Run FFmpeg
+    log(`[compression] Starting ffmpeg for job: ${job.job_id}`);
     const ffmpeg = spawn('ffmpeg', [
       '-i', inputPath,
-      '-c:v', 'libx264', '-preset', 'fast', '-crf', '23',
-      '-c:a', 'aac', '-b:a', '128k',
+      '-c:v', 'libx264', '-preset', 'fast', '-crf', '28',
+      '-c:a', 'aac', '-b:a', '96k',
       '-f', 'hls', '-hls_time', '6', '-hls_playlist_type', 'vod',
       '-hls_segment_filename', path.join(outputDir, 'output_%03d.ts'),
       path.join(outputDir, 'output.m3u8')
     ]);
+    log(`[compression] FFmpeg process started for job: ${job.job_id}`);
 
     let lastLogTime = 0;
     const LOG_THROTTLE_MS = 300; // Only send logs every 300ms
@@ -141,45 +196,62 @@ async function processJob(job) {
     await new Promise((res, rej) => {
       ffmpeg.on('close', (code) => code === 0 ? res() : rej(new Error('FFmpeg failed')));
     });
+    log(`[compression] ffmpeg finished for job: ${job.job_id}`);
 
     // Upload HLS files to S3
+    log(`[compression] Reading HLS output directory: ${outputDir}`);
     const files = fs.readdirSync(outputDir);
     let hlsUrl = "";
-    // Find .m3u8 file explicitly
     const m3u8File = files.find(f => f.endsWith('.m3u8'));
     if (!m3u8File) throw new Error('No .m3u8 file found in HLS output');
     for (const file of files) {
       const filePath = path.join(outputDir, file);
       const s3Key = `hls/${job.job_id}/${file}`;
+      log(`[compression] Uploading file to S3: ${s3Key}`);
       await uploadToS3WithRetry({
         Bucket: BUCKET,
         Key: s3Key,
         Body: fs.createReadStream(filePath),
         ContentType: file.endsWith('.m3u8') ? 'application/vnd.apple.mpegurl' : 'video/MP2T'
       });
+      log(`[compression] Uploaded HLS file to S3: ${s3Key}`);
       if (file === m3u8File) {
         hlsUrl = `https://${BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
       }
     }
 
-    // Update DB: set status, set compressedInvestorPitch or compressedPitchAnswerUrl
+    // Update DB
+    log(`[compression] Marking job as complete in DB: ${job.job_id}`);
     await pg.query("UPDATE video_jobs SET status = 'complete', completed_at = NOW() WHERE job_id = $1", [job.job_id]);
+    log(`[compression] Marked job as complete: ${job.job_id}`);
     if (job.scout_id) {
+      log(`[compression] Updating scouts table for scout_id: ${job.scout_id}`);
       await pg.query("UPDATE scouts SET compressed_investor_pitch = $1 WHERE scout_id = $2", [hlsUrl, job.scout_id]);
+      log(`[compression] Updated scouts table for scout_id: ${job.scout_id}`);
     }
     if (job.pitch_id) {
+      log(`[compression] Updating founder_answers table for pitch_id: ${job.pitch_id}`);
       await pg.query("UPDATE founder_answers SET compressed_pitch_answer_url = $1 WHERE pitch_id = $2", [hlsUrl, job.pitch_id]);
+      log(`[compression] Updated founder_answers table for pitch_id: ${job.pitch_id}`);
     }
 
     sendLog(job.job_id, "Processing complete. HLS URL: " + hlsUrl, true);
+    log(`[compression] Processing complete for job: ${job.job_id}`);
   } catch (err) {
     log('Job error:', err);
-    await pg.query("UPDATE video_jobs SET status = 'failed' WHERE job_id = $1", [job.job_id]);
+    console.error(`[compression] Error processing job ${job.job_id}:`, err);
+    try {
+      log(`[compression] Marking job as failed in DB: ${job.job_id}`);
+      await pg.query("UPDATE video_jobs SET status = 'failed' WHERE job_id = $1", [job.job_id]);
+      log(`[compression] Marked job as failed: ${job.job_id}`);
+    } catch (dbErr) {
+      log('Failed to update job status to failed:', dbErr);
+    }
     sendLog(job.job_id, "Processing failed: " + err.message, true);
   } finally {
     // Cleanup temp files
-    try { if (inputPath) fs.unlinkSync(inputPath); } catch (e) { log('Cleanup input error:', e.message); }
-    try { if (outputDir) fs.rmSync(outputDir, { recursive: true, force: true }); } catch (e) { log('Cleanup output error:', e.message); }
+    try { if (inputPath) fs.unlinkSync(inputPath); log(`[compression] Cleaned up input: ${inputPath}`); } catch (e) { log('Cleanup input error:', e.message); }
+    try { if (outputDir) fs.rmSync(outputDir, { recursive: true, force: true }); log(`[compression] Cleaned up output dir: ${outputDir}`); } catch (e) { log('Cleanup output error:', e.message); }
   }
 }
 
