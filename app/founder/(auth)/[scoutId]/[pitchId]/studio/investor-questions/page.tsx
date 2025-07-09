@@ -255,8 +255,7 @@ export default function InvestorQuestionsPage() {
         formData.append('scoutId', scoutId);
         formData.append('pitchId', pitchId);
         formData.append('pitchType', 'founder');
-
-        const res = await fetch('http://localhost:9898/upload-chunk', {
+        const res = await fetch('/worker/upload-chunk', {
           method: 'POST',
           body: formData,
         });

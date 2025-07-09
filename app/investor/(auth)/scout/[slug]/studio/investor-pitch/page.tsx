@@ -188,7 +188,7 @@ export default function InvestorPitchPage() {
         formData.append('pitchType', 'investor');
         formData.append('pitchId', scoutId); // If you have a separate pitchId, use it
 
-        const res = await fetch('http://localhost:9898/upload-chunk', {
+        const res = await fetch('/worker/upload-chunk', {
           method: 'POST',
           body: formData,
         });
