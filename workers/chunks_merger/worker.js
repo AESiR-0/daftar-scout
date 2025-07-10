@@ -75,13 +75,21 @@ app.post('/upload-chunk', upload.single('chunk'), async (req, res) => {
                 console.log(`[chunks_merger] Merged file created at ${mergedPath}`);
                 // Upload merged file to S3
                 const mergedFileBuffer = fs.readFileSync(mergedPath);
-                let s3Key, dbColumn;
+                let s3Key;
                 if (pitchType === 'founder') {
                     s3Key = `founder-pitch/merged/${uploadId}/${filename}`;
-                    dbColumn = 'founder_pitch';
+                    // Update founder_answers table
+                    await pg.query(
+                        `UPDATE founder_answers SET pitch_answer_url = $1 WHERE pitch_id = $2`,
+                        [`https://d2nq6gsuamvat4.cloudfront.net/${s3Key}`, pitchId]
+                    );
                 } else {
                     s3Key = `investor-pitch/merged/${uploadId}/${filename}`;
-                    dbColumn = 'investor_pitch';
+                    // Update scouts table
+                    await pg.query(
+                        `UPDATE scouts SET investor_pitch = $1 WHERE scout_id = $2`,
+                        [`https://d2nq6gsuamvat4.cloudfront.net/${s3Key}`, scoutId]
+                    );
                 }
                 await S3.putObject({
                     Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -94,10 +102,6 @@ app.post('/upload-chunk', upload.single('chunk'), async (req, res) => {
                 // Insert job for compression worker and update correct pitch column
                 const jobId = crypto.randomUUID();
                 try {
-                    await pg.query(
-                        `UPDATE SCOUT SET ${dbColumn}=$1 where scout_id=$2`,
-                        [`https://d2nq6gsuamvat4.cloudfront.net/${s3Key}`, scoutId]
-                    );
                     await pg.query(
                         "INSERT INTO video_jobs (job_id, s3_key, status, scout_id, pitch_id) VALUES ($1, $2, 'pending', $3, $4)",
                         [jobId, s3Key, scoutId, pitchId]
