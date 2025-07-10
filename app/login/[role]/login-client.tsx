@@ -13,8 +13,9 @@ export function LoginClient({ role }: { role: string }) {
     setIsLoading(true);
     try {
       localStorage.setItem("user_role", role);
-      await signIn("google", {
-        callbackUrl: 'https://daftaros.com/investor',
+      const callbackUrl = role === "founder" ? "/founder" : "/investor";
+      const result = await signIn("google", {
+        callbackUrl,
         redirect: true
       });
     } catch (error) {
