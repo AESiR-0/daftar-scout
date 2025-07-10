@@ -1,51 +1,51 @@
-name: Deploy to EC2 via SSH
+# name: Deploy to EC2 via SSH
 
-on:
-  push:
-    branches:
-      - dev
+# on:
+#   push:
+#     branches:
+#       - dev
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -e  # Exit immediately on any error
-            set -o pipefail
-            cd daftar-scout
-            git stash push -m "Auto-stash before deploy" || echo "No changes to stash"
-            echo "=== Pulling latest changes ==="
-            git pull || { echo "❌ Git pull failed"; exit 1; }
+#     steps:
+#       - name: Deploy via SSH
+#         uses: appleboy/ssh-action@v1.0.0
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ubuntu
+#           key: ${{ secrets.EC2_SSH_KEY }}
+#           script: |
+#             set -e  # Exit immediately on any error
+#             set -o pipefail
+#             cd daftar-scout
+#             git stash push -m "Auto-stash before deploy" || echo "No changes to stash"
+#             echo "=== Pulling latest changes ==="
+#             git pull || { echo "❌ Git pull failed"; exit 1; }
 
-            echo "=== Cleaning and installing dependencies ==="
-            npm ci || { echo "❌ npm ci failed"; exit 1; }
+#             echo "=== Cleaning and installing dependencies ==="
+#             npm ci || { echo "❌ npm ci failed"; exit 1; }
 
-            echo "=== Backing up current build ==="
-            cp -r .next .next_backup 2>/dev/null || echo "No existing .next to backup"
-            cp -r node_modules node_modules_backup 2>/dev/null || echo "No existing node_modules to backup"
+#             echo "=== Backing up current build ==="
+#             cp -r .next .next_backup 2>/dev/null || echo "No existing .next to backup"
+#             cp -r node_modules node_modules_backup 2>/dev/null || echo "No existing node_modules to backup"
 
-            echo "=== Running build ==="
-            if ! npm run build; then
-              echo "❌ Build failed. Restoring previous state..."
+#             echo "=== Running build ==="
+#             if ! npm run build; then
+#               echo "❌ Build failed. Restoring previous state..."
 
-              rm -rf .next
-              rm -rf node_modules
+#               rm -rf .next
+#               rm -rf node_modules
 
-              mv .next_backup .next 2>/dev/null || echo "No .next backup"
-              mv node_modules_backup node_modules 2>/dev/null || echo "No node_modules backup"
+#               mv .next_backup .next 2>/dev/null || echo "No .next backup"
+#               mv node_modules_backup node_modules 2>/dev/null || echo "No node_modules backup"
 
-              echo "✅ Restored previous build artifacts"
-              exit 1
-            fi
+#               echo "✅ Restored previous build artifacts"
+#               exit 1
+#             fi
 
-            echo "=== Restarting PM2 ==="
-            pm2 restart daftaros || pm2 start ecosystem.config.js
+#             echo "=== Restarting PM2 ==="
+#             pm2 restart daftaros || pm2 start ecosystem.config.js
 
-            echo "✅ Deployment successful"
+#             echo "✅ Deployment successful"

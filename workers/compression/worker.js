@@ -79,29 +79,52 @@ async function startupChecks() {
   }
 }
 
+async function checkPendingJobs() {
+  const { rows } = await pg.query("SELECT * FROM video_jobs WHERE status = 'pending'");
+  for (const job of rows) {
+    await processJob(job);
+  }
+}
+checkPendingJobs();
+
 startupChecks().then(() => {
-  pollJobs();
+  checkPendingJobs()
 });
 
-async function pollJobs() {
-  try {
-    log('Polling for jobs...');
-    const { rows } = await pg.query(
-      "SELECT * FROM video_jobs WHERE status = 'pending' LIMIT 1"
-    );
-    log('Poll result:', rows.length, rows[0]?.job_id);
+
+const JOB_CHANNEL = 'new_video_job';
+pg.query(`LISTEN ${JOB_CHANNEL}`);
+pg.on('notification', async (msg) => {
+  if (msg.channel === JOB_CHANNEL) {
+    const jobId = msg.payload;
+    log(`[compression] Received notification for job: ${jobId}`);
+    // Fetch the job from DB and process it
+    const { rows } = await pg.query("SELECT * FROM video_jobs WHERE job_id = $1", [jobId]);
     if (rows.length) {
-      const job = rows[0];
-      log(`[compression] Found pending job: ${job.job_id}`);
-      await processJob(job);
-    } else {
-      log('[compression] No pending jobs found.');
+      await processJob(rows[0]);
     }
-  } catch (e) {
-    log('Polling error:', e);
   }
-  setTimeout(pollJobs, 5000);
-}
+});
+
+// async function pollJobs() {
+//   try {
+//     log('Polling for jobs...');
+//     const { rows } = await pg.query(
+//       "SELECT * FROM video_jobs WHERE status = 'pending' LIMIT 1"
+//     );
+//     log('Poll result:', rows.length, rows[0]?.job_id);
+//     if (rows.length) {
+//       const job = rows[0];
+//       log(`[compression] Found pending job: ${job.job_id}`);
+//       await processJob(job);
+//     } else {
+//       log('[compression] No pending jobs found.');
+//     }
+//   } catch (e) {
+//     log('Polling error:', e);
+//   }
+//   setTimeout(pollJobs, 5000);
+// }
 
 // --- S3 upload with retry ---
 async function uploadToS3WithRetry(params, maxRetries = 3) {
