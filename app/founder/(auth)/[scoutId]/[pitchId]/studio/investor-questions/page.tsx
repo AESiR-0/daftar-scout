@@ -263,27 +263,9 @@ export default function InvestorQuestionsPage() {
         setUploadProgress(((i + 1) / totalChunks) * 100);
         setUploadStatus(`Uploaded chunk ${i + 1} of ${totalChunks}`);
       }
-      setUploadStatus("All chunks uploaded. Video is being processed...");
-
-      // Poll for compression completion and refetch preview/compressed URL
-      let pollCount = 0;
-      let newCompressedUrl = null;
-      while (pollCount < 30) { // up to 1 minute
-        await new Promise((r) => setTimeout(r, 2000));
-        await fetchQuestions(); // refresh questions
-        const updated = questions.find(q => q.id === questionId);
-        if (updated && updated.compressedVideoUrl) {
-          newCompressedUrl = updated.compressedVideoUrl;
-          break;
-        }
-        pollCount++;
-      }
-      if (newCompressedUrl) {
-        setCompressedVideoUrl(newCompressedUrl);
-        setUploadStatus("Compression complete!");
-      } else {
-        setUploadStatus("Compression in progress. Please refresh later.");
-      }
+      setUploadStatus("All chunks uploaded. Video is being processed. You can refresh the page later to see the compressed video.");
+      // Optionally, refresh questions once after upload
+      await fetchQuestions();
     } catch (error: any) {
       toast({
         title: "Upload failed",
