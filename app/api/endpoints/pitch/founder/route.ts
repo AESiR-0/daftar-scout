@@ -5,6 +5,8 @@ import { users } from '@/backend/drizzle/models/users'
 import { db } from "@/backend/database";
 import { nanoid } from "nanoid";
 import { eq } from "drizzle-orm";
+import { scoutQuestions } from "@/backend/drizzle/models/scouts";
+import { founderAnswers } from "@/backend/drizzle/models/pitch";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -40,6 +42,14 @@ export async function POST(req: NextRequest) {
     designation: 'Founder', 
     invitationAccepted: true,
   })
+
+  // Insert founder_answers for each question in scout_questions for this scout
+  const questions = await db.select().from(scoutQuestions).where(eq(scoutQuestions.scoutId, scoutId));
+  if (questions.length > 0) {
+    await db.insert(founderAnswers).values(
+      questions.map(q => ({ pitchId, questionId: q.id, pitchAnswerUrl: "" }))
+    );
+  }
 
   return NextResponse.json({ pitchId });
 }

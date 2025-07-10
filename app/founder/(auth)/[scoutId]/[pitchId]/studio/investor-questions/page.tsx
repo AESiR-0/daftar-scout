@@ -215,6 +215,8 @@ export default function InvestorQuestionsPage() {
     e: React.MouseEvent<HTMLButtonElement>,
     questionId: number
   ) => {
+    console.log(questionId);
+
     if (isLocked || isDemoPitch) {
       toast({
         title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
@@ -255,17 +257,17 @@ export default function InvestorQuestionsPage() {
         formData.append('scoutId', scoutId);
         formData.append('pitchId', pitchId);
         formData.append('pitchType', 'founder');
-        const res = await fetch('/worker/upload-chunk', {
+        formData.append('questionId', questionId.toString());
+
+        const res = await fetch('http://localhost:9898/upload-chunk', {
           method: 'POST',
-          body: formData,
+          body: formData
         });
         if (!res.ok) throw new Error(`Chunk ${i + 1} upload failed`);
         setUploadProgress(((i + 1) / totalChunks) * 100);
         setUploadStatus(`Uploaded chunk ${i + 1} of ${totalChunks}`);
       }
       setUploadStatus("All chunks uploaded. Video is being processed. You can refresh the page later to see the compressed video.");
-      // Optionally, refresh questions once after upload
-      await fetchQuestions();
     } catch (error: any) {
       toast({
         title: "Upload failed",
@@ -422,7 +424,7 @@ export default function InvestorQuestionsPage() {
                             selectedQuestion &&
                             handleUploadVideo(e, selectedQuestion.id)
                           }
-                          disabled={isUploading || isLocked}
+                          disabled={isUploading || isLocked || compressedVideoUrl == ""}
                           className={`w-full ${isLocked ? 'opacity-100' : ''}`}
                         >
                           {isUploading ? (

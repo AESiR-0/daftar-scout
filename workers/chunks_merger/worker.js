@@ -9,6 +9,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
 const cors = require('cors');
+const { log } = require('console');
 app.use(cors());
 
 const CHUNKS_DIR = path.join(__dirname, 'chunks');
@@ -43,7 +44,7 @@ try {
 app.get('/health', (req, res) => res.send('OK'));
 
 app.post('/upload-chunk', upload.single('chunk'), async (req, res) => {
-    const { uploadId, chunkIndex, totalChunks, filename, scoutId, pitchId, pitchType } = req.body;
+    const { uploadId, chunkIndex, totalChunks, filename, scoutId, pitchId, pitchType, questionId } = req.body;
     const chunk = req.file;
 
     console.log(`[chunks_merger] Received chunk ${chunkIndex} for uploadId ${uploadId}`);
@@ -70,19 +71,34 @@ app.post('/upload-chunk', upload.single('chunk'), async (req, res) => {
         // All chunks received, merge them
         const mergedPath = path.join(uploadDir, filename);
         const writeStream = fs.createWriteStream(mergedPath);
+
         writeStream.on('finish', async () => {
             try {
                 console.log(`[chunks_merger] Merged file created at ${mergedPath}`);
                 // Upload merged file to S3
+                log(parseInt(questionId),pitchId, "data recd");
                 const mergedFileBuffer = fs.readFileSync(mergedPath);
                 let s3Key;
                 if (pitchType === 'founder') {
                     s3Key = `founder-pitch/merged/${uploadId}/${filename}`;
-                    // Update founder_answers table
-                    await pg.query(
-                        `UPDATE founder_answers SET pitch_answer_url = $1 WHERE pitch_id = $2`,
-                        [`https://d2nq6gsuamvat4.cloudfront.net/${s3Key}`, pitchId]
-                    );
+                    // Update founder_answers table only if no video exists
+                    const videoUrl = `https://d2nq6gsuamvat4.cloudfront.net/${s3Key}`;
+                    if (questionId) {
+                        // Check if the answer already exists for this question
+                        const { rows } = await pg.query(
+                            `SELECT pitch_answer_url FROM founder_answers WHERE pitch_id = $1 AND question_id = $2`,
+                            [pitchId, parseInt(questionId)]
+                        );
+                        if (rows.length && (!rows[0].pitch_answer_url || rows[0].pitch_answer_url === '')) {
+                            await pg.query(
+                                `UPDATE founder_answers SET pitch_answer_url = $1 WHERE pitch_id = $2 AND question_id = $3`,
+                                [videoUrl, pitchId, parseInt(questionId)]
+                            );
+                        }
+                    } else {
+                        // If questionId is not provided, do not update any rows (safety)
+                        console.warn('[chunks_merger] No questionId provided for founder upload, skipping update.');
+                    }
                 } else {
                     s3Key = `investor-pitch/merged/${uploadId}/${filename}`;
                     // Update scouts table
@@ -115,6 +131,14 @@ app.post('/upload-chunk', upload.single('chunk'), async (req, res) => {
                 // Clean up chunk files and merged file
                 fs.rmSync(uploadDir, { recursive: true, force: true });
                 console.log(`[chunks_merger] Cleaned up upload directory: ${uploadDir}`);
+
+                // Clean up the entire chunks directory
+                try {
+                    fs.rmSync(CHUNKS_DIR, { recursive: true, force: true });
+                    console.log(`[chunks_merger] Cleaned up CHUNKS_DIR: ${CHUNKS_DIR}`);
+                } catch (e) {
+                    console.warn(`[chunks_merger] Failed to clean up CHUNKS_DIR: ${e.message}`);
+                }
 
                 res.json({ status: 'merged', mergedPath, s3Key, jobId });
             } catch (err) {

@@ -157,7 +157,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     async redirect({ url, baseUrl }) {
-      // Always redirect to /investor after login
       return baseUrl + '/investor';
     },
   },
