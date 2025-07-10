@@ -52,7 +52,7 @@ module.exports = {
         watch: false,
         error_file: "/home/ubuntu/pm2-logs/notifications-error.log",
         out_file: "/home/ubuntu/pm2-logs/notifications-out.log",
-        merge_logs: true,
+        merge_logs: true,z
       }
     ]
   };

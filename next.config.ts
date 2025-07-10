@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'daftaros-dev.s3.ap-south-1.amazonaws.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'd2nq6gsuamvat4.cloudfront.net'
+      }
     ]
   },
   experimental: {

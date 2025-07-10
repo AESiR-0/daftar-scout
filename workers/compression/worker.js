@@ -83,7 +83,6 @@ startupChecks().then(() => {
   pollJobs();
 });
 
-// --- Poll for jobs ---
 async function pollJobs() {
   try {
     log('Polling for jobs...');
