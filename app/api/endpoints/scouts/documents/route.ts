@@ -87,6 +87,7 @@ export async function GET(req: Request) {
         id: users.id,
         firstName: users.name,
         lastName: users.lastName,
+        role: users.role,
       })
       .from(users)
       .where(inArray(users.id, userIds));
@@ -109,32 +110,49 @@ export async function GET(req: Request) {
       daftarResult.map((daftar) => [daftar.id, daftar])
     );
 
-    // Combine results
-    const response = documents.map((doc) => ({
-      id: doc.docId,
-      docName: doc.docName,
-      docType: doc.docType || "regular",
-      docUrl: doc.docUrl,
-      size: doc.size,
-      isPrivate: doc.isPrivate,
-      uploadedAt: doc.uploadedAt,
-      uploadedBy: doc.uploadedBy
-        ? {
-          id: doc.uploadedBy,
-          firstName: userMap.get(doc.uploadedBy)?.firstName,
-          lastName: userMap.get(doc.uploadedBy)?.lastName,
-        }
-        : null,
-      daftar: doc.daftarId
-        ? {
-          id: doc.daftarId,
-          name: daftarMap.get(doc.daftarId)?.name || "Unknown Daftar",
-        }
-        : null,
-      isUploadedByCurrentUser: doc.uploadedBy === userResult[0].id
-    }));
+    // Categorize documents
+    const sent: any[] = [];
+    const received: any[] = [];
+    const privateDocs: any[] = [];
 
-    return NextResponse.json(response, { status: 200 });
+    documents.forEach((doc) => {
+      const uploader = doc.uploadedBy ? userMap.get(doc.uploadedBy) : undefined;
+      const baseDoc = {
+        id: doc.docId,
+        docName: doc.docName,
+        docType: doc.docType || "regular",
+        docUrl: doc.docUrl && doc.docUrl.startsWith('undefined/')
+          ? `${process.env.CLOUDFRONT_DOMAIN}/${doc.docUrl.slice('undefined/'.length)}`
+          : doc.docUrl,
+        size: doc.size,
+        isPrivate: doc.isPrivate,
+        uploadedAt: doc.uploadedAt,
+        uploadedBy: doc.uploadedBy
+          ? {
+              id: doc.uploadedBy,
+              firstName: uploader?.firstName,
+              lastName: uploader?.lastName,
+              role: uploader?.role,
+            }
+          : null,
+        daftar: doc.daftarId
+          ? {
+              id: doc.daftarId,
+              name: daftarMap.get(doc.daftarId)?.name || "Unknown Daftar",
+            }
+          : null,
+        isUploadedByCurrentUser: doc.uploadedBy === userResult[0].id,
+      };
+      if (doc.uploadedBy === userResult[0].id) {
+        sent.push(baseDoc);
+      } else if (uploader?.role === "investor" && doc.isPrivate) {
+        privateDocs.push(baseDoc);
+      } else {
+        received.push(baseDoc);
+      }
+    });
+
+    return NextResponse.json({ sent, received, private: privateDocs }, { status: 200 });
   } catch (err) {
     console.error("GET /scout-documents error:", err);
     return NextResponse.json(

@@ -251,8 +251,18 @@ export default function DocumentsPage() {
     input.click();
   };
 
+  // Helper to ensure docUrl is always a valid absolute CloudFront URL
+  function getValidDocUrl(docUrl: string | null | undefined): string | null {
+    if (!docUrl) return null;
+    if (docUrl.startsWith('http')) return docUrl;
+    // Remove 'undefined/' or leading '/' if present
+    const cleaned = docUrl.replace(/^undefined\//, '').replace(/^\//, '');
+    return `${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${cleaned}`;
+  }
+
   const handleDownload = async (doc: Document) => {
-    if (!doc.docUrl) {
+    const url = getValidDocUrl(doc.docUrl);
+    if (!url) {
       toast({
         title: "Error",
         description: "Document URL not found",
@@ -260,18 +270,7 @@ export default function DocumentsPage() {
       });
       return;
     }
-
     try {
-      // Extract the key from the S3 URL
-      const urlParts = doc.docUrl.split('.amazonaws.com/');
-      if (urlParts.length !== 2) {
-        throw new Error("Invalid document URL format");
-      }
-      const key = urlParts[1];
-
-      // Get the S3 URL
-      const url = await getVideoUrl(key);
-
       toast({
         title: "Downloading file",
         description: `Started downloading ${doc.name}`,
@@ -288,7 +287,8 @@ export default function DocumentsPage() {
   };
 
   const handleView = async (doc: Document) => {
-    if (!doc.docUrl) {
+    const url = getValidDocUrl(doc.docUrl);
+    if (!url) {
       toast({
         title: "Error",
         description: "Document URL not found",
@@ -296,18 +296,7 @@ export default function DocumentsPage() {
       });
       return;
     }
-
     try {
-      // Extract the key from the S3 URL
-      const urlParts = doc.docUrl.split('.amazonaws.com/');
-      if (urlParts.length !== 2) {
-        throw new Error("Invalid document URL format");
-      }
-      const key = urlParts[1];
-
-      // Get the S3 URL
-      const url = await getVideoUrl(key);
-
       toast({
         title: "Opening document",
         description: `Opening ${doc.name} for viewing`,
