@@ -627,9 +627,82 @@ function generateDaftarTeamResponseEmail(
   };
 }
 
+function generateDaftarMemberInviteEmail(
+  userEmail: string,
+  notification: NotificationPayload
+) {
+  return {
+    to: userEmail,
+    subject: `${notification.daftarName} invited you to Daftar OS`,
+    html: `
+      <div style="background-color: #f4f4f4; padding: 40px 20px; font-family: Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          
+          <!-- Header -->
+          <div style="background-color: #0e0e0e; padding: 20px; text-align: center;">
+            <h1 style="color: #ffffff; font-size: 22px; margin: 0;">Daftar OS Technology</h1>
+          </div>
+
+          <!-- Invitation Message -->
+          <div style="padding: 30px;">
+            <h2 style="color: #333333; font-size: 20px; margin-bottom: 10px;">${notification.currentUsername} has invited you to the team as <span style="color: #ff5a5f;">${notification.designation}</span></h2>
+            
+            <p style="color: #555555; font-size: 16px; margin-top: 20px;">
+              Hey ${notification.invitedUsername},
+            </p>
+
+            <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
+              I'm inviting you to join my Daftar <strong>${notification.daftarName}</strong>.
+              <br /><br />
+              I'm scouting startups at Daftar OS and inviting you to join my team.
+              <br /><br />
+              Btw, this software is amazing – it helps me understand a startup in just <strong>2.5 minutes</strong> without all the PPTs. Can't wait to have you on board!
+            </p>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 40px 0 20px 0;">
+              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
+                style="background-color: #ff5a5f; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
+                Join My Daftar
+              </a>
+            </div>
+
+            <!-- Footer Info -->
+            <div style="color: #999999; font-size: 13px; text-align: center; margin-top: 30px;">
+              ${notification.currentUsername}<br/>
+              ${notification.currentUserDesignation}<br/>
+              ${notification.daftarName}<br/>
+              On Daftar Since ${notification.joinedTime || "2024"}
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Footer -->
+        <div style="text-align: center; color: #aaaaaa; font-size: 12px; margin-top: 20px;">
+          © ${new Date().getFullYear()} Daftar OS Technology. All rights reserved.
+        </div>
+      </div>
+    `,
+  };
+}
+
 export async function POST(request: Request) {
   try {
-    const { notification, userId, type, userEmail, userName, scoutName, daftarName, scoutId, daftarId, action, responderName, pitchName, designation, inviterName, pitchId, newMemberName } = await request.json();
+    const body = await request.json();
+    console.log('[EMAIL] Received email request:', { 
+      type: body.type, 
+      userEmail: body.userEmail, 
+      notificationType: body.notification?.type,
+      notificationSubtype: body.notification?.subtype 
+    });
+
+    const { notification, userId, type, userEmail, userName, scoutName, daftarName, scoutId, daftarId, action, responderName, pitchName, designation, inviterName, pitchId, newMemberName } = body;
+
+    // Validate required fields
+    if (!userEmail) {
+      console.error('[EMAIL] Missing userEmail in request');
+      return NextResponse.json({ error: "Missing userEmail" }, { status: 400 });
+    }
 
     // Handle welcome email for new users
     if (type === 'welcome') {
@@ -638,6 +711,7 @@ export async function POST(request: Request) {
         from: 'notifications@daftaros.com',
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Welcome email sent to ${userEmail}`);
       return NextResponse.json({ success: true });
     }
 
@@ -655,6 +729,7 @@ export async function POST(request: Request) {
         from: 'notifications@daftaros.com',
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Collaboration invite email sent to ${userEmail}`);
       return NextResponse.json({ success: true });
     }
 
@@ -672,6 +747,7 @@ export async function POST(request: Request) {
         from: 'notifications@daftaros.com',
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Collaboration response email sent to ${userEmail}`);
       return NextResponse.json({ success: true });
     }
 
@@ -690,6 +766,7 @@ export async function POST(request: Request) {
         from: 'notifications@daftaros.com',
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Pitch team invite email sent to ${userEmail}`);
       return NextResponse.json({ success: true });
     }
 
@@ -706,6 +783,7 @@ export async function POST(request: Request) {
         from: 'notifications@daftaros.com',
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Pitch team invite notification email sent to ${userEmail}`);
       return NextResponse.json({ success: true });
     }
 
@@ -723,6 +801,7 @@ export async function POST(request: Request) {
       await transporter.sendMail({
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Pitch team response email sent to ${userEmail}`);
       return NextResponse.json({ success: true });
     }
 
@@ -740,6 +819,7 @@ export async function POST(request: Request) {
         from: 'notifications@daftaros.com',
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Daftar team response email sent to ${userEmail}`);
       return NextResponse.json({ success: true });
     }
 
@@ -778,6 +858,19 @@ export async function POST(request: Request) {
         from: "notifications@daftaros.com",
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Daftar invite email sent to ${userEmail}`);
+    } else if (notification.type === "updates" && notification.subtype === "daftar_member_invited") {
+      // Handle daftar member invitation
+      const emailOptions = generateDaftarMemberInviteEmail(
+        userEmail,
+        notification.payload
+      );
+
+      await transporter.sendMail({
+        from: "notifications@daftaros.com",
+        ...emailOptions,
+      });
+      console.log(`[EMAIL] ✅ Daftar member invite email sent to ${userEmail}`);
     } else if (notification.type === "updates" && notification.payload.pitchId) {
       const acceptToken = generateActionToken(
         userId,
@@ -804,6 +897,7 @@ export async function POST(request: Request) {
         from: "notifications@daftaros.com",
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Pitch team invite email sent to ${userEmail}`);
     } else {
       const emailOptions = generateStandardNotificationEmail(
         userEmail,
@@ -814,13 +908,14 @@ export async function POST(request: Request) {
         from: "notifications@daftaros.com",
         ...emailOptions,
       });
+      console.log(`[EMAIL] ✅ Standard notification email sent to ${userEmail}`);
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error("[EMAIL] ❌ Error sending email:", error);
     return NextResponse.json(
-      { error: "Failed to send email" },
+      { error: "Failed to send email", details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

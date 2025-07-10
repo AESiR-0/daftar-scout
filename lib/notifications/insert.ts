@@ -344,6 +344,7 @@ export async function createNotification({
         }
         const emailData = (template as (notification: any, userEmail: string) => any)(notification, user.email);
 
+        // Send email using the email API
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/notifications/email`, {
           method: 'POST',
           headers: {
@@ -353,12 +354,16 @@ export async function createNotification({
             notification,
             userId,
             userEmail: user.email,
-            emailData,
+            // Send the email data directly instead of wrapping it
+            ...emailData,
           }),
         });
 
         if (!response.ok) {
-          console.error(`Failed to send email to user ${userId}`);
+          const errorText = await response.text();
+          console.error(`Failed to send email to user ${userId}:`, response.status, errorText);
+        } else {
+          console.log(`Email sent successfully to user ${userId}`);
         }
       } catch (error) {
         console.error(`Error sending email to user ${userId}:`, error);
