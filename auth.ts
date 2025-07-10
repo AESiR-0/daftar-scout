@@ -155,6 +155,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token }) {
       return token;
     },
+
+    async redirect({ url, baseUrl }) {
+      // Always redirect to /investor after login
+      return baseUrl + '/investor';
+    },
   },
   session: {
     strategy: "database", 
