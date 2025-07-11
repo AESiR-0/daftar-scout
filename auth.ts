@@ -29,6 +29,8 @@ const ALLOWED_EMAILS = [
   "dip4esh@gmail.com",
   "laad.vishal@gmail.com",
   "avijit@adengage.in",
+  "bookawestruckaws@gmail.com",
+  "avijeetdas70@gmail.com",
   "nitukthakur20@gmail.com",
   "prathamesh@adengage.in",
   "rohil9@gmail.com",
