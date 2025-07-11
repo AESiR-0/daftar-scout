@@ -259,7 +259,7 @@ export default function InvestorQuestionsPage() {
         formData.append('pitchType', 'founder');
         formData.append('questionId', questionId.toString());
 
-        const res = await fetch('http://localhost:9898/upload-chunk', {
+        const res = await fetch('/worker/upload-chunk', {
           method: 'POST',
           body: formData
         });
