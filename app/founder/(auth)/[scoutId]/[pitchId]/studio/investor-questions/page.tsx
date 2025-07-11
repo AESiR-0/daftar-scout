@@ -424,7 +424,7 @@ export default function InvestorQuestionsPage() {
                             selectedQuestion &&
                             handleUploadVideo(e, selectedQuestion.id)
                           }
-                          disabled={isUploading || isLocked || compressedVideoUrl == ""}
+                          disabled={isUploading || isLocked}
                           className={`w-full ${isLocked ? 'opacity-100' : ''}`}
                         >
                           {isUploading ? (
