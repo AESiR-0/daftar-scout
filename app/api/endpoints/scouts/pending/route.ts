@@ -135,6 +135,16 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Check custom questions
+    const questions = await db
+      .select({ scoutQuestion: scoutQuestions.scoutQuestion })
+      .from(scoutQuestions)
+      .where(eq(scoutQuestions.scoutId, scoutId));
+
+    if (questions.length !== 7 || questions.some(q => !q.scoutQuestion?.trim())) {
+      issues.push("Not all custom questions are filled or updated");
+    }
+
     // Get all approvals for this scout
     const approvals = await db
       .select({

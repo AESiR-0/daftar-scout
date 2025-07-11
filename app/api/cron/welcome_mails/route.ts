@@ -7,9 +7,11 @@ import { NextResponse } from "next/server";
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const SMPTP_HOST = process.env.SMTP_HOST ?? "mail.smtp2go.com"
+const SMPTP_PORT = process.env.SMPTP_PORT ?? '2525'
 const transporter = nodemailer.createTransport({
-    host: 'email-smtp.ap-south-1.amazonaws.com',
-    port: 587, // STARTTLS (recommended)
+    host: SMPTP_HOST,
+    port: parseInt(SMPTP_PORT), // STARTTLS (recommended)
     secure: false,
     auth: {
         user: SMTP_USER,

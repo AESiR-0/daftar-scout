@@ -61,13 +61,11 @@ export function CreateScoutDialog({
 
       const data = await response.json();
       const newScout = data.data;
-      router.push("/investor/scout");
       toast({
         title: "Scout created",
-        description: `Scout "${newScout.scoutName}" (ID: ${newScout.scoutId}) created successfully. 
-        \n Please refresh to see the scout in your list`,
+        description: `Scout "${newScout.scoutName}" (ID: ${newScout.scoutId}) created successfully.`,
       });
-      router.refresh();
+      window.location.reload();
 
       // Call the optional callback with the new scout data
       if (onScoutCreate) {

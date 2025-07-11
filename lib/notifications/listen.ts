@@ -12,10 +12,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 if (!SMTP2GO_USER || !SMTP2GO_PASSWORD) {
   throw new Error('SMTP2GO credentials are not configured');
 }
-
+const SMPTP_HOST = process.env.SMTP_HOST ?? "mail.smtp2go.com"
+const SMPTP_PORT = process.env.SMPTP_PORT ?? '2525'
 const transporter = nodemailer.createTransport({
-  host: 'email-smtp.ap-south-1.amazonaws.com',
-  port: 587, // STARTTLS (recommended)
+  host: SMPTP_HOST,
+  port: parseInt(SMPTP_PORT), // STARTTLS (recommended)
   secure: false,
   auth: {
     user: SMTP2GO_USER,
@@ -172,8 +173,8 @@ export async function sendNotificationEmail(notification: Notification, userId: 
       template = typeTemplates;
     } else {
       const subtype = notification.payload.action || 'default';
-      template = typeTemplates[subtype as keyof typeof typeTemplates] || 
-                (typeTemplates as any).default;
+      template = typeTemplates[subtype as keyof typeof typeTemplates] ||
+        (typeTemplates as any).default;
     }
 
     if (!template) {

@@ -118,6 +118,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid daftarId" }, { status: 404 });
   }
 
+  // Get all daftar IDs for the current user
+  const userDaftars = await db
+    .select({ daftarId: daftarInvestors.daftarId })
+    .from(daftarInvestors)
+    .where(eq(daftarInvestors.investorId, userId));
+  const userDaftarIds = userDaftars.map(d => d.daftarId);
+
+  // Prevent self-daftar invite
+  if (userDaftarIds.includes(daftarId)) {
+    return NextResponse.json(
+      { error: "You cannot invite your own daftar to collaborate." },
+      { status: 400 }
+    );
+  }
+
   // Get users in the daftar
   const daftarUsersList = await db
     .select({ userId: daftarInvestors.investorId })

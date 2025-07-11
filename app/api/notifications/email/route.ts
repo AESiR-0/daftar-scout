@@ -13,10 +13,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 if (!SMTP_USER || !SMTP_PASS) {
   throw new Error("SMTP credentials are not configured");
 }
-
+const SMPTP_HOST = process.env.SMTP_HOST ?? "mail.smtp2go.com"
+const SMPTP_PORT = process.env.SMPTP_PORT ?? '2525'
 const transporter = nodemailer.createTransport({
-  host: 'email-smtp.ap-south-1.amazonaws.com',
-  port: 587, // STARTTLS (recommended)
+  host: SMPTP_HOST,
+  port: parseInt(SMPTP_PORT), // STARTTLS (recommended)
   secure: false,
   auth: {
     user: SMTP_USER,
@@ -492,10 +493,10 @@ function generateCollaborationResponseEmail(
             </p>
 
             <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
-              ${action === 'accepted' 
-                ? 'The collaboration is now active and both teams can work together to expand the scout\'s reach.' 
-                : 'The collaboration request has been declined. You can continue with your existing scout activities.'
-              }
+              ${action === 'accepted'
+        ? 'The collaboration is now active and both teams can work together to expand the scout\'s reach.'
+        : 'The collaboration request has been declined. You can continue with your existing scout activities.'
+      }
             </p>
   
             <!-- Footer Info -->
@@ -604,10 +605,10 @@ function generateDaftarTeamResponseEmail(
             </p>
 
             <p style="color: #555555; font-size: 15px; margin-top: 10px; line-height: 1.6;">
-              ${action === 'accepted' 
-                ? 'The team member is now part of your daftar team and can help scout startups together.' 
-                : 'The invitation has been declined. You can continue with your existing team members.'
-              }
+              ${action === 'accepted'
+        ? 'The team member is now part of your daftar team and can help scout startups together.'
+        : 'The invitation has been declined. You can continue with your existing team members.'
+      }
             </p>
   
             <!-- Footer Info -->
@@ -689,11 +690,11 @@ function generateDaftarMemberInviteEmail(
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log('[EMAIL] Received email request:', { 
-      type: body.type, 
-      userEmail: body.userEmail, 
+    console.log('[EMAIL] Received email request:', {
+      type: body.type,
+      userEmail: body.userEmail,
       notificationType: body.notification?.type,
-      notificationSubtype: body.notification?.subtype 
+      notificationSubtype: body.notification?.subtype
     });
 
     const { notification, userId, type, userEmail, userName, scoutName, daftarName, scoutId, daftarId, action, responderName, pitchName, designation, inviterName, pitchId, newMemberName } = body;

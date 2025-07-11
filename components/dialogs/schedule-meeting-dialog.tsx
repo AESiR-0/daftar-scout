@@ -209,7 +209,7 @@ export function ScheduleMeetingDialog({
         title: "Success",
         description: "Meeting scheduled successfully",
       });
-      router.refresh();
+      window.location.replace("/investor/scout?tab=meetings");
       onScheduled?.();
     } catch (error) {
       console.error("Error scheduling meeting:", error);

@@ -144,6 +144,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Prevent self-invite
+    if (email.toLowerCase() === user.email.toLowerCase()) {
+      return NextResponse.json(
+        { error: "You cannot invite yourself to the team." },
+        { status: 400 }
+      );
+    }
+
     // Get invited user details
     const userExist = await db
       .select()

@@ -95,52 +95,27 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const { scoutId, language = "English", questions } = body;
 
-    if (!scoutId || !Array.isArray(questions) || questions.length !== 7) {
+    if (!scoutId || !Array.isArray(questions) || questions.length === 0) {
       return NextResponse.json(
-        { error: "Missing scoutId or invalid questions array (must be 7)" },
+        { error: "Missing scoutId or questions array (must be non-empty)" },
         { status: 400 }
       );
     }
 
-    // Get existing questions to match with updates
-    const existingQuestions = await db
-      .select()
-      .from(scoutQuestions)
-      .where(
-        and(
-          eq(scoutQuestions.scoutId, scoutId),
-          eq(scoutQuestions.language, language)
-        )
-      )
-      .orderBy(scoutQuestions.id);
-
-    if (existingQuestions.length !== 7) {
-      return NextResponse.json(
-        { error: "Incomplete question set. Use POST to create new questions." },
-        { status: 400 }
-      );
-    }
-
-    // Update each question individually
+    // Update only the provided questions (by id)
     await Promise.all(
-      questions.map(async (q: { question: string; isCustom?: boolean; videoUrl?: string }, index: number) => {
-        const existingQuestion = existingQuestions[index];
-        if (!existingQuestion) return;
-
+      questions.map(async (q: { id: number; question: string; isCustom?: boolean; videoUrl?: string }) => {
+        if (!q.id || typeof q.question !== "string") {
+          throw new Error("Each question must have an id and question text");
+        }
         return db
           .update(scoutQuestions)
           .set({
             scoutQuestion: q.question,
             isCustom: q.isCustom === false ? false : true,
-            scoutAnswerSampleUrl: q.videoUrl || existingQuestion.scoutAnswerSampleUrl
+            scoutAnswerSampleUrl: q.videoUrl || null,
           })
-          .where(
-            and(
-              eq(scoutQuestions.id, existingQuestion.id),
-              eq(scoutQuestions.scoutId, scoutId),
-              eq(scoutQuestions.language, language)
-            )
-          );
+          .where(eq(scoutQuestions.id, q.id));
       })
     );
 
@@ -151,7 +126,7 @@ export async function PATCH(req: NextRequest) {
   } catch (error) {
     console.error("Error updating scout questions:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: error instanceof Error ? error.message : String(error) || "Internal Server Error" },
       { status: 500 }
     );
   }

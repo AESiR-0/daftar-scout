@@ -1,11 +1,31 @@
-[] Video Upload Error in Investor pitch
-[] AWS SES for mails
-[] Firebase notifcations check
-[] Crashlytics
-[] Cron jobs migrate to our server
-[] use debouncing after onBlur of an input box
-[] connection timed out timer increase nginx in the server
-
-Future 
-[] OTP 
-[] Redis
+- [ ] First actions after logging in for create scout and create daftar 
+- [ ] refresh after scout creation
+- [ ] audience filters dialog typing error 
+- [ ] revert to smtp2go 
+- [ ] documents upload error
+- [ ] toaster on successful video upload
+- [ ] custom investor questions bug, cannot add custom questions to the scout
+- [ ] Date mismatch of scheduled and planning in scouts
+- [ ] add query param for tabs on /scout and /founder 
+- [ ] /founder meeting tab shows zero length
+- [ ] scout details -> sector : comma separated
+- [ ] website link validation in pitch details
+- [ ] self invite disable in /founder/studio/team
+- [ ] the pitch upload video condition check : upload button and url in database
+- [ ] in founder documents are not labelled correctly as private or public
+- [ ] remove button not working in pitch team
+- [ ] on approval, it is sending the pitch. make sure it happens to pitch now button check
+- [ ] update on pitch received to investor
+- [ ] age limit during sign up
+- [ ] ui breaking in investor pitch review team section
+- [ ] current pitch highlight on the left sidebar
+- [ ] first time it is failing to submit investor analysis
+- [ ] cloudfront url in env 
+- [ ] after accepting, lock the reviews and everything in pitch review. no new offers to be created
+- [ ] pitch categories are not updating 
+- [ ] pitch delete notification not being sent and the investor can still see it ; deleted still pitch visible in inbox. category not changing 
+- [ ] phone number input disable in profile
+- [ ] profile image cloudfront url remaining
+- [ ] if isDeleted Your account has been deleted - give buttons to reactivate or mail to reactivate if you want to 
+- [ ] notification add a default active tab
+- [ ] remove bookmark for other tabs
