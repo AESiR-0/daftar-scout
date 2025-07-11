@@ -104,16 +104,16 @@ export async function PATCH(req: NextRequest) {
 
     // Update only the provided questions (by id)
     await Promise.all(
-      questions.map(async (q: { id: number; question: string; isCustom?: boolean; videoUrl?: string }) => {
-        if (!q.id || typeof q.question !== "string") {
+      questions.map(async (q: { id: number; question?: string; scoutQuestion?: string; isCustom?: boolean; videoUrl?: string; scoutAnswerSampleUrl?: string }) => {
+        if (!q.id || (typeof q.question !== "string" && typeof q.scoutQuestion !== "string")) {
           throw new Error("Each question must have an id and question text");
         }
         return db
           .update(scoutQuestions)
           .set({
-            scoutQuestion: q.question,
+            scoutQuestion: typeof q.question === "string" ? q.question : q.scoutQuestion,
             isCustom: q.isCustom === false ? false : true,
-            scoutAnswerSampleUrl: q.videoUrl || null,
+            scoutAnswerSampleUrl: q.videoUrl || q.scoutAnswerSampleUrl || null,
           })
           .where(eq(scoutQuestions.id, q.id));
       })

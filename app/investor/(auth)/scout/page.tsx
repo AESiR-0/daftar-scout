@@ -4,7 +4,7 @@ import { useSearch } from "@/lib/context/search-context";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { InsightsDialog } from "@/components/dialogs/insights-dialog";
 import MeetingsPage from "@/app/founder/(auth)/meetings/page";
@@ -39,6 +39,7 @@ const emptyStateMessages: Record<string, string> = {
 
 export default function ScoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { searchQuery, filterValue } = useSearch();
   const [loading, setLoading] = useState(true);
   const [insightsOpen, setInsightsOpen] = useState(false);
@@ -70,6 +71,13 @@ export default function ScoutPage() {
 
     fetchMeetingsCount();
   }, []);
+
+  useEffect(() => {
+    // On mount, set tab from query param
+    const tab = searchParams.get("tab");
+    if (tab === "meetings") setShowMeetings(true);
+    else if (tab === "scoutboard") setShowMeetings(false);
+  }, [searchParams]);
 
   const { selectedDaftar } = useDaftar();
 
@@ -198,7 +206,10 @@ export default function ScoutPage() {
       <div className="flex items-center justify-end gap-4">
         <Button
           variant="outline"
-          onClick={() => setShowMeetings(true)}
+          onClick={() => {
+            setShowMeetings(true);
+            router.replace("?tab=meetings");
+          }}
           disabled={loading}
           className={
             showMeetings ? "bg-muted rounded-[0.3rem]" : "rounded-[0.3rem]"
@@ -215,7 +226,10 @@ export default function ScoutPage() {
 
         <Button
           variant="outline"
-          onClick={() => setShowMeetings(false)}
+          onClick={() => {
+            setShowMeetings(false);
+            router.replace("?tab=scoutboard");
+          }}
           disabled={loading}
           className={
             showMeetings ? "rounded-[0.3rem]" : "bg-muted rounded-[0.3rem]"

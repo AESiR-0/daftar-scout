@@ -217,6 +217,11 @@ export default function InvestorPitchPage() {
       if (compressedUrl) {
         setCompressedVideoUrl(compressedUrl);
         setUploadStatus("Compression complete!");
+        toast({
+          title: "Upload Success",
+          description: "Your video was uploaded and processed successfully.",
+          variant: "success",
+        });
       } else {
         setUploadStatus("Compression in progress. Please refresh later.");
       }

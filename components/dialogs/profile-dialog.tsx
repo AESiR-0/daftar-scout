@@ -184,6 +184,24 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
       });
       return;
     }
+    // Age validation
+    if (profileData.dateOfBirth) {
+      const dob = new Date(profileData.dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+      if (age < 18) {
+        toast({
+          title: "Invalid Age",
+          description: "You must be at least 18 years old.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     setIsLoading(true);
     try {
@@ -460,6 +478,14 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
     }
   }, [open]);
 
+  // Helper to get CloudFront image URL
+  const getProfileImageUrl = (image: string) => {
+    if (!image) return undefined;
+    if (image.startsWith('http://') || image.startsWith('https://')) return image;
+    const domain = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN || '';
+    return `${domain.replace(/\/$/, '')}/${image.replace(/^\//, '')}`;
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "account":
@@ -485,7 +511,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                   <label htmlFor="avatar-upload" className="cursor-pointer">
                   <Avatar className="h-20 w-20">
                       <AvatarImage 
-                        src={profileData.image} 
+                        src={getProfileImageUrl(profileData.image)} 
                         className={cn(
                           "transition-opacity hover:opacity-80",
                           isEditing && "ring-2 ring-primary ring-offset-2 ring-offset-background"
@@ -610,7 +636,7 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                             prev ? { ...prev, phone: e.target.value } : prev
                           )
                         }
-                        disabled={isLoading}
+                        disabled
                       />
                     </div>
                     <div className="space-y-2">

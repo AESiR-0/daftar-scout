@@ -286,11 +286,11 @@ export function TeamAnalysisSection({
                         key={`nps-${i}`}
                         variant={formState.nps === i ? "default" : "outline"}
                         onClick={() => setFormState(prev => ({ ...prev, nps: i }))}
-                        disabled={hasSubmitted || !isMember}
+                        disabled={hasSubmitted || !isMember || loading}
                         className={cn(
                           "w-8 h-8 p-0 rounded-[0.35rem]",
                           formState.nps === i && "bg-blue-600 hover:bg-blue-700",
-                          (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
+                          (hasSubmitted || !isMember || loading) && "cursor-not-allowed opacity-50"
                         )}
                       >
                         {i}
@@ -304,12 +304,12 @@ export function TeamAnalysisSection({
                     <Button
                       variant={formState.belief === "yes" ? "default" : "outline"}
                       onClick={() => setFormState(prev => ({ ...prev, belief: "yes" }))}
-                      disabled={hasSubmitted || !isMember}
+                      disabled={hasSubmitted || !isMember || loading}
                       className={cn(
                         formState.belief === "yes"
                           ? "bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
                           : "rounded-[0.35rem]",
-                        (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
+                        (hasSubmitted || !isMember || loading) && "cursor-not-allowed opacity-50"
                       )}
                     >
                       Yes
@@ -317,12 +317,12 @@ export function TeamAnalysisSection({
                     <Button
                       variant={formState.belief === "no" ? "default" : "outline"}
                       onClick={() => setFormState(prev => ({ ...prev, belief: "no" }))}
-                      disabled={hasSubmitted || !isMember}
+                      disabled={hasSubmitted || !isMember || loading}
                       className={cn(
                         formState.belief === "no"
                           ? "bg-red-600 hover:bg-red-700 rounded-[0.35rem]"
                           : "rounded-[0.35rem]",
-                        (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
+                        (hasSubmitted || !isMember || loading) && "cursor-not-allowed opacity-50"
                       )}
                     >
                       No
@@ -336,10 +336,10 @@ export function TeamAnalysisSection({
                     placeholder="Why do you want to meet... or not meet... in the startup?"
                     value={formState.note}
                     onChange={(e) => setFormState(prev => ({ ...prev, note: e.target.value }))}
-                    disabled={hasSubmitted || !isMember}
+                    disabled={hasSubmitted || !isMember || loading}
                     className={cn(
                       "min-h-[100px] rounded-[0.35rem] bg-muted/50 text-white border p-4",
-                      (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
+                      (hasSubmitted || !isMember || loading) && "cursor-not-allowed opacity-50"
                     )}
                   />
                 </div>
@@ -358,14 +358,15 @@ export function TeamAnalysisSection({
                   formState.nps === null ||
                   isSubmitting ||
                   hasSubmitted ||
-                  !isMember
+                  !isMember ||
+                  loading
                 }
                 className={cn(
                   "w-full bg-blue-600 hover:bg-blue-700",
-                  (hasSubmitted || !isMember) && "cursor-not-allowed opacity-50"
+                  (hasSubmitted || !isMember || loading) && "cursor-not-allowed opacity-50"
                 )}
               >
-                {isSubmitting ? "Submitting..." : "Submit Analysis"}
+                {isSubmitting || loading ? "Submitting..." : "Submit Analysis"}
               </Button>
             </CardContent>
           </Card>

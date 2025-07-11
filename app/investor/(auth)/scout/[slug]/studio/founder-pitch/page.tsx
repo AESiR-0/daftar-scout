@@ -330,9 +330,10 @@ export default function InvestorStudioPage() {
           scoutId,
           language: selectedLanguage,
           questions: customQuestions.map(q => ({
-            scoutQuestion: q.question,
+            id: q.id, // must be present
+            question: q.question, // map to 'question' for backend
             isCustom: true,
-            scoutAnswerSampleUrl: q.videoUrl || null
+            videoUrl: q.videoUrl || null
           }))
         }),
       });

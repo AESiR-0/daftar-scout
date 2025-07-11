@@ -4,6 +4,10 @@ import { pitchDelete, pitchTeam, pitch } from "@/backend/drizzle/models/pitch";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/auth";
 import { users } from "@/backend/drizzle/models/users";
+import { scouts, daftarScouts } from "@/backend/drizzle/models/scouts";
+import { daftarInvestors } from "@/backend/drizzle/models/daftar";
+import { inArray } from "drizzle-orm";
+import { createNotification } from "@/lib/notifications/insert";
 
 export async function GET(req: NextRequest) {
   try {
@@ -186,11 +190,92 @@ export async function POST(req: NextRequest) {
     );
 
     if (allTeamMembersApproved) {
+      // Get pitch details for notification
+      const pitchDetails = await db
+        .select({
+          pitchName: pitch.pitchName,
+          scoutId: pitch.scoutId,
+        })
+        .from(pitch)
+        .where(eq(pitch.id, pitchId))
+        .limit(1);
+
+      if (pitchDetails.length > 0) {
+        // Get scout details
+        const scoutDetails = await db
+          .select({
+            scoutName: scouts.scoutName,
+          })
+          .from(scouts)
+          .where(eq(scouts.scoutId, pitchDetails[0].scoutId!))
+          .limit(1);
+
+        // Get all Daftar IDs associated with the scout
+        const daftarIds = await db
+          .select({
+            daftarId: daftarScouts.daftarId,
+          })
+          .from(daftarScouts)
+          .where(eq(daftarScouts.scoutId, pitchDetails[0].scoutId!));
+
+        // Filter out any null daftarIds
+        const validDaftarIds = daftarIds
+          .map(d => d.daftarId)
+          .filter((id): id is string => id !== null);
+
+        // Get all investors from these Daftar groups
+        const investors = validDaftarIds.length > 0
+          ? await db
+            .select({
+              investorId: daftarInvestors.investorId,
+            })
+            .from(daftarInvestors)
+            .where(inArray(daftarInvestors.daftarId, validDaftarIds))
+          : [];
+
+        // Get pitch team members
+        const pitchTeamMembers = await db
+          .select({
+            userId: pitchTeam.userId,
+          })
+          .from(pitchTeam)
+          .where(eq(pitchTeam.pitchId, pitchId));
+
+        // Combine all users, filter nulls, and remove duplicates
+        const targetedUsers = [
+          ...new Set([
+            ...pitchTeamMembers.map((m) => m.userId),
+            ...investors.map((i) => i.investorId),
+          ].filter((id): id is string => id !== null)),
+        ];
+
+        // Send notification to all relevant users
+        if (targetedUsers.length > 0) {
+          await createNotification({
+            type: "alert",
+            subtype: "pitch_deleted",
+            title: `Pitch "${pitchDetails[0].pitchName}" Deleted`,
+            description: `Pitch "${pitchDetails[0].pitchName}" has been deleted by the founder team via ${scoutDetails[0]?.scoutName || "scout"}`,
+            role: "investor",
+            targeted_users: targetedUsers,
+            payload: {
+              action_at: new Date().toISOString(),
+              pitchId,
+              pitchName: pitchDetails[0].pitchName,
+              scout_id: pitchDetails[0].scoutId,
+              scoutName: scoutDetails[0]?.scoutName,
+              message: "Pitch has been deleted by the founder team",
+            },
+          });
+        }
+      }
+
       // Update pitch status to deleted and lock it
       await db
         .update(pitch)
         .set({
           status: "deleted",
+          investorStatus: "Deleted",
           isLocked: true,
         })
         .where(eq(pitch.id, pitchId));

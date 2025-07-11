@@ -128,6 +128,8 @@ export async function POST(req: NextRequest) {
         id: pitch.id,
         scoutId: pitch.scoutId,
         pitchName: pitch.pitchName,
+        isLocked: pitch.isLocked,
+        investorStatus: pitch.investorStatus,
       })
       .from(pitch)
       .where(and(
@@ -146,6 +148,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Pitch not found for this scoutId and pitchId" },
         { status: 404 }
+      );
+    }
+
+    // Check if pitch is locked (accepted)
+    if (pitchCheck[0].isLocked || pitchCheck[0].investorStatus === "Accepted") {
+      return NextResponse.json(
+        { error: "This pitch has been accepted and is no longer accepting new offers" },
+        { status: 403 }
       );
     }
 

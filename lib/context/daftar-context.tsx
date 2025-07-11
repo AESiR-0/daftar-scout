@@ -80,6 +80,7 @@ export function DaftarProvider({ children }: { children: ReactNode }) {
   }
 
   if (showDialog) {
+    const router = require('next/navigation').useRouter?.() || null;
     return (
       <CreateDaftarDialog
         open={showDialog}
@@ -89,6 +90,11 @@ export function DaftarProvider({ children }: { children: ReactNode }) {
           await fetchDaftars();
           setSelectedDaftar(newDaftarId);
           document.cookie = `selectedDaftarId=${newDaftarId}; path=/`;
+          if (router) {
+            router.push('/investor/scout');
+          } else if (typeof window !== 'undefined') {
+            window.location.href = '/investor/scout';
+          }
         }}
       />
     );

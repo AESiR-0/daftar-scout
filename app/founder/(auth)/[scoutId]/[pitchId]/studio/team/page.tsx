@@ -262,7 +262,7 @@ export default function TeamPage() {
     }
   };
 
-  const handleCancelInvite = (id: string) => {
+  const handleCancelInvite = async (id: string, userId: string) => {
     if (isDemoPitch) {
       toast({
         title: "Demo Pitch",
@@ -271,10 +271,31 @@ export default function TeamPage() {
       });
       return;
     }
-    setMembers(members.filter((member) => member.id !== id));
+    try {
+      const response = await fetch("/api/endpoints/pitch/founder/team", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pitchId, userId }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to remove pending invite");
+      }
+      setMembers(members.filter((member) => member.id !== id));
+      toast({
+        title: "Removed",
+        description: "Pending invite removed successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove pending invite",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRemoveMember = (id: string) => {
+  const handleRemoveMember = async (id: string, userId: string) => {
     if (isDemoPitch) {
       toast({
         title: "Demo Pitch",
@@ -283,7 +304,36 @@ export default function TeamPage() {
       });
       return;
     }
-    setMembers(members.filter((member) => member.id !== id));
+    if (activeMembers.length === 1) {
+      toast({
+        title: "Cannot remove last member",
+        description: "At least one team member is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const response = await fetch("/api/endpoints/pitch/founder/team", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pitchId, userId }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to remove team member");
+      }
+      setMembers(members.filter((member) => member.id !== id));
+      toast({
+        title: "Removed",
+        description: "Team member removed successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove team member",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleWithdraw = () => {
@@ -497,9 +547,9 @@ export default function TeamPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleRemoveMember(member.id)}
+              onClick={() => handleRemoveMember(member.id, member.userId)}
               className="h-8 w-8"
-              disabled={isDemoPitch}
+              disabled={isDemoPitch || activeMembers.length === 1}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -533,8 +583,9 @@ export default function TeamPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => handleCancelInvite(member.id)}
+          onClick={() => handleCancelInvite(member.id, member.userId)}
           className="text-red-500 hover:text-red-600"
+          disabled={isDemoPitch}
         >
           <X className="h-4 w-4" />
         </Button>

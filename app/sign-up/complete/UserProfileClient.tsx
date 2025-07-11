@@ -61,7 +61,16 @@ const createPersonalInfoSchema = (countryCode: string) =>
           message: "Indian phone numbers must be 10 digits",
         }
       ),
-    dob: z.string().min(1, "Date of birth cannot be empty"),
+    dob: z.string().min(1, "Date of birth cannot be empty").refine((val) => {
+      const dob = new Date(val);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        return age - 1 >= 18;
+      }
+      return age >= 18;
+    }, { message: "You must be at least 18 years old." }),
     countryCode: z.string().min(1, "Country code cannot be empty"),
   });
 

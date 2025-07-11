@@ -177,7 +177,7 @@ export default function InvestorQuestionsPage() {
     }
   };
 
-  const handleFileChange = (
+  const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     questionId: number
   ) => {
@@ -208,75 +208,56 @@ export default function InvestorQuestionsPage() {
 
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-    }
-  };
 
-  const handleUploadVideo = async (
-    e: React.MouseEvent<HTMLButtonElement>,
-    questionId: number
-  ) => {
-    console.log(questionId);
-
-    if (isLocked || isDemoPitch) {
-      toast({
-        title: isDemoPitch ? "Demo Pitch" : "Pitch is Locked",
-        description: isDemoPitch ? "This is a demo pitch, no data can be changed" : "Cannot upload videos while the pitch is locked.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const file = fileInputRef.current?.files?.[0];
-    if (!file || !selectedQuestion) {
-      toast({
-        title: "Error",
-        description: "Please select a video to upload",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadProgress(0);
-    setUploadStatus("Starting upload...");
-
-    const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const totalChunks = 4;
-    const chunkSize = Math.ceil(file.size / totalChunks);
-    try {
-      for (let i = 0; i < totalChunks; i++) {
-        const start = i * chunkSize;
-        const end = Math.min(start + chunkSize, file.size);
-        const chunk = file.slice(start, end);
-        const formData = new FormData();
-        formData.append('chunk', chunk);
-        formData.append('uploadId', uploadId);
-        formData.append('chunkIndex', i.toString());
-        formData.append('totalChunks', totalChunks.toString());
-        formData.append('filename', file.name);
-        formData.append('scoutId', scoutId);
-        formData.append('pitchId', pitchId);
-        formData.append('pitchType', 'founder');
-        formData.append('questionId', questionId.toString());
-
-        const res = await fetch('/worker/upload-chunk', {
-          method: 'POST',
-          body: formData
-        });
-        if (!res.ok) throw new Error(`Chunk ${i + 1} upload failed`);
-        setUploadProgress(((i + 1) / totalChunks) * 100);
-        setUploadStatus(`Uploaded chunk ${i + 1} of ${totalChunks}`);
-      }
-      setUploadStatus("All chunks uploaded. Video is being processed. You can refresh the page later to see the compressed video.");
-    } catch (error: any) {
-      toast({
-        title: "Upload failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
+      // --- Begin upload logic (moved from handleUploadVideo) ---
+      setIsUploading(true);
       setUploadProgress(0);
+      setUploadStatus("Starting upload...");
+
+      const uploadId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const totalChunks = 4;
+      const chunkSize = Math.ceil(file.size / totalChunks);
+      try {
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * chunkSize;
+          const end = Math.min(start + chunkSize, file.size);
+          const chunk = file.slice(start, end);
+          const formData = new FormData();
+          formData.append('chunk', chunk);
+          formData.append('uploadId', uploadId);
+          formData.append('chunkIndex', i.toString());
+          formData.append('totalChunks', totalChunks.toString());
+          formData.append('filename', file.name);
+          formData.append('scoutId', scoutId);
+          formData.append('pitchId', pitchId);
+          formData.append('pitchType', 'founder');
+          formData.append('questionId', questionId.toString());
+
+          const res = await fetch('/worker/upload-chunk', {
+            method: 'POST',
+            body: formData
+          });
+          if (!res.ok) throw new Error(`Chunk ${i + 1} upload failed`);
+          setUploadProgress(((i + 1) / totalChunks) * 100);
+          setUploadStatus(`Uploaded chunk ${i + 1} of ${totalChunks}`);
+        }
+        setUploadStatus("All chunks uploaded. Video is being processed. You can refresh the page later to see the compressed video.");
+        toast({
+          title: "Upload Success",
+          description: "Your video was uploaded and is being processed.",
+          variant: "success",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Upload failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
+      // --- End upload logic ---
     }
   };
 
@@ -418,27 +399,7 @@ export default function InvestorQuestionsPage() {
                           <X className="h-4 w-4 mr-2" />
                           Remove Video
                         </Button>
-                        <Button
-                          variant="outline"
-                          onClick={(e) =>
-                            selectedQuestion &&
-                            handleUploadVideo(e, selectedQuestion.id)
-                          }
-                          disabled={isUploading || isLocked}
-                          className={`w-full ${isLocked ? 'opacity-100' : ''}`}
-                        >
-                          {isUploading ? (
-                            <>
-                              <div className="animate-spin mr-2 h-4 w-4 border-2 border-b-transparent border-white rounded-full" />
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="h-4 w-4 mr-2" />
-                              Upload Video
-                            </>
-                          )}
-                        </Button>
+                        {/* Removed Upload Video button, upload is now instant on file selection */}
                       </div>
                       {isUploading && (
                         <div className="w-full space-y-2">

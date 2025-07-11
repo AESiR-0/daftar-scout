@@ -390,10 +390,34 @@ export default function PitchNameForm() {
                 type="text"
                 value={demoLink}
                 onChange={(e) => !isLocked && !isDemoPitch && setDemoLink(e.target.value)}
-                onBlur={debouncedAutoSave}
-                placeholder="Enter your website demo link"
+                onBlur={() => {
+                  // Validation: do not allow http/https prefix
+                  if (/^https?:\/\//i.test(demoLink)) {
+                    toast({
+                      title: "Invalid Website Link",
+                      description: "Please enter your website without https:// or http://. We add it automatically.",
+                      variant: "destructive",
+                    });
+                    setDemoLink("");
+                    return;
+                  }
+                  // Validation: must be a valid domain (e.g., example.com)
+                  const domainRegex = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,}$/;
+                  if (demoLink && !domainRegex.test(demoLink.trim())) {
+                    toast({
+                      title: "Invalid Website Link",
+                      description: "Please enter a valid domain (e.g., example.com)",
+                      variant: "destructive",
+                    });
+                    setDemoLink("");
+                    return;
+                  }
+                  debouncedAutoSave();
+                }}
+                placeholder="Enter your website demo link (without https://)"
                 disabled={isLocked || isDemoPitch}
               />
+              <p className="text-xs text-muted-foreground">Do not include https:// or http://. Just enter your domain (e.g., example.com).</p>
             </div>
             <div className="flex-1 space-y-2">
               <Label>Startup Stage</Label>

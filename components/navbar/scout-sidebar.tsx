@@ -13,6 +13,7 @@ import { InsightsDialog } from "../dialogs/insights-dialog";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { formatDate } from "@/lib/format-date";
+import { cn } from "@/lib/utils";
 
 interface Pitch {
   pitchId: string;
@@ -76,6 +77,8 @@ export function ScoutSidebar({
   const pathname = usePathname();
   const isStudio = pathname.includes("studio");
   const scoutId = pathname.split("/")[3];
+  // Extract pitchId from pathname if present
+  const pitchId = pathname.split("/")[5] || null;
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -363,7 +366,10 @@ Pitch Now: https://www.daftaros.com/founder/scout/${scoutId}
                             key={index}
                             href={`/investor/scout/${scoutId}/details/${pitch.pitchId}`}
                           >
-                            <Card className="hover:bg-muted/50 mt-1 transition-colors">
+                            <Card className={cn(
+                              "hover:bg-muted/50 mt-1 transition-colors",
+                              pitchId === pitch.pitchId && "bg-muted/50 hover:bg-muted"
+                            )}>
                               <CardContent className="p-4 space-y-2">
                                 <h3 className="font-medium text-sm">
                                   {pitch.pitchName}
@@ -371,7 +377,7 @@ Pitch Now: https://www.daftaros.com/founder/scout/${scoutId}
                                 <div className="text-xs text-muted-foreground">
                                   <p>NPS Score: {parseFloat(pitch.averageBelieveRating).toFixed(1) || 'N/A'}</p>
                                   <p>
-                                    Interested Team Members:{" "}
+                                    Interested Team Members: {" "}
                                     {pitch.interestedInvestors.length}
                                   </p>
                                 </div>

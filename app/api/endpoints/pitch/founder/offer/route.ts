@@ -194,7 +194,16 @@ export async function POST(req: NextRequest) {
     let targetedUsers: string[] = [];
 
     if (action === "accepted") {
-      // For accepted offers, notify everyone (empty array means all users)
+      // For accepted offers, lock the pitch and prevent new offers
+      await db
+        .update(pitch)
+        .set({
+          investorStatus: "Accepted",
+          isLocked: true,
+        })
+        .where(eq(pitch.id, pitchId));
+
+      // Notify all users about the acceptance
       targetedUsers = [];
     } else {
       // Get pitch details to find scoutId

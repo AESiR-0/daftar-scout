@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { pitchId } = await req.json();
+    const { pitchId, askForInvestor } = await req.json();
 
     if (!pitchId) {
       return NextResponse.json({ error: "Pitch ID is required" }, { status: 400 });
@@ -55,6 +55,13 @@ export async function POST(req: NextRequest) {
         eq(pitchTeam.userId, userId)
       )
     );
+
+    // Update askForInvestor if present
+    if (askForInvestor !== undefined) {
+      await db.update(pitch)
+        .set({ askForInvestor })
+        .where(eq(pitch.id, pitchId));
+    }
 
     // Get all team members and their approval status
     const allTeamMembers = await db

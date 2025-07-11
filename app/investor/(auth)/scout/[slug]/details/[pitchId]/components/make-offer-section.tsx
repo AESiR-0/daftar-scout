@@ -80,6 +80,7 @@ export function MakeOfferSection({
 }) {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
+  const [pitchStatus, setPitchStatus] = useState<{ isLocked: boolean; investorStatus: string } | null>(null);
   const { toast } = useToast();
   const [historyFilter, setHistoryFilter] = useState<
     "all" | "pending" | "accepted" | "rejected" | "withdrawn"
@@ -93,6 +94,22 @@ export function MakeOfferSection({
   });
   const [offerMessage, setOfferMessage] = useState("");
   const isDemo = scoutId === "jas730";
+  
+  const fetchPitchStatus = async () => {
+    try {
+      const response = await fetch(`/api/endpoints/pitch/investor?pitchId=${pitchId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPitchStatus({
+          isLocked: data.fields?.foundersPitch?.status === "Accepted" || false,
+          investorStatus: data.fields?.foundersPitch?.status || "Inbox"
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching pitch status:", error);
+    }
+  };
+
   const fetchOffers = async () => {
     try {
       const response = await fetch(
@@ -127,9 +144,11 @@ export function MakeOfferSection({
 
   useEffect(() => {
     fetchOffers();
+    fetchPitchStatus();
   }, [scoutId, pitchId]);
 
   const hasPendingOffer = offers.some((o) => o.status === "pending");
+  const isPitchLocked = pitchStatus?.isLocked || pitchStatus?.investorStatus === "Accepted";
 
   const handleCreateOffer = async () => {
     if (hasPendingOffer) {
@@ -137,6 +156,16 @@ export function MakeOfferSection({
         title: "Cannot Create Offer",
         description:
           "You already have a pending offer. Please withdraw it before creating a new one.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isPitchLocked) {
+      toast({
+        title: "Cannot Create Offer",
+        description:
+          "This pitch has been accepted and is no longer accepting new offers.",
         variant: "destructive",
       });
       return;
@@ -301,19 +330,19 @@ export function MakeOfferSection({
             <div className="mt-4 flex gap-2 justify-start">
               <Button
                 onClick={handleSendOffer}
-                disabled={!offerMessage.trim()}
+                disabled={!offerMessage.trim() || isPitchLocked}
                 variant="outline"
                 className="rounded-[0.35rem] bg-blue-500"
               >
-                Send Offer
+                {isPitchLocked ? "Pitch Accepted" : "Send Offer"}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleRejectPitch}
-                disabled={!offerMessage.trim()}
+                disabled={!offerMessage.trim() || isPitchLocked}
                 className="rounded-[0.35rem]"
               >
-                Reject Pitch
+                {isPitchLocked ? "Pitch Accepted" : "Reject Pitch"}
               </Button>
             </div>
           </div>

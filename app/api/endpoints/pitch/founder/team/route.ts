@@ -307,3 +307,34 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { user } = session;
+    if (!user || !user.id) {
+      return NextResponse.json({ error: "Invalid user session" }, { status: 400 });
+    }
+    const body = await req.json();
+    const { pitchId, userId } = body;
+    if (!pitchId || !userId) {
+      return NextResponse.json({ error: "pitchId and userId are required" }, { status: 400 });
+    }
+    // Only allow removing if the user is the pitch owner or removing themselves
+    // (You can adjust this logic as needed)
+    // Remove the member from the pitch team
+    const deleted = await db.delete(pitchTeam)
+      .where(and(eq(pitchTeam.pitchId, pitchId), eq(pitchTeam.userId, userId)))
+      .returning();
+    if (deleted.length === 0) {
+      return NextResponse.json({ error: "Team member not found or not removed" }, { status: 404 });
+    }
+    return NextResponse.json({ message: "Team member removed successfully" }, { status: 200 });
+  } catch (error) {
+    console.error("Error removing team member:", error);
+    return NextResponse.json({ error: "Failed to remove team member" }, { status: 500 });
+  }
+}

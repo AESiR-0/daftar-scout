@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PitchesList from "@/app/founder/(auth)/pitchesList/pitchesList";
 import ScoutPage from "@/app/founder/(auth)/scout/scoutPage";
 import DealBoardPage from "../deal-board/dealBoardPage";
@@ -36,7 +37,11 @@ type Scout = {
 };
 
 export default function PitchPage() {
-  const [selectedTab, setSelectedTab] = useState("dealBoard");
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selectedTab = searchParams.get("tab") || "dealBoard";
+  
   const [counts, setCounts] = useState({
     meetings: 0,
     scouts: 0,
@@ -52,6 +57,12 @@ export default function PitchPage() {
     { id: "pitches", label: "Pitches", count: counts.pitches },
     { id: "dealBoard", label: "Deal Board", count: counts.pitches },
   ];
+
+  const handleTabChange = (tabId: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", tabId);
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -121,7 +132,7 @@ export default function PitchPage() {
                     "flex items-center rounded-[0.35rem] gap-1",
                     selectedTab === item.id && "bg-accent"
                   )}
-                  onClick={() => setSelectedTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                 >
                   {item.label}
                   <Badge variant="secondary" className="ml-1">

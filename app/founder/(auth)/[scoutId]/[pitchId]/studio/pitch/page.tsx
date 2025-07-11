@@ -102,7 +102,7 @@ export default function PitchPage() {
           setTermsAccepted(true);
         }
       });
-      setSpecificAsks(data.askForInvestor);
+      setSpecificAsks(data.askForInvestor ?? "");
       setPitchApproved(data.pitchApproved);
       setSubmitted(data.submitted);
       setHasIncompleteAnswers(data.hasIncompleteAnswers);
@@ -232,6 +232,7 @@ export default function PitchPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           pitchId,
+          askForInvestor: specificAsks,
         }),
       });
 

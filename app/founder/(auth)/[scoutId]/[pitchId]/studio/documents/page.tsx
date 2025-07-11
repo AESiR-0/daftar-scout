@@ -53,9 +53,10 @@ export default function DocumentsPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<"private" | "received" | "sent">("private");
 
-  const privateCount = documentsList.filter((doc) => doc.type === "private").length;
-  const receivedCount = documentsList.filter((doc) => doc.type === "received").length;
-  const sentCount = documentsList.filter((doc) => doc.type === "sent").length;
+  // Tab counts (use isHidden for private, type for others)
+  const privateCount = documentsList.filter((doc) => doc.isHidden).length;
+  const receivedCount = documentsList.filter((doc) => doc.type === "received" && !doc.isHidden).length;
+  const sentCount = documentsList.filter((doc) => doc.type === "sent" && !doc.isHidden).length;
 
   // Function to fetch user info
   const fetchUserInfo = async (userId: string) => {

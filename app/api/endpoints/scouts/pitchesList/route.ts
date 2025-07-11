@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/backend/database";
-import { sql, and, eq, isNull } from "drizzle-orm";
+import { sql, and, eq, isNull, ne } from "drizzle-orm";
 import { investorPitch, pitch } from "@/backend/drizzle/models/pitch";
 import { users } from "@/backend/drizzle/models/users";
 
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Invalid parameters", status: 400 });
   }
 
-  // Step 1: Get all pitches for the scout
+  // Step 1: Get all pitches for the scout (excluding deleted pitches)
   const pitches = await db
     .select({
       pitchId: pitch.id,
@@ -25,7 +25,13 @@ export async function GET(req: NextRequest) {
       status: pitch.investorStatus,
     })
     .from(pitch)
-    .where(eq(pitch.scoutId, scoutId));
+    .where(
+      and(
+        eq(pitch.scoutId, scoutId),
+        ne(pitch.status, "deleted"), // Exclude deleted pitches
+        eq(pitch.isLocked, false) // Exclude locked pitches
+      )
+    );
 
   if (pitches.length === 0) {
     return NextResponse.json({ data: [], status: 200 });

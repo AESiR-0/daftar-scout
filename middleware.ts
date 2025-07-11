@@ -19,7 +19,31 @@ const RATE_LIMITED_ROUTES = [
   '/api/scout',
 ];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
+  // Block deactivated users for all app pages except /account-deactivated and static files
+  const isAppPage =
+    !request.nextUrl.pathname.startsWith('/api') &&
+    !request.nextUrl.pathname.startsWith('/_next') &&
+    !request.nextUrl.pathname.startsWith('/static') &&
+    !request.nextUrl.pathname.startsWith('/account-deactivated');
+
+  if (isAppPage) {
+    try {
+      const cookie = request.headers.get('cookie') || '';
+      const res = await fetch(`${request.nextUrl.origin}/api/endpoints/me`, {
+        headers: { cookie },
+      });
+      if (res.ok) {
+        const user = await res.json();
+        if (user && (user.isArchived === true || user.isActive === false)) {
+          return NextResponse.redirect(`${request.nextUrl.origin}/account-deactivated`);
+        }
+      }
+    } catch (err) {
+      // Ignore errors, allow through
+    }
+  }
+
   // Check if the request path matches any of our rate-limited routes
   const isRateLimitedRoute = RATE_LIMITED_ROUTES.some(route => 
     request.nextUrl.pathname.startsWith(route)

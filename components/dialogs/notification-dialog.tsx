@@ -78,7 +78,7 @@ export function NotificationDialog({
   role?: "founder" | "investor" | undefined;
   userId: string;
 }) {
-  const [activeTab, setActiveTab] = useState<UITab>("all");
+  const [activeTab, setActiveTab] = useState<UITab>("updates");
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationDetails, setNotificationDetails] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);

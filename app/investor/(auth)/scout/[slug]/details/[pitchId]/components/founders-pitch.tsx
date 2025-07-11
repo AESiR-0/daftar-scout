@@ -247,14 +247,7 @@ export function FoundersPitchSection({
     if (sectors.length === 0) return "";
     if (sectors.length === 1) return sectors[0];
     if (sectors.length === 2) return `${sectors[0]} and ${sectors[1]}`;
-
-    return (
-      sectors.slice(0, -2).join(", ") +
-      ", " +
-      sectors.slice(-2, -1) +
-      " and " +
-      sectors.slice(-1)
-    );
+    return `${sectors.slice(0, -1).join(", ")}, and ${sectors[sectors.length - 1]}`;
   };
 
   return (

@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button";
 import { useIsScoutLocked } from "@/contexts/isScoutLockedContext";
 import { useToast } from "@/hooks/use-toast";
 import "leaflet/dist/leaflet.css";
+import { createPortal } from "react-dom";
+import { ReactNode } from "react";
 
 // Custom Leaflet marker icon using online URLs
 const customIcon = new L.Icon({
@@ -135,6 +137,188 @@ function debounce(fn: Function, delay: number) {
   };
 }
 
+// Define types for modal props
+type AudienceFiltersModalProps = {
+  open: boolean;
+  onClose: () => void;
+  initialValues: {
+    scoutCommunity: string;
+    targetedGender: string;
+    scoutStage: string;
+    scoutSector: string[];
+    ageRange: [string, string];
+  };
+  onApply: (args: {
+    scoutCommunity: string;
+    targetedGender: string;
+    scoutStage: string;
+    scoutSector: string[];
+    ageRange: [string, string];
+  }) => void;
+  isLocked: boolean;
+  communities: { value: string; label: string }[];
+  genders: { value: string; label: string }[];
+  stages: { value: string; label: string }[];
+  sectors: { value: string; label: string }[];
+  Combobox: React.ComponentType<any>;
+  AgeRange: React.ComponentType<any>;
+};
+
+function AudienceFiltersModal({
+  open,
+  onClose,
+  initialValues,
+  onApply,
+  isLocked,
+  communities,
+  genders,
+  stages,
+  sectors,
+  Combobox,
+  AgeRange,
+}: AudienceFiltersModalProps) {
+  const [tempScoutCommunity, setTempScoutCommunity] = useState(initialValues.scoutCommunity);
+  const [tempTargetedGender, setTempTargetedGender] = useState(initialValues.targetedGender);
+  const [tempScoutStage, setTempScoutStage] = useState(initialValues.scoutStage);
+  const [tempScoutSector, setTempScoutSector] = useState(initialValues.scoutSector);
+  const [tempAgeRange, setTempAgeRange] = useState<[string, string]>(initialValues.ageRange);
+  const handleSectorSelect = (value: string) => {
+    setTempScoutSector((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
+  const clearFilters = () => {
+    setTempScoutCommunity("");
+    setTempTargetedGender("");
+    setTempScoutStage("");
+    setTempScoutSector([]);
+    setTempAgeRange(["18", "65"]);
+  };
+  const applyFilters = () => {
+    onApply({
+      scoutCommunity: tempScoutCommunity,
+      targetedGender: tempTargetedGender,
+      scoutStage: tempScoutStage,
+      scoutSector: tempScoutSector,
+      ageRange: tempAgeRange,
+    });
+    onClose();
+  };
+  if (!open || typeof window === "undefined") return null;
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+      aria-modal="true"
+      role="dialog"
+      onClick={onClose}
+    >
+      <div
+        className="max-w-md w-full bg-[#1a1a1a] text-white border-none rounded-[0.35rem] p-6 relative"
+        onClick={e => e.stopPropagation()}
+        role="document"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold">Audience Filters</h2>
+          <button
+            className="text-white hover:text-gray-300 text-2xl leading-none"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          If you a community, sector, or stage that you are specifically scouting for is not available in our list, just message us through support in your profile. We’ll update it within 12 hours.( notification will be sent to you )
+        </p>
+        <form action="" onSubmit={e => e.preventDefault()}>
+          <div className="space-y-6 py-4">
+            <div>
+              <Combobox
+                options={communities}
+                value={tempScoutCommunity}
+                onSelect={setTempScoutCommunity}
+                placeholder="Select a Community"
+                disabled={isLocked}
+              />
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <AgeRange
+                  minAge={tempAgeRange[0]}
+                  maxAge={tempAgeRange[1]}
+                  onMinChange={(value: string) => setTempAgeRange([value, tempAgeRange[1]])}
+                  onMaxChange={(value: string) => setTempAgeRange([tempAgeRange[0], value])}
+                  disabled={isLocked}
+                />
+              </div>
+              <div className="flex-1">
+                <Combobox
+                  options={genders}
+                  value={tempTargetedGender}
+                  onSelect={setTempTargetedGender}
+                  placeholder="Select Gender"
+                  disabled={isLocked}
+                />
+              </div>
+            </div>
+            <div>
+              <Combobox
+                options={stages}
+                value={tempScoutStage}
+                onSelect={setTempScoutStage}
+                placeholder="Select a Startup Stage"
+                disabled={isLocked}
+              />
+            </div>
+            <div className="space-y-2">
+              <Combobox
+                options={sectors}
+                value={tempScoutSector}
+                onSelect={handleSectorSelect}
+                placeholder="Add Sectors (Multiple Select)"
+                multiple
+                disabled={isLocked}
+              />
+              <div className="flex flex-wrap gap-2 mt-3">
+                {tempScoutSector.map((sector, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className={`text-xs ${!isLocked ? 'cursor-pointer hover:bg-muted' : ''} bg-[#2a2a2a] text-white rounded-[0.35rem]`}
+                    onClick={() => !isLocked && handleSectorSelect(sector)}
+                  >
+                    {sector} {!isLocked && <X className="h-3 w-3 ml-1" />}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        </form>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button
+            variant="outline"
+            className="rounded-[0.35rem]"
+            onClick={clearFilters}
+            disabled={isLocked}
+          >
+            Clear Filters
+          </Button>
+          <Button
+            className="bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
+            onClick={applyFilters}
+            disabled={isLocked}
+          >
+            Apply
+          </Button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export default function AudiencePage() {
   const pathname = usePathname();
   const scoutId = pathname.split("/")[3];
@@ -157,11 +341,6 @@ export default function AudiencePage() {
   const [sectors, setSectors] = useState<{ value: string; label: string }[]>(
     []
   );
-  const [tempScoutCommunity, setTempScoutCommunity] = useState<string>("");
-  const [tempTargetedGender, setTempTargetedGender] = useState<string>("");
-  const [tempScoutStage, setTempScoutStage] = useState<string>("");
-  const [tempScoutSector, setTempScoutSector] = useState<string[]>([]);
-  const [tempAgeRange, setTempAgeRange] = useState<[number, number]>([18, 65]);
 
   // Combobox component
   const Combobox = ({
@@ -241,26 +420,52 @@ export default function AudiencePage() {
     onMinChange: (value: string) => void;
     onMaxChange: (value: string) => void;
     disabled?: boolean;
-  }) => (
-    <div className="flex gap-2">
-      <Input
-        type="number"
-        value={minAge}
-        onChange={(e) => onMinChange(e.target.value)}
-        placeholder="Min"
-        className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
-        disabled={disabled}
-      />
-      <Input
-        type="number"
-        value={maxAge}
-        onChange={(e) => onMaxChange(e.target.value)}
-        placeholder="Max"
-        className="bg-[#1a1a1a] text-white rounded-[0.35rem]"
-        disabled={disabled}
-      />
-    </div>
-  );
+  }) => {
+    const { toast } = useToast();
+    // Only allow digits (and empty string)
+    const handleMinChange = (value: string) => {
+      if (/^\d*$/.test(value)) {
+        const min = parseInt(value, 10);
+        const max = parseInt(maxAge, 10);
+        if (min > 150) return;
+        if (maxAge && min > max) return; // Prevent min > max
+        onMinChange(value);
+      }
+    };
+    const handleMaxChange = (value: string) => {
+      if (/^\d*$/.test(value)) {
+        const max = parseInt(value, 10);
+        const min = parseInt(minAge, 10);
+        if (max > 150) return;
+        if (minAge && max < min) return; // Prevent max < min
+        onMaxChange(value);
+      }
+    };
+    return (
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={minAge}
+          onChange={e => handleMinChange(e.target.value)}
+          placeholder="Min"
+          className="bg-[#1a1a1a] text-white rounded-[0.35rem] w-full h-9 px-3 border border-input"
+          disabled={disabled}
+          inputMode="numeric"
+          pattern="[0-9]*"
+        />
+        <input
+          type="text"
+          value={maxAge}
+          onChange={e => handleMaxChange(e.target.value)}
+          placeholder="Max"
+          className="bg-[#1a1a1a] text-white rounded-[0.35rem] w-full h-9 px-3 border border-input"
+          disabled={disabled}
+          inputMode="numeric"
+          pattern="[0-9]*"
+        />
+      </div>
+    );
+  };
 
   // Fetch sectors data
   const fetchSectorsData = async () => {
@@ -294,14 +499,6 @@ export default function AudiencePage() {
       setScoutSector(parsed.scoutSector ?? []);
       setTargetAudAgeStart(parsed.targetAudAgeStart ?? 18);
       setTargetAudAgeEnd(parsed.targetAudAgeEnd ?? 65);
-      setTempScoutCommunity(parsed.scoutCommunity ?? "");
-      setTempTargetedGender(parsed.targetedGender ?? "");
-      setTempScoutStage(parsed.scoutStage ?? "");
-      setTempScoutSector(parsed.scoutSector ?? []);
-      setTempAgeRange([
-        parsed.targetAudAgeStart ?? 18,
-        parsed.targetAudAgeEnd ?? 65,
-      ]);
 
       if (parsed.targetAudLocation) {
         setTargetAudLocation(parsed.targetAudLocation);
@@ -317,14 +514,6 @@ export default function AudiencePage() {
       setScoutSector(defaults.scoutSector ?? []);
       setTargetAudAgeStart(defaults.targetAudAgeStart ?? 18);
       setTargetAudAgeEnd(defaults.targetAudAgeEnd ?? 65);
-      setTempScoutCommunity(defaults.scoutCommunity ?? "");
-      setTempTargetedGender(defaults.targetedGender ?? "");
-      setTempScoutStage(defaults.scoutStage ?? "");
-      setTempScoutSector(defaults.scoutSector ?? []);
-      setTempAgeRange([
-        defaults.targetAudAgeStart ?? 18,
-        defaults.targetAudAgeEnd ?? 65,
-      ]);
     }
   };
 
@@ -419,50 +608,6 @@ export default function AudiencePage() {
     }
   };
 
-  // Handle apply filters in dialog
-  const applyFilters = () => {
-    setScoutCommunity(tempScoutCommunity);
-    setTargetedGender(tempTargetedGender);
-    setScoutStage(tempScoutStage);
-    setScoutSector(tempScoutSector);
-    setTargetAudAgeStart(tempAgeRange[0]);
-    setTargetAudAgeEnd(tempAgeRange[1]);
-
-    try {
-      const formData = AudienceSchema.parse({
-        targetAudLocation,
-        scoutCommunity: tempScoutCommunity,
-        targetedGender: tempTargetedGender,
-        scoutStage: tempScoutStage,
-        scoutSector: tempScoutSector,
-        targetAudAgeStart: tempAgeRange[0],
-        targetAudAgeEnd: tempAgeRange[1],
-      });
-      saveData(formData);
-    } catch (error) {
-      console.error("Validation error on apply filters:", error);
-    }
-
-    setOpenFilters(false);
-  };
-
-  // Handle multi-select for sectors
-  const handleSectorSelect = (value: string) => {
-    setTempScoutSector((prev) =>
-      prev.includes(value)
-        ? prev.filter((item) => item !== value)
-        : [...prev, value]
-    );
-  };
-
-  const clearFilters = () => {
-    setTempScoutCommunity("");
-    setTempTargetedGender("");
-    setTempScoutStage("");
-    setTempScoutSector([]);
-    setTempAgeRange([18, 65]);
-  };
-
   if (isLockLoading) {
     return <p className="text-muted-foreground">Loading...</p>;
   }
@@ -512,109 +657,57 @@ export default function AudiencePage() {
 
         {/* Filters Button and Dialog */}
         <div className="z-10">
-          <Dialog open={openFilters} onOpenChange={setOpenFilters}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="rounded-[0.35rem]"
-              >
-                Edit Audience Filters
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md bg-[#1a1a1a] text-white border-none rounded-[0.35rem]">
-              <DialogHeader>
-                <DialogTitle>Audience Filters</DialogTitle>
-                <DialogDescription>
-                  <p className="text-sm text-muted-foreground">
-                    If you a community, sector, or stage that you are specifically scouting for is not available in our list, just message us through support in your profile. We’ll update it within 12 hours.( notification will be sent to you )
-                  </p>
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-6 py-4">
-                <div>
-                  <Combobox
-                    options={communities}
-                    value={tempScoutCommunity}
-                    onSelect={(value) => setTempScoutCommunity(value)}
-                    placeholder="Select a Community"
-                    disabled={isLocked}
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <AgeRange
-                      minAge={tempAgeRange[0].toString()}
-                      maxAge={tempAgeRange[1].toString()}
-                      onMinChange={(value) =>
-                        setTempAgeRange([Number(value), tempAgeRange[1]])
-                      }
-                      onMaxChange={(value) =>
-                        setTempAgeRange([tempAgeRange[0], Number(value)])
-                      }
-                      disabled={isLocked}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Combobox
-                      options={genders}
-                      value={tempTargetedGender}
-                      onSelect={(value) => setTempTargetedGender(value)}
-                      placeholder="Select Gender"
-                      disabled={isLocked}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Combobox
-                    options={stages}
-                    value={tempScoutStage}
-                    onSelect={(value) => setTempScoutStage(value)}
-                    placeholder="Select a Startup Stage"
-                    disabled={isLocked}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Combobox
-                    options={sectors}
-                    value={tempScoutSector}
-                    onSelect={handleSectorSelect}
-                    placeholder="Add Sectors (Multiple Select)"
-                    multiple
-                    disabled={isLocked}
-                  />
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {tempScoutSector.map((sector, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className={`text-xs ${!isLocked ? 'cursor-pointer hover:bg-muted' : ''} bg-[#2a2a2a] text-white rounded-[0.35rem]`}
-                        onClick={() => !isLocked && handleSectorSelect(sector)}
-                      >
-                        {sector} {!isLocked && <X className="h-3 w-3 ml-1" />}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  className="rounded-[0.35rem]"
-                  onClick={clearFilters}
-                  disabled={isLocked}
-                >
-                  Clear Filters
-                </Button>
-                <Button
-                  className="bg-blue-500 hover:bg-blue-600 rounded-[0.35rem]"
-                  onClick={applyFilters}
-                  disabled={isLocked}
-                >
-                  Apply
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button
+            variant="outline"
+            className="rounded-[0.35rem]"
+            onClick={() => setOpenFilters(true)}
+          >
+            Edit Audience Filters
+          </Button>
+          {openFilters && (
+            <AudienceFiltersModal
+              open={openFilters}
+              onClose={() => setOpenFilters(false)}
+              initialValues={{
+                scoutCommunity,
+                targetedGender,
+                scoutStage,
+                scoutSector,
+                ageRange: [targetAudAgeStart.toString(), targetAudAgeEnd.toString()],
+              }}
+              onApply={({ scoutCommunity, targetedGender, scoutStage, scoutSector, ageRange }) => {
+                const minAgeInt = parseInt(ageRange[0], 10) || 0;
+                const maxAgeInt = parseInt(ageRange[1], 10) || 0;
+                setScoutCommunity(scoutCommunity);
+                setTargetedGender(targetedGender);
+                setScoutStage(scoutStage);
+                setScoutSector(scoutSector);
+                setTargetAudAgeStart(minAgeInt);
+                setTargetAudAgeEnd(maxAgeInt);
+                try {
+                  const formData = AudienceSchema.parse({
+                    targetAudLocation,
+                    scoutCommunity,
+                    targetedGender,
+                    scoutStage,
+                    scoutSector,
+                    targetAudAgeStart: minAgeInt,
+                    targetAudAgeEnd: maxAgeInt,
+                  });
+                  saveData(formData);
+                } catch (error) {
+                  console.error("Validation error on apply filters:", error);
+                }
+              }}
+              isLocked={isLocked}
+              communities={communities}
+              genders={genders}
+              stages={stages}
+              sectors={sectors}
+              Combobox={Combobox}
+              AgeRange={AgeRange}
+            />
+          )}
         </div>
       </div>
     </div>

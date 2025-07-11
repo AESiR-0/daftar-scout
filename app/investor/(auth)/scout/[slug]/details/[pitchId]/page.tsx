@@ -13,7 +13,7 @@ import { InvestorsNote } from "./components/investors-note";
 import DocumentsSection from "./components/documents-section";
 import { FoundersPitchSection } from "./components/founders-pitch";
 import { TeamAnalysisSection } from "./components/team-analysis";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams, useRouter as useNextRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { MakeOfferSection } from "./components/make-offer-section";
 import { DeclinePitchDialog } from "./components/decline-pitch-dialog";
@@ -159,52 +159,46 @@ const getInitials = (name: string) => {
 };
 
 const MemberCard = ({ member }: { member: TeamMember }) => (
-  <div className="bg-[#1a1a1a] p-6 rounded-[0.35rem]">
-    <div className="flex justify-between items-start">
-      <div className="gap-4">
-        <Avatar className="h-56 w-56 rounded-[0.35rem]">
-          {member.imageUrl ? (
-            <AvatarImage
-              src={member.imageUrl}
-              alt={member.firstName}
-              className="rounded-[0.35rem]"
-            />
-          ) : (
-            <AvatarFallback className="rounded-[0.35rem] text-xl">
-              {getInitials(`${member.firstName} ${member.lastName}`)}
-            </AvatarFallback>
-          )}
-        </Avatar>
-        <div className="mt-2">
-          <div className="flex items-center gap-2">
-            <h4 className="text-xl font-medium">
-              {member.firstName} {member.lastName}
-            </h4>
+  <div className="bg-[#1a1a1a] p-2 rounded-[0.35rem] w-56 flex flex-col h-auto min-h-[320px]">
+    <div className="flex flex-col items-center gap-4">
+      <Avatar className="h-40 w-40 rounded-[0.35rem] mb-2">
+        {member.imageUrl ? (
+          <AvatarImage
+            src={member.imageUrl}
+            alt={member.firstName}
+            className="rounded-[0.35rem] object-cover h-40 w-40"
+          />
+        ) : (
+          <AvatarFallback className="rounded-[0.35rem] text-xl">
+            {getInitials(`${member.firstName} ${member.lastName}`)}
+          </AvatarFallback>
+        )}
+      </Avatar>
+      <div className="w-full flex flex-col items-center">
+        <h4 className="text-xl font-medium text-center">
+          {member.firstName} {member.lastName}
+        </h4>
+        <p className="text-sm mt-1 text-muted-foreground text-center">
+          {member.designation}
+        </p>
+        <div className="space-y-1 mt-2 text-sm text-muted-foreground w-full text-center">
+          <div className="flex justify-center gap-2">
+            <span>{member.age}</span>
+            <span>{member.gender}</span>
           </div>
-          <p className="text-sm mt-1 text-muted-foreground">
-            {member.designation}
+          <div className="flex justify-center gap-2">
+            <p>{member.email}</p>
+          </div>
+          <div className="flex justify-center gap-2">
+            <p>{formatPhoneNumber(member.phone)}</p>
+          </div>
+          <div className="flex justify-center gap-2">
+            <p>{member.location}</p>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Preferred languages to connect with investors:<br />
+            {member.language.join(", ")}
           </p>
-          <div className="">
-            <div className="space-y-1 mt-1 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <span>{member.age}</span>
-                <span>{member.gender}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <p>{member.email}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <p>{formatPhoneNumber(member.phone)}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <p>{member.location}</p>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Preferred languages to connect with investors: <br />
-                {member.language.join(", ")}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -215,7 +209,18 @@ const MemberCard = ({ member }: { member: TeamMember }) => (
 export default function PitchDetailsPage() {
   const { toast } = useToast();
   const { selectedDaftar, isLoading: isDaftarLoading } = useDaftar();
-  const [activeSection, setActiveSection] = useState("founders-pitch");
+  const params = useParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const pitchId = pathname.split("/")[5];
+  const scoutId = pathname.split("/")[3];
+  const searchParams = useSearchParams();
+  const nextRouter = useNextRouter();
+  
+  // Get initial tab from URL or default to "founders-pitch"
+  const initialTab = searchParams.get("tab") || "founders-pitch";
+  const [activeSection, setActiveSection] = useState(initialTab);
+  
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [scheduleMeetingOpen, setScheduleMeetingOpen] = useState(false);
   const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
@@ -223,12 +228,27 @@ export default function PitchDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
-  const params = useParams();
-  const pathname = usePathname();
-  const router = useRouter();
-  const pitchId = pathname.split("/")[5];
-  const scoutId = pathname.split("/")[3];
   const [userId, setUserId] = useState<string | null>(null);
+
+  // Sync tab state with query param and ensure URL is set on first load
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam && fields.some(f => f.id === tabParam)) {
+      setActiveSection(tabParam);
+    } else if (!tabParam) {
+      // If no tab param exists, set it to the default
+      const params = new URLSearchParams(Array.from(searchParams.entries()));
+      params.set("tab", "founders-pitch");
+      nextRouter.replace(`${pathname}?${params.toString()}`);
+    }
+  }, [searchParams, pathname, nextRouter]);
+
+  const setTabWithQuery = (tabId: string) => {
+    setActiveSection(tabId);
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    params.set("tab", tabId);
+    nextRouter.replace(`${pathname}?${params.toString()}`);
+  };
 
   // Fetch user data
   useEffect(() => {
@@ -609,7 +629,7 @@ export default function PitchDetailsPage() {
           {fields.map((section) => (
             <button
               key={section.id}
-              onClick={() => setActiveSection(section.id)}
+              onClick={() => setTabWithQuery(section.id)}
               className={cn(
                 "relative px-3 py-2 text-sm transition-colors",
                 activeSection === section.id
@@ -658,61 +678,60 @@ export default function PitchDetailsPage() {
           <div className="space-y-6 mt-4">
             <Card className="border-none bg-[#0e0e0e]">
               <CardContent>
-                <div className="grid grid-cols-2 gap-8">
-                  <div>
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 xl:max-w-[1600px] xl:mx-auto">
+                  <div className="xl:col-span-2">
                     <h3 className="text-lg font-medium mb-4">
-                      Team Members ({pitchDetails.teamMembers.length})
+                      Team Members ({Array.isArray(pitchDetails.teamMembers) ? pitchDetails.teamMembers.length : 0})
                     </h3>
-                    <div className=" grid grid-cols-2 gap-5 ">
-                      {pitchDetails.teamMembers.map((member) => {
-                        const transformedMember: TeamMember = {
-                          id: `${member.firstName}-${member.lastName}`,
-                          firstName: member.firstName,
-                          lastName: member.lastName,
-                          email: member.email,
-                          phone: member.phone,
-                          location: member.location,
-                          imageUrl: member.imageUrl,
-                          designation: member.designation,
-                          language: member.language,
-                          age: member.age,
-                          gender: member.gender,
-                        };
-                        return (
-                          <MemberCard
-                            key={transformedMember.id}
-                            member={transformedMember}
-                          />
-                        );
-                      })}
+                    <div className="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+                      {Array.isArray(pitchDetails.teamMembers) && pitchDetails.teamMembers.length > 0 ? (
+                        pitchDetails.teamMembers.map((member, idx) => {
+                          if (!member || !member.firstName || !member.lastName) return null;
+                          const transformedMember: TeamMember = {
+                            id: `${member.firstName}-${member.lastName}-${idx}`,
+                            firstName: member.firstName,
+                            lastName: member.lastName,
+                            email: member.email || "",
+                            phone: member.phone || "",
+                            location: member.location || "",
+                            imageUrl: member.imageUrl,
+                            designation: member.designation || "",
+                            language: Array.isArray(member.language) ? member.language : [],
+                            age: member.age || "",
+                            gender: member.gender || "",
+                          };
+                          return (
+                            <MemberCard
+                              key={transformedMember.id}
+                              member={transformedMember}
+                            />
+                          );
+                        })
+                      ) : (
+                        <div className="col-span-2 text-muted-foreground">No team members available.</div>
+                      )}
                     </div>
                   </div>
-                  {/* agregate data */}
-                  <div className="grid grid-cols-2 gap-4 mt-[2.75rem]">
-                    <div className=" space-y-6">
-                      <div>
-                        <div className="space-y-6">
-                          <Card className="border-none bg-[#1a1a1a] p-4">
-                            <h4 className="text-sm font-medium mb-2">
-                              Gender Ratio
-                            </h4>
-                            <div className="h-[200px]">
-                              <PieChart data={genderData} />
-                            </div>
-                          </Card>
-                        </div>
+                  {/* aggregate data */}
+                  <div className="flex flex-col gap-4 xl:mt-[2.75rem] xl:min-w-[320px] xl:max-w-[400px]">
+                    <Card className="border-none bg-[#1a1a1a] p-4">
+                      <h4 className="text-sm font-medium mb-2">
+                        Gender Ratio
+                      </h4>
+                      <div className="h-[200px]">
+                        <PieChart data={genderData} />
                       </div>
-                    </div>
-                    <div className="">
-                      <Card className="border-none bg-[#1a1a1a] p-4 mb-2">
-                        Average Age: {averageAge.toFixed(1)}
-                      </Card>
-                      <Card className="border-none bg-[#1a1a1a] p-4">
-                        <h4 className="text-sm font-medium mb-4">
-                          Preferred Languages to Connect with Investors
-                        </h4>
-                        <div className="space-y-2">
-                          {languageData.map(([language, count]) => (
+                    </Card>
+                    <Card className="border-none bg-[#1a1a1a] p-4 mb-2">
+                      Average Age: {isNaN(averageAge) ? "-" : averageAge.toFixed(1)}
+                    </Card>
+                    <Card className="border-none bg-[#1a1a1a] p-4">
+                      <h4 className="text-sm font-medium mb-4">
+                        Preferred Languages to Connect with Investors
+                      </h4>
+                      <div className="space-y-2">
+                        {Array.isArray(languageData) && languageData.length > 0 ? (
+                          languageData.map(([language, count]) => (
                             <div
                               key={language}
                               className="flex items-center justify-between p-2 rounded-md bg-background"
@@ -720,10 +739,12 @@ export default function PitchDetailsPage() {
                               <span className="text-sm">{language}</span>
                               <Badge variant="secondary">{count}</Badge>
                             </div>
-                          ))}
-                        </div>
-                      </Card>
-                    </div>
+                          ))
+                        ) : (
+                          <div className="text-muted-foreground">No language data available.</div>
+                        )}
+                      </div>
+                    </Card>
                   </div>
                 </div>
               </CardContent>

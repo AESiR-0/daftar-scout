@@ -16,7 +16,7 @@ import {
 import { focusSectors } from "@/backend/drizzle/models/pitch";
 import { scoutQuestions } from "@/backend/drizzle/models/scouts";
 import { auth } from "@/auth";
-import { eq, inArray, and } from "drizzle-orm";
+import { eq, inArray, and, ne } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -64,7 +64,10 @@ export async function GET(req: NextRequest) {
         createdAt: pitch.createdAt,
       })
       .from(pitch)
-      .where(eq(pitch.id, pitchId))
+      .where(and(
+        eq(pitch.id, pitchId),
+        ne(pitch.status, "deleted") // Exclude deleted pitches
+      ))
       .limit(1);
 
     if (!pitchData[0]) {
@@ -73,7 +76,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch focus sectors
     const sectors = await db
-      .select({ sectorName: focusSectors.sectorName })
+      .select({ sectorName: focusSectors.sectorName })  
       .from(pitchFocusSectors)
       .innerJoin(
         focusSectors,

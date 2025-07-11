@@ -9,7 +9,7 @@ import {
   ChevronDown,
   ArrowLeft,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { VideoDialog } from "@/components/dialogs/demo-dialog";
 
@@ -32,6 +32,7 @@ export function TopNav({ role }: { role: string }) {
   const navActions =
     role === "investor" ? topNavConfig["investor"] : topNavConfig["founder"];
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const scoutId = pathname.split("/")[3];
   const [profileOpen, setProfileOpen] = useState(false);
@@ -44,6 +45,9 @@ export function TopNav({ role }: { role: string }) {
   const [hasNewProfileUpdates, setHasNewProfileUpdates] = useState(true);
   const [studioEntryPoint, setStudioEntryPoint] = useState<string>("");
   const [avatarImage, setAvatarImage] = useState<string>("");
+
+  // Get the active tab from query parameters
+  const activeTab = searchParams.get("tab") || "dealBoard";
 
   // Only show search on specific pages
   const showSearch =
@@ -202,9 +206,12 @@ export function TopNav({ role }: { role: string }) {
             </div>
           ))}
 
-          <div onClick={() => router.push("/founder/pitch")}>
-            <BookmarkFilter />
-          </div>
+          {/* Only show bookmark filter on founder pitch page when scout tab is active */}
+          {role === "founder" && pathname === "/founder/pitch" && activeTab === "scout" && (
+            <div onClick={() => router.push("/founder/pitch")}>
+              <BookmarkFilter />
+            </div>
+          )}
 
           <div className="relative">
             <Button

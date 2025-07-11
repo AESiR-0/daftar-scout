@@ -95,8 +95,8 @@ export default function SchedulePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           scoutId,
-          lastDayToPitch: lastPitchDate?.toISOString(),
-          programLaunchDate: launchDate?.toISOString(),
+          lastDayToPitch: lastPitchDate ? format(lastPitchDate, "yyyy-MM-dd") : undefined,
+          programLaunchDate: launchDate ? format(launchDate, "yyyy-MM-dd") : undefined,
         }),
       });
 
