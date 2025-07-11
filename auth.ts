@@ -11,29 +11,29 @@ import {
 } from "@/backend/drizzle/models/users";
 import { sendWelcomeEmail } from "@/lib/notifications/listen";
 
-const ALLOWED_EMAILS = [
-  "workbyprat@gmail.com",
-  "ladraunak2@gmail.com",
-  "pancham@adengage.in",
-  "pratiechellani@gmail.com",
-  "cyborgkiller1008@gmail.com",
-  "ladraunak@gmail.com",
-  "daftarosbackup@gmail.com",
-  "ayushya2002@gmail.com",
-  "parv.shroff@gmail.com",
-  "tandonshaurya92@gmail.com",
-  "zishan.ux@gmail.com",
-  "sanketshetty26@gmail.com",
-  "laadparul@gmail.com",
-  "daftarosdummy@gmail.com",
-  "dip4esh@gmail.com",
-  "laad.vishal@gmail.com",
-  "avijit@adengage.in",
-  "nitukthakur20@gmail.com",
-  "prathamesh@adengage.in",
-  "rohil9@gmail.com",
-  "vermavandita20@gmail.com"
-];
+// const ALLOWED_EMAILS = [
+//   "workbyprat@gmail.com",
+//   "ladraunak2@gmail.com",
+//   "pancham@adengage.in",
+//   "pratiechellani@gmail.com",
+//   "cyborgkiller1008@gmail.com",
+//   "ladraunak@gmail.com",
+//   "daftarosbackup@gmail.com",
+//   "ayushya2002@gmail.com",
+//   "parv.shroff@gmail.com",
+//   "tandonshaurya92@gmail.com",
+//   "zishan.ux@gmail.com",
+//   "sanketshetty26@gmail.com",
+//   "laadparul@gmail.com",
+//   "daftarosdummy@gmail.com",
+//   "dip4esh@gmail.com",
+//   "laad.vishal@gmail.com",
+//   "avijit@adengage.in",
+//   "nitukthakur20@gmail.com",
+//   "prathamesh@adengage.in",
+//   "rohil9@gmail.com",
+//   "vermavandita20@gmail.com"
+// ];
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -75,9 +75,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!user.email || !account) return false;
 
       // Check if the email is in the allowed list
-      if (!ALLOWED_EMAILS.includes(user.email)) {
-        throw new Error("You cannot proceed, please have some patience and wait for the launch");
-      }
+      // if (!ALLOWED_EMAILS.includes(user.email)) {
+      //   throw new Error("You cannot proceed, please have some patience and wait for the launch");
+      // }
 
       // Find an existing user by email
       const existingUser = await db
