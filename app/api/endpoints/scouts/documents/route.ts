@@ -143,12 +143,22 @@ export async function GET(req: Request) {
           : null,
         isUploadedByCurrentUser: doc.uploadedBy === userResult[0].id,
       };
+      
+      // Categorize documents properly
       if (doc.uploadedBy === userResult[0].id) {
-        sent.push(baseDoc);
-      } else if (uploader?.role === "investor" && doc.isPrivate) {
-        privateDocs.push(baseDoc);
+        // Documents uploaded by current user
+        if (doc.isPrivate) {
+          privateDocs.push(baseDoc);
+        } else {
+          sent.push(baseDoc);
+        }
       } else {
-        received.push(baseDoc);
+        // Documents uploaded by other users
+        if (doc.isPrivate && uploader?.role === "investor") {
+          privateDocs.push(baseDoc);
+        } else {
+          received.push(baseDoc);
+        }
       }
     });
 

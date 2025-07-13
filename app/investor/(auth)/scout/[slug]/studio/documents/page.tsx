@@ -117,35 +117,85 @@ export default function DocumentsPage() {
       const data = await response.json();
 
       // Handle empty data case
-      if (!data || !Array.isArray(data)) {
+      if (!data || typeof data !== 'object') {
         setDocumentsList([]);
         return;
       }
 
-      const mappedDocuments: Document[] = data.map((doc: ApiDocument) => ({
-        id: doc.id,
-        name: doc.docName,
-        uploadedBy: {
-          id: doc.uploadedBy?.id || "unknown",
-          name: doc.uploadedBy ? `${doc.uploadedBy.firstName || ''} ${doc.uploadedBy.lastName || ''}`.trim() || "Unknown User" : "Unknown User",
-          daftarId: doc.daftarId
-        },
-        daftar: {
-          id: doc.daftarId,
-          name: doc.daftarName || "Unknown Daftar"
-        },
-        url: doc.docUrl,
-        uploadedAt: formatDate(doc.uploadedAt),
-        type: doc.isPrivate ? "private" : "sent",
-        size: `${(doc.size / (1024 * 1024)).toFixed(3)} MB`,
-        isHidden: false,
-        documentType: doc.docType as "regular" | "pitchDocument",
-        visibility: doc.isPrivate ? "private" : "investors_only",
-        isPrivate: doc.isPrivate,
-        isUploadedByCurrentUser: true
-      }));
+      // The API returns { sent, received, private } structure
+      const { sent = [], received = [], private: privateDocs = [] } = data;
 
-      setDocumentsList(mappedDocuments);
+      // Combine all documents and add proper categorization
+      const allDocuments: Document[] = [
+        ...sent.map((doc: any) => ({
+          id: doc.id,
+          name: doc.docName,
+          uploadedBy: {
+            id: doc.uploadedBy?.id || "unknown",
+            name: doc.uploadedBy ? `${doc.uploadedBy.firstName || ''} ${doc.uploadedBy.lastName || ''}`.trim() || "Unknown User" : "Unknown User",
+            daftarId: doc.daftarId
+          },
+          daftar: {
+            id: doc.daftarId,
+            name: doc.daftarName || "Unknown Daftar"
+          },
+          url: doc.docUrl,
+          uploadedAt: formatDate(doc.uploadedAt),
+          type: "sent" as const,
+          size: `${(doc.size / (1024 * 1024)).toFixed(3)} MB`,
+          isHidden: false,
+          documentType: doc.docType as "regular" | "pitchDocument",
+          visibility: "investors_only" as const,
+          isPrivate: doc.isPrivate,
+          isUploadedByCurrentUser: true
+        })),
+        ...received.map((doc: any) => ({
+          id: doc.id,
+          name: doc.docName,
+          uploadedBy: {
+            id: doc.uploadedBy?.id || "unknown",
+            name: doc.uploadedBy ? `${doc.uploadedBy.firstName || ''} ${doc.uploadedBy.lastName || ''}`.trim() || "Unknown User" : "Unknown User",
+            daftarId: doc.daftarId
+          },
+          daftar: {
+            id: doc.daftarId,
+            name: doc.daftarName || "Unknown Daftar"
+          },
+          url: doc.docUrl,
+          uploadedAt: formatDate(doc.uploadedAt),
+          type: "received" as const,
+          size: `${(doc.size / (1024 * 1024)).toFixed(3)} MB`,
+          isHidden: false,
+          documentType: doc.docType as "regular" | "pitchDocument",
+          visibility: "investors_only" as const,
+          isPrivate: doc.isPrivate,
+          isUploadedByCurrentUser: false
+        })),
+        ...privateDocs.map((doc: any) => ({
+          id: doc.id,
+          name: doc.docName,
+          uploadedBy: {
+            id: doc.uploadedBy?.id || "unknown",
+            name: doc.uploadedBy ? `${doc.uploadedBy.firstName || ''} ${doc.uploadedBy.lastName || ''}`.trim() || "Unknown User" : "Unknown User",
+            daftarId: doc.daftarId
+          },
+          daftar: {
+            id: doc.daftarId,
+            name: doc.daftarName || "Unknown Daftar"
+          },
+          url: doc.docUrl,
+          uploadedAt: formatDate(doc.uploadedAt),
+          type: "private" as const,
+          size: `${(doc.size / (1024 * 1024)).toFixed(3)} MB`,
+          isHidden: false,
+          documentType: doc.docType as "regular" | "pitchDocument",
+          visibility: "private" as const,
+          isPrivate: doc.isPrivate,
+          isUploadedByCurrentUser: true
+        }))
+      ];
+
+      setDocumentsList(allDocuments);
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast({
@@ -217,12 +267,14 @@ export default function DocumentsPage() {
         setIsUploading(true);
         for (const file of Array.from(files)) {
           try {
+            // First upload the file to S3
             const url = await uploadInvestorPitchDocument(file, scoutId);
 
             if (!url) {
               throw new Error("Failed to get upload URL");
             }
 
+            // Then create the document record in the database
             const response = await fetch("/api/endpoints/scouts/documents", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
