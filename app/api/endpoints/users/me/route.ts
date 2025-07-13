@@ -17,6 +17,8 @@ export async function GET() {
         name: users.name,
         email: users.email,
         role: users.role,
+        isActive: users.isActive,
+        isArchived: users.isArchived,
       })
       .from(users)
       .where(eq(users.email, session.user.email))

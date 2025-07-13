@@ -10,6 +10,7 @@ import { eq, inArray, or, not, and, sql, isNotNull } from "drizzle-orm";
 import { auth } from "@/auth"; // Assuming you have an auth utility
 import { users } from "@/backend/drizzle/models/users"; // Assuming you have a users table
 import { daftar, daftarInvestors } from "@/backend/drizzle/models/daftar"; // Assuming you have an investordaftar table
+import { pitch, pitchTeam } from "@/backend/drizzle/models/pitch";
 import { createNotification } from "@/lib/notifications/insert";
 
 const defaultQuestions = [
@@ -415,48 +416,101 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Scout not found" }, { status: 404 });
     }
 
-    // Get all active members of the daftar
-    const daftarMembers = await db
-      .select({
-        investorId: daftarInvestors.investorId,
-      })
-      .from(daftarInvestors)
-      .where(
-        and(
-          eq(daftarInvestors.daftarId, scout[0].daftarId || ""),
-          eq(daftarInvestors.status, "active"),
-          isNotNull(daftarInvestors.investorId)
-        )
-      );
+    // Start transaction for cleanup
+    await db.transaction(async (tx) => {
+      // Get all pitches for this scout
+      const scoutPitches = await tx
+        .select({
+          id: pitch.id,
+          pitchName: pitch.pitchName,
+        })
+        .from(pitch)
+        .where(eq(pitch.scoutId, scoutId));
 
-    // Delete the scout
-    await db
-      .update(scouts)
-      .set({ 
-        status: "deleted",
-        deletedOn: new Date(),
-      })
-      .where(eq(scouts.scoutId, scoutId));
+      // Reject all pitches with reason "Scout was deleted"
+      for (const pitchData of scoutPitches) {
+        await tx
+          .update(pitch)
+          .set({
+            status: "rejected",
+            investorStatus: "rejected",
+            isLocked: true,
+          })
+          .where(eq(pitch.id, pitchData.id));
 
-    // Notify all active daftar members
-    const validDaftarIds = daftarMembers
-      .map(m => m.investorId)
-      .filter((id): id is string => id !== null);
+        // Notify pitch team members about rejection
+        const pitchTeamMembers = await tx
+          .select({
+            userId: pitchTeam.userId,
+          })
+          .from(pitchTeam)
+          .where(eq(pitchTeam.pitchId, pitchData.id));
 
-    if (validDaftarIds.length > 0) {
-      await createNotification({
-        type: "alert",
-        subtype: "scout_deleted",
-        title: "Scout Deleted",
-        description: `Scout "${scout[0].scoutName}" has been deleted`,
-        role: "investor",
-        targeted_users: validDaftarIds,
-        payload: {
-          scout_id: scoutId,
-          message: `${currentUser[0].name} has deleted the scout "${scout[0].scoutName}"`
+        const validTeamMembers = pitchTeamMembers
+          .map(member => member.userId)
+          .filter((id): id is string => id !== null);
+
+        if (validTeamMembers.length > 0) {
+          await createNotification({
+            type: "updates",
+            subtype: "pitch_rejected",
+            title: "Pitch Rejected",
+            description: `Your pitch "${pitchData.pitchName}" has been rejected because the scout was deleted.`,
+            role: "founder",
+            targeted_users: validTeamMembers,
+            payload: {
+              pitchId: pitchData.id,
+              reason: "Scout was deleted",
+              message: `Your pitch "${pitchData.pitchName}" has been rejected because the scout was deleted.`,
+            },
+          });
         }
-      });
-    }
+      }
+
+      // Get all active members of the daftar
+      const daftarMembers = await tx
+        .select({
+          investorId: daftarInvestors.investorId,
+        })
+        .from(daftarInvestors)
+        .where(
+          and(
+            eq(daftarInvestors.daftarId, scout[0].daftarId || ""),
+            eq(daftarInvestors.status, "active"),
+            isNotNull(daftarInvestors.investorId)
+          )
+        );
+
+      // Delete the scout
+      await tx
+        .update(scouts)
+        .set({ 
+          status: "deleted",
+          deletedOn: new Date(),
+          isArchived: true,
+        })
+        .where(eq(scouts.scoutId, scoutId));
+
+      // Notify all active daftar members
+      const validDaftarIds = daftarMembers
+        .map(m => m.investorId)
+        .filter((id): id is string => id !== null);
+
+      if (validDaftarIds.length > 0) {
+        await createNotification({
+          type: "alert",
+          subtype: "scout_deleted",
+          title: "Scout Deleted",
+          description: `Scout "${scout[0].scoutName}" has been deleted`,
+          role: "investor",
+          targeted_users: validDaftarIds,
+          payload: {
+            scout_id: scoutId,
+            message: `${currentUser[0].name} has deleted the scout "${scout[0].scoutName}"`
+          }
+        });
+      }
+    });
 
     return NextResponse.json(
       { message: "Scout deleted successfully" },

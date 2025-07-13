@@ -44,6 +44,8 @@ export async function GET(req: NextRequest) {
       dateOfBirth: user.dob || null,
       languages: userLangs.map((l) => ({ id: l.id, name: l.name })),
       joinedDate: user.createdAt.toDateString(),
+      isActive: user.isActive,
+      isArchived: user.isArchived,
     });
   } catch (err) {
     console.error("GET /user/profile error", err);

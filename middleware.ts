@@ -20,12 +20,16 @@ const RATE_LIMITED_ROUTES = [
 ];
 
 export async function middleware(request: NextRequest) {
-  // Block deactivated users for all app pages except /account-deactivated and static files
+  // FIRST PRIORITY: Check for deactivated users on all app pages
   const isAppPage =
     !request.nextUrl.pathname.startsWith('/api') &&
     !request.nextUrl.pathname.startsWith('/_next') &&
     !request.nextUrl.pathname.startsWith('/static') &&
-    !request.nextUrl.pathname.startsWith('/account-deactivated');
+    !request.nextUrl.pathname.startsWith('/account-deactivated') &&
+    !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/sign-up') &&
+    !request.nextUrl.pathname.startsWith('/signin') &&
+    !request.nextUrl.pathname.startsWith('/signout');
 
   if (isAppPage) {
     try {
@@ -33,18 +37,25 @@ export async function middleware(request: NextRequest) {
       const res = await fetch(`${request.nextUrl.origin}/api/endpoints/me`, {
         headers: { cookie },
       });
+      
       if (res.ok) {
         const user = await res.json();
+        console.log('Middleware checking user:', user?.email, 'isArchived:', user?.isArchived, 'isActive:', user?.isActive);
+        
         if (user && (user.isArchived === true || user.isActive === false)) {
+          console.log('Redirecting deactivated user to account-deactivated page');
           return NextResponse.redirect(`${request.nextUrl.origin}/account-deactivated`);
         }
+      } else {
+        console.log('API call failed, status:', res.status);
       }
     } catch (err) {
-      // Ignore errors, allow through
+      console.error('Middleware error:', err);
+      // Don't redirect on error, just log it
     }
   }
 
-  // Check if the request path matches any of our rate-limited routes
+  // SECOND PRIORITY: Rate limiting for API routes
   const isRateLimitedRoute = RATE_LIMITED_ROUTES.some(route => 
     request.nextUrl.pathname.startsWith(route)
   );
@@ -101,7 +112,13 @@ export async function middleware(request: NextRequest) {
 // Configure which routes the middleware should run on
 export const config = {
   matcher: [
-    '/api/endpoints/:path*',
-    '/api/scout/:path*',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
