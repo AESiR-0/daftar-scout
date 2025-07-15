@@ -245,6 +245,7 @@ export default function InvestorQuestionsPage() {
           description: "Your video was uploaded and is being processed.",
           variant: "success",
         });
+        await fetchQuestions();
       } catch (error: any) {
         toast({
           title: "Upload failed",
