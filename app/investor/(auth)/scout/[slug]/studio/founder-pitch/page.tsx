@@ -319,23 +319,29 @@ export default function InvestorStudioPage() {
       }
 
       const existingQuestions = await getResponse.json();
-      
+      if (!Array.isArray(existingQuestions) || existingQuestions.length !== customQuestions.length) {
+        throw new Error('Mismatch between existing and custom questions count');
+      }
+
+      // Use the IDs from the fetched data to build the PATCH payload
+      const patchPayload = {
+        scoutId,
+        language: selectedLanguage,
+        questions: existingQuestions.map((q: any, i: number) => ({
+          id: q.id,
+          question: customQuestions[i].question,
+          isCustom: true,
+          videoUrl: customQuestions[i].videoUrl || null
+        }))
+      };
+
       // Update questions using PATCH
       const response = await fetch(`/api/endpoints/scouts/questions`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          scoutId,
-          language: selectedLanguage,
-          questions: customQuestions.map(q => ({
-            id: q.id, // must be present
-            question: q.question, // map to 'question' for backend
-            isCustom: true,
-            videoUrl: q.videoUrl || null
-          }))
-        }),
+        body: JSON.stringify(patchPayload),
       });
 
       if (!response.ok) {

@@ -44,7 +44,7 @@ export default function SchedulePage() {
     return "";
   }
 
-  const isDateValid = !dateError && lastPitchDate && launchDate;
+  const isDateValid = !!lastPitchDate && !!launchDate && !dateError;
 
   useEffect(() => {
     if (isDemoScout) {
