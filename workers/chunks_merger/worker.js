@@ -76,7 +76,7 @@ app.post('/upload-chunk', upload.single('chunk'), async (req, res) => {
             try {
                 console.log(`[chunks_merger] Merged file created at ${mergedPath}`);
                 // Upload merged file to S3
-                log(parseInt(questionId),pitchId, "data recd");
+                log(parseInt(questionId), pitchId, "data recd");
                 const mergedFileBuffer = fs.readFileSync(mergedPath);
                 let s3Key;
                 if (pitchType === 'founder') {
@@ -84,17 +84,12 @@ app.post('/upload-chunk', upload.single('chunk'), async (req, res) => {
                     // Update founder_answers table only if no video exists
                     const videoUrl = `https://d2nq6gsuamvat4.cloudfront.net/${s3Key}`;
                     if (questionId) {
-                        // Check if the answer already exists for this question
-                        const { rows } = await pg.query(
-                            `SELECT pitch_answer_url FROM founder_answers WHERE pitch_id = $1 AND question_id = $2`,
-                            [pitchId, parseInt(questionId)]
+
+                        await pg.query(
+                            `UPDATE founder_answers SET pitch_answer_url = $1 WHERE pitch_id = $2 AND question_id = $3`,
+                            [videoUrl, pitchId, parseInt(questionId)]
                         );
-                        if (rows.length && (!rows[0].pitch_answer_url || rows[0].pitch_answer_url === '')) {
-                            await pg.query(
-                                `UPDATE founder_answers SET pitch_answer_url = $1 WHERE pitch_id = $2 AND question_id = $3`,
-                                [videoUrl, pitchId, parseInt(questionId)]
-                            );
-                        }
+                        log('updated : ', videoUrl, pitchId, questionId);
                     } else {
                         // If questionId is not provided, do not update any rows (safety)
                         console.warn('[chunks_merger] No questionId provided for founder upload, skipping update.');
