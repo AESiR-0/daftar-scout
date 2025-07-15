@@ -324,8 +324,8 @@ export async function createNotification({
       }
     }
 
-    // Skip email generation for scout_link notifications
-    if (type === "scout_link" || subtype === "offer_withdrawn") {
+    // Skip email generation only for offer_withdrawn
+    if (subtype === "offer_withdrawn") {
       return notification;
     }
 

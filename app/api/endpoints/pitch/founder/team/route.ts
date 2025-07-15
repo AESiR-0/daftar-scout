@@ -335,6 +335,30 @@ export async function DELETE(req: NextRequest) {
     if (deleted.length === 0) {
       return NextResponse.json({ error: "Team member not found or not removed" }, { status: 404 });
     }
+
+    // Fetch pitch and owner details for notification
+    const [pitchDetails] = await db.select({ pitchName: pitch.pitchName }).from(pitch).where(eq(pitch.id, pitchId)).limit(1);
+    const [userDetails] = await db.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
+    // Find the pitch owner (the first user who joined as 'Founder')
+    const [owner] = await db.select({ userId: pitchTeam.userId }).from(pitchTeam).where(and(eq(pitchTeam.pitchId, pitchId), eq(pitchTeam.designation, 'Founder'))).limit(1);
+    if (owner && owner.userId) {
+      await createNotification({
+        type: 'alert',
+        subtype: 'team_exit',
+        title: 'Team Member Exited',
+        description: `${userDetails?.name || 'A user'} has exited your Pitch team (${pitchDetails?.pitchName || ''}).`,
+        targeted_users: [owner.userId],
+        role: 'founder',
+        payload: {
+          pitchId,
+          pitchName: pitchDetails?.pitchName || '',
+          action_by: userDetails?.name || '',
+          action: 'team_exit',
+          action_at: new Date().toISOString(),
+        },
+      });
+    }
+
     return NextResponse.json({ message: "Team member removed successfully" }, { status: 200 });
   } catch (error) {
     console.error("Error removing team member:", error);
