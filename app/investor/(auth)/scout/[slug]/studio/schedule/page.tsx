@@ -69,7 +69,11 @@ export default function SchedulePage() {
 
   const handleLaunchDateSelect = (date: Date | undefined) => {
     setLaunchDate(date);
-    if (date && lastPitchDate && date > lastPitchDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date && date < today) {
+      setDateError("Program launch date cannot be in the past");
+    } else if (date && lastPitchDate && date > lastPitchDate) {
       setDateError("Launch date cannot be after the last pitch date");
     } else {
       setDateError("");
@@ -78,7 +82,11 @@ export default function SchedulePage() {
 
   const handleLastPitchDateSelect = (date: Date | undefined) => {
     setLastPitchDate(date);
-    if (date && launchDate && launchDate > date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date && date < today) {
+      setDateError("Last pitch date cannot be in the past");
+    } else if (date && launchDate && launchDate > date) {
       setDateError("Launch date cannot be after the last pitch date");
     } else {
       setDateError("");
