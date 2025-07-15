@@ -328,16 +328,18 @@ export default function DocumentsPage() {
     }
 
     try {
-      // Extract the key from the S3 URL
-      const urlParts = doc.url.split('.amazonaws.com/');
-      if (urlParts.length !== 2) {
-        throw new Error("Invalid document URL format");
+      let url = doc.url;
+      if (url.includes('.amazonaws.com/')) {
+        // Extract the key from the S3 URL
+        const urlParts = url.split('.amazonaws.com/');
+        if (urlParts.length === 2) {
+          const key = urlParts[1];
+          url = await getVideoUrl(key);
+        } else {
+          throw new Error("Invalid S3 document URL format");
+        }
       }
-      const key = urlParts[1];
-
-      // Get the S3 URL
-      const url = await getVideoUrl(key);
-
+      // For CloudFront or other URLs, just use the URL as is
       window.open(url, "_blank");
       toast({
         title: "Downloading file",
@@ -370,16 +372,18 @@ export default function DocumentsPage() {
     }
 
     try {
-      // Extract the key from the S3 URL
-      const urlParts = doc.url.split('.amazonaws.com/');
-      if (urlParts.length !== 2) {
-        throw new Error("Invalid document URL format");
+      let url = doc.url;
+      if (url.includes('.amazonaws.com/')) {
+        // Extract the key from the S3 URL
+        const urlParts = url.split('.amazonaws.com/');
+        if (urlParts.length === 2) {
+          const key = urlParts[1];
+          url = await getVideoUrl(key);
+        } else {
+          throw new Error("Invalid S3 document URL format");
+        }
       }
-      const key = urlParts[1];
-
-      // Get the S3 URL
-      const url = await getVideoUrl(key);
-
+      // For CloudFront or other URLs, just use the URL as is
       window.open(url, "_blank");
       toast({
         title: "Opening document",
