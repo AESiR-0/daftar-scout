@@ -7,7 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { users } from "@/backend/drizzle/models/users";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { createNotification } from "@/backend/drizzle/models/notifications";
+import { createNotification } from "@/lib/notifications/insert";
 
 export async function GET(req: NextRequest) {
   try {
