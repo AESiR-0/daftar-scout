@@ -182,6 +182,7 @@ function AudienceFiltersModal({
   const [tempScoutStage, setTempScoutStage] = useState(initialValues.scoutStage);
   const [tempScoutSector, setTempScoutSector] = useState(initialValues.scoutSector);
   const [tempAgeRange, setTempAgeRange] = useState<[string, string]>(initialValues.ageRange);
+  const [ageError, setAgeError] = useState<string>("");
   const handleSectorSelect = (value: string) => {
     setTempScoutSector((prev) =>
       prev.includes(value)
@@ -195,23 +196,60 @@ function AudienceFiltersModal({
     setTempScoutStage("");
     setTempScoutSector([]);
     setTempAgeRange(["18", "65"]);
+    setAgeError("");
   };
   const applyFilters = () => {
+    const dedupedSectors = Array.from(new Set(tempScoutSector));
     onApply({
       scoutCommunity: tempScoutCommunity,
       targetedGender: tempTargetedGender,
       scoutStage: tempScoutStage,
-      scoutSector: tempScoutSector,
+      scoutSector: dedupedSectors,
       ageRange: tempAgeRange,
     });
     onClose();
   };
+
+  const handleMinChange = (value: string) => {
+    if (/^\d*$/.test(value)) {
+      const min = parseInt(value, 10);
+      const max = parseInt(tempAgeRange[1], 10);
+      if (value === "" || min < 18 || min > 150) {
+        setAgeError("Minimum age must be between 18 and 150");
+        return;
+      }
+      if (max && min > max) {
+        setAgeError("Minimum age cannot be greater than maximum age");
+        return;
+      }
+      setAgeError("");
+      setTempAgeRange([value, tempAgeRange[1]]);
+    }
+  };
+  const handleMaxChange = (value: string) => {
+    if (/^\d*$/.test(value)) {
+      const max = parseInt(value, 10);
+      const min = parseInt(tempAgeRange[0], 10);
+      if (value === "" || max < 18 || max > 150) {
+        setAgeError("Maximum age must be between 18 and 150");
+        return;
+      }
+      if (min && max < min) {
+        setAgeError("Maximum age cannot be less than minimum age");
+        return;
+      }
+      setAgeError("");
+      setTempAgeRange([tempAgeRange[0], value]);
+    }
+  };
+
   if (!open || typeof window === "undefined") return null;
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
       aria-modal="true"
       role="dialog"
+      aria-label="Audience Filters Modal"
       onClick={onClose}
     >
       <div
@@ -224,7 +262,7 @@ function AudienceFiltersModal({
           <button
             className="text-white hover:text-gray-300 text-2xl leading-none"
             onClick={onClose}
-            aria-label="Close"
+            aria-label="Close Audience Filters Modal"
           >
             &times;
           </button>
@@ -248,10 +286,11 @@ function AudienceFiltersModal({
                 <AgeRange
                   minAge={tempAgeRange[0]}
                   maxAge={tempAgeRange[1]}
-                  onMinChange={(value: string) => setTempAgeRange([value, tempAgeRange[1]])}
-                  onMaxChange={(value: string) => setTempAgeRange([tempAgeRange[0], value])}
+                  onMinChange={(value: string) => handleMinChange(value)}
+                  onMaxChange={(value: string) => handleMaxChange(value)}
                   disabled={isLocked}
                 />
+                {ageError && <div className="text-red-500 text-xs mt-1">{ageError}</div>}
               </div>
               <div className="flex-1">
                 <Combobox
@@ -421,32 +460,12 @@ export default function AudiencePage() {
     onMaxChange: (value: string) => void;
     disabled?: boolean;
   }) => {
-    const { toast } = useToast();
-    // Only allow digits (and empty string)
-    const handleMinChange = (value: string) => {
-      if (/^\d*$/.test(value)) {
-        const min = parseInt(value, 10);
-        const max = parseInt(maxAge, 10);
-        if (min > 150) return;
-        if (maxAge && min > max) return; // Prevent min > max
-        onMinChange(value);
-      }
-    };
-    const handleMaxChange = (value: string) => {
-      if (/^\d*$/.test(value)) {
-        const max = parseInt(value, 10);
-        const min = parseInt(minAge, 10);
-        if (max > 150) return;
-        if (minAge && max < min) return; // Prevent max < min
-        onMaxChange(value);
-      }
-    };
     return (
       <div className="flex gap-2">
         <input
-          type="text"
+          type="number"
           value={minAge}
-          onChange={e => handleMinChange(e.target.value)}
+          onChange={e => onMinChange(e.target.value)}
           placeholder="Min"
           className="bg-[#1a1a1a] text-white rounded-[0.35rem] w-full h-9 px-3 border border-input"
           disabled={disabled}
@@ -454,9 +473,9 @@ export default function AudiencePage() {
           pattern="[0-9]*"
         />
         <input
-          type="text"
+          type="number"
           value={maxAge}
-          onChange={e => handleMaxChange(e.target.value)}
+          onChange={e => onMaxChange(e.target.value)}
           placeholder="Max"
           className="bg-[#1a1a1a] text-white rounded-[0.35rem] w-full h-9 px-3 border border-input"
           disabled={disabled}
@@ -585,8 +604,18 @@ export default function AudiencePage() {
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+      toast({
+        title: "Success",
+        description: "Audience filters saved successfully.",
+        variant: "success",
+      });
     } catch (error) {
       console.error("Error saving data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save audience filters.",
+        variant: "destructive",
+      });
     }
   };
 

@@ -155,6 +155,35 @@ export const emailTemplates = {
         </div>
       `,
     }),
+    pitch_team_invite: (notification: any, userEmail: string) => {
+      // Get userId and pitchId from notification
+      const userId = (notification.targeted_users && notification.targeted_users[0]) || notification.userId;
+      const pitchId = notification.payload?.pitchId;
+      // Defensive: if missing, fallback to empty string
+      const now = Date.now();
+      const acceptToken = Buffer.from(`${userId}:${pitchId}:accept:${now}`).toString('base64');
+      const rejectToken = Buffer.from(`${userId}:${pitchId}:reject:${now}`).toString('base64');
+      const acceptUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pitch/team/action?token=${acceptToken}`;
+      const rejectUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pitch/team/action?token=${rejectToken}`;
+      return {
+        to: userEmail,
+        subject: `Pitch Team Invitation - ${notification.payload?.pitchName || ''}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f4f4f4; padding: 20px; border-radius: 10px; border: 1px solid #ccc;">
+            <h2>Pitch Team Invitation</h2>
+            <p>Hello ${notification.userName || ''},</p>
+            <p><strong>${notification.payload?.currentUsername || ''}</strong> has invited you to join the pitch team for <strong>${notification.payload?.pitchName || ''}</strong> as <strong>${notification.payload?.invitedUserDesignation || 'Team Member'}</strong>.</p>
+            <p>This is an exciting opportunity to collaborate on a startup pitch and work together to present your ideas to potential investors.</p>
+            <div style="margin-top: 20px; text-align: center;">
+              <a href="${acceptUrl}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; margin-right: 10px; border-radius: 5px; font-weight: bold;">Accept Invitation</a>
+              <a href="${rejectUrl}" style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Decline Invitation</a>
+            </div>
+            <p>If you have any questions about this invitation, please don't hesitate to reach out to the team or our support team.</p>
+            <p style="margin-top: 30px; color: #888; font-size: 13px;">DaftarOS Team<br/>Building the Future of Startup Collaboration</p>
+          </div>
+        `,
+      };
+    },
   },
 
   // Alerts for Founders

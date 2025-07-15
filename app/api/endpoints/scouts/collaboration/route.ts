@@ -7,6 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { users } from "@/backend/drizzle/models/users";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { createNotification } from "@/backend/drizzle/models/notifications";
 
 export async function GET(req: NextRequest) {
   try {
@@ -150,7 +151,7 @@ export async function POST(req: NextRequest) {
     isPending: true,
   });
 
-  // Send email to each user in the daftar instead of creating notifications
+  // Send email and create notification for each user in the daftar
   for (const userId of targetedUsers) {
     try {
       // Get user's email and name
@@ -164,6 +165,21 @@ export async function POST(req: NextRequest) {
         console.error(`No email found for user ${userId}`);
         continue;
       }
+
+      // Create in-app notification
+      await createNotification({
+        type: 'request',
+        subtype: 'collaboration',
+        title: 'Scout Collaboration Invite',
+        description: `You have been invited to collaborate on scout ${scoutExists[0].scoutName} by daftar ${daftarExists[0].name}.`,
+        targeted_users: [userId],
+        payload: {
+          scoutId: scoutId,
+          daftarId: daftarId,
+          scoutName: scoutExists[0].scoutName,
+          daftarName: daftarExists[0].name,
+        },
+      });
 
       // Send collaboration invitation email
       const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/notifications/email`, {
@@ -186,7 +202,7 @@ export async function POST(req: NextRequest) {
         console.error(`Failed to send email to user ${userId}`);
       }
     } catch (error) {
-      console.error(`Error sending email to user ${userId}:`, error);
+      console.error(`Error sending email or notification to user ${userId}:`, error);
     }
   }
 

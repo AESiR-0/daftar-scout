@@ -30,6 +30,21 @@ export async function PATCH(req: NextRequest) {
       scoutSector,
     } = parsed;
 
+    // Backend validation for age range
+    if (targetAudAgeStart !== null && targetAudAgeEnd !== null) {
+      if (targetAudAgeStart < 18 || targetAudAgeStart > 150) {
+        return NextResponse.json({ error: "Minimum age must be between 18 and 150" }, { status: 400 });
+      }
+      if (targetAudAgeEnd < 18 || targetAudAgeEnd > 150) {
+        return NextResponse.json({ error: "Maximum age must be between 18 and 150" }, { status: 400 });
+      }
+      if (targetAudAgeStart > targetAudAgeEnd) {
+        return NextResponse.json({ error: "Minimum age cannot be greater than maximum age" }, { status: 400 });
+      }
+    }
+    // Deduplicate sectors
+    const dedupedSectors = scoutSector ? Array.from(new Set(scoutSector)) : [];
+
     if (!scoutId) {
       return NextResponse.json(
         { error: "scoutId is required" },
@@ -58,7 +73,7 @@ export async function PATCH(req: NextRequest) {
         scoutCommunity: scoutCommunity ?? existingScout[0].scoutCommunity,
         targetedGender: targetedGender ?? existingScout[0].targetedGender,
         scoutStage: scoutStage ?? existingScout[0].scoutStage,
-        scoutSector: scoutSector ?? existingScout[0].scoutSector ?? [],
+        scoutSector: dedupedSectors.length > 0 ? dedupedSectors : existingScout[0].scoutSector ?? [],
       })
       .where(eq(scouts.scoutId, scoutId))
       .returning();
