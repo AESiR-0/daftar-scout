@@ -23,10 +23,26 @@ export default function SchedulePage() {
 
   const [lastPitchDate, setLastPitchDate] = useState<Date>();
   const [launchDate, setLaunchDate] = useState<Date>();
-  const [dateError, setDateError] = useState<string>();
+  const [dateError, setDateError] = useState<string>("");
   const [isScheduled, setIsScheduled] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Validation function for both dates
+  function validateDates(launchDate: Date | undefined, lastPitchDate: Date | undefined) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (launchDate && launchDate < today) {
+      return "Program launch date cannot be in the past";
+    }
+    if (lastPitchDate && lastPitchDate < today) {
+      return "Last pitch date cannot be in the past";
+    }
+    if (launchDate && lastPitchDate && launchDate > lastPitchDate) {
+      return "Launch date cannot be after the last pitch date";
+    }
+    return "";
+  }
 
   const isDateValid = !dateError && lastPitchDate && launchDate;
 
@@ -67,30 +83,19 @@ export default function SchedulePage() {
     if (scoutId) fetchSchedule();
   }, [scoutId]);
 
+  // Validate dates whenever either changes
+  useEffect(() => {
+    setDateError(validateDates(launchDate, lastPitchDate));
+  }, [launchDate, lastPitchDate]);
+
   const handleLaunchDateSelect = (date: Date | undefined) => {
     setLaunchDate(date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (date && date < today) {
-      setDateError("Program launch date cannot be in the past");
-    } else if (date && lastPitchDate && date > lastPitchDate) {
-      setDateError("Launch date cannot be after the last pitch date");
-    } else {
-      setDateError("");
-    }
+    setDateError(validateDates(date, lastPitchDate));
   };
 
   const handleLastPitchDateSelect = (date: Date | undefined) => {
     setLastPitchDate(date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (date && date < today) {
-      setDateError("Last pitch date cannot be in the past");
-    } else if (date && launchDate && launchDate > date) {
-      setDateError("Launch date cannot be after the last pitch date");
-    } else {
-      setDateError("");
-    }
+    setDateError(validateDates(launchDate, date));
   };
 
   const handleGoLive = async () => {
@@ -214,7 +219,7 @@ export default function SchedulePage() {
                 variant="outline"
                 onClick={handleGoLive}
                 className="rounded-[0.35rem]"
-                disabled={!isDateValid || isScheduled || loading || !isApproved || isDemoScout}
+                disabled={!isDateValid || isScheduled || loading || !isApproved || isDemoScout || !!dateError}
               >
                 {loading
                   ? "Scheduling..."
