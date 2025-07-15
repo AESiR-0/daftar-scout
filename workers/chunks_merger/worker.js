@@ -113,11 +113,19 @@ app.post('/upload-chunk', upload.single('chunk'), async (req, res) => {
                 // Insert job for compression worker and update correct pitch column
                 const jobId = crypto.randomUUID();
                 try {
-                    await pg.query(
-                        "INSERT INTO video_jobs (job_id, s3_key, status, scout_id, pitch_id) VALUES ($1, $2, 'pending', $3, $4)",
-                        [jobId, s3Key, scoutId, pitchId]
-                    );
-                    console.log(`[chunks_merger] Inserted compression job ${jobId} for S3 key ${s3Key}`);
+                    if (pitchType === 'founder' && questionId) {
+                        await pg.query(
+                            "INSERT INTO video_jobs (job_id, s3_key, status, scout_id, pitch_id, question_id) VALUES ($1, $2, 'pending', $3, $4, $5)",
+                            [jobId, s3Key, scoutId, pitchId, parseInt(questionId)]
+                        );
+                        console.log(`[chunks_merger] Inserted compression job ${jobId} for S3 key ${s3Key} with question_id ${questionId}`);
+                    } else {
+                        await pg.query(
+                            "INSERT INTO video_jobs (job_id, s3_key, status, scout_id, pitch_id) VALUES ($1, $2, 'pending', $3, $4)",
+                            [jobId, s3Key, scoutId, pitchId]
+                        );
+                        console.log(`[chunks_merger] Inserted compression job ${jobId} for S3 key ${s3Key}`);
+                    }
                 } catch (dbErr) {
                     console.error('[chunks_merger] DB error during job insert:', dbErr);
                     return res.status(500).json({ error: dbErr.message });

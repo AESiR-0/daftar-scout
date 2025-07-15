@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/backend/database";
 import { scoutQuestions } from "@/backend/drizzle/models/scouts";
 import { founderAnswers } from "@/backend/drizzle/models/pitch";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
@@ -74,12 +74,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await db.insert(founderAnswers).values({
-      pitchId,
-      questionId,
-      pitchAnswerUrl,
-      answerLanguage,
-    });
+    // Upsert founder answer: update if exists, insert if not
+    const updated = await db
+      .update(founderAnswers)
+      .set({
+        pitchAnswerUrl,
+        answerLanguage,
+      })
+      .where(
+        and(
+          eq(founderAnswers.pitchId, pitchId),
+          eq(founderAnswers.questionId, questionId)
+        )
+      )
+      .returning();
+
+    if (updated.length === 0) {
+      await db.insert(founderAnswers).values({
+        pitchId,
+        questionId,
+        pitchAnswerUrl,
+        answerLanguage,
+      });
+    }
 
     return NextResponse.json({ message: "Answer submitted" }, { status: 200 });
   } catch (error) {

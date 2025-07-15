@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, text, timestamp, integer } from "drizzle-orm/pg-core";
 
 export const videoJobs = pgTable("video_jobs", {
   id: serial("id").primaryKey(),
@@ -8,7 +8,8 @@ export const videoJobs = pgTable("video_jobs", {
   status: text("status").notNull().default("pending"), // pending, processing, complete, failed
   logs: text("logs"), // optional: store logs
   createdAt: timestamp("created_at").defaultNow(),
-  completedAt: timestamp("completed_at"),
+  completedAt: timestamp("completed_at"), 
+  questionId: integer("question_id"),
   scoutId: varchar("scout_id", { length: 255 }),
   pitchId: varchar("pitch_id", { length: 255 }),
 }); 

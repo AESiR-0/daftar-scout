@@ -251,11 +251,17 @@ async function processJob(job) {
       await pg.query("UPDATE scouts SET compressed_investor_pitch = $1 WHERE scout_id = $2", [hlsUrl, job.scout_id]);
       log(`[compression] Updated scouts table for scout_id: ${job.scout_id}`);
     }
-    if (job.pitch_id) {
-      log(`[compression] Updating founder_answers table for pitch_id: ${job.pitch_id}`);
-      await pg.query("UPDATE founder_answers SET compressed_pitch_answer_url = $1 WHERE pitch_id = $2", [hlsUrl, job.pitch_id]);
-      log(`[compression] Updated founder_answers table for pitch_id: ${job.pitch_id}`);
-    }
+    if (job.pitch_id && job.question_id) {
+      log(`[compression] Updating founder_answers table for pitch_id: ${job.pitch_id}, question_id: ${job.question_id}`);
+      await pg.query(
+        "UPDATE founder_answers SET compressed_pitch_answer_url = $1 WHERE pitch_id = $2 AND question_id = $3",
+        [hlsUrl, job.pitch_id, job.question_id]
+      );
+      log(`[compression] Updated founder_answers table for pitch_id: ${job.pitch_id}, question_id: ${job.question_id}`);
+    } else if (job.pitch_id) {
+      // fallback for legacy jobs without question_id
+      log(`[compression] Updating founder_answers table for pitch_id: ${job.pitch_id} (no question_id)`);
+       }
 
     sendLog(job.job_id, "Processing complete. HLS URL: " + hlsUrl, true);
     log(`[compression] Processing complete for job: ${job.job_id}`);

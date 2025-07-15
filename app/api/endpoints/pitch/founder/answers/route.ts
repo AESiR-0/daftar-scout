@@ -65,16 +65,20 @@ export async function POST(
       );
     }
     const compressedVideoUrl = pitchAnswerUrl.replace(process.env.AWS_S3_BUCKET_NAME!, process.env.AWS_S3_COMPRESSION_BUCKET_NAME!) ?? pitchAnswerUrl;
-    // Insert new founder answer
-    const newAnswer = await db
-      .insert(founderAnswers)
-      .values({
-        pitchId,
+    // Upsert founder answer: update if exists, insert if not
+    const updated = await db
+      .update(founderAnswers)
+      .set({
         pitchAnswerUrl,
         compressedPitchAnswerUrl: compressedVideoUrl,
-        questionId,
         answerLanguage,
       })
+      .where(
+        and(
+          eq(founderAnswers.pitchId, pitchId),
+          eq(founderAnswers.questionId, questionId)
+        )
+      )
       .returning({
         id: founderAnswers.id,
         pitchId: founderAnswers.pitchId,
@@ -82,6 +86,26 @@ export async function POST(
         questionId: founderAnswers.questionId,
         answerLanguage: founderAnswers.answerLanguage,
       });
+
+    let newAnswer = updated;
+    if (updated.length === 0) {
+      newAnswer = await db
+        .insert(founderAnswers)
+        .values({
+          pitchId,
+          pitchAnswerUrl,
+          compressedPitchAnswerUrl: compressedVideoUrl,
+          questionId,
+          answerLanguage,
+        })
+        .returning({
+          id: founderAnswers.id,
+          pitchId: founderAnswers.pitchId,
+          pitchAnswerUrl: founderAnswers.pitchAnswerUrl,
+          questionId: founderAnswers.questionId,
+          answerLanguage: founderAnswers.answerLanguage,
+        });
+    }
 
     return NextResponse.json(
       {
