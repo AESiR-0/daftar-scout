@@ -156,10 +156,8 @@ export const emailTemplates = {
       `,
     }),
     pitch_team_invite: (notification: any, userEmail: string) => {
-      // Get userId and pitchId from notification
       const userId = (notification.targeted_users && notification.targeted_users[0]) || notification.userId;
       const pitchId = notification.payload?.pitchId;
-      // Defensive: if missing, fallback to empty string
       const now = Date.now();
       const acceptToken = Buffer.from(`${userId}:${pitchId}:accept:${now}`).toString('base64');
       const rejectToken = Buffer.from(`${userId}:${pitchId}:reject:${now}`).toString('base64');

@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
+    
     const { user } = session;
     if (!user || !user.email) {
       return NextResponse.json(
@@ -218,15 +218,18 @@ export async function POST(req: NextRequest) {
     // Notification for invited user (email with accept/reject)
     await createNotification({
       type: "updates",
-      subtype: "team_join",
+      subtype: "pitch_team_invite",
       title: "Pitch Team Invitation",
       description: `You have been invited to join ${pitchName} as ${designation || "Team Member"}`,
       targeted_users: [userId],
       role: "founder",
       payload: {
         pitchId,
-        designation: designation || "Team Member",
-        message: `You have been invited to join ${pitchName} as ${designation || "Team Member"}`,
+        pitchName,
+        currentUsername: user.name || "", // inviter's name
+        currentUserDesignation: "Founder", // fallback if not set
+        invitedUsername: invitedUserName,
+        invitedUserDesignation: designation || "Team Member",
         action: "invite",
         action_by: user.id,
         action_at: new Date().toISOString(),
