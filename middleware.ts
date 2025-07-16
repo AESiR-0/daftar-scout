@@ -20,6 +20,29 @@ const RATE_LIMITED_ROUTES = [
 ];
 
 export async function middleware(request: NextRequest) {
+  // REDIRECT LOGGED-IN USERS FROM /landing OR /login TO /[role]
+  const isLandingOrLogin =
+    request.nextUrl.pathname === '/landing' ||
+    request.nextUrl.pathname === '/login';
+
+  if (isLandingOrLogin) {
+    try {
+      const cookie = request.headers.get('cookie') || '';
+      const res = await fetch(`${request.nextUrl.origin}/api/endpoints/me`, {
+        headers: { cookie },
+      });
+      if (res.ok) {
+        const user = await res.json();
+        if (user && user.role) {
+          // Redirect to /[role] (e.g., /founder, /investor, etc.)
+          return NextResponse.redirect(`${request.nextUrl.origin}/${user.role}`);
+        }
+      }
+    } catch (err) {
+      // Ignore errors, just proceed
+    }
+  }
+
   // FIRST PRIORITY: Check for deactivated users on all app pages
   const isAppPage =
     !request.nextUrl.pathname.startsWith('/api') &&
