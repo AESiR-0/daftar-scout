@@ -280,7 +280,7 @@ export default function InvestorPitchPage() {
           <div className="col-span-2 ">
             <div className="space-y-4">
               {showSample ? (
-                <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-3 max-h-[500px] overflow-hidden">
+                <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-3 max-h-[400px] overflow-hidden">
                   <div className="space-y-4 animate-in fade-in-50 duration-300 w-full h-full">
                     {compressedVideoUrl && compressedVideoUrl.endsWith('.m3u8') ? (
                       <ReactPlayer
@@ -288,7 +288,7 @@ export default function InvestorPitchPage() {
                         controls
                         width="100%"
                         height="100%"
-                        style={{ maxHeight: 500, objectFit: "contain" }}
+                        style={{ maxHeight: 400, objectFit: "contain" }}
                         config={{ file: { forceHLS: true } }}
                       />
                     ) : videoUrl && videoUrl.endsWith('.m3u8') ? (
@@ -297,7 +297,7 @@ export default function InvestorPitchPage() {
                         controls
                         width="100%"
                         height="100%"
-                        style={{ maxHeight: 500, objectFit: "contain" }}
+                        style={{ maxHeight: 400, objectFit: "contain" }}
                         config={{ file: { forceHLS: true } }}
                       />
                     ) : (

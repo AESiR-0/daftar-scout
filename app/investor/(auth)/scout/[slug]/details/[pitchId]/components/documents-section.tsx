@@ -299,6 +299,8 @@ export default function DocumentsSection({
     input.accept = ".pdf,.doc,.docx,.xlsx";
     input.multiple = true;
 
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
     input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files?.length) return;
@@ -306,6 +308,14 @@ export default function DocumentsSection({
       try {
         setIsUploading(true);
         await Promise.all(Array.from(files).map(async (file) => {
+          if (file.size > MAX_FILE_SIZE) {
+            toast({
+              title: "Error",
+              description: `File ${file.name} is too large. Maximum file size is 20MB.`,
+              variant: "destructive",
+            });
+            return;
+          }
           try {
             const formData = new FormData();
             formData.append("file", file);

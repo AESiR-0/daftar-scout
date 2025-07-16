@@ -41,6 +41,8 @@ export default function InvestorIntroPage() {
   const handleDaftarComplete = () => {
     setCreateDaftarOpen(false);
     router.push("/investor/loading");
+    if (router.refresh) router.refresh();
+    else if (typeof window !== 'undefined') window.location.reload();
   };
 
   if (loading) {

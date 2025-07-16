@@ -14,9 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Camera,
-  Trash2,
-  UserCircle,
   MessageSquarePlus,
   Shield,
   LogOut,
@@ -45,7 +42,7 @@ import { signOut } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/format-date";
-import  FormatDate  from "@/lib/formatDate";
+import FormatDate from "@/lib/formatDate";
 import { Card } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -509,15 +506,15 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <label htmlFor="avatar-upload" className="cursor-pointer">
-                  <Avatar className="h-20 w-20">
-                      <AvatarImage 
-                        src={getProfileImageUrl(profileData.image)} 
+                    <Avatar className="h-20 w-20">
+                      <AvatarImage
+                        src={getProfileImageUrl(profileData.image)}
                         className={cn(
                           "transition-opacity hover:opacity-80",
                           isEditing && "ring-2 ring-primary ring-offset-2 ring-offset-background"
                         )}
                       />
-                  </Avatar>
+                    </Avatar>
                   </label>
                   <input
                     id="avatar-upload"
@@ -582,16 +579,16 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                       }
                     }}
                   />
-                  </div>
+                </div>
                 {!isEditing && (
-                <Button
+                  <Button
                     variant="outline"
-                  size="icon"
-                  className="rounded-[0.35rem]"
+                    size="icon"
+                    className="rounded-[0.35rem]"
                     onClick={() => setIsEditing(true)}
-                >
+                  >
                     <Pencil className="h-4 w-4" />
-                </Button>
+                  </Button>
                 )}
                 {isEditing && (
                   <p className="text-xs text-muted-foreground mt-2">
@@ -670,17 +667,17 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                             const currentDate = profileData.dateOfBirth ? new Date(profileData.dateOfBirth) : new Date();
                             const monthIndex = new Date(`${value} 1, 2000`).getMonth();
                             currentDate.setMonth(monthIndex);
-                                setProfileData((prev) =>
-                                  prev
-                                    ? {
-                                        ...prev,
-                                    dateOfBirth: currentDate.toISOString().split("T")[0],
-                                      }
-                                    : prev
-                                );
-                            }}
-                            disabled={isLoading}
-                          >
+                            setProfileData((prev) =>
+                              prev
+                                ? {
+                                  ...prev,
+                                  dateOfBirth: currentDate.toISOString().split("T")[0],
+                                }
+                                : prev
+                            );
+                          }}
+                          disabled={isLoading}
+                        >
                           <SelectTrigger className="rounded-[0.35rem] bg-[#1a1a1a]">
                             <SelectValue placeholder="Month" />
                           </SelectTrigger>
@@ -708,22 +705,22 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                               const month = currentDate.getMonth();
                               const year = currentDate.getFullYear();
                               const daysInMonth = new Date(year, month + 1, 0).getDate();
-                              
+
                               if (day <= daysInMonth) {
                                 currentDate.setDate(day);
                                 setProfileData((prev) =>
                                   prev
                                     ? {
-                                        ...prev,
-                                        dateOfBirth: currentDate.toISOString().split("T")[0],
-                                      }
+                                      ...prev,
+                                      dateOfBirth: currentDate.toISOString().split("T")[0],
+                                    }
                                     : prev
                                 );
                               }
-                              }
-                            }}
+                            }
+                          }}
                           placeholder="Day"
-                            disabled={isLoading}
+                          disabled={isLoading}
                           className="rounded-[0.35rem] bg-[#1a1a1a]"
                         />
 
@@ -739,31 +736,31 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
                               const month = currentDate.getMonth();
                               const day = currentDate.getDate();
                               const daysInMonth = new Date(year, month + 1, 0).getDate();
-                              
+
                               if (day <= daysInMonth) {
                                 currentDate.setFullYear(year);
                                 setProfileData((prev) =>
                                   prev
                                     ? {
-                                        ...prev,
-                                        dateOfBirth: currentDate.toISOString().split("T")[0],
-                                      }
+                                      ...prev,
+                                      dateOfBirth: currentDate.toISOString().split("T")[0],
+                                    }
                                     : prev
                                 );
                               }
-                              }
-                            }}
+                            }
+                          }}
                           placeholder="Year"
-                              disabled={isLoading}
+                          disabled={isLoading}
                           className="rounded-[0.35rem] bg-[#1a1a1a]"
                         />
                       </div>
                       {profileData.dateOfBirth && (
                         <p className="text-sm text-muted-foreground">
-                          Selected date: {new Date(profileData.dateOfBirth).toLocaleDateString('en-US', { 
-                            month: 'long', 
-                            day: 'numeric', 
-                            year: 'numeric' 
+                          Selected date: {new Date(profileData.dateOfBirth).toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
                           })}
                         </p>
                       )}
@@ -1036,24 +1033,24 @@ export function ProfileDialog({ open, onOpenChange }: ProfileDialogProps) {
             </ScrollArea>
           </Card>
         );
-      case "delete":
-        return (
-          <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                We're sad to say goodbye. This action can't be undone, and all
-                your data will be permanently lost.
-              </p>
-              <Button
-                variant="destructive"
-                className="rounded-[0.35rem]"
-                onClick={handleDeleteAccount}
-              >
-                Delete
-              </Button>
-            </div>
-          </Card>
-        );
+      // case "delete":
+      //   return (
+      //     <Card className="border-none rounded-[0.35rem] h-[500px] overflow-y-auto bg-[#1a1a1a] p-4">
+      //       <div className="space-y-4">
+      //         <p className="text-sm text-muted-foreground">
+      //           We're sad to say goodbye. This action can't be undone, and all
+      //           your data will be permanently lost.
+      //         </p>
+      //         <Button
+      //           variant="destructive"
+      //           className="rounded-[0.35rem]"
+      //           onClick={handleDeleteAccount}
+      //         >
+      //           Delete
+      //         </Button>
+      //       </div>
+      //     </Card>
+      //   );
 
       case "logout":
         return (

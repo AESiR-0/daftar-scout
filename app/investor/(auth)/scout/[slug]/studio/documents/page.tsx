@@ -259,6 +259,8 @@ export default function DocumentsPage() {
     input.accept = ".pdf,.doc,.docx,.xlsx";
     input.multiple = true;
 
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
     input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || files.length === 0) return;
@@ -266,6 +268,14 @@ export default function DocumentsPage() {
       try {
         setIsUploading(true);
         for (const file of Array.from(files)) {
+          if (file.size > MAX_FILE_SIZE) {
+            toast({
+              title: "Error",
+              description: `File ${file.name} is too large. Maximum file size is 20MB.`,
+              variant: "destructive",
+            });
+            continue;
+          }
           try {
             // First upload the file to S3
             const url = await uploadInvestorPitchDocument(file, scoutId);
@@ -628,6 +638,12 @@ function DocumentsList({
     );
   };
 
+  function formatFileSize(size: number) {
+    if (size >= 1024 * 1024) return (size / (1024 * 1024)).toFixed(2) + ' MB';
+    if (size >= 1024) return (size / 1024).toFixed(2) + ' KB';
+    return size + ' B';
+  }
+
   return (
     <div className="space-y-4">
       {documents.map((doc) => {
@@ -644,7 +660,7 @@ function DocumentsList({
                 <FileText className="h-8 w-8" />
                 <div>
                   <h3 className="font-medium">{doc.name}</h3>
-                  <p className="text-xs text-muted-foreground">{doc.size}</p>
+                  <p className="text-xs text-muted-foreground">{formatFileSize(doc.size)}</p>
                 </div>
               </div>
             </div>

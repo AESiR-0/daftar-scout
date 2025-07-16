@@ -92,8 +92,11 @@ export function DaftarProvider({ children }: { children: ReactNode }) {
           document.cookie = `selectedDaftarId=${newDaftarId}; path=/`;
           if (router) {
             router.push('/investor/scout');
+            if (router.refresh) router.refresh();
+            else if (typeof window !== 'undefined') window.location.reload();
           } else if (typeof window !== 'undefined') {
             window.location.href = '/investor/scout';
+            window.location.reload();
           }
         }}
       />

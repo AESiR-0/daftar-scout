@@ -168,6 +168,8 @@ export default function DocumentsPage() {
     input.accept = ".pdf,.doc,.docx,.xlsx";
     input.multiple = true;
 
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
     input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (files && files.length > 0) {
@@ -175,6 +177,14 @@ export default function DocumentsPage() {
           setIsUploading(true);
           const newDocs: Document[] = [];
           for (const file of Array.from(files)) {
+            if (file.size > MAX_FILE_SIZE) {
+              toast({
+                title: "Error",
+                description: `File ${file.name} is too large. Maximum file size is 20MB.`,
+                variant: "destructive",
+              });
+              continue;
+            }
             // Generate a unique key for S3
             const key = `founder-docs/${pitchId}/${Date.now()}-${file.name}`;
 
@@ -506,15 +516,10 @@ function getNullishFields(doc: Document): string[] {
   return nullishFields;
 }
 
-function formatFileSize(sizeInBytes: string): string {
-  const bytes = parseInt(sizeInBytes);
-  if (bytes === 0) return "0 B";
-
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+function formatFileSize(size: number) {
+  if (size >= 1024 * 1024) return (size / (1024 * 1024)).toFixed(2) + ' MB';
+  if (size >= 1024) return (size / 1024).toFixed(2) + ' KB';
+  return size + ' B';
 }
 
 function DocumentsList({
@@ -560,7 +565,7 @@ function DocumentsList({
                   <div>
                     <h3 className="font-medium">{doc.name}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {formatFileSize(doc.size)}
+                      {formatFileSize(Number(doc.size))}
                     </p>
                   </div>
                 </div>

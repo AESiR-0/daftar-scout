@@ -113,7 +113,12 @@ export function AppSidebar({ role }: { role: string }) {
       <CreateDaftarDialog
         open={createDaftarOpen}
         onOpenChange={setCreateDaftarOpen}
-        onSuccess={() => setSelectDaftarOpen(true)}
+        onSuccess={() => {
+          setSelectDaftarOpen(true);
+          const router = require('next/navigation').useRouter?.() || null;
+          if (router && router.refresh) router.refresh();
+          else if (typeof window !== 'undefined') window.location.reload();
+        }}
       />
     </div>
   );

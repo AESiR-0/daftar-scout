@@ -449,7 +449,11 @@ export default function PitchPage() {
         <Button
           className="w-full rounded-[0.35rem] bg-muted hover:bg-muted/50"
           size="lg"
-          onClick={handlePitchSubmission}
+          onClick={async () => {
+            if (window.confirm("Are you sure you want to submit this pitch? This action cannot be undone.")) {
+              await handlePitchSubmission();
+            }
+          }}
           disabled={isLoading || !termsAccepted || !pitchApproved || submitted || hasIncompleteAnswers || isDemoPitch}
         >
           Pitch Now
