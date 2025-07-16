@@ -22,7 +22,7 @@ const RATE_LIMITED_ROUTES = [
 export async function middleware(request: NextRequest) {
   // REDIRECT LOGGED-IN USERS FROM /landing OR /login TO /[role]
   const isLandingOrLogin =
-    request.nextUrl.pathname === '/landing' ||
+    request.nextUrl.pathname.includes('landing') ||
     request.nextUrl.pathname === '/login';
 
   if (isLandingOrLogin) {
@@ -60,11 +60,11 @@ export async function middleware(request: NextRequest) {
       const res = await fetch(`${request.nextUrl.origin}/api/endpoints/me`, {
         headers: { cookie },
       });
-      
+
       if (res.ok) {
         const user = await res.json();
         console.log('Middleware checking user:', user?.email, 'isArchived:', user?.isArchived, 'isActive:', user?.isActive);
-        
+
         if (user && (user.isArchived === true || user.isActive === false)) {
           console.log('Redirecting deactivated user to account-deactivated page');
           return NextResponse.redirect(`${request.nextUrl.origin}/account-deactivated`);
@@ -79,7 +79,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // SECOND PRIORITY: Rate limiting for API routes
-  const isRateLimitedRoute = RATE_LIMITED_ROUTES.some(route => 
+  const isRateLimitedRoute = RATE_LIMITED_ROUTES.some(route =>
     request.nextUrl.pathname.startsWith(route)
   );
 
@@ -97,7 +97,7 @@ export async function middleware(request: NextRequest) {
 
     // Get or create rate limit entry for this IP
     const rateLimitInfo = rateLimit.get(ip) || { count: 0, timestamp: now };
-    
+
     // Check if rate limit is exceeded
     if (rateLimitInfo.count >= RATE_LIMIT.max) {
       return new NextResponse(
@@ -125,7 +125,7 @@ export async function middleware(request: NextRequest) {
     response.headers.set('X-RateLimit-Limit', RATE_LIMIT.max.toString());
     response.headers.set('X-RateLimit-Remaining', (RATE_LIMIT.max - rateLimitInfo.count - 1).toString());
     response.headers.set('X-RateLimit-Reset', (Math.floor(now / 1000) + RATE_LIMIT.windowMs / 1000).toString());
-    
+
     return response;
   }
 
