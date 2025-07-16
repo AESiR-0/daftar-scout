@@ -280,12 +280,26 @@ export default function InvestorPitchPage() {
           <div className="col-span-2 ">
             <div className="space-y-4">
               {showSample ? (
-                <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-3">
-                  <div className="space-y-4 animate-in fade-in-50 duration-300">
+                <div className="border-2 flex flex-col items-center justify-center border-dashed border-gray-700 rounded-lg p-3 max-h-[500px] overflow-hidden">
+                  <div className="space-y-4 animate-in fade-in-50 duration-300 w-full h-full">
                     {compressedVideoUrl && compressedVideoUrl.endsWith('.m3u8') ? (
-                      <ReactPlayer url={compressedVideoUrl} controls width="100%" height="auto" config={{ file: { forceHLS: true } }} />
+                      <ReactPlayer
+                        url={compressedVideoUrl}
+                        controls
+                        width="100%"
+                        height="100%"
+                        style={{ maxHeight: 500, objectFit: "contain" }}
+                        config={{ file: { forceHLS: true } }}
+                      />
                     ) : videoUrl && videoUrl.endsWith('.m3u8') ? (
-                      <ReactPlayer url={videoUrl} controls width="100%" height="auto" config={{ file: { forceHLS: true } }} />
+                      <ReactPlayer
+                        url={videoUrl}
+                        controls
+                        width="100%"
+                        height="100%"
+                        style={{ maxHeight: 500, objectFit: "contain" }}
+                        config={{ file: { forceHLS: true } }}
+                      />
                     ) : (
                       <VideoStreamer src={compressedVideoUrl || videoUrl || "/dummyVideo.mp4"} />
                     )}
@@ -296,7 +310,14 @@ export default function InvestorPitchPage() {
                   {videoUrl ? (
                     <div className="space-y-4">
                       {videoUrl.endsWith('.m3u8') ? (
-                        <ReactPlayer url={videoUrl} controls width="100%" height="auto" config={{ file: { forceHLS: true } }} />
+                        <ReactPlayer
+                          url={videoUrl}
+                          controls
+                          width="100%"
+                          height="100%"
+                          style={{ maxHeight: 500, objectFit: "contain" }}
+                          config={{ file: { forceHLS: true } }}
+                        />
                       ) : (
                         <VideoStreamer src={videoUrl} />
                       )}
