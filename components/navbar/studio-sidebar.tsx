@@ -49,8 +49,7 @@ export function StudioSidebar({
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
                     isActive
                       ? "bg-blue-600 text-white"
-                      : "hover:bg-accent/50 text-muted-foreground",
-                    item.className
+                      : "hover:bg-accent/50 text-muted-foreground"
                   )}
                 >
                   <item.icon className="h-4 w-4" />
