@@ -341,7 +341,7 @@ export default function InvestorQuestionsPage() {
             </p>
           </div>
         )}
-        <div className="flex justify-end mb-4">
+        {/* <div className="flex justify-end mb-4">
           <Dialog open={questionsOpen} onOpenChange={setQuestionsOpen}>
             <DialogTrigger asChild>
               <Button
@@ -358,7 +358,7 @@ export default function InvestorQuestionsPage() {
               </DialogHeader>
               <div className="grid grid-cols-12 gap-6 mt-10">
                 {/* Language Column */}
-                {/* <div className="col-span-2 space-y-4">
+        {/* <div className="col-span-2 space-y-4">
                   <h3 className="text-lg font-semibold">Languages</h3>
                   <div className="space-y-2">
                     {languages.map((language) => (
@@ -374,10 +374,8 @@ export default function InvestorQuestionsPage() {
                       </div>
                     ))}
                   </div>
-                </div> */}
-
-                {/* Video Preview Column */}
-                <div className="col-span-6">
+                </div> 
+s                <div className="col-span-6">
                   <Card className="overflow-hidden border-0 bg-[#1a1a1a] shadow-none">
                     <div className="aspect-[9/16] h-[533px] w-[300px] flex items-center justify-center">
                       {compressedVideoUrl && compressedVideoUrl.endsWith('.m3u8') ? (
@@ -390,7 +388,6 @@ export default function InvestorQuestionsPage() {
                     </div>
                   </Card>
                 </div>
-                {/* Questions Column */}
                 <div className="col-span-4 space-y-4">
                   <h3 className="text-lg font-semibold">
                     Investor's Questions
@@ -411,7 +408,7 @@ export default function InvestorQuestionsPage() {
               </div>
             </DialogContent>
           </Dialog>
-        </div>
+        </div> */}
         {isLoading ? (
           <p className="text-muted-foreground">Loading questions...</p>
         ) : questions.length === 0 ? (

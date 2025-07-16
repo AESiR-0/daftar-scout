@@ -188,25 +188,25 @@ export default function InvestorStudioPage() {
     if (language === "Gujarati" && questionId === 7) {
       return "/videos/Q7_Gujarati.mp4"
     }
-    if(language === "Savji" && questionId === 1){
+    if (language === "Savji" && questionId === 1) {
       return "/videos/Q1_Savji.mp4"
     }
-    if(language === "Savji" && questionId === 2){
+    if (language === "Savji" && questionId === 2) {
       return "/videos/Q2_Savji.mp4"
     }
-    if(language === "Savji" && questionId === 3){
+    if (language === "Savji" && questionId === 3) {
       return "/videos/Q3_Savji.mp4"
     }
-    if(language === "Savji" && questionId === 4){
+    if (language === "Savji" && questionId === 4) {
       return "/videos/Q4_Savji.mp4"
     }
-    if(language === "Savji" && questionId === 5){
+    if (language === "Savji" && questionId === 5) {
       return "/videos/Q5_Savji.mp4"
     }
-    if(language === "Savji" && questionId === 6){
+    if (language === "Savji" && questionId === 6) {
       return "/videos/Q6_Savji.mp4"
     }
-    if(language === "Savji" && questionId === 7){
+    if (language === "Savji" && questionId === 7) {
       return "/videos/Q7_Savji.mp4"
     }
 
@@ -419,7 +419,7 @@ export default function InvestorStudioPage() {
                   </label>
                 </div>
               </div>
-              <Dialog open={questionsOpen} onOpenChange={setQuestionsOpen}>
+              {/* <Dialog open={questionsOpen} onOpenChange={setQuestionsOpen}>
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -433,7 +433,6 @@ export default function InvestorStudioPage() {
                     <DialogTitle>Sample Screening Questions</DialogTitle>
                   </DialogHeader>
                   <div className="grid grid-cols-10 gap-6 mt-10">
-                    {/* Language Column */}
                     <div className="col-span-2 space-y-4">
                       <h3 className="text-lg font-semibold">Languages</h3>
                       <div className="space-y-2">
@@ -451,7 +450,6 @@ export default function InvestorStudioPage() {
                       </div>
                     </div>
 
-                    {/* Video Preview Column */}
                     <div className="col-span-4">
                       <Card className="overflow-hidden border-0 w-[300px] h-[533px] bg-muted/50">
                         <div className="aspect-[9/16]  flex items-center justify-center">
@@ -460,7 +458,6 @@ export default function InvestorStudioPage() {
                       </Card>
                     </div>
 
-                    {/* Questions Column */}
                     <div className="col-span-4 space-y-4">
                       <h3 className="text-lg font-semibold">Investor's Questions</h3>
                       <div className="space-y-2">
@@ -479,7 +476,7 @@ export default function InvestorStudioPage() {
                     </div>
                   </div>
                 </DialogContent>
-              </Dialog>
+              </Dialog> */}
             </div>
 
             {selectedOption && (
@@ -494,37 +491,37 @@ export default function InvestorStudioPage() {
                 <div className="space-y-4">
                   {selectedOption === "sample"
                     ? questionsData.defaultQuestions.map((question, index) => (
-                        <div
-                          key={question.id}
-                          className="flex items-center gap-3"
-                        >
-                          <span className="text-sm font-medium text-gray-400 w-6">
-                            {index + 1}.
-                          </span>
-                          <p className="text-sm flex-1">{question.question}</p>
-                        </div>
-                      ))
+                      <div
+                        key={question.id}
+                        className="flex items-center gap-3"
+                      >
+                        <span className="text-sm font-medium text-gray-400 w-6">
+                          {index + 1}.
+                        </span>
+                        <p className="text-sm flex-1">{question.question}</p>
+                      </div>
+                    ))
                     : customQuestions.map((question, index) => (
-                        <div
-                          key={question.id ?? index}
-                          className="flex items-center gap-3"
-                        >
-                          <span className="text-sm font-medium text-gray-400 w-6">
-                            {index + 1}.
-                          </span>
-                          <Input
-                            disabled={isLocked}
-                            value={question.question}
-                            onChange={(e) => {
-                              const updatedQuestions = [...customQuestions];
-                              updatedQuestions[index].question = e.target.value;
-                              setCustomQuestions(updatedQuestions);
-                            }}
-                            placeholder={`Enter question ${index + 1}...`}
-                            className="flex-1 bg-[#2a2a2a] border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500"
-                          />
-                        </div>
-                      ))}
+                      <div
+                        key={question.id ?? index}
+                        className="flex items-center gap-3"
+                      >
+                        <span className="text-sm font-medium text-gray-400 w-6">
+                          {index + 1}.
+                        </span>
+                        <Input
+                          disabled={isLocked}
+                          value={question.question}
+                          onChange={(e) => {
+                            const updatedQuestions = [...customQuestions];
+                            updatedQuestions[index].question = e.target.value;
+                            setCustomQuestions(updatedQuestions);
+                          }}
+                          placeholder={`Enter question ${index + 1}...`}
+                          className="flex-1 bg-[#2a2a2a] border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500"
+                        />
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
