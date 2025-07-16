@@ -421,7 +421,7 @@ export default function DocumentsPage() {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          
+
         },
         credentials: "include",
       });
@@ -627,9 +627,8 @@ function DocumentsList({
             {doc.uploadedAt}
           </div>
           <div className="text-xs mt-2">
-            <span className={`px-2 py-1 rounded ${
-              doc.visibility === "investors_only" ? "bg-blue-900/50" : "bg-red-900/50"
-            }`}>
+            <span className={`px-2 py-1 rounded ${doc.visibility === "investors_only" ? "bg-blue-900/50" : "bg-red-900/50"
+              }`}>
               {visibilityText[doc.visibility as keyof typeof visibilityText]}
             </span>
           </div>
@@ -649,48 +648,49 @@ function DocumentsList({
       {documents.map((doc) => {
         console.log(doc);
         return (
-        <div
-          key={doc.id}
-          className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${doc.isHidden ? "opacity-50" : ""
-            }`}
-        >
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <FileText className="h-8 w-8" />
-                <div>
-                  <h3 className="font-medium">{doc.name}</h3>
-                  <p className="text-xs text-muted-foreground">{formatFileSize(doc.size)}</p>
+          <div
+            key={doc.id}
+            className={`bg-[#1a1a1a] p-6 rounded-[0.35rem] ${doc.isHidden ? "opacity-50" : ""
+              }`}
+          >
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-8 w-8" />
+                  <div>
+                    <h3 className="font-medium">{doc.name}</h3>
+                    <p className="text-xs text-muted-foreground">{formatFileSize(parseInt(doc.size))}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDownload(doc)}
-                className="hover:bg-muted/50"
-              >
-                <Download className="h-4 w-4" />
-              </Button>
-              {canDelete && (
+              <div className="flex gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => onDownload(doc)}
                   className="hover:bg-muted/50"
-                  onClick={() => onDelete(doc.id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Download className="h-4 w-4" />
                 </Button>
-              )}
+                {canDelete && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-muted/50"
+                    onClick={() => onDelete(doc.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+              {renderMetadata(doc)}
             </div>
           </div>
-
-          <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-            {renderMetadata(doc)}
-          </div>
-        </div>
-      )})}
+        )
+      })}
     </div>
   );
 }
