@@ -29,7 +29,6 @@ export async function GET(req: NextRequest) {
       and(
         eq(pitch.scoutId, scoutId),
         ne(pitch.status, "deleted"), // Exclude deleted pitches
-        eq(pitch.isLocked, false) // Exclude locked pitches
       )
     );
 
