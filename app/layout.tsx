@@ -4,6 +4,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Footer } from "@/components/footer";
 import { ErrorBoundary } from "@/components/error-boundary";
+import MobileBlocker from "@/components/MobileBlocker";
 
 export const metadata: Metadata = {
   title: "Daftar OS",
@@ -37,12 +38,14 @@ export default function RootLayout({
       </head>
       <body className="subpixel-antialiased font-poppins">
         <ToastProvider>
-          <ErrorBoundary>
-            <div className="flex min-h-screen bg-[#0e0e0e] flex-col">
-              {children}
-            </div>
-            <Footer />
-          </ErrorBoundary>
+          <MobileBlocker>
+            <ErrorBoundary>
+              <div className="flex min-h-screen bg-[#0e0e0e] flex-col">
+                {children}
+              </div>
+              <Footer />
+            </ErrorBoundary>
+          </MobileBlocker>
         </ToastProvider>
         <Toaster />
       </body>

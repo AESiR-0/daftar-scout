@@ -10,278 +10,278 @@ import { cache } from 'react';
 const getCachedVideoSource = cache((language: string, questionId: string): string => {
   // Hindi videos
   if (language === "Hindi" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Hindi-VanditaVerma.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Hindi-VanditaVerma.mov"
   }
   if (language === "Hindi" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Hindi-VanditaVerma.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Hindi-VanditaVerma.mp4"
   }
   if (language === "Hindi" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Hindi-VanditaVerma.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Hindi-VanditaVerma.mp4"
   }
   if (language === "Hindi" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Hindi-VanditaVerma.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Hindi-VanditaVerma.mov"
   }
   if (language === "Hindi" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Hindi-VanditaVerma.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Hindi-VanditaVerma.mov"
   }
   if (language === "Hindi" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Hindi-VanditaVerma.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Hindi-VanditaVerma.mov"
   }
   if (language === "Hindi" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Hindi-VanditaVerma.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Hindi-VanditaVerma.mov"
   }
 
   // Marathi videos
   if (language === "Marathi" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Marathi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Marathi.mp4"
   }
   if (language === "Marathi" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Marathi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Marathi.mp4"
   }
   if (language === "Marathi" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Marathi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Marathi.mp4"
   }
   if (language === "Marathi" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Marathi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Marathi.mp4"
   }
   if (language === "Marathi" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Marathi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Marathi.mp4"
   }
   if (language === "Marathi" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Marathi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Marathi.mp4"
   }
   if (language === "Marathi" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Marathi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Marathi.mp4"
   }
 
   // Sindhi videos
   if (language === "Sindhi" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Sindhi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Sindhi.mp4"
   }
   if (language === "Sindhi" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Sindhi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Sindhi.mp4"
   }
   if (language === "Sindhi" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Sindhi.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Sindhi.mov"
   }
   if (language === "Sindhi" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Sindhi.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Sindhi.mov"
   }
   if (language === "Sindhi" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Sindhi.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Sindhi.mov"
   }
   if (language === "Sindhi" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Sindhi.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Sindhi.mov"
   }
   if (language === "Sindhi" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Sindhi.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Sindhi.mov"
   }
 
   // Assamese videos
   if (language === "Assamese" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Assamese+-+BristyBorah.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Assamese+-+BristyBorah.mov"
   }
   if (language === "Assamese" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Assamese+-+BristyBorah.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Assamese+-+BristyBorah.mov"
   }
   if (language === "Assamese" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Assamese+-+BristyBorah.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Assamese+-+BristyBorah.mov"
   }
   if (language === "Assamese" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Assamese+-+BristyBorah.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Assamese+-+BristyBorah.mov"
   }
   if (language === "Assamese" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Assamese+-+BristyBorah.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Assamese+-+BristyBorah.mov"
   }
   if (language === "Assamese" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Assamese+-+BristyBorah.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Assamese+-+BristyBorah.mov"
   }
   if (language === "Assamese" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Assamese+-+BristyBorah.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Assamese+-+BristyBorah.mov"
   }
 
   // Punjabi videos
   if (language === "Punjabi" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_punjabi+-+Manav+Maini.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_punjabi+-+Manav+Maini.mov"
   }
   if (language === "Punjabi" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_punjabi+-+Manav+Maini.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_punjabi+-+Manav+Maini.mp4"
   }
   if (language === "Punjabi" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_punjabi+-+Manav+Maini.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_punjabi+-+Manav+Maini.mov"
   }
   if (language === "Punjabi" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_punjabi+-+Manav+Maini.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_punjabi+-+Manav+Maini.mov"
   }
   if (language === "Punjabi" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_punjabi+-+Manav+Maini.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_punjabi+-+Manav+Maini.mp4"
   }
   if (language === "Punjabi" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_punjabi+-+Manav+Maini.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_punjabi+-+Manav+Maini.mov"
   }
   if (language === "Punjabi" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_punjabi+-+Manav+Maini.mov"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_punjabi+-+Manav+Maini.mov"
   }
 
   // Gujarati videos
   if (language === "Gujarati" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Gujarati.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Gujarati.mp4"
   }
   if (language === "Gujarati" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Gujarati.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Gujarati.mp4"
   }
   if (language === "Gujarati" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Gujarati.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Gujarati.mp4"
   }
   if (language === "Gujarati" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Gujarati.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Gujarati.mp4"
   }
   if (language === "Gujarati" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Gujarati.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Gujarati.mp4"
   }
   if (language === "Gujarati" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Gujarati.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Gujarati.mp4"
   }
   if (language === "Gujarati" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Gujarati.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Gujarati.mp4"
   }
 
   // Bengali videos
   if (language === "Bengali" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Bengali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Bengali.mp4"
   }
   if (language === "Bengali" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Bengali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Bengali.mp4"
   }
   if (language === "Bengali" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Bengali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Bengali.mp4"
   }
   if (language === "Bengali" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Bengali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Bengali.mp4"
   }
   if (language === "Bengali" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Bengali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Bengali.mp4"
   }
   if (language === "Bengali" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Bengali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Bengali.mp4"
   }
   if (language === "Bengali" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Bengali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Bengali.mp4"
   }
 
   // English videos
   if (language === "English" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_English.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_English.mp4"
   }
   if (language === "English" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_English.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_English.mp4"
   }
   if (language === "English" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_English.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_English.mp4"
   }
   if (language === "English" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_English.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_English.mp4"
   }
   if (language === "English" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_English.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_English.mp4"
   }
   if (language === "English" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_English.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_English.mp4"
   }
   if (language === "English" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_English.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_English.mp4"
   }
 
   // Pahadi videos
   if (language === "Pahadi" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Pahadi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Pahadi.mp4"
   }
   if (language === "Pahadi" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Pahadi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Pahadi.mp4"
   }
   if (language === "Pahadi" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Pahadi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Pahadi.mp4"
   }
   if (language === "Pahadi" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Pahadi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Pahadi.mp4"
   }
   if (language === "Pahadi" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Pahadi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Pahadi.mp4"
   }
   if (language === "Pahadi" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Pahadi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Pahadi.mp4"
   }
   if (language === "Pahadi" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Pahadi.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Pahadi.mp4"
   }
 
   // Nepali videos
   if (language === "Nepali" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Nepali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Nepali.mp4"
   }
   if (language === "Nepali" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Nepali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Nepali.mp4"
   }
   if (language === "Nepali" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Nepali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Nepali.mp4"
   }
   if (language === "Nepali" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Nepali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Nepali.mp4"
   }
   if (language === "Nepali" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Nepali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Nepali.mp4"
   }
   if (language === "Nepali" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Nepali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Nepali.mp4"
   }
   if (language === "Nepali" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Nepali.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Nepali.mp4"
   }
 
   // Urdu videos
   if (language === "Urdu" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Urdu.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Urdu.mp4"
   }
   if (language === "Urdu" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Urdu.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Urdu.mp4"
   }
   if (language === "Urdu" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Urdu.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Urdu.mp4"
   }
   if (language === "Urdu" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Urdu.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Urdu.mp4"
   }
   if (language === "Urdu" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Urdu.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Urdu.mp4"
   }
   if (language === "Urdu" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Urdu.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Urdu.mp4"
   }
   if (language === "Urdu" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Urdu.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Urdu.mp4"
   }
 
   // Odia videos
   if (language === "Odia" && questionId === "problem") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Odia.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Odia.mp4"
   }
   if (language === "Odia" && questionId === "solution") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Odia.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Odia.mp4"
   }
   if (language === "Odia" && questionId === "market") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Odia.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Odia.mp4"
   }
   if (language === "Odia" && questionId === "business") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Odia.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Odia.mp4"
   }
   if (language === "Odia" && questionId === "future") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Odia.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Odia.mp4"
   }
   if (language === "Odia" && questionId === "help") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Odia.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Odia.mp4"
   }
   if (language === "Odia" && questionId === "challenges") {
-    return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Odia.mp4"
+    return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Odia.mp4"
   }
 
   return "/videos/sample-pitch.mp4"; // Default video
@@ -336,278 +336,278 @@ export default function FounderPage() {
   const getVideoSource = (language: string, questionId: string) => {
     // Hindi videos
     if (language === "Hindi" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Hindi-VanditaVerma.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Hindi-VanditaVerma.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Hindi-VanditaVerma.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Hindi-VanditaVerma.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Hindi-VanditaVerma.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Hindi-VanditaVerma.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Hindi-VanditaVerma.mov"
     }
     if (language === "Hindi" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Hindi-VanditaVerma.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Hindi-VanditaVerma.mov"
     }
 
     // Marathi videos
     if (language === "Marathi" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Marathi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Marathi.mp4"
     }
     if (language === "Marathi" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Marathi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Marathi.mp4"
     }
     if (language === "Marathi" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Marathi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Marathi.mp4"
     }
     if (language === "Marathi" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Marathi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Marathi.mp4"
     }
     if (language === "Marathi" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Marathi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Marathi.mp4"
     }
     if (language === "Marathi" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Marathi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Marathi.mp4"
     }
     if (language === "Marathi" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Marathi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Marathi.mp4"
     }
 
     // Sindhi videos
     if (language === "Sindhi" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Sindhi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Sindhi.mp4"
     }
     if (language === "Sindhi" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Sindhi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Sindhi.mp4"
     }
     if (language === "Sindhi" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Sindhi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Sindhi.mp4"
     }
     if (language === "Sindhi" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Sindhi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Sindhi.mp4"
     }
     if (language === "Sindhi" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Sindhi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Sindhi.mp4"
     }
     if (language === "Sindhi" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Sindhi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Sindhi.mp4"
     }
     if (language === "Sindhi" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Sindhi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Sindhi.mp4"
     }
 
     // Assamese videos
     if (language === "Assamese" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Assamese+-+BristyBorah.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Assamese+-+BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Assamese+-+BristyBorah.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Assamese+-+BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Assamese+-+BristyBorah.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Assamese+-+BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Assamese+-+BristyBorah.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Assamese+-+BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Assamese+-+BristyBorah.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Assamese+-+BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Assamese+-+BristyBorah.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Assamese+-+BristyBorah.mov"
     }
     if (language === "Assamese" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Assamese+-+BristyBorah.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Assamese+-+BristyBorah.mov"
     }
 
     // Punjabi videos
     if (language === "Punjabi" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_punjabi+-+Manav+Maini.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_punjabi+-+Manav+Maini.mov"
     }
     if (language === "Punjabi" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_punjabi+-+Manav+Maini.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_punjabi+-+Manav+Maini.mov"
     }
     if (language === "Punjabi" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_punjabi+-+Manav+Maini.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_punjabi+-+Manav+Maini.mov"
     }
     if (language === "Punjabi" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_punjabi+-+Manav+Maini.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_punjabi+-+Manav+Maini.mov"
     }
     if (language === "Punjabi" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_punjabi+-+Manav+Maini.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_punjabi+-+Manav+Maini.mov"
     }
     if (language === "Punjabi" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_punjabi+-+Manav+Maini.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_punjabi+-+Manav+Maini.mov"
     }
     if (language === "Punjabi" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_punjabi+-+Manav+Maini.mov"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_punjabi+-+Manav+Maini.mov"
     }
 
     // Gujarati videos
     if (language === "Gujarati" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Gujarati.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Gujarati.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Gujarati.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Gujarati.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Gujarati.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Gujarati.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Gujarati.mp4"
     }
     if (language === "Gujarati" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Gujarati.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Gujarati.mp4"
     }
 
     // Bengali videos
     if (language === "Bengali" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Bengali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Bengali.mp4"
     }
     if (language === "Bengali" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Bengali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Bengali.mp4"
     }
     if (language === "Bengali" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Bengali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Bengali.mp4"
     }
     if (language === "Bengali" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Bengali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Bengali.mp4"
     }
     if (language === "Bengali" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Bengali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Bengali.mp4"
     }
     if (language === "Bengali" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Bengali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Bengali.mp4"
     }
     if (language === "Bengali" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Bengali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Bengali.mp4"
     }
 
     // English videos
     if (language === "English" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_English.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_English.mp4"
     }
     if (language === "English" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_English.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_English.mp4"
     }
     if (language === "English" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_English.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_English.mp4"
     }
     if (language === "English" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_English.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_English.mp4"
     }
     if (language === "English" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_English.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_English.mp4"
     }
     if (language === "English" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_English.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_English.mp4"
     }
     if (language === "English" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_English.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_English.mp4"
     }
 
     // Pahadi videos
     if (language === "Pahadi" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Pahadi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Pahadi.mp4"
     }
     if (language === "Pahadi" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Pahadi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Pahadi.mp4"
     }
     if (language === "Pahadi" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Pahadi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Pahadi.mp4"
     }
     if (language === "Pahadi" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Pahadi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Pahadi.mp4"
     }
     if (language === "Pahadi" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Pahadi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Pahadi.mp4"
     }
     if (language === "Pahadi" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Pahadi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Pahadi.mp4"
     }
     if (language === "Pahadi" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Pahadi.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Pahadi.mp4"
     }
 
     // Nepali videos
     if (language === "Nepali" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Nepali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Nepali.mp4"
     }
     if (language === "Nepali" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Nepali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Nepali.mp4"
     }
     if (language === "Nepali" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Nepali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Nepali.mp4"
     }
     if (language === "Nepali" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Nepali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Nepali.mp4"
     }
     if (language === "Nepali" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Nepali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Nepali.mp4"
     }
     if (language === "Nepali" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Nepali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Nepali.mp4"
     }
     if (language === "Nepali" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Nepali.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Nepali.mp4"
     }
 
     // Urdu videos
     if (language === "Urdu" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Urdu.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Urdu.mp4"
     }
     if (language === "Urdu" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Urdu.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Urdu.mp4"
     }
     if (language === "Urdu" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Urdu.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Urdu.mp4"
     }
     if (language === "Urdu" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Urdu.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Urdu.mp4"
     }
     if (language === "Urdu" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Urdu.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Urdu.mp4"
     }
     if (language === "Urdu" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Urdu.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Urdu.mp4"
     }
     if (language === "Urdu" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Urdu.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Urdu.mp4"
     }
 
     // Odia videos
     if (language === "Odia" && questionId === "problem") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q1_Odia.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q1_Odia.mp4"
     }
     if (language === "Odia" && questionId === "solution") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q2_Odia.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q2_Odia.mp4"
     }
     if (language === "Odia" && questionId === "market") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q3_Odia.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q3_Odia.mp4"
     }
     if (language === "Odia" && questionId === "business") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q4_Odia.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q4_Odia.mp4"
     }
     if (language === "Odia" && questionId === "future") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q5_Odia.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q5_Odia.mp4"
     }
     if (language === "Odia" && questionId === "help") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q6_Odia.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q6_Odia.mp4"
     }
     if (language === "Odia" && questionId === "challenges") {
-      return "https://daftaros.s3.ap-south-1.amazonaws.com/sample-landing/Q7_Odia.mp4"
+      return "https://d2nq6gsuamvat4.cloudfront.net/sample-landing/Q7_Odia.mp4"
     }
 
     return "/videos/sample-pitch.mp4" // Default video
@@ -616,7 +616,7 @@ export default function FounderPage() {
   return (
     <div className="flex flex-col items-center h-full px-4 py-12">
       {/* Main Content */}
-      <div className="max-w-6xl w-full mt-10 space-y-28"> 
+      <div className="max-w-6xl w-full mt-10 space-y-28">
         {/* Hero Section */}
         <div className="space-y-6 text-center">
           <h1 className="text-7xl font-light tracking-tight">
@@ -643,7 +643,7 @@ export default function FounderPage() {
         </div>
         <div className="text-left">
           <h1 className="text-3xl font-semibold">Sample Startup Pitches</h1>
-        
+
           {/* 3 Column Layout */}
           <div className="grid grid-cols-12 gap-6 mt-10">
             {/* Language Column */}
@@ -654,7 +654,7 @@ export default function FounderPage() {
                   <div
                     key={language}
                     className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedLanguage === language ? 'text-blue-600' : 'hover:bg-muted'
-                    }`}
+                      }`}
                     onClick={() => setSelectedLanguage(language)}
                   >
                     <span className="text-sm">{language}</span>
@@ -732,7 +732,7 @@ export default function FounderPage() {
                   <div
                     key={q.id}
                     className={`flex items-center space-x-2 p-2 rounded-lg cursor-pointer transition-colors ${selectedQuestion === q.id ? 'text-blue-600' : 'hover:bg-muted'
-                    }`}
+                      }`}
                     onClick={() => setSelectedQuestion(q.id)}
                   >
                     <span className="text-sm">{q.title}</span>
