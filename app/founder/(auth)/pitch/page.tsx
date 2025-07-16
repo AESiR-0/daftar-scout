@@ -146,7 +146,7 @@ export default function PitchPage() {
                 <PitchesList pitchBoard={pitchesArray} />
               )}
               {selectedTab === "meetings" && <MeetingsPage />}
-              {selectedTab === "scout" && <ScoutPage scouts={scoutsArray} />}
+              {selectedTab === "scout" && <ScoutPage scouts={[...scoutsArray].sort((a, b) => new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime())} />}
               {selectedTab === "dealBoard" && (
                 <DealBoardPage pitches={pitchesArray} />
               )}

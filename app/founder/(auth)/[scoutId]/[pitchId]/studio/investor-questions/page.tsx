@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePathname } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Video, X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,8 @@ interface Question {
 
 export default function InvestorQuestionsPage() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const scoutId = pathname.split("/")[2];
   const pitchId = pathname.split("/")[3];
   const { isLocked, isLoading: isLockLoading } = useIsLocked();
@@ -129,7 +132,8 @@ export default function InvestorQuestionsPage() {
 
   useEffect(() => {
     fetchQuestions();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const fetchQuestions = async () => {
     setIsLoading(true);
@@ -156,13 +160,18 @@ export default function InvestorQuestionsPage() {
       }));
 
       setQuestions(fetchedQuestions);
-      const firstQuestion = fetchedQuestions[0] || null;
-      setSelectedQuestion(firstQuestion);
-      setPreviewUrl(firstQuestion?.videoUrl || "");
-      setCompressedVideoUrl(firstQuestion?.compressedVideoUrl || null);
-      if (firstQuestion?.language) {
-        setLanguage(firstQuestion.language);
+
+      // Get questionId from query param
+      const questionIdParam = searchParams.get("question");
+      let selected = fetchedQuestions[0] || null;
+      if (questionIdParam) {
+        const match = fetchedQuestions.find(q => q.id === Number(questionIdParam));
+        if (match) selected = match;
       }
+      setSelectedQuestion(selected);
+      setPreviewUrl(selected?.videoUrl || "");
+      setCompressedVideoUrl(selected?.compressedVideoUrl || null);
+      if (selected?.language) setLanguage(selected.language);
     } catch (error) {
       console.error("Error fetching questions:", error);
       toast({
@@ -245,6 +254,8 @@ export default function InvestorQuestionsPage() {
           description: "Your video was uploaded and is being processed.",
           variant: "success",
         });
+        // After upload, update the query param to keep the user on the same question
+        router.replace(`?question=${questionId}`, { scroll: false });
         await fetchQuestions();
       } catch (error: any) {
         toast({
@@ -281,6 +292,37 @@ export default function InvestorQuestionsPage() {
     setCompressedVideoUrl(question.compressedVideoUrl);
     if (question.language) {
       setLanguage(question.language);
+    }
+    // Update the query param
+    router.replace(`?question=${question.id}`, { scroll: false });
+  };
+
+  const handleLanguageChange = async (newLanguage: string) => {
+    setLanguage(newLanguage);
+    if (selectedQuestion) {
+      try {
+        await fetch("/api/endpoints/pitch/founder/answers/languages", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pitchId,
+            questionId: selectedQuestion.id,
+            answerLanguage: newLanguage,
+          }),
+        });
+        await fetchQuestions();
+        toast({
+          title: "Language updated",
+          description: `Language set to ${newLanguage} for this question.`,
+          variant: "success",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update language.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -447,9 +489,9 @@ export default function InvestorQuestionsPage() {
                   <div className="mt-5">
                     <Combobox
                       placeholder="Select video's language"
-                      value={'Marathi'}
+                      value={language}
                       options={languages}
-                      onSelect={(value) => setLanguage(value)}
+                      onSelect={handleLanguageChange}
                       disabled={isLocked}
                     />
                   </div>

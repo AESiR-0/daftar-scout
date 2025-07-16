@@ -145,12 +145,12 @@ export const investorStudioNavItems = [
     icon: Calendar,
   },
 
-  {
-    title: "Delete",
-    url: "delete",
-    icon: Trash2,
-    className: "text-red-500 hover:text-red-600",
-  },
+  // {
+  //   title: "Delete",
+  //   url: "delete",
+  //   icon: Trash2,
+  //   className: "text-red-500 hover:text-red-600",
+  // },
 ];
 
 export const scoutStudioNavItems = [
