@@ -6,6 +6,7 @@ import { users } from "@/backend/drizzle/models/users";
 import { eq, and, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { createNotification } from "@/lib/notifications/insert";
 
 export async function POST(req: NextRequest) {
   // Get session and user
@@ -191,43 +192,24 @@ async function processCollaborationAction(
     new Set(relatedInvestors.map((i) => i.investorId))
   ).filter((id): id is string => id !== null);
 
-  // Send email to all related investors instead of creating notifications
+  // Send notification to all related investors instead of sending emails directly
   for (const investorId of targetedInvestorIds) {
     try {
-      // Get investor's email and name
-      const [investor] = await db
-        .select({ email: users.email, name: users.name })
-        .from(users)
-        .where(eq(users.id, investorId))
-        .limit(1);
-
-      if (!investor?.email) {
-        console.error(`No email found for investor ${investorId}`);
-        continue;
-      }
-
-      // Send collaboration response email
-      const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/notifications/email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: 'collaboration_response',
-          userEmail: investor.email,
-          userName: investor.name || 'User',
+      await createNotification({
+        type: "updates",
+        subtype: "collaboration",
+        title: "Scout Collaboration Response",
+        description: `${userDetails.firstName || 'User'} has ${action}ed the collaboration request for scout ${scoutDetails[0].scoutName} in daftar ${daftarDetails[0].name}.`,
+        targeted_users: [investorId],
+        payload: {
           scoutName: scoutDetails[0].scoutName,
           daftarName: daftarDetails[0].name,
           action: action,
           responderName: userDetails.firstName || 'User',
-        }),
+        },
       });
-
-      if (!emailResponse.ok) {
-        console.error(`Failed to send email to investor ${investorId}`);
-      }
     } catch (error) {
-      console.error(`Error sending email to investor ${investorId}:`, error);
+      console.error(`Error creating notification for investor ${investorId}:`, error);
     }
   }
 

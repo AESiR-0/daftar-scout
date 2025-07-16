@@ -182,6 +182,18 @@ export const emailTemplates = {
         `,
       };
     },
+    collaboration: (notification: any, userEmail: string) => ({
+      to: userEmail,
+      subject: 'Collaboration Update',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f0f0f0; padding: 20px; border-radius: 10px; border: 1px solid #ccc;">
+          <h2>Collaboration Update</h2>
+          <p>${notification.userName || ''},</p>
+          <p>${notification.responderName || 'A user'} has ${notification.action || 'updated'} the collaboration request for scout <strong>${notification.scoutName || ''}</strong> in daftar <strong>${notification.daftarName || ''}</strong>.</p>
+          <p>Best regards,<br>Daftar OS</p>
+        </div>
+      `,
+    }),
   },
 
   // Alerts for Founders
