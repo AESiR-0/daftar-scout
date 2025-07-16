@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/backend/database";
-import { sql, and, eq, isNull, ne } from "drizzle-orm";
+import { sql, and, eq, isNull, ne, or } from "drizzle-orm";
 import { investorPitch, pitch } from "@/backend/drizzle/models/pitch";
 import { users } from "@/backend/drizzle/models/users";
 
@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
     .where(
       and(
         eq(pitch.scoutId, scoutId),
-        ne(pitch.status, "deleted"), // Exclude deleted pitches
+        ne(pitch.status, "deleted"), // Exclude deleted pitches]
+        or(
+        eq(pitch.investorStatus, "Inbox"),eq(pitch.investorStatus, "inbox"))
       )
     );
 
