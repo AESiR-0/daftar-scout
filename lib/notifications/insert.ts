@@ -33,7 +33,7 @@ export const emailTemplates = {
           <p>${notification.userName},</p>
           <p>We're excited to inform you that ${notification.payload.daftar_id} has requested to collaborate with you on their scout ${notification.payload.scout_id}.</p>
           <div style="margin-top: 20px;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL}/dashboard" 
+            <a href="https://daftaros.com/investor" 
                style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; margin-right: 10px;">
               View Request
             </a>
@@ -67,11 +67,11 @@ export const emailTemplates = {
           <p>${notification.userName},</p>
           <p>You have been invited to join ${notification.payload.daftarName} on Daftar OS.</p>
           <div style="margin-top: 20px;">
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
+            <a href="https://daftaros.com/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
                style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; margin-right: 10px;">
               Accept
             </a>
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/reject?mail=${userEmail}" 
+            <a href="https://daftaros.com/api/endpoints/daftar/actions/reject?mail=${userEmail}" 
                style="background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none;">
               Reject
             </a>
@@ -161,8 +161,8 @@ export const emailTemplates = {
       const now = Date.now();
       const acceptToken = Buffer.from(`${userId}:${pitchId}:accept:${now}`).toString('base64');
       const rejectToken = Buffer.from(`${userId}:${pitchId}:reject:${now}`).toString('base64');
-      const acceptUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pitch/team/action?token=${acceptToken}`;
-      const rejectUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/pitch/team/action?token=${rejectToken}`;
+      const acceptUrl = `https://daftaros.com/api/pitch/team/action?token=${acceptToken}`;
+      const rejectUrl = `https://daftaros.com/api/pitch/team/action?token=${rejectToken}`;
       return {
         to: userEmail,
         subject: `Pitch Team Invitation - ${notification.payload?.pitchName || ''}`,
@@ -372,7 +372,7 @@ export async function createNotification({
         const emailData = (template as (notification: any, userEmail: string) => any)(notification, user.email);
 
         // Send email using the email API
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/notifications/email`, {
+        const response = await fetch(`https://daftaros.com/api/notifications/email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

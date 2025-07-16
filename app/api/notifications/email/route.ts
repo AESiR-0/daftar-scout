@@ -8,7 +8,7 @@ import { daftar } from "@/backend/drizzle/models/daftar";
 
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const BASE_URL = "https://daftaros.com";
 
 if (!SMTP_USER || !SMTP_PASS) {
   throw new Error("SMTP credentials are not configured");
@@ -48,8 +48,8 @@ function generatePitchTeamInviteEmail(
   pitchId: string,
   scoutId: string
 ) {
-  const acceptUrl = `${BASE_URL}/api/pitch/team/action?token=${Buffer.from(`${userEmail}:${pitchId}:accept:${Date.now()}`).toString('base64')}`;
-  const rejectUrl = `${BASE_URL}/api/pitch/team/action?token=${Buffer.from(`${userEmail}:${pitchId}:reject:${Date.now()}`).toString('base64')}`;
+  const acceptUrl = `https://daftaros.com/api/pitch/team/action?token=${Buffer.from(`${userEmail}:${pitchId}:accept:${Date.now()}`).toString('base64')}`;
+  const rejectUrl = `https://daftaros.com/api/pitch/team/action?token=${Buffer.from(`${userEmail}:${pitchId}:reject:${Date.now()}`).toString('base64')}`;
 
   return {
     to: userEmail,
@@ -170,8 +170,8 @@ function generateDaftarTeamInviteEmail(
   acceptToken: string,
   rejectToken: string
 ) {
-  const acceptUrl = `${BASE_URL}/api/pitch/team/action?token=${acceptToken}`;
-  const rejectUrl = `${BASE_URL}/api/pitch/team/action?token=${rejectToken}`;
+  const acceptUrl = `https://daftaros.com/api/pitch/team/action?token=${acceptToken}`;
+  const rejectUrl = `https://daftaros.com/api/pitch/team/action?token=${rejectToken}`;
 
   return {
     to: userEmail,
@@ -380,7 +380,7 @@ function generateWelcomeEmail(userEmail: string, userName: string) {
   
             <!-- CTA Button -->
             <div style="text-align: center; margin: 40px 0 20px;">
-              <a href="${BASE_URL}/dashboard" 
+              <a href="${BASE_URL}/investor" 
                 style="background-color: #ff5a5f; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
                 Go to Dashboard
               </a>
@@ -433,11 +433,11 @@ function generateDaftarInviteEmail(
   
             <!-- CTA Buttons -->
             <div style="text-align: center; margin: 40px 0 20px;">
-              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
+              <a href="https://daftaros.com/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
                 style="background-color: #4CAF50; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block; margin-right: 10px;">
                 Accept
               </a>
-              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/reject?mail=${userEmail}" 
+              <a href="https://daftaros.com/api/endpoints/daftar/actions/reject?mail=${userEmail}" 
                 style="background-color: #f44336; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
                 Reject
               </a>
@@ -662,7 +662,7 @@ function generateDaftarMemberInviteEmail(
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 40px 0 20px 0;">
-              <a href="${process.env.NEXT_PUBLIC_BASE_URL}/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
+              <a href="https://daftaros.com/api/endpoints/daftar/actions/accept?mail=${userEmail}" 
                 style="background-color: #ff5a5f; color: #ffffff; font-weight: bold; text-decoration: none; padding: 14px 30px; font-size: 16px; border-radius: 6px; display: inline-block;">
                 Join My Daftar
               </a>
