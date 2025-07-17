@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 const isMobileDevice = () => {
   if (typeof window === "undefined") return false;
   const ua = navigator.userAgent;
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < 800;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < 1100;
 };
 
 const blockerStyle: React.CSSProperties = {
