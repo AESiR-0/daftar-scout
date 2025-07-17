@@ -14,10 +14,7 @@ export function LoginClient({ role }: { role: string }) {
     try {
       localStorage.setItem("user_role", role);
       const callbackUrl = role === "founder" ? "/founder" : "/investor";
-      const result = await signIn("google", {
-        callbackUrl,
-        redirect: true
-      });
+      const result = await signIn("google");
     } catch (error) {
       console.error("Sign in error:", error);
       setIsLoading(false);

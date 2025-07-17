@@ -76,10 +76,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async signIn({ user, account }) {
       if (!user.email || !account) return false;
 
-      // Check if the email is in the allowed list
-      if (!ALLOWED_EMAILS.includes(user.email)) {
-        throw new Error("You cannot proceed, please have some patience and wait for the launch");
-      }
+      // // Check if the email is in the allowed list
+      // if (!ALLOWED_EMAILS.includes(user.email)) {
+      //   throw new Error("You cannot proceed, please have some patience and wait for the launch");
+      // }
 
       // Find an existing user by email
       const existingUser = await db
@@ -163,6 +163,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
   session: {
-    strategy: "database", 
+    strategy: "database",
   },
 });
