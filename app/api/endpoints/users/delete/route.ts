@@ -206,12 +206,12 @@ export async function POST(req: NextRequest) {
 
       // 3. Finally, archive the user
       await tx
-        .update(users)
-        .set({
-          isActive: false,
-          isArchived: true,
-          archivedOn: new Date(),
-        })
+      .update(users)
+      .set({
+        isActive: false,
+        isArchived: true,
+        archivedOn: new Date(),
+      })
         .where(eq(users.id, userId));
     });
 
